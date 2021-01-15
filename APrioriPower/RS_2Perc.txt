@@ -1,0 +1,33 @@
+[[1]]
+[[1]]$Model
+Linear mixed model fit by REML ['lmerMod']
+Formula: offset ~ trial + glasses + chin + fps_c + light_c + ethnic +  
+    (1 + chin | subj)
+   Data: ds
+REML criterion at convergence: 621.6355
+Random effects:
+ Groups   Name        Std.Dev.    Corr 
+ subj     (Intercept) 0.050000000      
+          chin        0.030000000 -0.33
+ Residual             0.000001104      
+Number of obs: 120, groups:  subj, 20
+Fixed Effects:
+(Intercept)        trial      glasses         chin        fps_c      light_c  
+     0.1500       0.0010       0.0200       0.0200       0.0100       0.0020  
+ethnicBlack  ethnicAsian  
+     0.0007       0.0070  
+
+[[1]]$`Power Curve`
+Power for predictor 'glasses', (95% confidence interval),
+by number of levels in subj:
+    100: 39.90% (36.85, 43.01) - 600 rows
+    125: 49.40% (46.26, 52.55) - 750 rows
+    150: 60.20% (57.09, 63.25) - 900 rows
+    175: 67.80% (64.80, 70.69) - 1050 rows
+    200: 74.00% (71.16, 76.69) - 1200 rows
+    225: 79.40% (76.76, 81.87) - 1350 rows
+    250: 84.80% (82.42, 86.97) - 1500 rows
+    275: 88.00% (85.82, 89.95) - 1650 rows
+    300: 91.10% (89.16, 92.79) - 1800 rows
+
+Time elapsed: 0 h 48 m 54 s
