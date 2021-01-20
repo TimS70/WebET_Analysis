@@ -11,6 +11,18 @@ function fit_discount_k()
 %     khoi 06.26.09 simplified
 %     schneegans 08.01.2021 modified for applying the replication code
 
+%Input: 
+% behavioral data
+% col 1: 'run_id'
+% col 2: 'aSS'
+% col 3: 'aLL'
+% col 4: 'tSS'
+% col 5: 'tLL'
+% col 6: 'choseLL'
+% col 7: 'rt'
+% col 8: 'LL_top',
+% col 9: 'choseTop'
+
 dataPath=pwd; %adapt to your location
 cd(dataPath)
 
