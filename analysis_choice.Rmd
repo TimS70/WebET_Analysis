@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, message=FALSE, warning=FALSE}
-setwd("C:/Users/User/GitHub/WebET_Analysis")
+setwd("C:/Users/User/Google Drive/Masterarbeit/Analysis/")
 # https://gist.github.com/stevenworthington/3178163
 ipak <- function(pkg){
   new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
@@ -36,61 +36,119 @@ knitr::opts_chunk$set(echo = TRUE)
 options(scipen=999) # Show R markdown output as Integers
 ```
 
-# Prep data
+# H1, H2, H4
 ```{r data}
-data_et_fix <- read_csv('data_rInput/data_et_fix.csv')
-data_trial_fix <- read_csv('data_rInput/data_trial_fix.csv')
-data_subject <- read_csv('data_rInput/data_subject.csv')
-names(data_trial_fix)
+data_trial_choice <- read_csv('data_trial_choice.csv')
+
+names <- c('chinFirst' ,'choseTop', 'choseLL', 'ethnic', 'gender', 'degree')
+data_trial_choice[,names] <- lapply(data_trial_choice[,names] , factor)
+
+# data_trial_choice$degree <- factor(data_trial_choice$degree, levels = c(1, 2, 0), 
+#                    labels = c("College", "Grad","HighSchool"))
+
+str(data_trial_choice)
 ```
 
-```{r}
-data_trial_fix = data_trial_fix %>%
-    filter(!is.na(precision))
-nrow(data_trial_fix)
-```
 
-```{r}
 
-```
 ## Visualize Predictors
 ```{r}
-ggpairs(data_trial_fix[, c('x_pos', 'y_pos', 'precision', 'offset', 'fps')]) # Correlations
+ggpairs(data_trial_choice[, c('choiceNr', 'trial_duration_exact', 'k', 'optionIndex', 'attributeIndex', 'payneIndex')]) # Correlations
 ```
 
+# Violin Plots (categorical Variables)
+```{r}
+# ggplot(data_trial_choice, aes(x = choseTop, y = k)) +
+#   stat_sum(aes(size = ..n.., group = 1)) +
+#   scale_size_area(max_size=10)
+```
+
+```{r}
+# TODO: FPS
+
+
+violinPlot_1 = function(categoricalVariable) {
+tmp <- melt(data_trial_choice[, c(categoricalVariable, "optionIndex", "attributeIndex", "payneIndex")], id.vars=categoricalVariable)
+ggplot(tmp, aes(x = get(categoricalVariable), y = value)) +
+  geom_jitter(alpha = .1) +
+  geom_violin(alpha = .75) +
+  facet_grid(variable ~ .) +
+  scale_y_sqrt()
+}
+
+violinPlot_2 = function(categoricalVariable) {
+tmp <- melt(data_trial_choice[, c(categoricalVariable, "trial_duration_exact")], id.vars=categoricalVariable)
+ggplot(tmp, aes(x = get(categoricalVariable), y = value)) +
+  geom_jitter(alpha = .1) +
+  geom_violin(alpha = .75) +
+  facet_grid(variable ~ .) +
+  scale_y_sqrt()
+}
+
+violinPlot_1('gender')
+violinPlot_1('ethnic')
+violinPlot_1('degree')
+
+violinPlot_2('gender')
+violinPlot_2('ethnic')
+violinPlot_2('degree')
+```
+
+# Boxplots (Binary)
+```{r}
+boxPlot = function(binaryVariable) {
+tmp <- melt(data_trial_choice[, c(binaryVariable, "optionIndex", "attributeIndex", "payneIndex", 'trial_duration_exact')],
+  id.vars=binaryVariable)
+ggplot(tmp, aes(factor(get(binaryVariable)), y = value, fill=factor(get(binaryVariable)))) +
+  geom_boxplot() +
+  facet_wrap(~variable, scales="free_y")
+}
+
+boxPlot('choseTop')
+```
 
 ## Rescale
+
+## Random Slope
+### Offset
 ```{r}
+# https://stats.idre.ucla.edu/r/dae/mixed-effects-logistic-regression/
+data_trial_choice$choiceNr_c = scale(data_trial_choice$choiceNr)
+model <- glmer(choseLL ~ choiceNr_c + optionIndex + attributeIndex + payneIndex + k + (1 | run_id), 
+               data = data_trial_choice, 
+               family = binomial, 
+               control = glmerControl(optimizer = "bobyqa"),
+               nAGQ = 10)
+
+print(model, corr = FALSE)
+summary(model)
+confint(model, method="boot", n=50) # CI with Bootstrap does not need normality
 ```
 
-# Null 
+## Visualize with Average Marginal Probability
 ```{r}
-data_trial_fix$x_pos_c = scale(data_trial_fix$x_pos)
-data_trial_fix$y_pos_c = scale(data_trial_fix$y_pos)
-data_trial_fix$withinTaskIndex_c = scale(data_trial_fix$withinTaskIndex)
-
-m_null <- lmer(offset ~ x_pos_c + y_pos_c + withinTaskIndex_c + fps + (1 | run_id), 
-               data = data_trial_fix)
-# print(m_null, corr = FALSE)
-summary(m_null)
+summary(data_trial_choice$optionIndex)
 ```
 
-# M1: Adding chin
 ```{r}
-m1 <- lmer(offset ~ x_pos_c + y_pos_c + withinTaskIndex + chin + (1 | run_id), 
-               data = data_trial_fix)
-# print(m1, corr = FALSE)
-summary(m1)
-confint(m1, method="boot", n=50) # CI with Bootstrap does not need normality
-```
+tmpdat <- data_trial_choice[, c("choiceNr_c", 
+                                "optionIndex",  
+                                'attributeIndex', 
+                                'payneIndex', 
+                                'k',    
+                                "run_id")]
 
-# M2: 
-```{r}
-m2 <- lmer(offset ~ x_pos_c + y_pos_c + withinTaskIndex + chin + (1 | run_id), 
-               data = data_trial_fix)
-# print(m1, corr = FALSE)
-summary(m2)
-confint(m2, method="boot", n=50) # CI with Bootstrap does not need normality
+# sequence of distinct values for predictor of interest
+jvalues <- with(data_trial_choice, 
+                seq(from = min(optionIndex), 
+                    to = max(optionIndex), 
+                    length.out = 100))
+
+# calculate predicted probabilities and store in a list
+predictions <- lapply(jvalues, function(j) {
+    tmpdat$optionIndex <- j
+    predict(model, newdata = tmpdat, type = "response")
+})
 ```
 
 ```{r}
