@@ -17,6 +17,8 @@ ipak <- function(pkg){
 ipak(c(
     'data.table',
     "dplyr",
+    'Hmisc',
+    
     "knitr",
     'readr',
     "rsq",
@@ -43,37 +45,232 @@ options(scipen=999) # Show R markdown output as Integers
 
 # Prep data
 ```{r data}
-data_et_fix <- read_csv('data_jupyter/data_et_fix.csv')
-data_trial_fix <- read_csv('data_jupyter/data_trial_fix.csv')
-data_subject <- read_csv('data_jupyter/data_subject.csv')
-names(data_trial_fix)
-str(data_trial_fix)
-head(data_trial_fix)
+data_et_fix_raw <- read_csv('data_jupyter/data_et_fix.csv')
+data_trial_fix_raw <- read_csv('data_jupyter/data_trial_fix.csv')
+data_subject_raw <- read_csv('data_jupyter/data_subject.csv')
+str(data_et_fix_raw)
+names(data_trial_fix_raw)
+str(data_trial_fix_raw)
+head(data_trial_fix_raw)
 ```
+
+## Add glasses to data_et_fix
+```{r}
+if ('glasses_binary' %in% names(data_trial_fix_raw))
+    {data_trial_fix_raw = data_trial_fix_raw %>% select(!glasses_binary)}
+data_trial_fix_raw = merge(
+    data_trial_fix_raw, 
+    data_subject_raw %>% 
+        select(run_id, glasses_binary) %>%
+        distinct(),
+    by='run_id'
+)
+summary(data_trial_fix_raw$glasses_binary)
+```
+
 # Screening
 ```{r}
-data_trial_fix %>%
-    group_by(run_id) %>%
-    summarise(n = sum(n))
+summary(data_et_fix_raw %>%
+            select(x, y, t_task)
+)
+summary(data_trial_fix_raw %>% 
+            select(run_id, offset, precision, fps)
+)
+```
+## FPS for fixation task
+```{r}
+trialFPS = data_et_fix_raw %>%
+    group_by(run_id, trial_index) %>%
+    summarise(n = n())
+
+trialFPS = merge(
+    trialFPS, 
+    data_trial_fix_raw %>% select(run_id, trial_index, trial_duration_exact),
+    by=c('run_id', 'trial_index'))
+trialFPS$fps = 1000 * trialFPS$n / trialFPS$trial_duration_exact
+
+if ('fps_fix' %in% names(data_subject_raw))
+    {data_subject_raw = data_subject_raw %>% select(!fps_fix)}
+data_subject_raw = merge(
+    data_subject_raw, 
+    trialFPS %>% group_by(run_id) %>% summarise(fps_fix = mean(fps)),
+    by='run_id'
+)
+summary(data_subject_raw$fps_fix)
+```
+
+## Low FPS or not following instructions
+```{r}
+data_subject_raw %>%
+    select(run_id, triedChin, keptHead, fps_fix) %>%
+    filter(
+        triedChin==0 | 
+        keptHead==0 |
+        fps_fix<3
+        )
+```
+
+## Trials with insanely high t_task
+```{r}
+high_t_task = data_et_fix_raw %>%
+    filter(t_task>5500) %>%
+    group_by(run_id, trial_index) %>%
+    summarise(t_task_max = max(t_task))
+
+if ('trial_duration_exact' %in% names(high_t_task))
+    {high_t_task = high_t_task %>% select(!trial_duration_exact)}
+high_t_task = merge(
+    high_t_task, 
+    data_trial_fix_raw %>%
+        select(run_id, trial_index, trial_duration_exact),
+    by=c('run_id', 'trial_index')
+)
+unique(high_t_task$run_id)
+high_t_task      
+```
+
+## Anyone without the full number of trials?
+```{r}
+# Number of trials per subject
+ans = as.data.table(
+    data_trial_fix_raw %>% select(run_id, trial_index, chin, withinTaskIndex)
+    )[, count := uniqueN(trial_index), by = run_id]
+ans %>% 
+    filter(count!=18)
+```
+
+## Glasses 
+```{r}
+data_subject_raw %>%
+    select(run_id, glasses_binary)
+```
+
+# Cleaning
+## Subjects to exclude from screening
+```{r}
+excludedSubjects = c(1, 70, 80, 97, 2012)
+```
+
+## data_trial_fix
+```{r}
+
+data_trial_fix = data_trial_fix_raw %>%
+    filter(
+        !is.na(precision) & 
+        !(run_id %in% excludedSubjects) &
+        (trial_duration_exact<5100)
+        )
+print(paste('Raw: ', nrow(data_trial_fix_raw)))
+print(paste('Cleaned: ', nrow(data_trial_fix)))
+```
+
+## data_et_fix
+On purpose, we don't exclude specific x and y values, neither positive nor negative outliers
+```{r}
+data_et_fix = data_et_fix_raw %>%
+    filter(
+        !(run_id %in% excludedSubjects) &
+        (t_task<5100)
+        )
+print(paste('Raw: ', nrow(data_et_fix_raw)))
+print(paste('Cleaned: ', nrow(data_et_fix)))
+```
+# Assumptions - Long Format
+```{r}
+predictors = c('withinTaskIndex', 'x_pos', 'y_pos', 'fps', 'glasses_binary')
+```
+## Multicollinearity of the predictors
+```{r}
+correlation = cor(
+    data_trial_fix %>% 
+        select(predictors),
+    use = 'pairwise.complete.obs'
+)
+
+symnum(correlation)
+correlation
+```
+
+## Standardized residuals
+```{r}
+random = rchisq(nrow(data_trial_fix_raw), 7)
+fake = lm(
+    random ~ ., 
+    data=data_trial_fix_raw %>% select(predictors)
+    )
+
+fitted = scale(fake$fitted.values)
+# Studentized residuals
+standardized = rstudent(fake)
+qqnorm(standardized)
+abline(0, 1)
+```
+
+```{r}
+hist(standardized)
+```
+
+## Heteroscedasticity
+```{r}
+plot(fitted, standardized)
+abline(0, 0)
+abline(v=0)
 ```
 
 
+# Visualize Predictors
 ```{r}
-nrow(data_trial_fix)
-data_trial_fix = data_trial_fix %>%
-    filter(!is.na(precision))
-nrow(data_trial_fix)
-```
-
-## Visualize Predictors
-```{r}
-ggpairs(data_trial_fix[, c('x_pos', 'y_pos', 'precision', 'offset', 'fps')]) # Correlations
+ggpairs(data_trial_fix[, append(predictors, c('precision', 'offset'))]) # Correlations
 ```
 
 
-# Intercept only
-```{r}
 
+# Do we need to nest the data? 
+RI > IO model?
+
+## Intercept only
+Alone not very intersting
+```{r}
+m_io = gls(
+    offset ~ 1, 
+    data=data_trial_fix,
+    method='ML', 
+    na.action='na.omit'
+    )
+summary(m_io)
+```
+## Random intercept 
+Control for the fact that the subjects start at different places regarding the accuracy of the eyetracking data. Standard error has increased. Subjects vary by about 0.12 (Jan 24) around the intercept 
+```{r}
+m_ri_0 = lme(
+    offset ~ 1, 
+    data=data_trial_fix,
+    method='ML', 
+    na.action='na.omit', 
+    random = ~1 | run_id
+    )
+summary(m_ri_0)
+```
+## Compare IO and RI
+The RI model is way better than the IO model. Therefore, we should do an MLM.
+```{r}
+anova(m_io_0, m_ri_0)
+```
+
+# Adding Fixed Effects
+Look at the predictor correlation
+```{r}
+m_ri_1 = lme(
+    offset ~ withinTaskIndex + x_pos + y_pos, 
+    data=data_trial_fix,
+    method='ML', 
+    na.action='na.omit', 
+    random = ~1 | run_id
+    )
+summary(m_ri_1)
+anova(m_io_0, m_ri_0, m_ri_1)
+```
+# More
 ```
 
 # M0:
