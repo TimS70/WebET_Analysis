@@ -6,8 +6,7 @@ output: html_document
 ---
 
 ```{r setup, message=FALSE, warning=FALSE}
-setwd("C:/Users/User/Google Drive/Masterarbeit/Analysis/")
-# https://gist.github.com/stevenworthington/3178163
+setwd("C:/Users/User/GitHub/WebET_Analysis")# https://gist.github.com/stevenworthington/3178163
 ipak <- function(pkg){
   new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
   if (length(new.pkg)) 
@@ -36,7 +35,14 @@ knitr::opts_chunk$set(echo = TRUE)
 options(scipen=999) # Show R markdown output as Integers
 ```
 
-# H1, H2, H4
+
+# Load data
+# Screening
+# Cleaning
+Response time Outliers with malhalanobis distance
+(https://www.youtube.com/watch?v=UvyxSqEXBwc) min 31:10
+
+
 ```{r data}
 data_trial_choice <- read_csv('data_trial_choice.csv')
 

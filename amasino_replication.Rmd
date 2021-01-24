@@ -4,8 +4,7 @@ output: html_notebook
 ---
 Load packages and set participant exclusions
 ```{r}
-setwd('C:/Users/User/Google Drive/Masterarbeit/Analysis')
-
+setwd("C:/Users/User/GitHub/WebET_Analysis")
 getPackages <- function(pkg){
   new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
   if (length(new.pkg)) 
@@ -25,6 +24,8 @@ getPackages(c('dplyr',
             )
 ```
 
+# Matlab
+Excludes outliers
 ```{r}
 run_matlab_script('amasino_dataPrep/init.m')
 ```
@@ -34,11 +35,12 @@ Load data, make data frames
 # Data on subject level
 data_subject <- read.table('data_jupyter/data_subject.csv', header=TRUE, sep=',')
 alllogk<-read.table("amasino_dataPrep/intermediateCSVs/allLogk.csv", header=FALSE, sep=",")
-data_subject$logK = as.data.frame((alllogk))[, 1]
+names(alllogk) = c('run_id', 'logK')
+data_subject = merge(data_subject, alllogk, by='run_id')
 
 dfET = data_subject %>%
-    dplyr::select(optionIndex, attributeIndex, payneIndex, logK) %>%
-    rename(optInd = optionIndex, attInd = attributeIndex, payneInd = payneIndex)
+    dplyr::select(optionIndex, attributeIndex, payneIndex, logK)
+names(dfET) = c('optInd', 'attInd', 'payneInd', 'logK')
 
 # Data on Trial level
 data_trial_choice <- read.table('data_jupyter/data_trial_choice.csv', header=TRUE, sep=',')
@@ -47,8 +49,18 @@ colnames(subjVals)<-c("run_id", 'svLL', 'svSS', 'svT', 'svB', 'dSV')
 data_trial_choice = cbind(data_trial_choice, subjVals[, 2:6])
 
 data_et_choice <- read.table('data_jupyter/data_et_choice.csv', header=TRUE, sep=',')
+if ('choseTop' %in% names(data_et_choice))
+    {data_et_choice = data_et_choice %>% select(!choseTop)}
+data_et_choice = merge(
+    data_et_choice, 
+    data_trial_choice %>% 
+        group_by(run_id, trial_index) %>% 
+        summarise(choseTop = mean(choseTop)),
+    by=c('run_id', 'trial_index')
+)
+data_et_choice$lookTopAOI = as.integer(data_et_choice$aoi == 'TL' | data_et_choice$aoi == 'TR')
 
-rt = data_subject$rt_choice
+# rt = data_subject$rt_choice
 
 #Subjective value based on discount rate
 percT<-read.table("amasino_dataPrep/intermediateCSVs/SVpropT.csv", header=FALSE, sep=",")
@@ -61,10 +73,9 @@ SV_RTlong=melt(SV_RT, id.vars=c("V1"))
 SV_RTlong$variable=as.integer(SV_RTlong$variable) #get proper x vals
 ```
 
-
-```{r}
-data_et_choice$lookTopAOI = as.integer(data_et_choice$aoi == 'TL' | data_et_choice$aoi == 'TR')
-```
+# Screening
+# Cleaning
+see choice_analysis.Rmd
 
 # Bins
 Eye tracking bins with average proportion of looking top for each 
@@ -87,13 +98,13 @@ addBins <- function(data, nBins) {
     for (i in 1:length(subjects)) {
         maxChoices = data %>% 
             filter(run_id == subjects[i]) %>%
-            dplyr::select(choiceNr) %>%
+            dplyr::select(withinTaskIndex) %>%
             max
       
         combinedTrials = list()
         for (j in 1:maxChoices) {
             bins = data %>%
-                filter(run_id == subjects[i] & choiceNr == j) %>%
+                filter(run_id == subjects[i] & withinTaskIndex == j) %>%
                 cutBin(nBins)
             combinedTrials[[j]] = bind_rows(bins)
         }
@@ -106,27 +117,28 @@ addBins <- function(data, nBins) {
     return(combinedSubjects)
 }
 
+
 choseT <- data_et_choice %>%
-    filter(chose_top == 1 & !is.na(aoi)) %>%
+    filter(choseTop == 1 & !is.na(aoi)) %>%
     addBins(5) %>%
-    dplyr::select(run_id, choiceNr, bin, lookTopAOI, chose_top) %>%
-    group_by(run_id, chose_top, bin) %>%
+    dplyr::select(run_id, withinTaskIndex, bin, lookTopAOI, choseTop) %>%
+    group_by(run_id, choseTop, bin) %>%
     summarise(lookTopAOI=mean(lookTopAOI)) %>%
     spread(bin, lookTopAOI) 
 
 choseB <- data_et_choice %>%
-    filter(chose_top == 0 & !is.na(aoi)) %>%
+    filter(choseTop == 0 & !is.na(aoi)) %>%
     addBins(5) %>%
-    dplyr::select(run_id, choiceNr, bin, lookTopAOI, chose_top) %>%
-    group_by(run_id, chose_top, bin) %>%
+    dplyr::select(run_id, withinTaskIndex, bin, lookTopAOI, choseTop) %>%
+    group_by(run_id, choseTop, bin) %>%
     summarise(lookTopAOI=mean(lookTopAOI)) %>%
     spread(bin, lookTopAOI) 
 
 choseTBLong <- data_et_choice %>%
     filter(!is.na(aoi)) %>%
     addBins(5) %>%
-    dplyr::select(run_id, choiceNr, bin, lookTopAOI, chose_top) %>%
-    group_by(run_id, chose_top, bin) %>%
+    dplyr::select(run_id, withinTaskIndex, bin, lookTopAOI, choseTop) %>%
+    group_by(run_id, choseTop, bin) %>%
     summarise(lookTopAOI=mean(lookTopAOI))
 
 choseTB<-rbind(choseT,choseB)
@@ -146,13 +158,13 @@ addLastFix <- function(data) {
         for (i in 1:length(subjects)) {
             maxChoices = data %>% 
                 filter(run_id == subjects[i]) %>%
-                dplyr::select(choiceNr) %>%
+                dplyr::select(withinTaskIndex) %>%
                 max
           
             combinedTrials = list()
             for (j in 1:maxChoices) {
                 thisTrial = data %>%
-                    filter(run_id == subjects[i] & choiceNr == j)
+                    filter(run_id == subjects[i] & withinTaskIndex == j)
                 thisTrial$lastFixTop = thisTrial[nrow(thisTrial), 'lookTopAOI']
                 combinedTrials[[j]] = thisTrial
             }
@@ -169,29 +181,33 @@ data_et_choice = data_et_choice %>%
 
 lookT <- data_et_choice %>%
     filter(lastFixTop == 1) %>%
-    dplyr::select(run_id, choiceNr, chose_top) %>%
-    group_by(run_id, choiceNr) %>%
-    summarise(chose_top=mean(chose_top)) %>%
+    dplyr::select(run_id, withinTaskIndex, choseTop) %>%
+    group_by(run_id, withinTaskIndex) %>%
+    summarise(choseTop=mean(choseTop)) %>%
     group_by(run_id) %>%
-    summarise(chose_top=mean(chose_top))
+    summarise(choseTop=mean(choseTop))
 lookT
 
 lookB <- data_et_choice %>%
     filter(lastFixTop == 0) %>%
-    dplyr::select(run_id, choiceNr, chose_top) %>%
-    group_by(run_id, choiceNr) %>%
-    summarise(chose_top=mean(chose_top)) %>%
+    dplyr::select(run_id, withinTaskIndex, choseTop) %>%
+    group_by(run_id, withinTaskIndex) %>%
+    summarise(choseTop=mean(choseTop)) %>%
     group_by(run_id) %>%
-    summarise(chose_top=mean(chose_top))
+    summarise(choseTop=mean(choseTop))
 lookB
 
 lookTBLong <- data_et_choice %>%
-    dplyr::select(run_id, choiceNr, lastFixTop, chose_top) %>%
-    group_by(run_id, lastFixTop, choiceNr) %>%
-    summarise(chose_top=mean(chose_top)) %>%
+    dplyr::select(run_id, withinTaskIndex, lastFixTop, choseTop) %>%
+    group_by(run_id, lastFixTop, withinTaskIndex) %>%
+    summarise(choseTop=mean(choseTop)) %>%
     group_by(run_id, lastFixTop) %>%
-    summarise(chose_top=mean(chose_top))
+    summarise(choseTop=mean(choseTop)) %>%
+    filter(!(run_id %in% c(12, 93, 2009)))
 lookTBLong
+lookTBLong %>% group_by(run_id) %>% summarise(n = n()) %>%
+  filter(n<2)
+
 ```
 
 Error Analyis
@@ -233,7 +249,7 @@ matchCorrectTrials = function(errorTrials, data_subject) {
             closestCorrectTrial = correctTrials %>%
                 filter(dSV_difference == min(dSV_difference))
             closestCorrectTrial
-            errorTrials[i, ]$closestCorrectTrial = closestCorrectTrial$choiceNr
+            errorTrials[i, ]$closestCorrectTrial = closestCorrectTrial$withinTaskIndex
         }
     }
     return(errorTrials)
@@ -241,6 +257,7 @@ matchCorrectTrials = function(errorTrials, data_subject) {
 
 data_subject$inconsistent = 0 
 subjects = unique(data_subject$run_id)
+## TODO
 for (i in 1:length(subjects)) {
     thisSubject = data_trial_choice %>%
         filter(run_id == 16)
@@ -292,7 +309,7 @@ colnames(numErrs)<-c("errors")
 
 Histogram of log(k)
 ```{r}
-ggplot(dfET, aes(x=logk))+
+ggplot(dfET, aes(x=logK))+
   geom_histogram(binwidth=.5, alpha=.5,position="identity")+
   scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
   theme_bw()+theme(text=element_text(size=40))
@@ -326,8 +343,8 @@ ggsave("plots/RT_TB.pdf",width=5.5, height=5)
 Manipulation checks of eye tracking in time bins
 ```{r}
 
-choseT$chose_top = as.factor(choseT$chose_top)
-class(choseT$chose_top)
+choseT$choseTop = as.factor(choseT$choseTop)
+class(choseT$choseTop)
 
 for (i in 3:7) {
     tTest = t.test(choseT[[i]], choseB[[i]], paired=TRUE)
@@ -338,13 +355,13 @@ cohen.d(as.numeric(choseT[[3]]),as.numeric(choseB[[3]]),pooled=TRUE,paired=TRUE)
 
 
 ```{r}
-choseTBLong$chose_top = as.factor(choseTBLong$chose_top)
+choseTBLong$choseTop = as.factor(choseTBLong$choseTop)
 choseTBLong$bin = as.factor(choseTBLong$bin)
 
 #Violin plot of time bins
-ggplot(choseTBLong, aes(x=bin, y=lookTopAOI, fill=chose_top))+
+ggplot(choseTBLong, aes(x=bin, y=lookTopAOI, fill=choseTop))+
   geom_violin(alpha=.7, size=0, position="dodge")+
-  stat_summary(fun=mean,geom="point",shape=45,size=10, position=position_dodge(.9), aes(color=chose_top))+
+  stat_summary(fun=mean,geom="point",shape=45,size=10, position=position_dodge(.9), aes(color=choseTop))+
   scale_colour_manual(values=c(1, 2), name="", labels=c("Chose top", "Chose bottom"))+
   geom_text(x=1, y=1.01, label="")+ annotate("segment",x=0.7, xend=1.3, y=1, yend=1)+
   geom_text(x=2, y=1.01, label="")+ annotate("segment",x=1.7, xend=2.3, y=1, yend=1)+
@@ -357,17 +374,17 @@ ggplot(choseTBLong, aes(x=bin, y=lookTopAOI, fill=chose_top))+
 ggsave("plots/ET_TB.pdf",width=5.5, height=5)
 
 #Violin plot last fixation location
-lookTBLong
-lookTBLong$lastFixTop = as.factor(lookTBLong$lastFixTop)
 
-t.test(chose_top ~ lastFixTop, data=lookTBLong, paired=TRUE) #Already adjusted for ET exclusions 
-cohen.d(chose_top ~ lastFixTop, data=lookTBLong, paired=TRUE, pooled=TRUE)
+lookTBLong$lastFixTop = as.factor(lookTBLong$lastFixTop)
+t.test(choseTop ~ lastFixTop, data=lookTBLong, paired=TRUE) 
+  #Already adjusted for ET exclusions 
+cohen.d(choseTop ~ lastFixTop, data=lookTBLong, paired=TRUE, pooled=TRUE)
 meanT<- lookTBLong %>%
     filter(lastFixTop == 1) %>%
-    dplyr::select(chose_top) %>%
+    dplyr::select(choseTop) %>%
     mean()
 
-ggplot(lookTBLong, aes(x=lastFixTop,y=chose_top))+
+ggplot(lookTBLong, aes(x=lastFixTop,y=choseTop))+
     geom_violin(fill="gray", size=0)+
     stat_summary(fun.y=mean,geom="point",shape=45,size=10, color="white")+
     geom_text(x=1.5, y=1.02, label="***")+ 
@@ -394,7 +411,7 @@ Correlation between Option Index and discount rate k
 #         ylab(yName) 
 # }
 
-ggplot(dfET, aes(x=optInd, y=logk)) +
+ggplot(dfET, aes(x=optInd, y=logK)) +
     theme_bw()+xlim(-1,1)+ylim(-10,0) +
     scale_colour_grey(start=.1, end=.6) +
     scale_shape_manual(values=c(16,17)) +
@@ -403,7 +420,7 @@ ggplot(dfET, aes(x=optInd, y=logk)) +
     ylab('Log(k)') 
 ggsave('plots/opt_logk.pdf',width=5.7, height=5)
 
-cor.test(dfET$optInd,dfET$logk) 
+cor.test(dfET$optInd,dfET$logK) 
 ```
 
 Correlation of Attribute index and Payne index
@@ -423,20 +440,20 @@ cor.test(dfET$payneInd,dfET$attInd)
 Correlation of Eye tracking indices and discount rate
 ```{r}
 #Plot correlation between attribute index and discount rate (k-val)
-ggplot(dfET, aes(x=attInd, y=logk)) +
-  geom_point(size=2.5, aes(alpha=.5, color=col, shape=col))+
+ggplot(dfET, aes(x=attInd, y=logK)) +
+  geom_point(size=2.5, aes(alpha=.5))+
   guides(alpha=FALSE,color=FALSE, shape=FALSE)+
   theme_bw()+xlim(-1,1)+
   scale_colour_grey()+ylim(-10,0)+
   theme(text=element_text(size=20))+
   xlab("Attribute index") + ylab("log(k)") 
 ggsave("plots/logk_att.pdf",width=5.7, height=5)
-cor.test(dfET$attInd,dfET$logk) 
+cor.test(dfET$attInd,dfET$logK) 
 
 #Plot correlation between Payne index and discount rate
 #Replication sample
-ggplot(dfET, aes(x=payneInd, y=logk)) +
-  geom_point(size=2.5, aes(alpha=.5, color=col, shape=col))+
+ggplot(dfET, aes(x=payneInd, y=logK)) +
+  geom_point(size=2.5, aes(alpha=.5))+
   guides(alpha=FALSE,color=FALSE, shape=FALSE)+
   theme_bw()+xlim(-1,1)+
   scale_colour_grey()+ylim(-10,0)+
@@ -444,7 +461,7 @@ ggplot(dfET, aes(x=payneInd, y=logk)) +
   xlab("Payne index") +
   ylab("log(k)") 
 ggsave("plots/logk_payne.pdf",width=5.7, height=5)
-cor.test(dfET$payneInd,dfET$logk) 
+cor.test(dfET$payneInd,dfET$logK) 
 ```
 
 Supplementary Figure 12 Error analysis

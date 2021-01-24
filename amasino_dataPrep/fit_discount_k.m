@@ -38,13 +38,13 @@ for i = 1:length(subj)  %loop over all subjects
     ind=data(:,1)==subj(i) & ~isnan(data(:,6)) & data(:,2)~=10; 
     [info,p]=fit_discount_model(data(ind,6),data(ind,2),data(ind,4),data(ind,3),data(ind,5)); 
     if info.b(2)<.0001 && mean(data(ind,6))>.95 %Extremely patient
-        kvals=[kvals; -9.5];
+        kvals=[kvals; subj(i), -9.5];
     elseif info.b(2)<0 %Inconsistent choice, can't properly fit
-        kvals=[kvals; NaN];
+        kvals=[kvals; subj(i), NaN];
     else %Fit within typical range, keep fit
-        kvals=[kvals; log(info.b(2))]; %Save log(k) as output
+        kvals=[kvals; subj(i), log(info.b(2))]; %Save log(k) as output
     end
-    noise=[noise; info.b(1)]; %Save noise as output
+    noise=[noise; subj(i), info.b(1)]; %Save noise as output
 end
 
 cd(strcat(dataPath, '\intermediateCSVs'))

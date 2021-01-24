@@ -1,4 +1,4 @@
-function [clusterInfo] = assembleClusterInfo(data, clusters, nClusters, screen_width, screen_height, aoiSizePercentage)
+function [clusterInfo] = assembleClusterInfo(data, clusters, nClusters, aoiSizePercentage)
     %Summarize info about clusters 
     % col 1: cluster number
     % col 2: number of data points in each cluster (accumarray),
@@ -10,8 +10,8 @@ function [clusterInfo] = assembleClusterInfo(data, clusters, nClusters, screen_w
     % col 8: bottom borter
     means=grpstats(data,clusters);
     clusterInfo=[(1:nClusters)',accumarray(clusters,1),means(:,3:4)];
-    clusterInfo(:, 5) = clusterInfo(:, 3) - (aoiSizePercentage/2) * screen_width;
-    clusterInfo(:, 6) = clusterInfo(:, 3) + (aoiSizePercentage/2) * screen_width;
-    clusterInfo(:, 7) = clusterInfo(:, 4) - (aoiSizePercentage/2) * screen_height;
-    clusterInfo(:, 8) = clusterInfo(:, 4) + (aoiSizePercentage/2) * screen_height;   
+    clusterInfo(:, 5) = clusterInfo(:, 3) - aoiSizePercentage/2;
+    clusterInfo(:, 6) = clusterInfo(:, 3) + aoiSizePercentage/2;
+    clusterInfo(:, 7) = clusterInfo(:, 4) - aoiSizePercentage/2;
+    clusterInfo(:, 8) = clusterInfo(:, 4) + aoiSizePercentage/2;   
 end

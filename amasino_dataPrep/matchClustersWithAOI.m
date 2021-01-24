@@ -1,10 +1,10 @@
-function [aoiInfo, matchedClusterInd] = matchClustersWithAOI(aoiInfo, clusterInfo, grandmean, screen_width, screen_height)  
+function [aoiInfo, matchedClusterInd] = matchClustersWithAOI(aoiInfo, clusterInfo, grandmean)  
     
 
     %Assign clusters to each quadrant of the screen relative to the grandmean as center
     %Clusters should be at least 100 pixels horizontally away from the center to avoid the fixation cluster
-    minXDeviation = screen_width * 0.1;
-    minYDeviation = screen_height * 0.1;
+    minXDeviation = 0.1;
+    minYDeviation = 0.1;
     
     clusterInd.TL = clusterInfo(~(clusterInfo(:,3)>grandmean(1)-minXDeviation & clusterInfo(:,4)>grandmean(2)-minYDeviation), 1);
     clusterInd.BL = clusterInfo(~(clusterInfo(:,3)>grandmean(1)-minXDeviation & clusterInfo(:,4)<grandmean(2)+minYDeviation), 1);

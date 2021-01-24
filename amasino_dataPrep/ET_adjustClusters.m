@@ -22,8 +22,6 @@ function ET_adjustClusters()
 % col 3: x-position (pixels on screen)
 % col 4: y-position (pixels on screen)
 % col 5: time
-% col 6: window width (pixels on screen)
-% col 7: window height (pixels on screen)
 
 % Output
 % col 1: subject number (matching behavioral data)
@@ -51,29 +49,27 @@ for i = 1:length(subj)
     grandmean=mean(data(sub,3:4)); %Find center of all eye data points
     
     aoiSizePercentage = 0.3;
-    screen_width = max(data(sub, 6));
-    screen_height = max(data(sub, 7));
     corners = {'TL'; 'TR'; 'BL'; 'BR'};
 
     % Create Plot
-    savePlot(data(sub, 3), data(sub, 4), screen_width, screen_height, 'plots/BeforeCorrection_FIG%d.png', i);
+    savePlot(data(sub, 3), data(sub, 4), 1, 1, 'plots/BeforeCorrection_FIG%d.png', i);
 
     sub = data(:,1)==subj(i); % subject-specific data points
     [dataWithClusters, aoiInfo, clusterInfo, matchedClusterInd] = getClusters(data(sub, :), ...
-        grandmean, aoiSizePercentage, screen_width, screen_height);
+        grandmean, aoiSizePercentage);
    
     % Separate clustering for first and second half of the experiment
     sub1 = data(:,1)==subj(i) & data(:,2)<41;
     [dataWithClusters1, aoiInfo1, clusterInfo1, matchedClusterInd1] = getClusters(data(sub1, :), ...
-        grandmean, aoiSizePercentage, screen_width, screen_height);
+        grandmean, aoiSizePercentage);
     
     sub2 = data(:,1)==subj(i) & data(:,2)>40;
     [dataWithClusters2, aoiInfo2, clusterInfo2, matchedClusterInd2] = getClusters(data(sub2, :), ...
-        grandmean, aoiSizePercentage, screen_width, screen_height);
+        grandmean, aoiSizePercentage);
     
     % Clusters differ if >40 pixels deviation and > 20 gaze points 
     clusters1And2differ  = ...
-        sum(sum(abs(clusterInfo1(matchedClusterInd1,3:4)-clusterInfo2(matchedClusterInd2,3:4))>40)) && ...
+        sum(sum(abs(clusterInfo1(matchedClusterInd1,3:4)-clusterInfo2(matchedClusterInd2,3:4))>0.04)) && ...
         sum(clusterInfo1(matchedClusterInd2, 1)>20) && ...
         sum(clusterInfo2(matchedClusterInd2, 2)>20);
     
@@ -105,7 +101,7 @@ for i = 1:length(subj)
 
    adjET(adjET(:,1)==0,:)=[]; %Get rid of points not in AOIs
    
-   savePlot(data(sub, 3), data(sub, 4), screen_width, screen_height, 'plots/AfterCorrection_FIG%d.png', i);
+   savePlot(data(sub, 3), data(sub, 4), 1, 1, 'plots/AfterCorrection_FIG%d.png', i);
    
    ET_adj=[ET_adj; adjET]; %Add this subject to all subjects
 end
