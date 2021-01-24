@@ -142,13 +142,14 @@ ans %>%
 ## Glasses 
 ```{r}
 data_subject_raw %>%
-    select(run_id, glasses_binary)
+    select(run_id, glasses_binary) %>%
+    filter(is.na(glasses_binary))
 ```
 
 # Cleaning
 ## Subjects to exclude from screening
 ```{r}
-excludedSubjects = c(1, 70, 80, 97, 2012)
+excludedSubjects = c(1, 70, 80, 97, 131, 2012)
 ```
 
 ## data_trial_fix
@@ -177,7 +178,7 @@ print(paste('Cleaned: ', nrow(data_et_fix)))
 ```
 # Assumptions - Long Format
 ```{r}
-predictors = c('withinTaskIndex', 'x_pos', 'y_pos', 'fps', 'glasses_binary')
+predictors = c('withinTaskIndex', 'x_pos', 'y_pos', 'fps', 'glasses_binary', 'chin')
 ```
 ## Multicollinearity of the predictors
 ```{r}
@@ -225,22 +226,20 @@ ggpairs(data_trial_fix[, append(predictors, c('precision', 'offset'))]) # Correl
 
 
 
-# Do we need to nest the data? 
-RI > IO model?
-
-## Intercept only
-Alone not very intersting
+# Models
+## IO: intercept only
 ```{r}
-m_io = gls(
+m_io_0 = gls(
     offset ~ 1, 
     data=data_trial_fix,
     method='ML', 
     na.action='na.omit'
     )
-summary(m_io)
+summary(m_io_0)
 ```
 ## Random intercept 
-Control for the fact that the subjects start at different places regarding the accuracy of the eyetracking data. Standard error has increased. Subjects vary by about 0.12 (Jan 24) around the intercept 
+Control for the fact that the subjects start at different places regarding the accuracy of the eyetracking data. Standard error has increased. Subjects vary by about 0.12 (Jan 24) around the intercept. The RI model is way better than the IO model. Therefore, we should do an MLM.
+
 ```{r}
 m_ri_0 = lme(
     offset ~ 1, 
@@ -250,52 +249,114 @@ m_ri_0 = lme(
     random = ~1 | run_id
     )
 summary(m_ri_0)
-```
-## Compare IO and RI
-The RI model is way better than the IO model. Therefore, we should do an MLM.
-```{r}
 anova(m_io_0, m_ri_0)
 ```
 
-# Adding Fixed Effects
+# m_ri_1: adding chin rest
 Look at the predictor correlation
 ```{r}
 m_ri_1 = lme(
-    offset ~ withinTaskIndex + x_pos + y_pos, 
+    offset ~ chin, # x_pos + y_pos + withinTaskIndex + fps, 
     data=data_trial_fix,
     method='ML', 
     na.action='na.omit', 
     random = ~1 | run_id
     )
 summary(m_ri_1)
-anova(m_io_0, m_ri_0, m_ri_1)
+anova(m_ri_0, m_ri_1)
 ```
-# More
+# m_ri_2: adding experimental variables
+glasses, chin
+```{r}
+m_ri_2 = lme(
+    offset ~ x_pos + y_pos + withinTaskIndex + fps + glasses_binary + chin, 
+    data=data_trial_fix,
+    method='ML', 
+    na.action='na.omit', 
+    random = ~1 | run_id
+    )
+summary(m_ri_2)
+anova(m_ri_0, m_ri_1, m_ri_2)
 ```
 
-# M0:
+# m_rs_0: Random slopes for chin
+Standard deviation across glasses is large. Participants vary a lot around the average score. Probably another variable. Also interpret the Correlation between the fixed effects. With lower offset, chin-rest could have a greater effect. However, there are no significant findings. (Unfortunately), the RS-model is better, so the effect of chin-rest largely varies.
+
 ```{r}
 
-m0 <- lmer(offset ~ x_pos + y_pos + withinTaskIndex + fps + (1 | run_id), 
-               data = data_trial_fix)
-summary(m0)
+m_rs_1 = lme(
+    offset ~ chin, 
+    data=data_trial_fix,
+    method='ML', 
+    na.action='na.omit', 
+    random = ~ chin | run_id,
+    control = lmeControl(msMaxIter = 200) # Get sure it converges
+    )
+summary(m_rs_1)
+anova(m_ri_1, m_rs_1)
+# anova(...)
 ```
 
-# M0: Null 
+# Temp: Only using the most powerful predictors
+None of the variables add much
 ```{r}
+temp_m_ri_1 = lme(
+    offset ~ y_pos, 
+    data=data_trial_fix,
+    method='ML', 
+    na.action='na.omit', 
+    random = ~1 | run_id
+    )
+summary(temp_m_ri_1)
 
-m0 <- lmer(offset ~ x_pos + y_pos + withinTaskIndex + fps + (1 | run_id), 
-               data = data_trial_fix)
-summary(m0)
+temp_m_ri_2 = lme(
+    offset ~ y_pos + glasses_binary, 
+    data=data_trial_fix,
+    method='ML', 
+    na.action='na.omit', 
+    random = ~1 | run_id
+    )
+summary(temp_m_ri_2)
+
+temp_m_ri_3 = lme(
+    offset ~ y_pos + glasses_binary + chin, 
+    data=data_trial_fix,
+    method='ML', 
+    na.action='na.omit', 
+    random = ~1 | run_id
+    )
+summary(temp_m_ri_3)
+anova(m_ri_0, temp_m_ri_1, temp_m_ri_3)
 ```
 
-# M1: Adding chin
+# Assumptions
+For this model, 
 ```{r}
-m1 <- lmer(offset ~ x_pos + y_pos + withinTaskIndex + fps + chin + (1 | run_id),
-           data = data_trial_fix)
-summary(m1)
-confint(m1, method="boot", n=50) # CI with Bootstrap does not need normality
+screen = lme(offset ~ chin, 
+             data = data_trial_fix, 
+             method = 'ML',
+             na.action = "na.omit",
+             random = ~ chin | run_id,
+             control = lmeControl(msMaxIter = 200))
+standardized = as.data.frame(scale(screen$residuals))
+standardized = standardized$fixed
+fitted = scale(fitted.values(screen))
+qqnorm(standardized)
+abline(0, 1)
 ```
+
+Normality got worse
+```{r}
+hist(standardized)
+```
+Heteroscedasticity got worse
+Concentration of dots is heavily on the left side
+```{r}
+plot(fitted, standardized)
+abline(0, 0)
+abline(v=0)
+```
+
 
 ## ICC
 ICC = x%. x% of the variance relate to the variance between the subjects 
@@ -307,15 +368,6 @@ ICCest(data_trial_fix$run_id_factor, data_trial_fix$offset,
 fixef(m1)
 ranef(m1)
 coef(m1)
-```
-
-# M0 vs. M1
-AIC, BIC
-Log-likelihood with chin-square difference test
-(df difference, Chi-square table)
-
-# Random Slope
-```{r}
 ```
 
 ## Effects
