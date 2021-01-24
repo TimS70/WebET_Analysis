@@ -1,0 +1,163 @@
+---
+title: "MixedRegression"
+author: "Tim Schneegans"
+date: "4 Januar 2021"
+output: html_document
+---
+
+```{r setup, message=FALSE, warning=FALSE}
+setwd("C:/Users/User/GitHub/WebET_Analysis")
+# https://gist.github.com/stevenworthington/3178163
+ipak <- function(pkg){
+  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+  if (length(new.pkg)) 
+    install.packages(new.pkg, dependencies = TRUE)
+  sapply(pkg, require, character.only = TRUE)
+}
+ipak(c(
+    'data.table',
+    "dplyr",
+    "knitr",
+    'readr',
+    "rsq",
+    'lme4',
+    'nlme', 
+    'reshape',
+    "ICC",
+    'ggplot2',
+    'GGally',
+    'reshape2',
+    'lme4',
+    'compiler',
+    'parallel',
+    'boot',
+    'lattice',
+    "lmerTest", # Erhalte p-Werte
+    "tinytex"
+    )
+)
+
+knitr::opts_chunk$set(echo = TRUE)
+options(scipen=999) # Show R markdown output as Integers
+```
+
+# Prep data
+```{r data}
+data_et_fix <- read_csv('data_jupyter/data_et_fix.csv')
+data_trial_fix <- read_csv('data_jupyter/data_trial_fix.csv')
+data_subject <- read_csv('data_jupyter/data_subject.csv')
+names(data_trial_fix)
+str(data_trial_fix)
+head(data_trial_fix)
+```
+# Screening
+```{r}
+data_trial_fix %>%
+    group_by(run_id) %>%
+    summarise(n = sum(n))
+```
+
+
+```{r}
+nrow(data_trial_fix)
+data_trial_fix = data_trial_fix %>%
+    filter(!is.na(precision))
+nrow(data_trial_fix)
+```
+
+## Visualize Predictors
+```{r}
+ggpairs(data_trial_fix[, c('x_pos', 'y_pos', 'precision', 'offset', 'fps')]) # Correlations
+```
+
+
+# Intercept only
+```{r}
+
+```
+
+# M0:
+```{r}
+
+m0 <- lmer(offset ~ x_pos + y_pos + withinTaskIndex + fps + (1 | run_id), 
+               data = data_trial_fix)
+summary(m0)
+```
+
+# M0: Null 
+```{r}
+
+m0 <- lmer(offset ~ x_pos + y_pos + withinTaskIndex + fps + (1 | run_id), 
+               data = data_trial_fix)
+summary(m0)
+```
+
+# M1: Adding chin
+```{r}
+m1 <- lmer(offset ~ x_pos + y_pos + withinTaskIndex + fps + chin + (1 | run_id),
+           data = data_trial_fix)
+summary(m1)
+confint(m1, method="boot", n=50) # CI with Bootstrap does not need normality
+```
+
+## ICC
+ICC = x%. x% of the variance relate to the variance between the subjects 
+```{r ICC}
+library(ICC)
+data_trial_fix$run_id_factor <- as.factor(data_trial_fix$run_id)
+ICCest(data_trial_fix$run_id_factor, data_trial_fix$offset, 
+       alpha=.05, CI.type="THD")
+fixef(m1)
+ranef(m1)
+coef(m1)
+```
+
+# M0 vs. M1
+AIC, BIC
+Log-likelihood with chin-square difference test
+(df difference, Chi-square table)
+
+# Random Slope
+```{r}
+```
+
+## Effects
+Varianzaufkl?rung: Pseudo-R? (VL11 F18f.)
+
+# More models? 
+Kontexteffekte (GRO-Zentrierung, VL10)?
+
+# Assumptions
+Sources: 
+ - https://www.youtube.com/watch?v=UvyxSqEXBwc
+ - https://www.pythonfordatascience.org/mixed-effects-regression-python/
+
+## Accuracy
+```{r}
+```
+
+## Outliers
+```{r}
+```
+
+## Multicollinearity
+```{r}
+```
+
+## Linearity
+```{r}
+```
+
+## Normality
+Voraussetzungen (Eid2015, p. 747)
+ - Residuen unabh?ngig und identisch normalverteilt, u.a.
+```{r}
+```
+
+## Homogeneity
+```{r}
+```
+
+## Homoscedasticity
+```{r}
+```
