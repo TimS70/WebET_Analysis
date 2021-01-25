@@ -65,7 +65,7 @@ data_trial_fix_raw = merge(
         distinct(),
     by='run_id'
 )
-summary(data_trial_fix_raw$glasses_binary)
+data_trial_fix_raw
 ```
 
 # Screening
@@ -283,7 +283,6 @@ anova(m_ri_0, m_ri_1, m_ri_2)
 Standard deviation across glasses is large. Participants vary a lot around the average score. Probably another variable. Also interpret the Correlation between the fixed effects. With lower offset, chin-rest could have a greater effect. However, there are no significant findings. (Unfortunately), the RS-model is better, so the effect of chin-rest largely varies.
 
 ```{r}
-
 m_rs_1 = lme(
     offset ~ chin, 
     data=data_trial_fix,
@@ -297,36 +296,20 @@ anova(m_ri_1, m_rs_1)
 # anova(...)
 ```
 
-# Temp: Only using the most powerful predictors
-None of the variables add much
+# Random Slope with the best predictors
+# TODO: Also try only using the top positions (see Semmelmann & Weigelt) 
 ```{r}
-temp_m_ri_1 = lme(
-    offset ~ y_pos, 
+m_rs_2 = lme(
+    offset ~ chin + y_pos, 
     data=data_trial_fix,
     method='ML', 
     na.action='na.omit', 
-    random = ~1 | run_id
+    random = ~ chin | run_id,
+    control = lmeControl(msMaxIter = 200) # Get sure it converges
     )
-summary(temp_m_ri_1)
+summary(m_rs_2)
 
-temp_m_ri_2 = lme(
-    offset ~ y_pos + glasses_binary, 
-    data=data_trial_fix,
-    method='ML', 
-    na.action='na.omit', 
-    random = ~1 | run_id
-    )
-summary(temp_m_ri_2)
-
-temp_m_ri_3 = lme(
-    offset ~ y_pos + glasses_binary + chin, 
-    data=data_trial_fix,
-    method='ML', 
-    na.action='na.omit', 
-    random = ~1 | run_id
-    )
-summary(temp_m_ri_3)
-anova(m_ri_0, temp_m_ri_1, temp_m_ri_3)
+anova(m_rs_1, m_rs_2)
 ```
 
 # Assumptions
