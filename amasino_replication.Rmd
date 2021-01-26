@@ -2,7 +2,8 @@
 title: "Supplement: Amount and time exert independent influences on intertermporal choice"
 output: html_notebook
 ---
-Load packages and set participant exclusions
+
+# Prep data
 ```{r}
 setwd("C:/Users/User/GitHub/WebET_Analysis")
 getPackages <- function(pkg){
@@ -27,10 +28,9 @@ getPackages(c('dplyr',
 # Matlab
 Excludes outliers
 ```{r}
-run_matlab_script('amasino_dataPrep/init.m')
+# run_matlab_script('amasino_dataPrep/init.m')
 ```
-
-Load data, make data frames
+Load data
 ```{r}
 # Data on subject level
 data_subject <- read.table('data_jupyter/data_subject.csv', header=TRUE, sep=',')
@@ -38,16 +38,12 @@ alllogk<-read.table("amasino_dataPrep/intermediateCSVs/allLogk.csv", header=FALS
 names(alllogk) = c('run_id', 'logK')
 data_subject = merge(data_subject, alllogk, by='run_id')
 
-dfET = data_subject %>%
-    dplyr::select(optionIndex, attributeIndex, payneIndex, logK)
-names(dfET) = c('optInd', 'attInd', 'payneInd', 'logK')
-
 # Data on Trial level
 data_trial_choice <- read.table('data_jupyter/data_trial_choice.csv', header=TRUE, sep=',')
-subjVals <- read.table("amasino_dataPrep/intermediateCSVs/subjVals.csv", header=FALSE, sep=",")
-colnames(subjVals)<-c("run_id", 'svLL', 'svSS', 'svT', 'svB', 'dSV')
-data_trial_choice = cbind(data_trial_choice, subjVals[, 2:6])
+data_trial_choice
+```
 
+```{r}
 data_et_choice <- read.table('data_jupyter/data_et_choice.csv', header=TRUE, sep=',')
 if ('choseTop' %in% names(data_et_choice))
     {data_et_choice = data_et_choice %>% select(!choseTop)}
@@ -72,6 +68,65 @@ percTlong$variable=as.integer(percTlong$variable) #get proper x vals
 SV_RTlong=melt(SV_RT, id.vars=c("V1"))
 SV_RTlong$variable=as.integer(SV_RTlong$variable) #get proper x vals
 ```
+
+
+## Subjective value
+```{r}
+if ('logK' %in% names(data_trial_choice))
+    {data_trial_choice = data_trial_choice %>% select(!logK)}
+data_trial_choice = merge(
+    data_trial_choice,
+    data_subject %>% dplyr::select(run_id, logK),
+    by='run_id'
+)
+data_trial_choice %>% dplyr::select(run_id, trial_index, logK)
+```
+
+```{r}
+subjectiveValue = function(data) {
+  data$svLL = data$aLL / (1+ exp(data$logK) * data$tLL)
+  data$svSS = data$aSS / (1+ exp(data$logK) * data$tSS)
+  data$svT = data$LL_top * data$svLL + (1-data$LL_top) * data$svSS 
+  data$svB = data$LL_top * data$svSS + (1-data$LL_top) * data$svLL
+  data$dSV = data$svT - data$svB 
+  return(data)
+}
+
+data_trial_choice = subjectiveValue(data_trial_choice)
+data_trial_choice %>% 
+    dplyr::select(run_id, logK, aLL, svLL, aSS, svLL, tLL, dSV) %>%
+    filter(abs(dSV) > 5)
+```
+
+%Input: 
+% behavioral data
+% col 1: 'run_id'
+% col 2: 'aSS'
+% col 3: 'aLL'
+% col 4: 'tSS'
+% col 5: 'tLL'
+% col 6: 'choseLL'
+% col 7: 'rt'
+% col 8: 'LL_top',
+% col 9: 'choseTop'
+
+    %Put values into 5 bins of SV Top - SV bottom bins 
+    for j=1:5; %for range of SV left - SV right is (-5,5) in increments of 2   
+        ind=find(dSV(rows)>=(-7+2*j) & dSV(rows)<(-5+2*j)); 
+        propT(j)=mean(data(rows(ind),9)); %Find proportion of top choices
+        rt(j)=mean(data(rows(ind),7)); %find RT
+    end
+    SVpropT(i,:)=[i propT];
+    SVrt(i,:)=[i rt];
+end   
+
+
+cd(strcat(dataPath, '\intermediateCSVs'))
+csvwrite('subjVals.csv',subjVals) % write log subjective values to csv
+csvwrite('SVpropT.csv',SVpropT)
+csvwrite('SVrt.csv',SVrt)
+cd(dataPath)
+end
 
 # Screening
 # Cleaning
@@ -210,29 +265,30 @@ lookTBLong %>% group_by(run_id) %>% summarise(n = n()) %>%
 
 ```
 
-Error Analyis
+# Error Analyis
 ```{r}
-data_trial_choice$svLLGreatersvSS = as.integer(
-    data_trial_choice$svLL > data_trial_choice$svLL)
-data_trial_choice$predictTop = as.integer(
-        (data_trial_choice$svT > data_trial_choice$svB)    
-    )
-data_trial_choice$predictLL = as.integer(
-        data_trial_choice$predictTop & data_trial_choice$LL_top
-    )
-data_trial_choice$patientError = as.integer(
-    (!data_trial_choice$predictLL & data_trial_choice$choseLL)
-)
-data_trial_choice$impatientError = as.integer(
-    (data_trial_choice$predictLL & !data_trial_choice$choseLL)
-)
-data_trial_choice$errorTrial = as.integer(
-        (data_trial_choice$predictTop != data_trial_choice$choseTop) 
-    )
+identify_error_trials = function(data) {
+    data$svLLGreatersvSS = as.integer(data$svLL > data$svLL)
+    data$predictTop = as.integer((data$svT > data$svB))
+    data$predictLL = as.integer(data$predictTop & data$LL_top)
+    data$patientError = as.integer((!data$predictLL & data$choseLL))
+    data$impatientError = as.integer((data$predictLL & !data$choseLL))
+    data$errorTrial = as.integer((data$predictTop != data$choseTop))
+    return(data)
+}
+
+data_trial_choice = identify_error_trials(data_trial_choice)
+data_trial_choice %>% 
+    dplyr::select(withinTaskIndex, svLLGreatersvSS, predictTop, 
+                  predictLL, choseLL, patientError, impatientError, 
+                  errorTrial
+                  )
 data_trial_choice %>%
     group_by(run_id) %>%
     summarise(errorTrial=sum(errorTrial))
+```
 
+````{r}
 matchCorrectTrials = function(errorTrials, data_subject) {
     errorTrials$closestCorrectTrial = 0 
     for (i in 1:nrow(errorTrials)) {
@@ -257,10 +313,18 @@ matchCorrectTrials = function(errorTrials, data_subject) {
 
 data_subject$inconsistent = 0 
 subjects = unique(data_subject$run_id)
+
+```
+
+```{r}
+data_subject
+```
+
+```{r}
 ## TODO
 for (i in 1:length(subjects)) {
     thisSubject = data_trial_choice %>%
-        filter(run_id == 16)
+        filter(run_id == subjects[i])
     
     errorTrials = thisSubject %>%
         filter(errorTrial == 1) %>%
