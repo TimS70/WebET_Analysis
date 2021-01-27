@@ -343,7 +343,7 @@ abline(v=0)
 
 ## ICC
 ICC = x%. x% of the variance relate to the variance between the subjects 
-```{r ICC}
+# ```{r ICC}
 library(ICC)
 data_trial_fix$run_id_factor <- as.factor(data_trial_fix$run_id)
 ICCest(data_trial_fix$run_id_factor, data_trial_fix$offset, 

@@ -5,122 +5,125 @@ date: "4 Januar 2021"
 output: html_document
 ---
 
-```{r setup, message=FALSE, warning=FALSE}
-setwd("C:/Users/User/GitHub/WebET_Analysis")# https://gist.github.com/stevenworthington/3178163
-ipak <- function(pkg){
+
+```{r}
+setwd("C:/Users/User/GitHub/WebET_Analysis")
+getPackages <- function(pkg){
   new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
   if (length(new.pkg)) 
     install.packages(new.pkg, dependencies = TRUE)
   sapply(pkg, require, character.only = TRUE)
 }
-ipak(c("knitr",
-       "dplyr",
-       'readr',
-       "rsq",
-       'lme4',
-       "ICC",
-       'ggplot2',
-       'GGally',
-       'reshape2',
-       'lme4',
-       'compiler',
-       'parallel',
-       'boot',
-       'lattice',
-       "lmerTest", # Erhalte p-Werte
-       "tinytex")
-    )
 
-knitr::opts_chunk$set(echo = TRUE)
-options(scipen=999) # Show R markdown output as Integers
+getPackages(c('dplyr', 
+              "effsize",
+              'e1071',
+              "ggplot2",
+              "ggsignif",
+              'lme4',
+              'matlabr',
+              'QuantPsyc',
+              "RColorBrewer",
+              'reshape2',
+              'tidyr')
+            )
 ```
 
+# Matlab
+```{r}
+run_matlab_script('amasino_dataPrep/fit_discount_k.m')
+```
 
-# Load data
 # Screening
 # Cleaning
-Response time Outliers with malhalanobis distance
-(https://www.youtube.com/watch?v=UvyxSqEXBwc) min 31:10
+see choice_analysis.Rmd
 
-
-```{r data}
-data_trial_choice <- read_csv('data_trial_choice.csv')
-
-names <- c('chinFirst' ,'choseTop', 'choseLL', 'ethnic', 'gender', 'degree')
-data_trial_choice[,names] <- lapply(data_trial_choice[,names] , factor)
-
-# data_trial_choice$degree <- factor(data_trial_choice$degree, levels = c(1, 2, 0), 
-#                    labels = c("College", "Grad","HighSchool"))
-
-str(data_trial_choice)
-```
-
-
-
-## Visualize Predictors
+# Read and create datasets
+## Exclude subjects
 ```{r}
-ggpairs(data_trial_choice[, c('choiceNr', 'trial_duration_exact', 'k', 'optionIndex', 'attributeIndex', 'payneIndex')]) # Correlations
+# Data on subject level
+excludeSubjects <- read.table('data_jupyter/excludeSubjects_choice.csv', 
+                           header=TRUE, sep=',')[, 1]
+excludeSubjects
 ```
 
-# Violin Plots (categorical Variables)
+
+## data_subject
 ```{r}
-# ggplot(data_trial_choice, aes(x = choseTop, y = k)) +
-#   stat_sum(aes(size = ..n.., group = 1)) +
-#   scale_size_area(max_size=10)
+# Data on subject level
+data_subject <- read.table('data_jupyter/data_subject.csv', 
+                           header=TRUE, sep=',') %>%
+    filter(!(run_id %in% excludeSubjects))
+alllogk<-read.table(
+    "amasino_dataPrep/intermediateCSVs/allLogk.csv", header=FALSE, sep=",")
+names(alllogk) = c('run_id', 'logK')
+data_subject = merge(data_subject, alllogk, by='run_id')
+data_subject = data_subject %>% 
+    filter(!is.na(logK))
+print(nrow(data_subject))
+data_subject
+```
+
+
+## data_trial_choice
+```{r}
+# Data on Trial level
+data_trial_choice <- read.table('data_jupyter/data_trial_choice.csv',
+                                header=TRUE, sep=',')  %>%
+    filter(run_id %in% data_subject$run_id)
+
+if ('logK' %in% names(data_trial_choice))
+    {data_trial_choice = data_trial_choice %>% select(!logK)}
+data_trial_choice = merge(
+    data_trial_choice,
+    data_subject %>% dplyr::select(run_id, logK),
+    by='run_id'
+)
+
+data_trial_choice = data_trial_choice %>% filter(!is.na(logK))
+
+print(paste('Number of subjects: ', length(unique(data_trial_choice$run_id))))
+data_trial_choice %>% dplyr::select(run_id, trial_index, logK)
+```
+
+## data_et_choice
+```{r}
+data_et_choice <- read.table('data_jupyter/data_et_choice.csv', 
+                             header=TRUE, sep=',') %>%
+    filter(run_id %in% data_subject$run_id)
+
+if ('choseTop' %in% names(data_et_choice))
+    {data_et_choice = data_et_choice %>% select(!choseTop)}
+data_et_choice = merge(
+    data_et_choice, 
+    data_trial_choice %>% 
+        group_by(run_id, trial_index) %>% 
+        summarise(choseTop = mean(choseTop)),
+    by=c('run_id', 'trial_index')
+)
+
+data_et_choice$lookTopAOI = as.integer(data_et_choice$aoi == 'TL' | data_et_choice$aoi == 'TR')
+
+print(paste('Number of subjects: ', length(unique(data_et_choice$run_id))))
+
 ```
 
 ```{r}
-# TODO: FPS
-
-
-violinPlot_1 = function(categoricalVariable) {
-tmp <- melt(data_trial_choice[, c(categoricalVariable, "optionIndex", "attributeIndex", "payneIndex")], id.vars=categoricalVariable)
-ggplot(tmp, aes(x = get(categoricalVariable), y = value)) +
-  geom_jitter(alpha = .1) +
-  geom_violin(alpha = .75) +
-  facet_grid(variable ~ .) +
-  scale_y_sqrt()
-}
-
-violinPlot_2 = function(categoricalVariable) {
-tmp <- melt(data_trial_choice[, c(categoricalVariable, "trial_duration_exact")], id.vars=categoricalVariable)
-ggplot(tmp, aes(x = get(categoricalVariable), y = value)) +
-  geom_jitter(alpha = .1) +
-  geom_violin(alpha = .75) +
-  facet_grid(variable ~ .) +
-  scale_y_sqrt()
-}
-
-violinPlot_1('gender')
-violinPlot_1('ethnic')
-violinPlot_1('degree')
-
-violinPlot_2('gender')
-violinPlot_2('ethnic')
-violinPlot_2('degree')
+data_trial_choice$clusters2
 ```
 
-# Boxplots (Binary)
+# Models
+## Random Intercept
 ```{r}
-boxPlot = function(binaryVariable) {
-tmp <- melt(data_trial_choice[, c(binaryVariable, "optionIndex", "attributeIndex", "payneIndex", 'trial_duration_exact')],
-  id.vars=binaryVariable)
-ggplot(tmp, aes(factor(get(binaryVariable)), y = value, fill=factor(get(binaryVariable)))) +
-  geom_boxplot() +
-  facet_wrap(~variable, scales="free_y")
-}
 
-boxPlot('choseTop')
 ```
-
-## Rescale
 
 ## Random Slope
 ### Offset
 ```{r}
 # https://stats.idre.ucla.edu/r/dae/mixed-effects-logistic-regression/
-data_trial_choice$choiceNr_c = scale(data_trial_choice$choiceNr)
-model <- glmer(choseLL ~ choiceNr_c + optionIndex + attributeIndex + payneIndex + k + (1 | run_id), 
+
+m1_rs <- glmer(choseLL ~ choiceNr_c + optionIndex + attributeIndex + payneIndex + k + (1 | run_id), 
                data = data_trial_choice, 
                family = binomial, 
                control = glmerControl(optimizer = "bobyqa"),
