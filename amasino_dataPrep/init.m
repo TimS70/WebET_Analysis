@@ -17,6 +17,5 @@ cd(strcat(dataPath, '\intermediateCSVs'))
 csvwrite('ET_adj.csv', data)
 cd(dataPath)
 
-subjectiveValue()
 %ET_errorAnalysis()
 %numErrors()

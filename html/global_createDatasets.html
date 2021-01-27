@@ -15081,53 +15081,12 @@ Index([&#39;run_id&#39;, &#39;condition&#39;, &#39;rt&#39;, &#39;stimulus&#39;, 
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Choice-data">Choice data<a class="anchor-link" href="#Choice-data">&#182;</a></h3>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[14]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Cleaning</span>
-<span class="n">data_trial</span><span class="o">.</span><span class="n">loc</span><span class="p">[:</span> <span class="p">,</span> 
-       <span class="p">[</span>
-           <span class="s1">&#39;option_topLeft&#39;</span><span class="p">,</span>
-           <span class="s1">&#39;option_bottomLeft&#39;</span><span class="p">,</span> 
-           <span class="s1">&#39;option_topRight&#39;</span><span class="p">,</span> 
-           <span class="s1">&#39;option_bottomRight&#39;</span><span class="p">,</span> 
-           <span class="s1">&#39;chosenAmount&#39;</span><span class="p">,</span> 
-           <span class="s1">&#39;chosenDelay&#39;</span>
-       <span class="p">]</span> 
-    <span class="p">]</span> <span class="o">=</span> <span class="n">data_trial</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> 
-       <span class="p">[</span>
-           <span class="s1">&#39;option_topLeft&#39;</span><span class="p">,</span>
-           <span class="s1">&#39;option_bottomLeft&#39;</span><span class="p">,</span> 
-           <span class="s1">&#39;option_topRight&#39;</span><span class="p">,</span> 
-           <span class="s1">&#39;option_bottomRight&#39;</span><span class="p">,</span> 
-           <span class="s1">&#39;chosenAmount&#39;</span><span class="p">,</span> 
-           <span class="s1">&#39;chosenDelay&#39;</span>
-       <span class="p">]</span> 
-    <span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">([</span><span class="s1">&#39;Today&#39;</span><span class="p">,</span> <span class="s1">&#39;Tomorrow&#39;</span><span class="p">,</span> <span class="s1">&#39;7 days&#39;</span><span class="p">,</span> <span class="s1">&#39;15 days&#39;</span><span class="p">,</span> <span class="s1">&#39;30 days&#39;</span><span class="p">,</span> <span class="s1">&#39;90 days&#39;</span><span class="p">,</span> <span class="s1">&#39;180 days&#39;</span><span class="p">],</span> 
-             <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">])</span> \
-    <span class="o">.</span><span class="n">replace</span><span class="p">({</span><span class="s1">&#39;\$&#39;</span><span class="p">:</span><span class="s1">&#39;&#39;</span><span class="p">},</span> <span class="n">regex</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> \
-    <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;50 cent&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span> 
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h3 id="Numerics">Numerics<a class="anchor-link" href="#Numerics">&#182;</a></h3>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[15]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[14]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_trial</span> <span class="o">=</span> <span class="n">convertToNumeric</span><span class="p">(</span><span class="n">data_trial</span><span class="p">,</span> 
@@ -15136,13 +15095,7 @@ Index([&#39;run_id&#39;, &#39;condition&#39;, &#39;rt&#39;, &#39;stimulus&#39;, 
         <span class="s1">&#39;key_press&#39;</span><span class="p">,</span> 
         <span class="s1">&#39;x_pos&#39;</span><span class="p">,</span> <span class="s1">&#39;y_pos&#39;</span><span class="p">,</span> <span class="s1">&#39;time_elapsed&#39;</span><span class="p">,</span> <span class="s1">&#39;trial_duration&#39;</span><span class="p">,</span>
         <span class="s1">&#39;rt&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;window_width&#39;</span><span class="p">,</span> <span class="s1">&#39;window_height&#39;</span><span class="p">,</span> 
-        <span class="s1">&#39;option_topLeft&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;option_bottomLeft&#39;</span><span class="p">,</span> 
-        <span class="s1">&#39;option_topRight&#39;</span><span class="p">,</span> 
-        <span class="s1">&#39;option_bottomRight&#39;</span><span class="p">,</span> 
-        <span class="s1">&#39;chosenAmount&#39;</span><span class="p">,</span> 
-        <span class="s1">&#39;chosenDelay&#39;</span>
+        <span class="s1">&#39;window_width&#39;</span><span class="p">,</span> <span class="s1">&#39;window_height&#39;</span>
     <span class="p">]</span>
 <span class="p">)</span>
 </pre></div>
@@ -15165,7 +15118,7 @@ Index([&#39;run_id&#39;, &#39;condition&#39;, &#39;rt&#39;, &#39;stimulus&#39;, 
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[16]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[15]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">reformatYang</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
@@ -16584,7 +16537,7 @@ Reformat index: 28252
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[17]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[16]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">textToDataframe</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
@@ -16631,20 +16584,8 @@ Reformat index: 28252
     <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 
 
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Start decoding Index 17
-</pre>
-</div>
-</div>
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-
-
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>&lt;ipython-input-17-80ee6abdb188&gt;:8: SettingWithCopyWarning: 
+<pre>&lt;ipython-input-16-80ee6abdb188&gt;:8: SettingWithCopyWarning: 
 A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
@@ -16661,7 +16602,8 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Index 17 extracted
+<pre>Start decoding Index 17
+Index 17 extracted
 Start decoding Index 19
 Index 19 extracted
 Start decoding Index 21
@@ -45647,7 +45589,7 @@ Index 30494 extracted
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[18]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[17]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_et</span> <span class="o">=</span> <span class="n">convertToNumeric</span><span class="p">(</span><span class="n">data_et</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;t_task&#39;</span><span class="p">])</span>
@@ -45661,7 +45603,7 @@ Index 30494 extracted
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[19]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[18]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_et</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;trial_index&#39;</span><span class="p">])[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
@@ -45684,7 +45626,7 @@ Index 30494 extracted
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>&lt;ipython-input-19-5a412f0f98d6&gt;:1: FutureWarning: Indexing with multiple keys (implicitly converted to a tuple of keys) will be deprecated, use a list instead.
+<pre>&lt;ipython-input-18-5a412f0f98d6&gt;:1: FutureWarning: Indexing with multiple keys (implicitly converted to a tuple of keys) will be deprecated, use a list instead.
   data_et.groupby([&#39;run_id&#39;, &#39;trial_index&#39;])[&#39;x&#39;, &#39;y&#39;].count()
 </pre>
 </div>
@@ -45693,7 +45635,7 @@ Index 30494 extracted
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[19]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[18]:</div>
 
 
 
@@ -45806,7 +45748,7 @@ Index 30494 extracted
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[20]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[19]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">df1</span> <span class="o">=</span> <span class="n">data_raw</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
@@ -45846,7 +45788,7 @@ Index 30494 extracted
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[21]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[20]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_prolific</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/Google Drive/Masterarbeit/Acquise/prolific_documents/prolific_export.csv&#39;</span><span class="p">)</span> \
@@ -45863,7 +45805,7 @@ Index 30494 extracted
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[22]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[21]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;NOTPROLIFIC&#39;</span><span class="p">)</span>
@@ -45877,7 +45819,7 @@ Index 30494 extracted
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[23]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[22]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_subject</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;prolificID&#39;</span><span class="p">]]</span>
@@ -45896,7 +45838,7 @@ Index 30494 extracted
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[23]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[22]:</div>
 
 
 
@@ -45999,15 +45941,15 @@ Index 30494 extracted
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[24]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[23]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;./data_jupyter&#39;</span><span class="p">):</span>
     <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s1">&#39;./data_jupyter&#39;</span><span class="p">)</span>
 
-<span class="n">data_et</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;data_jupyter/data_et.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># data_et.to_csv(&quot;data_jupyter/data_et.csv&quot;, index=False, header=True)</span>
 <span class="n">data_trial</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;data_jupyter/data_trial.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">data_subject</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;data_jupyter/data_subject.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># data_subject.to_csv(&quot;data_jupyter/data_subject.csv&quot;, index=False, header=True)</span>
 </pre></div>
 
      </div>
@@ -46023,7 +45965,7 @@ Index 30494 extracted
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[25]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[24]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Success! Script ran through&#39;</span><span class="p">)</span>

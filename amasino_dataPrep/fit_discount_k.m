@@ -23,6 +23,7 @@ function fit_discount_k()
 % col 8: 'LL_top',
 % col 9: 'choseTop'
 
+pwd = 'C:\Users\User\GitHub\WebET_Analysis\amasino_dataPrep';
 dataPath=pwd; %adapt to your location
 cd(dataPath)
 
