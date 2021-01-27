@@ -243,7 +243,7 @@ ggplot(grouped, aes(x=tLL, y=svLL, color=run_id)) +
 ## Add subjective value difference (dSV) bins
 ### General bins
 ```{r}
-nBins = 5
+nBins = 8
 data_trial_choice$general_dSV_TB_bin = cut(
     data_trial_choice$dSV_TB, 
     nBins, 
@@ -261,7 +261,7 @@ unique(data_trial_choice$general_dSV_LLSS_bin)
 ```
 
 ### Bins on subject-level
-```{r}
+#```{r}
 nBins = 5
 data_trial_choice$dSV_TB_bin = 0 
 subjects = unique(data_trial_choice$run_id)
@@ -287,8 +287,8 @@ for (i in 1:length(subjects)) {
 unique(data_trial_choice$dSV_TB_bin)
 ```
 
-```{r}
-nBins = 5
+#```{r}
+nBins = 7
 data_trial_choice$dSV_LLSS_bin = 0 
 subjects = unique(data_trial_choice$run_id)
 
@@ -615,9 +615,9 @@ which themselves are based on individual's fitted k value
 ```{r}
 identify_error_trials = function(data) {
     data$predictLL = as.integer(data$svLL > data$svSS)
-    data$errorTrial = as.integer((data$predictLL != data$choseLL))
-    data$patientError = as.integer((!data$predictLL & data$choseLL))
-    data$impatientError = as.integer((data$predictLL & !data$choseLL))
+    data$errorTrial = as.integer((data$choseLL != data$predictLL))
+    data$patientError = as.integer((data$choseLL & !data$predictLL))
+    data$impatientError = as.integer((!data$choseLL & data$predictLL))
     return(data)
 }
 
@@ -642,25 +642,24 @@ data_trial_choice %>%
 
 ## Find Correct trial for each Error trial
 ````{r}
-matchCorrectTrials = function(data) {
+matchTrials = function(data) {
+    data$matched_trial=0
     for (i in 1:nrow(data)) {
         if (data[i, ]$errorTrial) {
             if (data[i, ]$impatientError) {
                 correctTrials = data %>% 
                     filter(
                         run_id==data[i, ]$run_id & 
-                        !errorTrial & 
-                        choseLL) %>%
-                    select(run_id, withinTaskIndex, dSV_LLSS)
+                        !errorTrial & choseLL) %>%
+                    dplyr::select(run_id, withinTaskIndex, dSV_LLSS)
                 
             } 
             if (data[i, ]$patientError) {
                 correctTrials = data %>% 
                     filter(
                         run_id==data[i, ]$run_id & 
-                        !errorTrial & 
-                        !choseLL) %>%
-                    select(run_id, withinTaskIndex, dSV_LLSS)
+                        !errorTrial & !choseLL) %>%
+                    dplyr::select(run_id, withinTaskIndex, dSV_LLSS)
             }
         # If it is an error trial  
             
@@ -669,13 +668,15 @@ matchCorrectTrials = function(data) {
                     abs(correctTrials$dSV_LLSS - data[i, ]$dSV_LLSS)
             
                 matched_trials = correctTrials %>%
-                    filter(dSV_difference == min(correctTrials$dSV_difference)) %>%
+                    filter(dSV_difference == 
+                                min(correctTrials$dSV_difference)) %>%
                     dplyr::pull(withinTaskIndex)
             
                 data[i, ]$matched_trial = matched_trials[1]
                 
                 if (length(matched_trials)>1) {
-                    already_matched = data %>% filter(run_id==data[i, ]$run_id) %>%
+                    already_matched = data %>% 
+                        filter(run_id==data[i, ]$run_id) %>%
                         dplyr::pull(matched_trial)
                   
                     for (j in 1:length(matched_trials)) {
@@ -689,155 +690,182 @@ matchCorrectTrials = function(data) {
     }
     return(data)
 }
-matchingInfo(data_trial_choice)
-````
-matchingInfo = function(data) {
-    error_trial_info = data.frame(0, 0, 0, 0)
-    names(error_trial_info) = c(
-        'subject', "n_error_trials","n_unique_matched", 'n_unmatched')
-
-    subjects = unique(data$run_id)
-    for (i in 1:length(subjects)) {
-        this_subject_trials = data %>% filter(run_id == subjects[i])
-        
-        if (sum(this_subject_trials$errorTrial)>0) {
-            errorTrials = matchCorrectTrials(this_subject_trials)
-            
-            n_unique_matched = length(unique(errorTrials$matched_trial))
-            this_subject_info = data.frame(
-                subjects[i], 
-                nrow(errorTrials),
-                n_unique_matched,
-                n_unmatched_error_trials = nrow(errorTrials) - n_unique_matched
-            )
-            names(this_subject_info) = names(error_trial_info)
-            error_trial_info = rbind(error_trial_info, this_subject_info)
-        }
-    }
-    return(error_trial_info)
-}
-
-
+data_trial_choice %>%
+    mutate(dSV_TB_bin = replace(
+            dSV_TB_bin, 
+            run_id==subjects[i],
+            these_bins)        
+        )
+= matchTrials(data_trial_choice)
 ````
 
-subjects_choseLL_notMatched = 
-    matchingInfo(data_trial_choice %>% filter(choseLL==0)) %>%
-    filter(n_unique_matched>2) %>%
-    dplyr::pull(subject)
-subjects_choseLL_notMatched
-````
-subjects_not_choseLL_notMatched = 
-    matchingInfo(data_trial_choice %>% filter(choseLL==1)) %>%
-    filter(n_unique_matched>2) %>%
-    dplyr::pull(subject)
-subjects_not_choseLL_notMatched
-```
 
 
 ## Reaction time and option INdexRT
-```{r}
-grouped_error_chose_LL = data_trial_choice %>%
-    filter(choseLL==1) %>%
-    filter(!(run_id %in% subjects_choseLL_notMatched)) %>%
+
+### LL>SS: LL was predicted. 
+Do subjects behave differently when they correctly choose LL (as expected) than when they unexpectedly chose SS instead? 
+````{r}
+subjects_LLcorrect = data_trial_choice %>%
+    filter(
+              (
+                  (predictLL & !errorTrial) |
+                  (predictLL & errorTrial)
+              )
+          ) %>%
+    group_by(run_id) %>%
+    summarise(n_unique_matched = length(unique(matched_trial))) %>%
+    filter(n_unique_matched>2) %>%
+    dplyr::pull(run_id)
+subjects_LLcorrect
+length(subjects_LLcorrect)
+
+grouped_LLcorrect =  data_trial_choice %>%
+    filter(
+              (
+                  (predictLL & !errorTrial) |
+                  (predictLL & errorTrial)
+              ) &
+              (run_id %in% subjects_LLcorrect)
+          ) %>%
     group_by(run_id, errorTrial) %>%
     summarize(n = n(), 
               rt = mean(trial_duration_exact), 
-              optionIndex = mean(optionIndex))
-grouped_error_chose_LL$errorTrial = 
-    factor(grouped_error_chose_LL$errorTrial)
+              optionIndex = mean(optionIndex), 
+              attributeIndex = mean(attributeIndex),
+              payneIndex = mean(payneIndex))
+grouped_LLcorrect$errorTrial = factor(grouped_LLcorrect$errorTrial)
+grouped_LLcorrect
 
-grouped_error_chose_LL
-grouped_error_chose_LL %>%
+criteria = c('rt', 'optionIndex', 'attributeIndex', 'payneIndex')
+lapply(criteria, function(x)
+     t.test(as.formula(paste(x,"errorTrial",sep="~")),
+            data=grouped_LLcorrect,
+           paired=TRUE, na.action=na.pass)
+)
+
+grouped_LLcorrect %>%
+    group_by(errorTrial) %>%
+    summarise(n = sum(n), 
+              rt = mean(rt),
+              optionIndex = mean(optionIndex),
+              attributeIndex = mean(attributeIndex),
+              payneIndex = mean(payneIndex))
+```
+
+### SS>LL: SS was predicted. 
+Do subjects behave differently when they correctly choose SS (as expected) than when they unexpectedly chose LL instead?
+```{r}
+subjects_SScorrect = data_trial_choice %>%
+    filter(
+              (
+                  (!predictLL & !errorTrial) |
+                  (!predictLL & errorTrial)
+              )
+          ) %>%
     group_by(run_id) %>%
-    summarise(n = n())
+    summarise(n_unique_matched = length(unique(matched_trial))) %>%
+    filter(n_unique_matched>2) %>%
+    dplyr::pull(run_id)
+subjects_SScorrect
+length(subjects_SScorrect)
 
-t.test(rt ~ errorTrial, 
-       data=grouped_error_chose_LL,
-       paired=TRUE, na.action=na.pass)
+grouped_SScorrect =  data_trial_choice %>%
+    filter(
+              (
+                  (!predictLL & !errorTrial) |
+                  (!predictLL & errorTrial)
+              ) &
+              (run_id %in% subjects_LLcorrect)
+          ) %>%
+    group_by(run_id, errorTrial) %>%
+    summarize(n = n(), 
+              rt = mean(trial_duration_exact), 
+              optionIndex = mean(optionIndex),
+              attributeIndex = mean(attributeIndex),
+              payneIndex = mean(payneIndex))
+grouped_SScorrect$errorTrial = factor(grouped_SScorrect$errorTrial)
+grouped_SScorrect
+
+criteria = c('rt', 'optionIndex', 'attributeIndex', 'payneIndex')
+lapply(criteria, function(x)
+     t.test(as.formula(paste(x,"errorTrial",sep="~")),
+            data=grouped_SScorrect,
+           paired=TRUE, na.action=na.pass)
+)
+
+grouped_SScorrect %>%
+    group_by(errorTrial) %>%
+    summarise(n = sum(n), 
+              rt = mean(rt),
+              optionIndex = mean(optionIndex),
+              attributeIndex = mean(attributeIndex),
+              payneIndex = mean(payneIndex))
 ```
 
 
 ```{r}
-#Error analysis from the Matlab code
-#LL>SS mean SV LL > SV SS, so an error means SS was chosen, correct means LL was chosen. 
-#SS>LL means SV SS > SV LL so an error means LL was chosen, correct means SS was chosen.
-error<-data.frame(t(read.table("amasino_dataPrep/intermediateCSVs/errorMatrix.csv", header=FALSE, sep=",")))
-rownames(error)<-c('SS>LLErrRT','SS>LLCorRT','SS>LLErrOI','SS>LLCorOI','SS>LLErrAI','SS>LLCorAI','SS>LLErrPI','SS>LLCorPI','LL>SSErrRT','LL>SSCorRT','LL>SSErrOI','LL>SSCorOI','LL>SSErrAI','LL>SSCorAI','LL>SSErrPI','LL>SSCorPI')
-
-#Create variable that indexes errors vs. correct responses across types
-error$errCorr='Error' 
-error$errCorr[c(2,4,6,8,10,12,14,16)]='Correct' 
-error$errCorr=as.factor(error$errCorr)
-
-#Create variable that indicates correct answer (LL>SS or SS>LL) across types
-error$labels=c('SS>LLRT','SS>LLRT','SS>LLOI','SS>LLOI','SS>LLAI','SS>LLAI','SS>LLPI','SS>LLPI','LL>SSRT','LL>SSRT','LL>SSOI','LL>SSOI','LL>SSAI','LL>SSAI','LL>SSPI','LL>SSPI')
-error$labels=factor(error$labels, levels= c('SS>LLRT',  'SS>LLOI', 'SS>LLAI', 'SS>LLPI', 'LL>SSRT', 'LL>SSOI',  'LL>SSAI', 'LL>SSPI'))
-
-errorRT=melt(error[c(1:2,9:10),],id=c("errCorr","labels")) #Response time
-errorRT$value=as.numeric(errorRT$value)
-errorOI=melt(error[c(3:4,11:12),],id=c("errCorr","labels")) #Option index
-errorOI$value=as.numeric(errorOI$value)
-errorAI=melt(error[c(5:6,13:14),],id=c("errCorr","labels")) #Attribute index
-errorAI$value=as.numeric(errorAI$value)
-errorPI=melt(error[c(7:8,15:16),],id=c("errCorr","labels")) #Payne index
-errorPI$value=as.numeric(errorPI$value)
-
-choiceSide<-data.frame(read.table("amasino_dataPrep/intermediateCSVs/percLeft.csv", header=FALSE, sep=","))
-colnames(choiceSide)<-c("run_id", "sideProp")
-
-numErrs<- read.table("amasino_dataPrep/intermediateCSVs/numErrs.csv", header = FALSE, sep=",")
-colnames(numErrs)<-c("errors")
-```
+grouped_LLcorrect$LLcorr=1
+grouped_SScorrect$LLcorr=0
+grouped = rbind(grouped_LLcorrect, grouped_SScorrect)
+grouped$rt = grouped$rt/1000
+grouped$LLcorr = factor(grouped$LLcorr)
+grouped$errorTrial = factor(grouped$errorTrial)
 
 
-
-
-
-
-
-Error analysis
-```{r}
-#Response time error analysis
-
-t.test(errorRT$value[errorRT$errCorr=="Error" & errorRT$labels=="SS>LLRT"], errorRT$value[errorRT$errCorr=="Correct" & errorRT$labels=="SS>LLRT"],paired=TRUE, na.action=na.pass) #SS>LL error vs. correct response time
-t.test(errorRT$value[errorRT$errCorr=="Error" & errorRT$labels=="LL>SSRT"], errorRT$value[errorRT$errCorr=="Correct" & errorRT$labels=="LL>SSRT"],paired=TRUE, na.action=na.pass) #LL>SS error vs. correct response time
-cohen.d(errorRT$value[errorRT$labels=="LL>SSRT"],errorRT$errCorr[errorRT$labels=="LL>SSRT"],pooled=TRUE,na.rm=TRUE, paired=TRUE) #Effect size for response time difference
-
-ggplot(errorRT, aes(x=labels,y=value, fill=errCorr))+
-  geom_violin(alpha=.6, size=0,position=position_dodge(0))+
-  stat_summary(fun.data="mean_se",geom="linerange",aes(color=errCorr),alpha=1,size=1.5)+
-  stat_summary(fun=mean, geom="line",aes(group=errCorr, color=errCorr),size=1.5)+
-  geom_text(x=2, y=7.4, label="***",size=10)+ coord_cartesian(ylim=c(0,7.5))+
-  theme_bw()+theme(text=element_text(size=20))+
-  scale_x_discrete(labels=c("SS>LL", "LL>SS"))+
-  xlab("Choices")+ylab("Response Time (s)")+labs(fill="",color="")+
-  guides(size="none")+scale_colour_grey()+scale_fill_grey()
+ggplot(grouped, aes(x=LLcorr, y=rt, fill=errorTrial)) +
+  geom_split_violin(alpha=.6, size=0, position=position_dodge(0)) +
+  stat_summary(
+      fun.data="mean_se",
+      geom="linerange",
+      aes(color=errorTrial),
+      alpha=1,
+      size=1.5) +
+  stat_summary(
+      fun=mean, 
+      geom="line",
+      aes(group=errorTrial, color=errorTrial), 
+      size=1.5) +
+  # geom_text(x=2, y=7.4, label="***",size=10) + 
+  coord_cartesian(ylim=c(0,7.5)) +
+  theme_bw() + 
+  theme(text=element_text(size=20)) +
+  scale_x_discrete(labels=c("SS>LL", "LL>SS")) +
+  xlab("Choices") + ylab("Response Time (s)") + 
+  labs(fill="",color="")+
+  guides(size="none") + 
+  scale_colour_grey() + scale_fill_grey()
 ggsave("plots/errRT.pdf",width=6.5, height=5)
+```
 
-#Option index analysis
-#Replication sample
-t.test(errorOI$value[errorOI$errCorr=="Error" & errorOI$labels=="SS>LLOI"], errorOI$value[errorOI$errCorr=="Correct" & errorOI$labels=="SS>LLOI"],paired=TRUE, na.action=na.pass) #SS>LL error vs. correct option index
-cohen.d(errorOI$value[errorOI$labels=="SS>LLOI"],errorOI$errCorr[errorOI$labels=="SS>LLOI"],pooled=TRUE,na.rm=TRUE, paired=TRUE) #Effect size
-t.test(errorOI$value[errorOI$errCorr=="Error" & errorOI$labels=="LL>SSOI"], errorOI$value[errorOI$errCorr=="Correct" & errorOI$labels=="LL>SSOI"],paired=TRUE, na.action=na.pass) #LL>SS error vs. correct option index
-cohen.d(errorOI$value[errorOI$labels=="LL>SSOI"],errorOI$errCorr[errorOI$labels=="LL>SSOI"],pooled=TRUE,na.rm=TRUE, paired=TRUE)
+```{r}
+grouped_LLcorrect$LLcorr=1
+grouped_SScorrect$LLcorr=0
+grouped = rbind(grouped_LLcorrect, grouped_SScorrect)
+grouped$rt = grouped$rt/1000
+grouped$LLcorr = factor(grouped$LLcorr)
 
-ggplot(errorOI, aes(x=labels,y=value, fill=errCorr))+
-  geom_violin(alpha=.6, size=0,position=position_dodge(0))+
-  stat_summary(fun.data="mean_se",geom="linerange",aes(color=errCorr),alpha=1,size=1.5)+
-  stat_summary(fun.y=mean, geom="line",aes(group=errCorr, color=errCorr),size=1.5)+
-  geom_text(x=1, y=.9, label="***",size=10)+ geom_text(x=2, y=.9, label="***",size=10)+ 
-  coord_cartesian(ylim=c(-1,1))+ scale_colour_grey()+scale_fill_grey()+
-  theme_bw()+theme(text=element_text(size=20))+scale_x_discrete(labels=c("SS>LL", "LL>SS"))+ xlab("Choices")+ylab("Option Index")+
-  labs(fill="",color="")+guides(size="none")
-ggsave("plots/errOI.pdf",width=6.5, height=5)
-
-#Attribute index analysis
-#Replication sample
-t.test(errorAI$value[errorAI$errCorr=="Error" & errorAI$labels=="SS>LLAI"], errorAI$value[errorAI$errCorr=="Correct" & errorAI$labels=="SS>LLAI"],paired=TRUE, na.action=na.pass) #SS>LL error vs. correct attribute index
-t.test(errorAI$value[errorAI$errCorr=="Error" & errorAI$labels=="LL>SSAI"], errorAI$value[errorAI$errCorr=="Correct" & errorAI$labels=="LL>SSAI"],paired=TRUE, na.action=na.pass) #LL>SS error vs. correct attribute index
-
-#Payne index analysis
-#Replication sample
-t.test(errorPI$value[errorPI$errCorr=="Error" & errorPI$labels=="SS>LLPI"], errorPI$value[errorPI$errCorr=="Correct" & errorPI$labels=="SS>LLPI"],paired=TRUE, na.action=na.pass) #SS>LL error vs. correct Payne index
-t.test(errorPI$value[errorPI$errCorr=="Error" & errorPI$labels=="LL>SSPI"], errorPI$value[errorPI$errCorr=="Correct" & errorPI$labels=="LL>SSPI"],paired=TRUE, na.action=na.pass) #LL>SS error vs. correct Payne index
+ggplot(grouped, aes(x=LLcorr, y=optionIndex, fill=errorTrial)) +
+  geom_split_violin(alpha=.6, size=0, position=position_dodge(0)) +
+  stat_summary(
+      fun.data="mean_se",
+      geom="linerange",
+      aes(color=errorTrial),
+      alpha=1,
+      size=1.5) +
+  stat_summary(
+      fun=mean, 
+      geom="line",
+      aes(group=errorTrial, color=errorTrial), 
+      size=1.5) +
+  # geom_text(x=2, y=7.4, label="***",size=10) + 
+  coord_cartesian(ylim=c(-2.5, 2.5)) +
+  theme_bw() + 
+  theme(text=element_text(size=20)) +
+  scale_x_discrete(labels=c("SS>LL", "LL>SS")) +
+  xlab("Choices") + ylab("Option Index") + 
+  labs(fill="",color="")+
+  guides(size="none") + 
+  scale_colour_grey() + scale_fill_grey()
+ggsave("plots/errOptInd.pdf",width=6.5, height=5)
 ```
