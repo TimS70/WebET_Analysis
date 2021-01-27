@@ -435,7 +435,7 @@ ET_bins_choseTB_long <- data_et_choice %>%
     summarise(lookTopAOI=mean(lookTopAOI))
 ET_bins_choseTB_long
 
-ET_bins_choseTB_wide<-rbind(choseTop_bins, choseBottom_bins)
+ET_bins_choseTB_wide<-rbind(ET_bins_choseTop, ET_bins_choseBottom)
 ET_bins_choseTB_wide
 ```
 
@@ -690,13 +690,7 @@ matchTrials = function(data) {
     }
     return(data)
 }
-data_trial_choice %>%
-    mutate(dSV_TB_bin = replace(
-            dSV_TB_bin, 
-            run_id==subjects[i],
-            these_bins)        
-        )
-= matchTrials(data_trial_choice)
+data_trial_choice = matchTrials(data_trial_choice)
 ````
 
 
