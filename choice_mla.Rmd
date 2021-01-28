@@ -148,6 +148,21 @@ confint(m2_ri, method="boot", n=50) # CI with Bootstrap does not need normality
 anova(m0_io, m2_ri)
 ```
 
+## Random Intercept Fixed Slope
+The effect of ET variables largely varies by subjects
+```{r}
+m3_rs = glmer(
+    choseLL ~ attributeIndex + optionIndex + payneIndex + 
+        (1 + attributeIndex + optionIndex + payneIndex | run_id), 
+    data = data_trial_choice, 
+    family = binomial, 
+    control = glmerControl(optimizer = "bobyqa"))
+summary(m3_rs)
+# confint(m3_rs, method="boot", n=50) # CI with Bootstrap does not need normality
+anova(m2_ri, m3_rs)
+```
+
+
 # Clusters
 No clusters can improve the prediction of choices
 ```{r}
