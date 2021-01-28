@@ -184,9 +184,7 @@ summary(m0_io)
 icc <- m0_io@theta[1]^2/ (m0_io@theta[1]^2 + (3.14159^2/3))
 icc
 ```
-
-## Random Intercept Fixed Slope
-Within-Subject centering
+## Within-Subject centering
 ```{r}
 grouped = data.frame(
     data_subject$run_id,
@@ -203,24 +201,58 @@ data_trial_choice = merge(
     grouped, 
     by='run_id'
 )
-data_trial_choice$attributeIndex_cm = 
+data_trial_choice$attributeIndex_cmc = 
     data_trial_choice$attributeIndex - 
     data_trial_choice$cluster_mean_AI
 
-data_trial_choice$optionIndex_cm = 
+data_trial_choice$optionIndex_cmc = 
     data_trial_choice$optionIndex - 
     data_trial_choice$cluster_mean_OI
 
-data_trial_choice$payneIndex_cm = 
+data_trial_choice$payneIndex_cmc = 
     data_trial_choice$payneIndex - 
     data_trial_choice$cluster_mean_PI
 
 data_trial_choice %>% 
-    dplyr::select(attributeIndex, attributeIndex_cm,
-           optionIndex, optionIndex_cm,
-           payneIndex, payneIndex_cm)
-````
+    dplyr::select(attributeIndex, attributeIndex_cmc,
+           optionIndex, optionIndex_cmc,
+           payneIndex, payneIndex_cmc)
+```
 
+
+## Random Intercept (Constrained intermediate model)
+Contains all theoretically relevant effects
+```{r}
+m1_ri = glmer(
+    choseLL ~ withinTaskIndex + 
+        attributeIndex_cmc + optionIndex_cmc + 
+        payneIndex_cmc + (1 | run_id), 
+    data = data_trial_choice, 
+    family = binomial, 
+    control = glmerControl(optimizer = "bobyqa"))
+summary(m1_ri)
+paste("FYI: The deviance of the AIM is:", m1_ri@devcomp$cmp[[8]])
+```
+
+
+## Random Intercept Random Slope (Augmented intermediate model)
+A likelihood ratio test (anova) shows that the model with random slopes is to be preferred.
+```{r}
+m2_rirs = glmer(
+    choseLL ~ withinTaskIndex + 
+        attributeIndex_cmc + optionIndex_cmc + 
+        payneIndex_cmc + 
+          (1 + attributeIndex_cmc + optionIndex_cmc + 
+           payneIndex_cmc | run_id), 
+    data = data_trial_choice, 
+    family = binomial, 
+    control = glmerControl(optimizer = "bobyqa"))
+summary(m2_rirs)
+paste("FYI: The deviance of the CIM is:", m2_rirs@devcomp$cmp[[8]])
+anova(m1_ri, m2_rirs)
+```
+
+## Fial model: RIRS
 Control variables, such as age and withinTaskIndex do not show a correlation. 
 Predictors: attributeIndex + optionIndex + payneIndex
  - Effect of the Option Index: Odds for choseLL increase by the factor exp(-0.97)=0.38. The more gaze points on immediate options, the lower the odd for choseLL
@@ -228,30 +260,43 @@ Predictors: attributeIndex + optionIndex + payneIndex
  - Did not try to get the procentual reduction of L1 and L2 variance because the logistic regression does not have error terms
 
 ```{r}
-m1_ri = glmer(
-    choseLL ~ attributeIndex_cm + optionIndex_cm + payneIndex_cm
-        + (1 | run_id), 
-    data = data_trial_choice, 
-    family = binomial, 
-    control = glmerControl(optimizer = "bobyqa"),
-    nAGQ = 10)
-summary(m1_ri)
-confint(m1_ri, method="boot", n=50) # CI with Bootstrap does not need normality
-anova(m0_io, m1_ri)
-```
-
-## Random Intercept Random Slope
-The effect of ET variables largely varies by subjects
-```{r}
-m2_rs = glmer(
-    choseLL ~ attributeIndex + optionIndex + payneIndex + 
-        (1 + attributeIndex + optionIndex + payneIndex | run_id), 
+m3_rirs = glmer(
+    choseLL ~ withinTaskIndex + 
+        attributeIndex_cmc + optionIndex_cmc + 
+        payneIndex_cmc + 
+          (1 + attributeIndex_cmc + optionIndex_cmc + 
+           payneIndex_cmc | run_id), 
     data = data_trial_choice, 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"))
-summary(m2_rs)
-confint(m3_rs, method="boot", n=50) # CI with Bootstrap does not need normality
-anova(m1_ri, m2_rs)
+summary(m3_rirs)
+paste("FYI: The deviance of the CIM is:", m3_rirs@devcomp$cmp[[8]])
+confint(m3_rirs, method="boot", n=50) # CI with Bootstrap
+# The confidence intervals should not include 1 to be significant
+```
+
+## Simple Slopes
+```{r}
+sd_OI_cmc <- sd(data_trial_fix$attributeIndex_cmc)
+sd_PI_cmc <- sd(data_trial_fix$payneIndex_cmc)
+
+d$gpa_m1SD <- d$gpa_cmc + sd_gpa_cmc
+FM_m1SD <- glmer(bieber ~ gpa_m1SD + teacher_fan_c + (1 + gpa_cmc || classes) + gpa_m1SD:teacher_fan_c, data = d, family = "binomial")
+summary(FM_m1SD)
+
+#Below is the command to calculate the second simple slope
+#namely the effect of "teacher_fan_c" when "gpa_cmc" is high (+1 SD).
+d$gpa_p1SD <- d$gpa_cmc - sd_gpa_cmc
+FM_p1SD <- glmer(bieber ~ gpa_p1SD + teacher_fan_c + (1 + gpa_cmc || classes) + gpa_p1SD:teacher_fan_c, data = d, family = "binomial")
+summary(FM_p1SD)
+
+#Below are the command to compare the coefficient estimates obtained in the final model,
+#with (glmer) or without (glm) the use of multilevel modelling.
+GLMER <- glmer(bieber ~ gpa_cmc + teacher_fan_c + (1 + gpa_cmc || classes) + gpa_cmc:teacher_fan_c, data = d, family = "binomial")
+GLM <-  glm(bieber ~ gpa_cmc + teacher_fan_c + gpa_cmc:teacher_fan_c, data = d, family = "binomial")
+
+summary(GLMER)
+summary(GLM)
 ```
 
 
