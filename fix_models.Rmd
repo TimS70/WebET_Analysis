@@ -237,7 +237,7 @@ m_io_0 = gls(
     )
 summary(m_io_0)
 ```
-## Random intercept 
+## RI: Random intercept
 Control for the fact that the subjects start at different places regarding the accuracy of the eyetracking data. Standard error has increased. Subjects vary by about 0.12 (Jan 24) around the intercept. The RI model is way better than the IO model. Therefore, we should do an MLM.
 
 ```{r}
@@ -250,6 +250,17 @@ m_ri_0 = lme(
     )
 summary(m_ri_0)
 anova(m_io_0, m_ri_0)
+```
+## ICC
+ICC = x%. x% of the variance relate to the variance between the subjects 
+```{r ICC}
+library(ICC)
+data_trial_fix$run_id_factor <- as.factor(data_trial_fix$run_id)
+ICCest(data_trial_fix$run_id_factor, data_trial_fix$offset, 
+       alpha=.05, CI.type="THD")
+fixef(m_ri_0)
+ranef(m_ri_0)
+coef(m_ri_0)
 ```
 
 # m_ri_1: adding chin rest
@@ -340,18 +351,6 @@ abline(0, 0)
 abline(v=0)
 ```
 
-
-## ICC
-ICC = x%. x% of the variance relate to the variance between the subjects 
-# ```{r ICC}
-library(ICC)
-data_trial_fix$run_id_factor <- as.factor(data_trial_fix$run_id)
-ICCest(data_trial_fix$run_id_factor, data_trial_fix$offset, 
-       alpha=.05, CI.type="THD")
-fixef(m1)
-ranef(m1)
-coef(m1)
-```
 
 ## Effects
 Varianzaufkl?rung: Pseudo-R? (VL11 F18f.)

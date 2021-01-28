@@ -1,7 +1,7 @@
 ---
-title: "MixedRegression"
+title: "Choice Task Regression Analysis"
 author: "Tim Schneegans"
-date: "4 Januar 2021"
+date: "28th of January 2021"
 output: html_document
 ---
 
@@ -15,7 +15,8 @@ getPackages <- function(pkg){
   sapply(pkg, require, character.only = TRUE)
 }
 
-getPackages(c('dplyr', 
+getPackages(c('colorspace', 
+              'dplyr', 
               "effsize",
               'e1071',
               "ggplot2",
@@ -33,10 +34,6 @@ getPackages(c('dplyr',
 ```{r}
 # run_matlab_script('amasino_dataPrep/fit_discount_k.m')
 ```
-
-# Screening
-# Cleaning
-see choice_analysis.Rmd
 
 # Read and create datasets
 ## Exclude subjects
@@ -108,10 +105,71 @@ print(paste('Number of subjects: ', length(unique(data_et_choice$run_id))))
 
 ```
 
-# Models
-## Intercept Only 
+# Screening
+ - Response times > 4 or 5 seconds or malhalanobis? 
+
+# Cleaning
+see choice_analysis.Rmd
+
+
+
+# Correlative Analysis
+#````{r}
+library(ggplot2) # Load the librarie (you have to do this one on each new session)
+ggpairs(
+    data_subject %>%
+        dplyr::select(
+            choseLL,
+            attributeIndex, optionIndex, payneIndex,
+            fps), 
+    progress = F
+    ) 
+ggsave("plots/choseLL_corr_01.pdf",width=6.5, height=5)
+
+ggpairs(
+    data_subject %>%
+        dplyr::select(
+            choseLL,
+            birthyear, gender,
+            LL_top, choice_rt, logK),
+    progress = F
+    ) 
+ggsave("plots/choseLL_corr_02.pdf",width=6.5, height=5)
+
+#```
+
+# Logistic Regression on subject-level
+Sommet, 2017
+ - Predict log-odds (exp(beta)). Odds increase by the factor exp(beta), when the predictor changes in one unit. beta=0 means odds=1. 
+ - Logisitic regression does not have residuals because it predicts probabilities not concrete values.
+
+```{r}
+m0 = glm(choseLL ~ 1,
+         data = data_subject, 
+         family = binomial(link = "logit"))
+summary(m0)
+```
+
+## M1: Adding predictors
+A positive Attribute Index indicates more fixations on the amount attributes
+A negative Option Index indicates more fixations on the delayed option
+A negative Payne Index indicates more transitions within attributes 
+```{r}
+m1 = glm(choseLL ~ 1 + attributeIndex + optionIndex + payneIndex,
+         data = data_subject, 
+         family = binomial(link = "logit"))
+summary(m1)
+anova(m0, m1)
+```
+
+# MLA
+When I do not look at the summarized scores but on every trial, I need to account for the lack of interdependence and use a MLA.
+
+## Intercept Only
 https://stats.idre.ucla.edu/r/dae/mixed-effects-logistic-regression/
-Average choice tendency is -0.62 (Jan 28), which is a strong tendency against the larger later choice 
+ - Odds for LL choice is exp(-0.62) = 0.5379444 (Jan 28). The chance to choseLL is half as high as choseSS. The average chance is exp(-0.62)/(1+exp(-0.62)) = 0.3497815. 
+ - Mean log-odds for choice_LL vary across subjects. SD=0.4418, Odds could increase by factor exp(0.44)=1.55.
+ - ICC=0.056, i.e. 5.6% of the variance are explained by between subject differences
 ````{r}
 m0_io = glmer(
     choseLL ~ 1 + (1 | run_id), 
@@ -120,46 +178,80 @@ m0_io = glmer(
     control = glmerControl(optimizer = "bobyqa"),
     nAGQ = 10)
 summary(m0_io)
+
+
+# take pi^2 / 3 instead of the level-1 residual
+icc <- m0_io@theta[1]^2/ (m0_io@theta[1]^2 + (3.14159^2/3))
+icc
 ```
 
 ## Random Intercept Fixed Slope
-Control variables: withinTaskIndex
+Within-Subject centering
+```{r}
+grouped = data.frame(
+    data_subject$run_id,
+    data_subject$attributeIndex,
+    data_subject$optionIndex,
+    data_subject$payneIndex
+)
+names(grouped) = c('run_id', 
+                   'cluster_mean_AI', 
+                   'cluster_mean_OI', 
+                   'cluster_mean_PI')
+data_trial_choice = merge(
+    data_trial_choice,
+    grouped, 
+    by='run_id'
+)
+data_trial_choice$attributeIndex_cm = 
+    data_trial_choice$attributeIndex - 
+    data_trial_choice$cluster_mean_AI
+
+data_trial_choice$optionIndex_cm = 
+    data_trial_choice$optionIndex - 
+    data_trial_choice$cluster_mean_OI
+
+data_trial_choice$payneIndex_cm = 
+    data_trial_choice$payneIndex - 
+    data_trial_choice$cluster_mean_PI
+
+data_trial_choice %>% 
+    dplyr::select(attributeIndex, attributeIndex_cm,
+           optionIndex, optionIndex_cm,
+           payneIndex, payneIndex_cm)
+````
+
+Control variables, such as age and withinTaskIndex do not show a correlation. 
+Predictors: attributeIndex + optionIndex + payneIndex
+ - Effect of the Option Index: Odds for choseLL increase by the factor exp(-0.97)=0.38. The more gaze points on immediate options, the lower the odd for choseLL
+ - Effect of the Payne Index: Odds for choseLL increase by the factor exp(-0.17)=0.84. The more transitions within options (positive payne), the lower the odd for chose LL
+ - Did not try to get the procentual reduction of L1 and L2 variance because the logistic regression does not have error terms
+
 ```{r}
 m1_ri = glmer(
-    choseLL ~ withinTaskIndex + (1 | run_id), 
+    choseLL ~ attributeIndex_cm + optionIndex_cm + payneIndex_cm
+        + (1 | run_id), 
     data = data_trial_choice, 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"),
     nAGQ = 10)
 summary(m1_ri)
+confint(m1_ri, method="boot", n=50) # CI with Bootstrap does not need normality
 anova(m0_io, m1_ri)
 ```
 
-Predictors: attributeIndex + optionIndex + payneIndex
-```{r}
-m2_ri = glmer(
-    choseLL ~ attributeIndex + optionIndex + payneIndex + (1 | run_id), 
-    data = data_trial_choice, 
-    family = binomial, 
-    control = glmerControl(optimizer = "bobyqa"),
-    nAGQ = 10)
-summary(m2_ri)
-confint(m2_ri, method="boot", n=50) # CI with Bootstrap does not need normality
-anova(m0_io, m2_ri)
-```
-
-## Random Intercept Fixed Slope
+## Random Intercept Random Slope
 The effect of ET variables largely varies by subjects
 ```{r}
-m3_rs = glmer(
+m2_rs = glmer(
     choseLL ~ attributeIndex + optionIndex + payneIndex + 
         (1 + attributeIndex + optionIndex + payneIndex | run_id), 
     data = data_trial_choice, 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"))
-summary(m3_rs)
-# confint(m3_rs, method="boot", n=50) # CI with Bootstrap does not need normality
-anova(m2_ri, m3_rs)
+summary(m2_rs)
+confint(m3_rs, method="boot", n=50) # CI with Bootstrap does not need normality
+anova(m1_ri, m2_rs)
 ```
 
 

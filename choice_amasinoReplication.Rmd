@@ -15,7 +15,9 @@ getPackages <- function(pkg){
   sapply(pkg, require, character.only = TRUE)
 }
 
-getPackages(c('dplyr', 
+getPackages(c('plyr',
+              'dplyr', 
+              
               "effsize",
               'e1071',
               "ggplot2",
@@ -71,14 +73,12 @@ data_trial_choice <- read.table('data_jupyter/data_trial_choice.csv',
                                 header=TRUE, sep=',')  %>%
     filter(run_id %in% data_subject$run_id)
 
-if ('logK' %in% names(data_trial_choice))
-    {data_trial_choice = data_trial_choice %>% select(!logK)}
+if ('logK' %in% names(data_trial_choice)) {
+    data_trial_choice = data_trial_choice %>% select(!logK)}
 data_trial_choice = merge(
     data_trial_choice,
-    data_subject %>% dplyr::select(run_id, logK),
-    by='run_id'
-)
-
+    data_subject %>% dplyr::select(run_id, logK), 
+    by='run_id')
 data_trial_choice = data_trial_choice %>% filter(!is.na(logK))
 
 print(paste('Number of subjects: ', length(unique(data_trial_choice$run_id))))
@@ -91,15 +91,12 @@ data_et_choice <- read.table('data_jupyter/data_et_choice.csv',
                              header=TRUE, sep=',') %>%
     filter(run_id %in% data_subject$run_id)
 
+grouped = data_trial_choice %>% 
+      dplyr::group_by(run_id, trial_index) %>% 
+      dplyr::summarise(choseTop = mean(choseTop))
 if ('choseTop' %in% names(data_et_choice))
     {data_et_choice = data_et_choice %>% select(!choseTop)}
-data_et_choice = merge(
-    data_et_choice, 
-    data_trial_choice %>% 
-        group_by(run_id, trial_index) %>% 
-        summarise(choseTop = mean(choseTop)),
-    by=c('run_id', 'trial_index')
-)
+data_et_choice = merge(data_et_choice, grouped, by=c('run_id', 'trial_index'))
 
 data_et_choice$lookTopAOI = as.integer(data_et_choice$aoi == 'TL' | data_et_choice$aoi == 'TR')
 
@@ -231,8 +228,8 @@ ggplot(data_trial_choice, aes(x=tLL, y=svLL, color=run_id)) +
     ggtitle('svLL across tLL')
 
 grouped = data_trial_choice %>% 
-    group_by(run_id, tLL) %>%
-    summarise(svLL = mean(svLL))
+    dplyr::group_by(run_id, tLL) %>%
+    dplyr::summarise(svLL = mean(svLL))
 
 ggplot(grouped, aes(x=tLL, y=svLL, color=run_id)) +
     geom_line() +
@@ -314,13 +311,13 @@ unique(data_trial_choice$dSV_LLSS_bin)
 
 ```{r}
 grouped = data_trial_choice %>%
-    group_by(general_dSV_TB_bin) %>%
-    summarise(dSV_TB = mean(dSV_TB))
+    dplyr::group_by(general_dSV_TB_bin) %>%
+    dplyr::summarise(dSV_TB = mean(dSV_TB))
 
 
 SV_bins = data_trial_choice %>%
-    group_by(run_id, general_dSV_TB_bin) %>%
-    summarise(
+    dplyr::group_by(run_id, general_dSV_TB_bin) %>%
+    dplyr::summarise(
         choseTop=mean(choseTop), 
         rt=mean(trial_duration_exact)/1000, 
         count=mean(x_count)
@@ -415,24 +412,24 @@ ET_bins_choseTop <- data_et_choice %>%
     filter(choseTop == 1 & !is.na(aoi)) %>%
     ET_bins(3) %>%
     dplyr::select(run_id, withinTaskIndex, bin, lookTopAOI, choseTop) %>%
-    group_by(run_id, choseTop, bin) %>%
-    summarise(lookTopAOI=mean(lookTopAOI)) %>%
+    dplyr::group_by(run_id, choseTop, bin) %>%
+    dplyr::summarise(lookTopAOI=mean(lookTopAOI)) %>%
     spread(bin, lookTopAOI) 
 
 ET_bins_choseBottom <- data_et_choice %>%
     filter(choseTop == 0 & !is.na(aoi)) %>%
     ET_bins(3) %>%
     dplyr::select(run_id, withinTaskIndex, bin, lookTopAOI, choseTop) %>%
-    group_by(run_id, choseTop, bin) %>%
-    summarise(lookTopAOI=mean(lookTopAOI)) %>%
+    dplyr::group_by(run_id, choseTop, bin) %>%
+    dplyr::summarise(lookTopAOI=mean(lookTopAOI)) %>%
     spread(bin, lookTopAOI) 
 
 ET_bins_choseTB_long <- data_et_choice %>%
     filter(!is.na(aoi)) %>%
     ET_bins(3) %>%
     dplyr::select(run_id, withinTaskIndex, bin, lookTopAOI, choseTop) %>%
-    group_by(run_id, choseTop, bin) %>%
-    summarise(lookTopAOI=mean(lookTopAOI))
+    dplyr::group_by(run_id, choseTop, bin) %>%
+    dplyr::summarise(lookTopAOI=mean(lookTopAOI))
 ET_bins_choseTB_long
 
 ET_bins_choseTB_wide<-rbind(ET_bins_choseTop, ET_bins_choseBottom)
@@ -521,8 +518,8 @@ for (i in 1:length(unique(ET_bins_choseTB_long$bin))) {
 ```{r}
 add_lastFixTop = function(data_trial, data_et) {
     grouped = data_et %>%
-        group_by(run_id, trial_index) %>%
-        summarise(t_task = max(t_task))
+        dplyr::group_by(run_id, trial_index) %>%
+        dplyr::summarise(t_task = max(t_task))
     grouped = merge(
         grouped,
         data_et %>% 
@@ -550,30 +547,30 @@ data_trial_choice %>%
 lookT_lastFix <- data_trial_choice %>%
     filter(lastFixTop == 1) %>%
     dplyr::select(run_id, withinTaskIndex, choseTop) %>%
-    group_by(run_id, withinTaskIndex) %>%
-    summarise(choseTop=mean(choseTop)) %>%
-    group_by(run_id) %>%
-    summarise(choseTop=mean(choseTop))
+    dplyr::group_by(run_id, withinTaskIndex) %>%
+    dplyr::summarise(choseTop=mean(choseTop)) %>%
+    dplyr::group_by(run_id) %>%
+    dplyr::summarise(choseTop=mean(choseTop))
 
 lookB_lastFix <- data_trial_choice %>%
     filter(lastFixTop == 0) %>%
     dplyr::select(run_id, withinTaskIndex, choseTop) %>%
-    group_by(run_id, withinTaskIndex) %>%
-    summarise(choseTop=mean(choseTop)) %>%
-    group_by(run_id) %>%
-    summarise(choseTop=mean(choseTop))
+    dplyr::group_by(run_id, withinTaskIndex) %>%
+    dplyr::summarise(choseTop=mean(choseTop)) %>%
+    dplyr::group_by(run_id) %>%
+    dplyr::summarise(choseTop=mean(choseTop))
 
 lookTB_lastFix_long <- data_trial_choice %>%
     dplyr::select(run_id, withinTaskIndex, lastFixTop, choseTop) %>%
-    group_by(run_id, lastFixTop, withinTaskIndex) %>%
-    summarise(choseTop=mean(choseTop)) %>%
-    group_by(run_id, lastFixTop) %>%
-    summarise(choseTop=mean(choseTop)) 
+    dplyr::group_by(run_id, lastFixTop, withinTaskIndex) %>%
+    dplyr::summarise(choseTop=mean(choseTop)) %>%
+    dplyr::group_by(run_id, lastFixTop) %>%
+    dplyr::summarise(choseTop=mean(choseTop)) 
 lookTB_lastFix_long
 
 subjects_only_look_top = lookTB_lastFix_long %>% 
-    group_by(run_id) %>% 
-    summarise(n = n()) %>%
+    dplyr::group_by(run_id) %>% 
+    dplyr::summarise(n = n()) %>%
     filter(n<2) %>%
     dplyr::pull(run_id)
 lookTB_lastFix_long = lookTB_lastFix_long %>%
@@ -635,8 +632,8 @@ data_trial_choice %>%
     filter(run_id==61)
    
 data_trial_choice %>%
-    group_by(run_id) %>%
-    summarise(choseLL = mean(choseLL), errorTrial=sum(errorTrial))
+    dplyr::group_by(run_id) %>%
+    dplyr::summarise(choseLL = mean(choseLL), errorTrial=sum(errorTrial))
 ```
 
 
@@ -707,8 +704,8 @@ subjects_LLcorrect = data_trial_choice %>%
                   (predictLL & errorTrial)
               )
           ) %>%
-    group_by(run_id) %>%
-    summarise(n_unique_matched = length(unique(matched_trial))) %>%
+    dplyr::group_by(run_id) %>%
+    dplyr::summarise(n_unique_matched = length(unique(matched_trial))) %>%
     filter(n_unique_matched>2) %>%
     dplyr::pull(run_id)
 subjects_LLcorrect
@@ -722,8 +719,8 @@ grouped_LLcorrect =  data_trial_choice %>%
               ) &
               (run_id %in% subjects_LLcorrect)
           ) %>%
-    group_by(run_id, errorTrial) %>%
-    summarize(n = n(), 
+    dplyr::group_by(run_id, errorTrial) %>%
+    dplyr::summarise(n = n(), 
               rt = mean(trial_duration_exact), 
               optionIndex = mean(optionIndex), 
               attributeIndex = mean(attributeIndex),
@@ -739,8 +736,8 @@ lapply(criteria, function(x)
 )
 
 grouped_LLcorrect %>%
-    group_by(errorTrial) %>%
-    summarise(n = sum(n), 
+    dplyr::group_by(errorTrial) %>%
+    dplyr::summarise(n = sum(n), 
               rt = mean(rt),
               optionIndex = mean(optionIndex),
               attributeIndex = mean(attributeIndex),
@@ -757,8 +754,8 @@ subjects_SScorrect = data_trial_choice %>%
                   (!predictLL & errorTrial)
               )
           ) %>%
-    group_by(run_id) %>%
-    summarise(n_unique_matched = length(unique(matched_trial))) %>%
+    dplyr::group_by(run_id) %>%
+    dplyr::summarise(n_unique_matched = length(unique(matched_trial))) %>%
     filter(n_unique_matched>2) %>%
     dplyr::pull(run_id)
 subjects_SScorrect
@@ -772,8 +769,8 @@ grouped_SScorrect =  data_trial_choice %>%
               ) &
               (run_id %in% subjects_LLcorrect)
           ) %>%
-    group_by(run_id, errorTrial) %>%
-    summarize(n = n(), 
+    dplyr::group_by(run_id, errorTrial) %>%
+    dplyr::summarise(n = n(), 
               rt = mean(trial_duration_exact), 
               optionIndex = mean(optionIndex),
               attributeIndex = mean(attributeIndex),
@@ -789,8 +786,8 @@ lapply(criteria, function(x)
 )
 
 grouped_SScorrect %>%
-    group_by(errorTrial) %>%
-    summarise(n = sum(n), 
+    dplyr::group_by(errorTrial) %>%
+    dplyr::summarise(n = sum(n), 
               rt = mean(rt),
               optionIndex = mean(optionIndex),
               attributeIndex = mean(attributeIndex),
@@ -799,15 +796,18 @@ grouped_SScorrect %>%
 
 
 ```{r}
-grouped_LLcorrect$LLcorr=1
-grouped_SScorrect$LLcorr=0
+grouped_LLcorrect$LLexpected=1
+grouped_SScorrect$LLexpected=0
 grouped = rbind(grouped_LLcorrect, grouped_SScorrect)
 grouped$rt = grouped$rt/1000
-grouped$LLcorr = factor(grouped$LLcorr)
+grouped$LLexpected = factor(grouped$LLexpected)
 grouped$errorTrial = factor(grouped$errorTrial)
+grouped$errorTrial = mapvalues(grouped$errorTrial, 
+          from = c(0, 1), 
+          to = c("Correct", "Error"))
 
 
-ggplot(grouped, aes(x=LLcorr, y=rt, fill=errorTrial)) +
+ggplot(grouped, aes(x=LLexpected, y=rt, fill=errorTrial)) +
   geom_split_violin(alpha=.6, size=0, position=position_dodge(0)) +
   stat_summary(
       fun.data="mean_se",
@@ -833,13 +833,17 @@ ggsave("plots/errRT.pdf",width=6.5, height=5)
 ```
 
 ```{r}
-grouped_LLcorrect$LLcorr=1
-grouped_SScorrect$LLcorr=0
+grouped_LLcorrect$LLexpected=1
+grouped_SScorrect$LLexpected=0
 grouped = rbind(grouped_LLcorrect, grouped_SScorrect)
-grouped$rt = grouped$rt/1000
-grouped$LLcorr = factor(grouped$LLcorr)
+lagrouped$rt = grouped$rt/1000
+grouped$LLexpected = factor(grouped$LLexpected)
+grouped$errorTrial = factor(grouped$errorTrial)
+grouped$errorTrial = mapvalues(grouped$errorTrial, 
+          from = c(0, 1), 
+          to = c("Correct", "Error"))
 
-ggplot(grouped, aes(x=LLcorr, y=optionIndex, fill=errorTrial)) +
+ggplot(grouped, aes(x=LLexpected, y=optionIndex, fill=errorTrial)) +
   geom_split_violin(alpha=.6, size=0, position=position_dodge(0)) +
   stat_summary(
       fun.data="mean_se",
