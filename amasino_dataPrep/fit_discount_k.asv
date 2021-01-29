@@ -27,9 +27,11 @@ pwd = 'C:\Users\User\GitHub\WebET_Analysis\amasino_dataPrep';
 dataPath=pwd; %adapt to your location
 cd(dataPath)
 
-load('data_source/schneegansEtAl_behavior.csv')
-data=schneegansEtAl_behavior;
+load('data_source/schneegansETAl_behavior.csv')
+data=schneegansETAl_behavior;
 
+data = data(data(1, :)==32, :)
+data
 kvals=[];
 noise=[];
 subj = unique(data(:, 1));

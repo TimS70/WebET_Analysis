@@ -277,10 +277,15 @@ confint(m3_rirs, method="boot", n=50) # CI with Bootstrap
 
 ## Simple Slopes
 ```{r}
-sd_OI_cmc <- sd(data_trial_fix$attributeIndex_cmc)
-sd_PI_cmc <- sd(data_trial_fix$payneIndex_cmc)
+sd_OI_cmc <- sd(data_trial_choice$optionIndex_cmc)
+sd_PI_cmc <- sd(data_trial_choice$payneIndex_cmc)
 
-d$gpa_m1SD <- d$gpa_cmc + sd_gpa_cmc
+data_trial_choice$OI_sd1 =
+    data_trial_choice$optionIndex_cmc + sd_OI_cmc
+
+data_trial_choice$OI_sd1 =
+    data_trial_choice$payneIndex_cmc + sd_PI_cmc
+
 FM_m1SD <- glmer(bieber ~ gpa_m1SD + teacher_fan_c + (1 + gpa_cmc || classes) + gpa_m1SD:teacher_fan_c, data = d, family = "binomial")
 summary(FM_m1SD)
 

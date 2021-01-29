@@ -29,10 +29,37 @@ getPackages(c('plyr',
               'tidyr')
             )
 ```
+```{r}
+# https://stackoverflow.com/a/45614547
+GeomSplitViolin <- ggproto("GeomSplitViolin", GeomViolin, draw_group = function(self, data, ..., draw_quantiles = NULL){
+  data <- transform(data, xminv = x - violinwidth * (x - xmin), xmaxv = x + violinwidth * (xmax - x))
+  grp <- data[1,'group']
+  newdata <- plyr::arrange(transform(data, x = if(grp%%2==1) xminv else xmaxv), if(grp%%2==1) y else -y)
+  newdata <- rbind(newdata[1, ], newdata, newdata[nrow(newdata), ], newdata[1, ])
+  newdata[c(1,nrow(newdata)-1,nrow(newdata)), 'x'] <- round(newdata[1, 'x']) 
+  if (length(draw_quantiles) > 0 & !scales::zero_range(range(data$y))) {
+    stopifnot(all(draw_quantiles >= 0), all(draw_quantiles <= 
+                                              1))
+    quantiles <- ggplot2:::create_quantile_segment_frame(data, draw_quantiles)
+    aesthetics <- data[rep(1, nrow(quantiles)), setdiff(names(data), c("x", "y")), drop = FALSE]
+    aesthetics$alpha <- rep(1, nrow(quantiles))
+    both <- cbind(quantiles, aesthetics)
+    quantile_grob <- GeomPath$draw_panel(both, ...)
+    ggplot2:::ggname("geom_split_violin", grid::grobTree(GeomPolygon$draw_panel(newdata, ...), quantile_grob))
+  }
+  else {
+    ggplot2:::ggname("geom_split_violin", GeomPolygon$draw_panel(newdata, ...))
+  }
+})
+
+geom_split_violin <- function (mapping = NULL, data = NULL, stat = "ydensity", position = "identity", ..., draw_quantiles = NULL, trim = TRUE, scale = "area", na.rm = FALSE, show.legend = NA, inherit.aes = TRUE) {
+  layer(data = data, mapping = mapping, stat = stat, geom = GeomSplitViolin, position = position, show.legend = show.legend, inherit.aes = inherit.aes, params = list(trim = trim, scale = scale, draw_quantiles = draw_quantiles, na.rm = na.rm, ...))
+}
+```
 
 # Matlab
 ```{r}
-run_matlab_script('amasino_dataPrep/fit_discount_k.m')
+# run_matlab_script('amasino_dataPrep/fit_discount_k.m')
 ```
 
 # Screening
@@ -62,7 +89,8 @@ data_subject = merge(data_subject, alllogk, by='run_id')
 data_subject = data_subject %>% 
     filter(!is.na(logK))
 print(nrow(data_subject))
-data_subject
+data_subject %>%
+    filter(run_id %in% c(19, 32, 66, 96, 126, 130, 1000, 2012))
 ```
 
 
@@ -134,10 +162,21 @@ cor.test(data_subject$payneIndex, data_subject$attributeIndex)
 Histogram of log(k)
 ```{r}
 ggplot(data_subject, aes(x=logK))+
-  geom_histogram(binwidth=.5, alpha=.5,position="identity")+
+  geom_histogram(binwidth=.5, alpha=.5, position="identity")+
   scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
   theme_bw()+theme(text=element_text(size=40))
   ggsave("plots/logk_hist.pdf", width=5.5, height=5)
+```
+
+## Exclude subjects with high logK
+```{r}
+print('Subjects with high logK')
+subjects_highLogK = data_subject %>% filter(logK>5) %>%dplyr::pull(run_id)
+print(subjects_highLogK)
+
+# data_trial_choice = data_trial_choice %>%
+#    filter(!(run_id %in% subjects_highLogK))
+
 ```
 
 ## Correlation of Eye tracking indices and discount rate
@@ -147,7 +186,7 @@ ggplot(data_subject, aes(x=attributeIndex, y=logK)) +
   geom_point(size=2.5, aes(alpha=.5))+
   guides(alpha=FALSE,color=FALSE, shape=FALSE)+
   theme_bw()+xlim(-1,1)+
-  scale_colour_grey()+ylim(-10,0)+
+  scale_colour_grey() + ylim(-5,10)+
   theme(text=element_text(size=20))+
   xlab("Attribute index") + ylab("log(k)") 
 ggsave("plots/logk_attributeIndex.pdf",width=5.7, height=5)
@@ -159,16 +198,13 @@ ggplot(data_subject, aes(x=payneIndex, y=logK)) +
   geom_point(size=2.5, aes(alpha=.5))+
   guides(alpha=FALSE,color=FALSE, shape=FALSE)+
   theme_bw()+xlim(-1,1)+
-  scale_colour_grey()+ylim(-10,0)+
+  scale_colour_grey() + ylim(-5,10) +
   theme(text=element_text(size=20))+
   xlab("Payne index") +
   ylab("log(k)") 
 ggsave("plots/logk_payneIndex.pdf",width=5.7, height=5)
-cor.test(data_subject$payneIndex,data_subject$logK) 
-```
+cor.test(data_subject$payneIndex,data_subject$logK)
 
-Correlation between Option Index and discount rate k
-```{r}
 # correlationPlot <- function(data, xVar, yVar, xName, yName) {
 #     data$xVar <- data[, xVar]
 #     data$yVar <- data[, yVar]
@@ -183,10 +219,10 @@ Correlation between Option Index and discount rate k
 # }
 
 ggplot(data_subject, aes(x=optionIndex, y=logK)) +
-  geom_point(size=2.5, aes(alpha=.5))+
-  guides(alpha=FALSE,color=FALSE, shape=FALSE)+
-  theme_bw()+xlim(-1,1)+
-  scale_colour_grey()+ylim(-10,0)+
+  geom_point(size=2.5, aes(alpha=.5)) +
+  guides(alpha=FALSE,color=FALSE, shape=FALSE) +
+  theme_bw()+xlim(-1,1) +
+  scale_colour_grey() + ylim(-5,10) +
   theme(text=element_text(size=20))+
   xlab("Option index") +
   ylab("log(k)") 
@@ -234,89 +270,42 @@ grouped = data_trial_choice %>%
 ggplot(grouped, aes(x=tLL, y=svLL, color=run_id)) +
     geom_line() +
     ggtitle('Grouped svLL across tLL')
-    
+
+ggplot(
+    data_trial_choice %>% filter(run_id %in% subjects_highLogK), 
+    aes(x=tLL, y=svLL, color=run_id)) +
+    geom_line() +
+    ggtitle('svLL across tLL - Only those with high logK')
 ```
 
 ## Add subjective value difference (dSV) bins
 ### General bins
 ```{r}
 nBins = 8
-data_trial_choice$general_dSV_TB_bin = cut(
+data_trial_choice$g_dSV_TB_bin = cut(
     data_trial_choice$dSV_TB, 
     nBins, 
     include.lowest=TRUE,
     labels=c(1:nBins))
 
-data_trial_choice$general_dSV_LLSS_bin = cut(
+data_trial_choice$g_dSV_LLSS_bin = cut(
     data_trial_choice$dSV_LLSS, 
     nBins, 
     include.lowest=TRUE,
     labels=c(1:nBins))
 
-unique(data_trial_choice$general_dSV_TB_bin)
-unique(data_trial_choice$general_dSV_LLSS_bin)
+unique(data_trial_choice$g_dSV_TB_bin)
+unique(data_trial_choice$g_dSV_LLSS_bin)
 ```
-
-### Bins on subject-level
-#```{r}
-nBins = 5
-data_trial_choice$dSV_TB_bin = 0 
-subjects = unique(data_trial_choice$run_id)
-
-for (i in 1:length(subjects)) {
-    this_subject_dSV_TB = data_trial_choice %>% 
-            filter(run_id==subjects[i]) %>%
-            dplyr::pull(dSV_TB)
-    these_bins = cut(
-        this_subject_dSV_TB, 
-        nBins, 
-        include.lowest=TRUE,
-        labels=c(1:nBins))
-    
-    data_trial_choice = data_trial_choice %>%
-        mutate(dSV_TB_bin = replace(
-            dSV_TB_bin, 
-            run_id==subjects[i],
-            these_bins)        
-        )
-}
-
-unique(data_trial_choice$dSV_TB_bin)
-```
-
-#```{r}
-nBins = 7
-data_trial_choice$dSV_LLSS_bin = 0 
-subjects = unique(data_trial_choice$run_id)
-
-for (i in 1:length(subjects)) {
-    this_subject_dSV_LLSS = data_trial_choice %>% 
-            filter(run_id==subjects[i]) %>%
-            dplyr::pull(dSV_LLSS)
-    these_bins = cut(
-        this_subject_dSV_LLSS, 
-        nBins, 
-        include.lowest=TRUE,
-        labels=c(1:nBins))
-    
-    data_trial_choice = data_trial_choice %>%
-        mutate(dSV_LLSS_bin = replace(
-            dSV_TB_bin, 
-            run_id==subjects[i],
-            these_bins)        
-        )
-}
-unique(data_trial_choice$dSV_LLSS_bin)
-````
 
 ```{r}
 grouped = data_trial_choice %>%
-    dplyr::group_by(general_dSV_TB_bin) %>%
+    dplyr::group_by(g_dSV_TB_bin) %>%
     dplyr::summarise(dSV_TB = mean(dSV_TB))
 
 
 SV_bins = data_trial_choice %>%
-    dplyr::group_by(run_id, general_dSV_TB_bin) %>%
+    dplyr::group_by(run_id, g_dSV_TB_bin) %>%
     dplyr::summarise(
         choseTop=mean(choseTop), 
         rt=mean(trial_duration_exact)/1000, 
@@ -325,19 +314,22 @@ SV_bins = data_trial_choice %>%
 SV_bins = merge(
     SV_bins, 
     grouped, 
-    by='general_dSV_TB_bin'
+    by='g_dSV_TB_bin'
 )
 SV_bins
 ```
 
+
 ## Manipulation checks of prop left responses, RTs, fixations for SV L - SV R
 ```{r}
 #Percent choices by difference in SV 
-ggplot(data=SV_bins, aes(x=dSV_TB, y=choseTop)) + 
+ggplot(
+    data=SV_bins, 
+    aes(x=dSV_TB, y=choseTop)) + 
     theme_bw() +
     geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
     xlim(-5,5) +
-    geom_line(stat="summary", fun.y="mean", size=.5)+
+    geom_line(stat="summary", fun="mean", size=.5)+
     stat_summary(fun.data=mean_se, geom="errorbar", width=.8)+
     xlab("SV top - SV bottom")+ylab("Proportion top choices")+
     theme(text=element_text(size=20))+ylim(0,1)
@@ -366,6 +358,467 @@ ggplot(data=SV_bins, aes(x=dSV_TB, y=count)) +
     theme(text=element_text(size=20))+ylim(0,20)
 ggsave("plots/SV_Count.pdf",width=5.5, height=5)
 ```
+
+## Check with lower logKs 
+```{r}
+test = data_trial_choice %>%
+    filter(run_id %in% subjects_highLogK)
+
+grouped = test %>%
+    dplyr::group_by(g_dSV_TB_bin) %>%
+    dplyr::summarise(dSV_TB = mean(dSV_TB))
+
+
+SV_bins = test %>%
+    dplyr::group_by(run_id, g_dSV_TB_bin) %>%
+    dplyr::summarise(
+        choseTop=mean(choseTop), 
+        rt=mean(trial_duration_exact)/1000, 
+        count=mean(x_count)
+    )
+SV_bins = merge(
+    SV_bins, 
+    grouped, 
+    by='g_dSV_TB_bin'
+)
+SV_bins
+
+ggplot(
+    data=SV_bins, 
+    aes(x=dSV_TB, y=choseTop)) + 
+    theme_bw() +
+    geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
+    xlim(-5,5) +
+    geom_line(stat="summary", fun="mean", size=.5)+
+    stat_summary(fun.data=mean_se, geom="errorbar", width=.8)+
+    xlab("SV top - SV bottom")+ylab("Proportion top choices")+
+    theme(text=element_text(size=20))+ylim(0,1)
+ggsave("plots/SV_TB.pdf", width=5.5, height=5)
+
+#RT by difference in SV
+ 
+#Replication sample (T/B)
+ggplot(data=SV_bins, aes(x=dSV_TB, y=rt)) +
+    geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
+    xlim(-5,5) +
+    geom_line(stat="summary", fun.y="mean", size=.5) +
+    stat_summary(fun.data=mean_se, geom="errorbar", width=.8) +
+    xlab("SV top - SV bottom") + 
+    ylab("Response Time (s)") +
+    theme(text=element_text(size=20))+ylim(0,6.5)
+ggsave("plots/SV_RT.pdf",width=5.5, height=5)
+
+ggplot(data=SV_bins, aes(x=dSV_TB, y=count)) +
+    geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
+    xlim(-5,5) +
+    geom_line(stat="summary", fun.y="mean", size=.5) +
+    stat_summary(fun.data=mean_se, geom="errorbar", width=.8) +
+    xlab("SV top - SV bottom") + 
+    ylab("Number of Fixations") +
+    theme(text=element_text(size=20))+ylim(0,20)
+ggsave("plots/SV_Count.pdf",width=5.5, height=5)
+
+```
+
+## Check with higher fps
+```{r}
+subjects_highFPS = data_subject %>%
+    filter(fps>median(data_subject$fps)) %>%
+    dplyr::pull(run_id)
+
+test = data_trial_choice %>%
+    filter(run_id %in% subjects_highFPS)
+
+grouped = test %>%
+    dplyr::group_by(g_dSV_TB_bin) %>%
+    dplyr::summarise(dSV_TB = mean(dSV_TB))
+
+
+SV_bins = test %>%
+    dplyr::group_by(run_id, g_dSV_TB_bin) %>%
+    dplyr::summarise(
+        choseTop=mean(choseTop), 
+        rt=mean(trial_duration_exact)/1000, 
+        count=mean(x_count)
+    )
+SV_bins = merge(
+    SV_bins, 
+    grouped, 
+    by='g_dSV_TB_bin'
+)
+SV_bins %>%
+    arrange(g_dSV_TB_bin)
+
+ggplot(
+    data=SV_bins, 
+    aes(x=dSV_TB, y=choseTop)) + 
+    theme_bw() +
+    geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
+    xlim(-5,5) +
+    geom_line(stat="summary", fun="mean", size=.5)+
+    stat_summary(fun.data=mean_se, geom="errorbar", width=.8)+
+    xlab("SV top - SV bottom")+ylab("Proportion top choices")+
+    theme(text=element_text(size=20))+ylim(0,1)
+ggsave("plots/SV_TB.pdf", width=5.5, height=5)
+
+#RT by difference in SV
+ 
+#Replication sample (T/B)
+ggplot(data=SV_bins, aes(x=dSV_TB, y=rt)) +
+    geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
+    xlim(-5,5) +
+    geom_line(stat="summary", fun.y="mean", size=.5) +
+    stat_summary(fun.data=mean_se, geom="errorbar", width=.8) +
+    xlab("SV top - SV bottom") + 
+    ylab("Response Time (s)") +
+    theme(text=element_text(size=20))+ylim(0,6.5)
+ggsave("plots/SV_RT.pdf",width=5.5, height=5)
+
+ggplot(data=SV_bins, aes(x=dSV_TB, y=count)) +
+    geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
+    xlim(-5,5) +
+    geom_line(stat="summary", fun.y="mean", size=.5) +
+    stat_summary(fun.data=mean_se, geom="errorbar", width=.8) +
+    xlab("SV top - SV bottom") + 
+    ylab("Number of Fixations") +
+    theme(text=element_text(size=20))+ylim(0,20)
+ggsave("plots/SV_Count.pdf",width=5.5, height=5)
+
+```
+
+### Are subjects with positive logKs any different from the others
+Barely any difference
+```{r}
+data_trial_choice$pos_logK = 0
+data_trial_choice$pos_logK = as.numeric((data_trial_choice$logK>=0))
+
+data_trial_choice %>%
+    group_by(pos_logK) %>%
+    summarise(
+        cF = sum(chinFirst),
+        Task_index = mean(withinTaskIndex),
+        rt = mean(trial_duration_exact),
+        fps = mean(fps),
+        amountLeft = mean(amountLeft),
+        LL_top = mean(LL_top),
+        aSS = mean(aSS),
+        aLL = mean(aLL),
+        tSS = mean(tSS), 
+        tLL = mean(tLL),
+        k = mean(k),
+        choseTop = mean(choseTop), 
+        choseLL = mean(choseLL), 
+        svLL = mean(svLL), 
+        svSS = mean(svSS)
+    )
+```
+
+### Why do some subjects get a positive logK?
+
+#### ChoseLL vs. tLL on different levels of aSS
+```{r}
+subjects_posLogK = data_subject %>%
+    filter(logK>0) %>%
+    dplyr::pull(run_id)
+print(paste('Subjects with positive LogK: ', 
+            length(subjects_posLogK)
+            )
+)
+subjects_negLogK = data_subject %>%
+    filter(logK<=0) %>%
+    dplyr::pull(run_id)
+print(paste('Subjects with negative LogK: ', 
+            length(subjects_negLogK)
+            )
+)
+
+nBins = 3
+levels(cut(data_trial_choice$aSS, nBins, include.lowest=TRUE))
+
+grouped = data_trial_choice %>%
+    mutate(aSS_bin = cut(aSS, nBins, include.lowest=TRUE, 
+                         labels=c('aSS<$2', '$2<aSS<$3.5', '$3.5<aSS<$4.5'))) %>%
+    filter(logK<0) %>%
+    group_by(tLL, aSS_bin) %>%
+    summarise(
+        choseLL = mean(choseLL),
+        n = n()
+        )
+
+ggplot(grouped, aes(x=tLL, y=choseLL)) + 
+    geom_point(aes(size=n, color=aSS_bin)) + 
+    ggtitle("Subjects with negative logK (n=34)")
+
+grouped = data_trial_choice %>%
+    mutate(aSS_bin = cut(aSS, nBins, include.lowest=TRUE, 
+                         labels=c('aSS<$2', '$2<aSS<$3.5', '$3.5<aSS<$4.5'))) %>%
+    filter(logK>0) %>%
+    group_by(tLL, aSS_bin) %>%
+    summarise(
+        choseLL = mean(choseLL),
+        n = n()
+        )
+
+ggplot(grouped, aes(x=tLL, y=choseLL)) + 
+    geom_point(aes(size=n, color=aSS_bin)) + 
+    ggtitle("Subjects with positive logK (n=10)")
+```
+
+#### aSS aLL ratio
+```{r}
+subjects_posLogK = data_subject %>%
+    filter(logK>0) %>%
+    dplyr::pull(run_id)
+print(paste('Subjects with positive LogK: ', 
+            length(subjects_posLogK)
+            )
+)
+subjects_negLogK = data_subject %>%
+    filter(logK<=0) %>%
+    dplyr::pull(run_id)
+print(paste('Subjects with negative LogK: ', 
+            length(subjects_negLogK)
+            )
+)
+
+nBins = 3
+levels(cut(data_trial_choice %>% 
+           mutate(aSS_aLL_ratio = aSS/aLL) %>%
+           dplyr::pull(aSS_aLL_ratio),
+           nBins, include.lowest=TRUE))
+
+grouped = data_trial_choice %>%
+    mutate(aSS_aLL_ratio = aSS/aLL) %>%
+    mutate(ass_aLL_ratio_bin = cut(aSS_aLL_ratio, nBins, include.lowest=TRUE, 
+                     labels=c('ratio<0.37', '0.37<ratio<0.63', '0.63<ratio<0.90'))) %>%
+    filter(logK<0) %>%
+    group_by(tLL, ass_aLL_ratio_bin) %>%
+    summarise(
+        choseLL = mean(choseLL),
+        n = n()
+        )
+ggplot(grouped, aes(x=tLL, y=choseLL)) + 
+    geom_point(aes(size=n, color=ass_aLL_ratio_bin)) + 
+    ggtitle("Subjects with negative logK (n=34)")
+
+
+grouped = data_trial_choice %>%
+    mutate(aSS_aLL_ratio = aSS/aLL) %>%
+    mutate(ass_aLL_ratio_bin = cut(aSS_aLL_ratio, nBins, include.lowest=TRUE, 
+                     labels=c('ratio<0.37', '0.37<ratio<0.63', '0.63<ratio<0.90'))) %>%
+    filter(logK>0) %>%
+    group_by(tLL, ass_aLL_ratio_bin) %>%
+    summarise(
+        choseLL = mean(choseLL),
+        n = n()
+        )
+
+ggplot(grouped, aes(x=tLL, y=choseLL)) + 
+    geom_point(aes(size=n, color=ass_aLL_ratio_bin)) + 
+    ggtitle("Subjects with positive logK (n=10)")
+```
+
+
+## We don't see anything when plotting proportion of choseLL across k
+```{r}
+test = data_trial_choice %>%
+    filter((run_id %in% subjects_highLogK)) %>%
+    mutate(k_bin = cut(
+        k, 8, include.lowest=TRUE, labels=c(1:8)))
+
+grouped_choseLL = test %>% 
+    group_by(run_id, k_bin) %>%
+    summarise(choseLL = mean(choseLL))
+
+grouped_Kmeans = test %>%
+    group_by(k_bin) %>%
+    summarise(k_mean = mean(k))
+
+k_bins = merge(grouped_choseLL, grouped_Kmeans, by='k_bin')
+k_bins
+
+ggplot(
+    data=k_bins, 
+    aes(x=k_mean, y=choseLL)) + 
+    theme_bw() +
+    geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
+    xlim(min(k_bins$k_mean), max(k_bins$k_mean)) +
+    geom_line(stat="summary", fun="mean", size=.5)+
+    stat_summary(fun.data=mean_se, geom="errorbar", width=.8)+
+    xlab("k")+ylab("Proportion top choices")+
+    theme(text=element_text(size=20))+ylim(0,1)
+
+test = data_trial_choice %>%
+    filter(!(run_id %in% subjects_highLogK)) %>%
+    mutate(k_bin = cut(
+        k, 8, include.lowest=TRUE, labels=c(1:8)))
+
+grouped_choseLL = test %>% 
+    group_by(run_id, k_bin) %>%
+    summarise(choseLL = mean(choseLL))
+
+grouped_Kmeans = test %>%
+    group_by(k_bin) %>%
+    summarise(k_mean = mean(k))
+
+k_bins = merge(grouped_choseLL, grouped_Kmeans, by='k_bin')
+k_bins
+
+ggplot(
+    data=k_bins, 
+    aes(x=k_mean, y=choseLL)) + 
+    theme_bw() +
+    geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
+    xlim(min(k_bins$k_mean), max(k_bins$k_mean)) +
+    geom_line(stat="summary", fun="mean", size=.5)+
+    stat_summary(fun.data=mean_se, geom="errorbar", width=.8)+
+    xlab("k")+ylab("Proportion top choices")+
+    theme(text=element_text(size=20))+ylim(0,1)
+```
+
+### Buttons correspond to top choices 
+```{r}
+data_trial_choice %>%
+    filter(run_id %in% subjects_highLogK) %>%
+    dplyr::select(
+        'run_id', 
+        'withinTaskIndex',
+        'option_topLeft',
+        'option_topRight', 
+        'option_bottomLeft', 
+        'option_bottomRight',
+        'key_press',
+        'choseTop') %>%
+    arrange(run_id, withinTaskIndex)
+```
+
+### LL option is correctly identified 
+```{r}
+data_trial_choice %>%
+    filter(run_id %in% subjects_highLogK) %>%
+    dplyr::select(
+        'run_id', 
+        'withinTaskIndex',
+        'option_topLeft',
+        'option_topRight', 
+        'option_bottomLeft', 
+        'option_bottomRight',
+        'LL_top') %>%
+    arrange(run_id, LL_top)
+
+data_trial_choice %>%
+    filter(run_id %in% subjects_highLogK) %>%
+    dplyr::select(
+        'LL_top',
+        'choseTop',
+        'choseLL') %>%
+    arrange(choseTop, choseLL)
+```
+
+### Subjects with logK>0 are unimpressed by the time delay of an option. They chose
+
+If the immediate option is large, then 
+```{r}
+data_trial_choice %>%
+    filter(run_id %in% subjects_highLogK) %>%
+    dplyr::select(
+        'run_id', 
+        'withinTaskIndex',
+        'option_topLeft',
+        'option_topRight', 
+        'option_bottomLeft', 
+        'option_bottomRight',
+        'k',
+        'choseLL') %>%
+    mutate(across(c('k'), round, 3)) %>%
+    arrange(k, choseLL, withinTaskIndex)
+
+df1 = data_trial_choice %>% filter(run_id %in% subjects_highLogK)
+df2 = data_trial_choice %>% filter(!(run_id %in% subjects_highLogK))
+df1$highLogK=1
+df2$highLogK=0
+data_plot = rbind(df1, df2)
+
+data_plot$choseLL = factor(data_plot$choseLL)
+
+data_plot$highLogK = factor(data_plot$highLogK)
+data_plot$highLogK = mapvalues(data_plot$highLogK, 
+          from = c(0, 1), 
+          to = c("LogK<0", "LogK>0"))
+
+ggplot(
+  data_plot %>% filter(aSS>3), 
+  aes(x=choseLL, y=tLL, fill=highLogK)) +
+  geom_split_violin(alpha=.6, size=0, position=position_dodge(0)) +
+  stat_summary(
+      fun.data="mean_se",
+      geom="linerange",
+      aes(color=highLogK),
+      alpha=1,
+      size=1.5) +
+  stat_summary(
+      fun=mean, 
+      geom="line",
+      aes(group=highLogK, color=highLogK), 
+      size=1.5) +
+#  coord_cartesian(ylim=c(0,7.5)) +
+  theme_bw() + 
+  theme(text=element_text(size=20)) +
+  ggtitle("aSS>3") +
+#   scale_x_discrete(labels=c("SS>LL", "LL>SS")) +
+  xlab("choseLL") + ylab("tLL") + 
+  labs(fill="",color="")+
+  guides(size="none") + 
+  scale_colour_grey() + scale_fill_grey()
+
+ggplot(
+  data_plot %>% filter(aSS<2), 
+  aes(x=choseLL, y=tLL, fill=highLogK)) +
+  geom_split_violin(alpha=.6, size=0, position=position_dodge(0)) +
+  stat_summary(
+      fun.data="mean_se",
+      geom="linerange",
+      aes(color=highLogK),
+      alpha=1,
+      size=1.5) +
+  stat_summary(
+      fun=mean, 
+      geom="line",
+      aes(group=highLogK, color=highLogK), 
+      size=1.5) +
+#  coord_cartesian(ylim=c(0,7.5)) +
+  theme_bw() + 
+  theme(text=element_text(size=20)) +
+  ggtitle("aSS<2") +
+#   scale_x_discrete(labels=c("SS>LL", "LL>SS")) +
+  xlab("choseLL") + ylab("tLL") + 
+  labs(fill="",color="")+
+  guides(size="none") + 
+  scale_colour_grey() + scale_fill_grey()
+```
+```
+
+
+
+```{r}
+data_trial_choice$aT = 
+    data_trial_choice$LL_top * data_trial_choice$aLL + 
+    (1-data_trial_choice$LL_top) * data_trial_choice$aSS
+
+data_trial_choice$aB = 
+    data_trial_choice$LL_top * data_trial_choice$aSS + 
+    (1-data_trial_choice$LL_top) * data_trial_choice$aLL
+
+# data_trial_choice %>%
+#     filter(run_id %in% c(32)) %>%  #subjects_highLogK) %>%
+#     dplyr::select(g_dSV_TB_bin, run_id, logK, 
+#                   aT, svT, aB, svB, dSV_TB, choseTop) %>% 
+#     mutate(across(c('svT', 'svB', 'dSV_TB'), round, 2)) %>%
+#     arrange(g_dSV_TB_bin)
+ 
+```
+
+
 
 
 # Eye Tracking Bins
@@ -438,32 +891,6 @@ ET_bins_choseTB_wide
 
 ## Plot look top AOI across time bins 
 ```{r}
-# https://stackoverflow.com/a/45614547
-GeomSplitViolin <- ggproto("GeomSplitViolin", GeomViolin, draw_group = function(self, data, ..., draw_quantiles = NULL){
-  data <- transform(data, xminv = x - violinwidth * (x - xmin), xmaxv = x + violinwidth * (xmax - x))
-  grp <- data[1,'group']
-  newdata <- plyr::arrange(transform(data, x = if(grp%%2==1) xminv else xmaxv), if(grp%%2==1) y else -y)
-  newdata <- rbind(newdata[1, ], newdata, newdata[nrow(newdata), ], newdata[1, ])
-  newdata[c(1,nrow(newdata)-1,nrow(newdata)), 'x'] <- round(newdata[1, 'x']) 
-  if (length(draw_quantiles) > 0 & !scales::zero_range(range(data$y))) {
-    stopifnot(all(draw_quantiles >= 0), all(draw_quantiles <= 
-                                              1))
-    quantiles <- ggplot2:::create_quantile_segment_frame(data, draw_quantiles)
-    aesthetics <- data[rep(1, nrow(quantiles)), setdiff(names(data), c("x", "y")), drop = FALSE]
-    aesthetics$alpha <- rep(1, nrow(quantiles))
-    both <- cbind(quantiles, aesthetics)
-    quantile_grob <- GeomPath$draw_panel(both, ...)
-    ggplot2:::ggname("geom_split_violin", grid::grobTree(GeomPolygon$draw_panel(newdata, ...), quantile_grob))
-  }
-  else {
-    ggplot2:::ggname("geom_split_violin", GeomPolygon$draw_panel(newdata, ...))
-  }
-})
-
-geom_split_violin <- function (mapping = NULL, data = NULL, stat = "ydensity", position = "identity", ..., draw_quantiles = NULL, trim = TRUE, scale = "area", na.rm = FALSE, show.legend = NA, inherit.aes = TRUE) {
-  layer(data = data, mapping = mapping, stat = stat, geom = GeomSplitViolin, position = position, show.legend = show.legend, inherit.aes = inherit.aes, params = list(trim = trim, scale = scale, draw_quantiles = draw_quantiles, na.rm = na.rm, ...))
-}
-
 ET_bins_choseTB_long$choseTop = as.factor(ET_bins_choseTB_long$choseTop)
 ET_bins_choseTB_long$bin = as.factor(ET_bins_choseTB_long$bin)
 
