@@ -22,38 +22,26 @@ function fit_discount_k()
 % col 7: 'rt'
 % col 8: 'LL_top',
 % col 9: 'choseTop'
+cd('C:\Users\User\GitHub\WebET_Analysis\fitK')
 
-pwd = 'C:\Users\User\GitHub\WebET_Analysis\amasino_dataPrep';
-dataPath=pwd; %adapt to your location
-cd(dataPath)
+data = readtable('fit_k_input.csv');
+data = data(data.run_id==11, :);
 
-load('data_source/schneegansETAl_behavior.csv')
-data=schneegansETAl_behavior;
-
-data = data(data(1, :)==32, :)
-data
 kvals=[];
 noise=[];
-subj = unique(data(:, 1));
-for i = 1:length(subj)  %loop over all subjects
-    %Only fit a given subject, and exclude non-responses and the immediate $10 option
-    %(sanity check to make sure they prefer $10 today to $10 tomorrow)
-    ind=data(:,1)==subj(i) & ~isnan(data(:,6)) & data(:,2)~=10; 
-    [info,p]=fit_discount_model(data(ind,6),data(ind,2),data(ind,4),data(ind,3),data(ind,5)); 
-    if info.b(2)<.0001 && mean(data(ind,6))>.95 %Extremely patient
-        kvals=[kvals; subj(i), -9.5];
-    elseif info.b(2)<0 %Inconsistent choice, can't properly fit
-        kvals=[kvals; subj(i), NaN];
-    else %Fit within typical range, keep fit
-        kvals=[kvals; subj(i), log(info.b(2))]; %Save log(k) as output
-    end
-    noise=[noise; subj(i), info.b(1)]; %Save noise as output
-end
 
-cd(strcat(dataPath, '\intermediateCSVs'))
-csvwrite('allLogk.csv',kvals) % write log k-vals to csv
-%  csvwrite('allnoisek_rep.csv',noise) % write temperature parameter to csv
-cd(dataPath)
+ind=data(:,1)==subj(i) & ~isnan(data(:,6)) & data(:,2)~=10; 
+[info,p]=fit_discount_model(data(ind,6),data(ind,2),data(ind,4),data(ind,3),data(ind,5)); 
+if info.b(2)<.0001 && mean(data(ind,6))>.95 %Extremely patient
+    kvals=[kvals; subj(i), -9.5];
+elseif info.b(2)<0 %Inconsistent choice, can't properly fit
+    kvals=[kvals; subj(i), NaN];
+else %Fit within typical range, keep fit
+    kvals=[kvals; subj(i), log(info.b(2))]; %Save log(k) as output
+end
+noise=[noise; subj(i), info.b(1)]; %Save noise as output
+
+csvwrite('logk.csv',kvals)
 
 end
 
