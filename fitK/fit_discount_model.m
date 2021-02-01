@@ -1,60 +1,3 @@
-function fit_discount_k()
-%Fits hyperbolic discount rate
-
-%REVISION HISTORY:
-%     brian  03.10.06 written
-%     brian  03.14.06 added fallback to FMINSEARCH, multiple fit capability
-%     kenway 11.29.06 added CI evaluation for FMINSEARCH (which returns
-%     Hessian)
-%     joe kable 03.12.09 modified to work with revised version of
-%     choice_prob and discount
-%     khoi 06.26.09 simplified
-%     schneegans 08.01.2021 modified for applying the replication code
-
-%Input: 
-% behavioral data
-% col 1: 'run_id'
-% col 2: 'aSS'
-% col 3: 'aLL'
-% col 4: 'tSS'
-% col 5: 'tLL'
-% col 6: 'choseLL'
-% col 7: 'rt'
-% col 8: 'LL_top',
-% col 9: 'choseTop'
-
-pwd = 'C:\Users\User\GitHub\WebET_Analysis\amasino_dataPrep';
-dataPath=pwd; %adapt to your location
-cd(dataPath)
-
-load('data_source/schneegansEtAl_behavior.csv')
-data=schneegansEtAl_behavior;
-
-kvals=[];
-noise=[];
-subj = unique(data(:, 1));
-for i = 1:length(subj)  %loop over all subjects
-    %Only fit a given subject, and exclude non-responses and the immediate $10 option
-    %(sanity check to make sure they prefer $10 today to $10 tomorrow)
-    ind=data(:,1)==subj(i) & ~isnan(data(:,6)) & data(:,2)~=10; 
-    [info,p]=fit_discount_model(data(ind,6),data(ind,2),data(ind,4),data(ind,3),data(ind,5)); 
-    if info.b(2)<.0001 && mean(data(ind,6))>.95 %Extremely patient
-        kvals=[kvals; subj(i), -9.5];
-    elseif info.b(2)<0 %Inconsistent choice, can't properly fit
-        kvals=[kvals; subj(i), NaN];
-    else %Fit within typical range, keep fit
-        kvals=[kvals; subj(i), log(info.b(2))]; %Save log(k) as output
-    end
-    noise=[noise; subj(i), info.b(1)]; %Save noise as output
-end
-
-cd(strcat(dataPath, '\intermediateCSVs'))
-csvwrite('allLogk.csv',kvals) % write log k-vals to csv
-%  csvwrite('allnoisek_rep.csv',noise) % write temperature parameter to csv
-cd(dataPath)
-
-end
-
 %----- FIT DISCOUNTING MODEL - LOGISTIC FIT OF HYPERBOLIC DISCOUNTING
 %     [info,p] = fit_discount_model(choice,v1,d1,v2,d2)
 %
@@ -77,12 +20,12 @@ end
 %                     .nb        - number of parameters
 %                     .optimizer - function minimizer used
 %                     .exitflag  - see FMINSEARCH
-%                     .a         - fitted parameters; note that for all the
-%                                  available models, the first element of A
+%                     .b         - fitted parameters; note that for all the
+%                                  available models, the first element of B
 %                                  is a noise term for the choice
 %                                  function, the remaining elements are
 %                                  parameters for the selected discount
-%                                  functions. eg., for dfn='exp', A(2) is
+%                                  functions. eg., for dfn='exp', B(2) is
 %                                  the time constant of the exponential decay.
 %                     .LL        - log-likelihood evaluated at maximum
 %                     .LL0       - restricted (minimal model) log-likelihood
@@ -99,7 +42,9 @@ function [info,p] = fit_discount_model(choice,v1,d1,v2,d2)
 
     nobs = length(choice);
     alpha = 0.05;
-    b0 = [.09 .008]; %noise, kval starting points--can test different values if needed 
+    b0 = [.09 .008]; 
+    %noise, kval starting points--can test different values if needed 
+    
     % Fit model, attempting to use FMINUNC first, then falling back to FMINSEARCH
     if exist('fminunc','file')
        try
@@ -163,63 +108,4 @@ function [info,p] = fit_discount_model(choice,v1,d1,v2,d2)
     info.AIC = -2*LL + 2*length(b);
     info.BIC = -2*LL + length(b)*log(nobs);
     info.r2 = 1 - LL/LL0;
-end
-
-%----- LOG-LIKELIHOOD FUNCTION
-function sumerr = local_negLL(beta,choice,v1,d1,v2,d2)
-    p = choice_prob(v1,d1,v2,d2,beta);
-
-    % Trap log(0)
-    ind = p == 1;
-    p(ind) = 0.9999;
-    ind = p == 0;
-    p(ind) = 0.0001;
-    % Log-likelihood
-    err = (choice==1).*log(p) + (1 - (choice==1)).*log(1-p);
-    % Sum of -log-likelihood
-    sumerr = -sum(err);
-end
-
-%----- CHOICE PROBABILITY FUNCTION - LOGIT
-%     p = choice_prob(v1,d1,v2,d2,beta);
-%
-%     INPUTS
-%     v1    - values of option 1 (ie, sooner option)
-%     d1    - delays of option 1
-%     v2    - values of option 2 (ie, later option)
-%     d2    - delays of option 2
-%     beta  - parameters, noise term (1) and discount rate (2)
-%
-%     OUTPUTS
-%     p     - choice probabilities for the **OPTION 2**
-%
-%     REVISION HISTORY:
-%     brian lau 03.14.06 written
-%     khoi 06.26.09 simplified 
-
-function [p,u1,u2] = choice_prob(v1,d1,v2,d2,beta)
-    u1 = discount(v1,d1,beta(2:end));
-    u2 = discount(v2,d2,beta(2:end));
-
-    % logit, smaller beta = larger error
-    p = 1 ./ (1 + exp(beta(1).*(u1-u2)));
-end
-
-%----- DISCOUNT FUNCTION - HYPERBOLIC
-%     y = discount(v,d,beta)
-%
-%     INPUTS
-%     v     - values
-%     d     - delays
-%     beta  - discount rate
-%
-%     OUTPUTS
-%     y     - discounted values
-%
-%     REVISION HISTORY:
-%     brian lau 03.14.06 written
-%     khoi 06.26.09 simplified 
-
-function y = discount(v,d,beta)
-    y = v./(1+beta(1).*d);
 end

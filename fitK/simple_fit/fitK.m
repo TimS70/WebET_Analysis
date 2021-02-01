@@ -8,16 +8,17 @@
 % that minimizes errors for subjects that have preferences according to a
 % logit destribution with unit variance
 
-function [k, logLik] = fitK(data)
+function [k, negative_LogLikelihood] = fitK(data)
 
     function sumloglik = GenerateLogLik(cur_k)
-        choiceProbabilities = GetPChoice(cur_k, ...
+        choiceProbabilities = pChoice(cur_k, ...
            data.aSS, data.aLL, data.tLL, data.choseLL);
 
+        % Low values are good
         sumloglik = (-1)*(sum(log(choiceProbabilities)));
     end
 
-    [k, logLik] = fminbnd(@GenerateLogLik,0,1);
+    [k, negative_LogLikelihood] = fminbnd(@GenerateLogLik,0,1);
 end
 
 

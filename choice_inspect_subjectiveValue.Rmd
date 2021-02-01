@@ -1,0 +1,534 @@
+---
+title: 'Supplement: Amount and time exert independent influences on intertermporal
+  choice'
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+setwd("C:/Users/User/GitHub/WebET_Analysis")
+getPackages <- function(pkg){
+  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+  if (length(new.pkg)) 
+    install.packages(new.pkg, dependencies = TRUE)
+  sapply(pkg, require, character.only = TRUE)
+}
+
+getPackages(c('plyr',
+              'dplyr', 
+              
+              "effsize",
+              'e1071',
+              "ggplot2",
+              "ggsignif",
+              'matlabr',
+              'QuantPsyc',
+              "RColorBrewer",
+              'reshape2',
+              'tidyr')
+            )
+```
+```{r}
+# https://stackoverflow.com/a/45614547
+GeomSplitViolin <- ggproto("GeomSplitViolin", GeomViolin, draw_group = function(self, data, ..., draw_quantiles = NULL){
+  data <- transform(data, xminv = x - violinwidth * (x - xmin), xmaxv = x + violinwidth * (xmax - x))
+  grp <- data[1,'group']
+  newdata <- plyr::arrange(transform(data, x = if(grp%%2==1) xminv else xmaxv), if(grp%%2==1) y else -y)
+  newdata <- rbind(newdata[1, ], newdata, newdata[nrow(newdata), ], newdata[1, ])
+  newdata[c(1,nrow(newdata)-1,nrow(newdata)), 'x'] <- round(newdata[1, 'x']) 
+  if (length(draw_quantiles) > 0 & !scales::zero_range(range(data$y))) {
+    stopifnot(all(draw_quantiles >= 0), all(draw_quantiles <= 
+                                              1))
+    quantiles <- ggplot2:::create_quantile_segment_frame(data, draw_quantiles)
+    aesthetics <- data[rep(1, nrow(quantiles)), setdiff(names(data), c("x", "y")), drop = FALSE]
+    aesthetics$alpha <- rep(1, nrow(quantiles))
+    both <- cbind(quantiles, aesthetics)
+    quantile_grob <- GeomPath$draw_panel(both, ...)
+    ggplot2:::ggname("geom_split_violin", grid::grobTree(GeomPolygon$draw_panel(newdata, ...), quantile_grob))
+  }
+  else {
+    ggplot2:::ggname("geom_split_violin", GeomPolygon$draw_panel(newdata, ...))
+  }
+})
+
+geom_split_violin <- function (mapping = NULL, data = NULL, stat = "ydensity", position = "identity", ..., draw_quantiles = NULL, trim = TRUE, scale = "area", na.rm = FALSE, show.legend = NA, inherit.aes = TRUE) {
+  layer(data = data, mapping = mapping, stat = stat, geom = GeomSplitViolin, position = position, show.legend = show.legend, inherit.aes = inherit.aes, params = list(trim = trim, scale = scale, draw_quantiles = draw_quantiles, na.rm = na.rm, ...))
+}
+```
+
+# Read and create datasets
+## Exclude subjects
+```{r}
+# Data on subject level
+excludeSubjects <- read.table('data_jupyter/excludeSubjects_choice.csv', 
+                           header=TRUE, sep=',')[, 1]
+excludeSubjects
+```
+
+
+# Import data
+```{r}
+# Data on subject level
+data_subject <- read.table('data_jupyter/data_subject.csv', 
+                           header=TRUE, sep=',')
+names(data_subject)
+
+data_trial <- read.table('data_jupyter/data_trial_choice.csv',
+                                header=TRUE, sep=',')
+names(data_trial)
+data_trial
+```
+
+# Import k-values
+#```{r}
+run_matlab_script('fitK/k_values.m')
+
+merge_mean_by_subject = function(data, data_source, varName) {
+    grouped = data_source %>%
+        dplyr::group_by(run_id) %>%
+        dplyr::summarise(varName = mean(varName))
+      
+    if (varName %in% names(data)) {
+        data = data %>% dplyr::select(!varName)
+    }
+
+    data = merge(
+        data, 
+        data_source %>% dplyr::select(run_id, varName), 
+        by='run_id')
+    return(data)
+}
+
+logK <- read.table('fitK/logK_schneegansEtAl2021.csv', header=TRUE, sep=',')
+data_subject = merge_mean_by_subject(data_subject, logK, 'logK')
+data_subject = merge_mean_by_subject(data_subject, logK, 'neg_logLik')
+#```
+
+
+```{r}
+run_matlab_script('fitK/fit_discount_k.m')
+logK <- read.table('fitK/logK_amasino2019.csv', header=TRUE, sep=',')
+names(logK) = c('run_id', 'logK')
+data_subject = merge_mean_by_subject(data_subject, logK, 'logK')
+
+noise = read.table('fitK/noiseK_amasino2019.csv', header=TRUE, sep=',')
+names(noise) = c('run_id', 'noise')
+data_subject = merge_mean_by_subject(data_subject, noise, 'noise')
+data_subject %>%
+    dplyr::select(run_id, logK, noise)
+
+```
+
+````{r}
+
+```
+
+# Screening
+## Distribution of k-values
+````{r}
+ggplot(data_subject, aes(x=logK))+
+    geom_histogram(binwidth=.5, alpha=.5, position="identity")+
+    scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
+    theme_bw()+theme(text=element_text(size=40))
+    ggsave("plots/logk_hist.pdf", width=5.5, height=5)
+    
+    
+ggplot(data_subject, aes(x=neg_logLik))+
+    geom_histogram(binwidth=5, alpha=.5, position="identity")+
+    scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
+    theme_bw()+theme(text=element_text(size=40))
+    ggsave("plots/logk_hist.pdf", width=5.5, height=5)
+    
+ggplot(data_subject, aes(x=logK, y=neg_logLik)) +
+    geom_point(size=2.5, aes(alpha=.5))+
+    guides(alpha=FALSE,color=FALSE, shape=FALSE)+
+    theme_bw() + 
+    scale_colour_grey() + 
+    theme(text=element_text(size=20)) +
+    xlab("logK") + ylab("neg_logLikelihood") +
+    ggtitle('The smaller the neg_logLikelihood, the better') 
+````
+
+````{r}
+subjects_biasedChoices = data_subject %>%
+    filter(
+        choseLL>0.99 | choseLL<0.01 |
+        choseTop>0.99 | choseTop<0.01     
+          ) %>%
+    arrange(run_id) %>%
+    dplyr::pull(run_id)
+subjects_biasedChoices
+```
+
+```{r}
+subjects_missingLogK = data_subject %>%
+    filter(is.na(logK)) %>%
+    arrange(run_id) %>%
+    dplyr::pull(run_id)
+subjects_missingLogK
+```
+
+# Cleaning
+```{r}
+excludeSubjects <- read.table('data_jupyter/excludeSubjects_choice.csv', 
+                           header=TRUE, sep=',')[, 1]
+excludeSubjects = c(
+    excludeSubjects,
+    subjects_biasedChoices,
+    subjects_missingLogK
+)
+excludeSubjects
+```
+
+```{r}
+generalCleaninng = function(data) {
+    data = data %>%
+        filter(
+            run_id < 1000 & 
+            !(run_id %in% excludeSubjects)
+                )
+}
+
+data_subject = generalCleaninng(data_subject)
+data_trial = generalCleaninng(data_trial)
+data_et = generalCleaninng(data_et)
+
+print(paste('Number of subjects: ', length(unique(data_trial$run_id))))
+```
+
+# Subjective value 
+## Subjective value for top and bottom options
+```{r}
+subjectiveValues = function(data) {
+    data$svLL = data$aLL / (1 + exp(data$logK) * data$tLL)
+    data$svSS = data$aSS / (1 + exp(data$logK) * data$tSS)
+    data$dSV_LLSS = data$svLL - data$svSS
+    
+    data$svT = data$aT / (1+ exp(data$logK) * data$tT)
+    data$svB = data$aB / (1+ exp(data$logK) * data$tB)
+    data$dSV_TB = data$svT - data$svB
+    
+    return(data)
+}
+
+data_trial = merge_mean_by_subject(data_trial, data_subject, 'logK')
+data_trial = merge_mean_by_subject(data_trial, logK, 'neg_logLik')
+data_trial = subjectiveValues(data_trial)
+
+
+data_trial %>%
+    dplyr::select(run_id, aT, tT, svT, aB, tB, svB, dSV_TB, choseTop) %>%
+    mutate(across(c('svT', 'svB', 'dSV_TB'), round, 2)) %>%
+    arrange(dSV_TB)
+```
+
+## choseTop by dSV bins
+```{r}
+data_trial$dSV_bin = 
+    cut(data_trial$dSV_TB,
+    breaks = seq(-5, 5, 1),
+    labels = seq(-4.5, 4.5, 1),
+    include.lowest=TRUE) %>%
+    paste() %>%
+    as.numeric()
+
+SV_bins = data_trial %>%
+    dplyr::group_by(run_id, dSV_bin) %>%
+    dplyr::summarise(
+        logK = mean(logK),
+        neg_logLik = mean(neg_logLik),
+        choseTop=mean(choseTop), 
+        rt=mean(trial_duration_exact)/1000, 
+        count=mean(x_count)) %>%
+    arrange(dSV_bin)
+SV_bins
+
+print(
+    paste(
+        'Remaining subjects: ', 
+        SV_bins %>% 
+            dplyr::pull(run_id) %>%
+            unique() %>%
+            length()
+    )
+)
+
+ggplot(
+    data=SV_bins, 
+    aes(x=dSV_bin, y=choseTop)) + 
+    theme_bw() +
+    geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
+    xlim(-5,5) +
+    geom_line(stat="summary", fun="mean", size=.5)+
+    stat_summary(fun.data=mean_se, geom="errorbar", width=.8)+
+    xlab("SV top - SV bottom")+ylab("Proportion top choices")+
+    theme(text=element_text(size=20))+ylim(0,1)
+ggsave("plots/sv_bins_schneegansK.pdf", width=5.5, height=5)
+```
+
+## Check specific subjects
+```{r}
+subjects = SV_bins %>%
+#    filter(neg_logLik<50) %>%
+    arrange(run_id) %>%
+    dplyr::pull(run_id) %>%
+    unique() 
+subjects
+
+for (i in 1:length(subjects)) {
+    plot = ggplot(
+        data=SV_bins %>% 
+            filter(run_id==subjects[i]), 
+        aes(x=dSV_bin, y=choseTop)) + 
+        geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
+        xlim(-5,5) + ylim(0,1) +
+        geom_line(stat="summary", fun="mean", size=.5)+
+        stat_summary(fun.data=mean_se, geom="errorbar", width=.8) +
+        theme(text=element_text(size=20)) +
+        theme_bw() +
+        xlab("SV top - SV bottom") + 
+        ylab("Proportion top choices") +
+        ggtitle(
+            paste(
+                subjects[i], 
+                round(SV_bins %>% 
+                          filter(run_id==subjects[i]) %>%
+                          dplyr::pull(noise), 
+                      5)
+                )
+            )
+    print(plot)
+}
+```
+
+## What subjects are bottom right
+```{r}
+SV_bins %>% 
+    filter(
+        dSV_bin>1 & 
+        choseTop<0.4 &
+        neg_logLik<50) %>%
+    arrange(run_id) %>%
+    dplyr::pull(run_id) %>%
+    unique()
+```
+
+### Are subjects with positive logKs any different from the others
+Barely any difference
+```{r}
+subjects_inverseShape = c(66, 80, 93, 94)
+subjects_snakeShape = c(45, 63, 85, 24, 42, 48, 58, 96)
+
+#NAN: 37, 61, 80
+#Pos: 66, 94, 96, 126, 140, 2012
+badLogKs_old = c(37, 61, 80, 66, 94, 96, 126, 140, 2012)
+
+
+subjects_normalShape = data_subject %>%
+    filter(!(run_id %in% c(subjects_inverseShape, subjects_snakeShape))) %>%
+    dplyr::pull(run_id)
+
+data_trial$shapeType = 'normal'
+data_trial = data_trial %>%
+    mutate(shapeType = ifelse(
+        run_id %in% subjects_inverseShape, 'inverse', shapeType)
+    ) %>%
+    mutate(shapeType = ifelse(
+        run_id %in% subjects_snakeShape, 'snake', shapeType)
+    )
+unique(data_trial$shapeType)
+
+data_trial %>%
+    filter(run_id==93) %>%
+    dplyr::select(run_id, withinTaskIndex, aLL, choseLL) %>%
+    # group_by(run_id) %>%
+    #summarise(m = mean(withinTaskIndex)) 
+    dplyr::pull(withinTaskIndex)
+
+data_trial %>%
+    filter(run_id %in% subjects_inverseShape) %>%
+    group_by(run_id) %>%
+    summarise(
+        n = length(unique(run_id)),
+        logK = mean(logK), 
+        logLik = mean(neg_logLik),
+        Task_index = mean(withinTaskIndex),
+        rt = median(trial_duration_exact),
+        aSS = mean(aSS),
+        aLL = mean(aLL),
+        tLL = mean(tLL),
+        k = mean(k),
+        choseTop = mean(choseTop), 
+        choseLL = mean(choseLL), 
+        svLL = mean(svLL), 
+        svSS = mean(svSS)
+    )
+```
+
+
+## What is wrong with subject x?
+### SV_bin Table
+Run_id==80 only picks LL, when LL is on top
+```{r}
+#subjects_inverseShape = c(66, 80, 93, 94)
+print(paste('LogK: ', data_subject[data_subject$run_id==94, 'logK']))
+print(paste('negative LogLikelihood: ', 
+            data_subject[data_subject$run_id==1, 'noise']
+            )
+      )
+
+data_trial %>%
+    filter(run_id==85) %>%
+    dplyr::select(
+        option_TL, option_TR, option_BL, option_BR, 
+        LL_top, choseTop, dSV_TB, dSV_bin) %>%
+    arrange(dSV_TB)
+```
+
+### Plot svLL sv. tLL
+```{r}
+plot_aSS_tLL_choseLL = function(data, title) {
+    plot = ggplot(
+        data %>%
+            group_by(aSS, tLL) %>%
+            summarise(
+                n=n(),
+                choseLL = factor(round(mean(choseLL)))
+                ),
+        aes(x=tLL, y=aSS, color=choseLL, size=n)) +
+        scale_color_manual(breaks = c(0, 1),
+                           values=c("#999999", "#E69F00")) +
+        geom_point() + 
+        ylim(0, 5) + 
+        ggtitle(title)
+    print(plot)
+}
+
+plot_aSS_tLL_choseLL(
+    data_trial %>% filter(run_id %in% 81),
+    paste('subjects_inverseShape', 81)
+)
+
+plot_aSS_tLL_choseLL(
+    data_trial %>% filter(run_id %in% 85),
+    paste('subjects_inverseShape', 85)
+)
+
+```
+
+## Plot svLL vs. tLL
+```{r}
+plot_svLL_tLL = function(data, title) {
+    plot = ggplot(
+        data %>%
+            group_by(tLL) %>%
+            summarise(
+                svLL = mean(svLL),
+                ),
+        aes(x=tLL, y=svLL)) +
+        ylim(0, 5) +
+        geom_line() + 
+        ggtitle(title)
+    print(plot)
+}
+
+logK = -8
+test = data_trial %>%
+    filter(run_id==66)
+test$svLL = 5 / (1 + exp(logK) * test$tLL)
+test %>%
+    group_by(tLL) %>%
+        summarise(svLL = mean(svLL))
+
+plot_svLL_tLL(
+    test,
+    title = exp(logK)
+)
+```
+
+
+### negative LogK-subjects respond more to a large immediate amount. 
+ - At small immediate rewards, all subjects are less likely to choose LL the higher
+the delay. 
+ - At large immediate options, behavior differs between two groups. Some (negative logK), 
+ are less likely to choose LL, the higher the delay. Some others (positive logK), 
+ almost by chance when the immediate reward is high.   
+```{r}
+data_trial %>%
+    filter(run_id %in% subjects_highLogK) %>%
+    dplyr::select(
+        'run_id', 
+        'withinTaskIndex',
+        'option_topLeft',
+        'option_topRight', 
+        'option_bottomLeft', 
+        'option_bottomRight',
+        'k',
+        'choseLL') %>%
+    mutate(across(c('k'), round, 3)) %>%
+    arrange(k, choseLL, withinTaskIndex)
+
+df1 = data_trial %>% filter(run_id %in% subjects_highLogK)
+df2 = data_trial %>% filter(!(run_id %in% subjects_highLogK))
+df1$highLogK=1
+df2$highLogK=0
+data_plot = rbind(df1, df2)
+
+data_plot$choseLL = factor(data_plot$choseLL)
+
+data_plot$highLogK = factor(data_plot$highLogK)
+data_plot$highLogK = mapvalues(data_plot$highLogK, 
+          from = c(0, 1), 
+          to = c("LogK<0", "LogK>0"))
+
+ggplot(
+  data_plot %>% filter(aSS>3), 
+  aes(x=choseLL, y=tLL, fill=highLogK)) +
+  geom_split_violin(alpha=.6, size=0, position=position_dodge(0)) +
+  stat_summary(
+      fun.data="mean_se",
+      geom="linerange",
+      aes(color=highLogK),
+      alpha=1,
+      size=1.5) +
+  stat_summary(
+      fun=mean, 
+      geom="line",
+      aes(group=highLogK, color=highLogK), 
+      size=1.5) +
+#  coord_cartesian(ylim=c(0,7.5)) +
+  theme_bw() + 
+  theme(text=element_text(size=20)) +
+  ggtitle("aSS>3") +
+#   scale_x_discrete(labels=c("SS>LL", "LL>SS")) +
+  xlab("choseLL") + ylab("tLL") + 
+  labs(fill="",color="")+
+  guides(size="none") + 
+  scale_colour_grey() + scale_fill_grey()
+
+ggplot(
+  data_plot %>% filter(aSS<2), 
+  aes(x=choseLL, y=tLL, fill=highLogK)) +
+  geom_split_violin(alpha=.6, size=0, position=position_dodge(0)) +
+  stat_summary(
+      fun.data="mean_se",
+      geom="linerange",
+      aes(color=highLogK),
+      alpha=1,
+      size=1.5) +
+  stat_summary(
+      fun=mean, 
+      geom="line",
+      aes(group=highLogK, color=highLogK), 
+      size=1.5) +
+#  coord_cartesian(ylim=c(0,7.5)) +
+  theme_bw() + 
+  theme(text=element_text(size=20)) +
+  ggtitle("aSS<2") +
+#   scale_x_discrete(labels=c("SS>LL", "LL>SS")) +
+  xlab("choseLL") + ylab("tLL") + 
+  labs(fill="",color="")+
+  guides(size="none") + 
+  scale_colour_grey() + scale_fill_grey()
+```
