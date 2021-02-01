@@ -58,8 +58,6 @@ geom_split_violin <- function (mapping = NULL, data = NULL, stat = "ydensity", p
 ```
 
 # Read and create datasets
-
-## data_subject
 ```{r}
 data_subject <- read.table('data_jupyter/data_subject.csv', 
                            header=TRUE, sep=',')
@@ -77,7 +75,6 @@ grouped = data_trial %>%
 if ('choseTop' %in% names(data_et))
     {data_et = data_et %>% select(!choseTop)}
 data_et = merge(data_et, grouped, by=c('run_id', 'trial_index'))
-data_et$lookTopAOI = as.integer(data_et$aoi == 'TL' | data_et$aoi == 'TR')
 data_et
 ```
 

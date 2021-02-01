@@ -19,6 +19,7 @@ getPackages(c('colorspace',
               'dplyr', 
               "effsize",
               'e1071',
+              'GGally',
               "ggplot2",
               "ggsignif",
               'lme4',
@@ -30,113 +31,131 @@ getPackages(c('colorspace',
             )
 ```
 
-# Matlab
+# Read and create datasets
 ```{r}
-# run_matlab_script('amasino_dataPrep/fit_discount_k.m')
+data_subject <- read.table('data_jupyter/data_subject.csv', 
+                           header=TRUE, sep=',')
+data_subject
+
+data_trial <- read.table('data_jupyter/data_trial_choice.csv',
+                                header=TRUE, sep=',')
+data_trial
+
+data_et <- read.table('data_jupyter/data_et_choice.csv', 
+                             header=TRUE, sep=',')
+grouped = data_trial %>% 
+      dplyr::group_by(run_id, trial_index) %>% 
+      dplyr::summarise(choseTop = mean(choseTop))
+if ('choseTop' %in% names(data_et))
+    {data_et = data_et %>% select(!choseTop)}
+data_et = merge(data_et, grouped, by=c('run_id', 'trial_index'))
+data_et
 ```
 
-# Read and create datasets
-## Exclude subjects
+## k-values
+K values and noise
+```{r}
+merge_mean_by_subject = function(data, data_source, varName) {
+    grouped = data_source %>%
+        dplyr::group_by(run_id) %>%
+        dplyr::summarise(varName = mean(varName))
+      
+    if (varName %in% names(data)) {
+        data = data %>% dplyr::select(!varName)
+    }
+
+    data = merge(
+        data, 
+        data_source %>% dplyr::select(run_id, varName), 
+        by='run_id')
+    return(data)
+}
+
+run_matlab_script('fitK/fit_discount_k.m')
+logK <- read.table('fitK/logK.csv', header=TRUE, sep=',')
+data_subject = merge_mean_by_subject(data_subject, logK, 'logK')
+data_subject = merge_mean_by_subject(data_subject, logK, 'noise')
+
+data_trial = merge_mean_by_subject(data_trial, logK, 'noise')
+data_trial = merge_mean_by_subject(data_trial, logK, 'logK')
+
+data_subject %>%
+    dplyr::select(run_id, logK, noise)
+```
+
+# Screening
+Trials with too much missing data for Option Index
+```{r}
+grouped_NA_ET = data_trial %>%
+    group_by(run_id) %>%
+    summarise(fps = mean(fps),
+              n_NA_OI = sum(is.na(optionIndex)),
+              n_NA_AI = sum(is.na(attributeIndex)),
+              n_NA_PI = sum(is.na(payneIndex))) %>%
+    arrange(n_NA_OI, n_NA_AI, n_NA_PI)
+grouped_NA_ET
+
+subjects_NA_OI = grouped_NA_ET %>%
+    filter(n_NA_OI>40) %>%
+    dplyr::pull(run_id)
+
+subjects_NA_AI = grouped_NA_ET %>%
+    filter(n_NA_AI>40) %>%
+    dplyr::pull(run_id)
+
+subjects_NA_PI = grouped_NA_ET %>%
+    filter(n_NA_PI>40) %>%
+    dplyr::pull(run_id)
+```
+
+# Cleaning
 ```{r}
 # Data on subject level
 excludeSubjects <- read.table('data_jupyter/excludeSubjects_choice.csv', 
                            header=TRUE, sep=',')[, 1]
+excludeSubjects = c(
+    excludeSubjects,
+    subjects_NA_OI,
+    subjects_NA_AI,
+    subjects_NA_PI) %>% 
+    sort() %>%
+    unique()
 excludeSubjects
 ```
 
-
-## data_subject
 ```{r}
-# Data on subject level
-data_subject <- read.table('data_jupyter/data_subject.csv', 
-                           header=TRUE, sep=',') %>%
-    filter(!(run_id %in% excludeSubjects))
-alllogk<-read.table(
-    "amasino_dataPrep/intermediateCSVs/allLogk.csv", header=FALSE, sep=",")
-names(alllogk) = c('run_id', 'logK')
-data_subject = merge(data_subject, alllogk, by='run_id')
-data_subject = data_subject %>% 
-    filter(!is.na(logK))
-print(nrow(data_subject))
-data_subject
+generalCleaninng = function(data) {
+    data = data %>%
+        filter(
+            run_id < 1000 & 
+            !(run_id %in% excludeSubjects)
+                )
+}
+
+data_subject = generalCleaninng(data_subject)
+data_trial = generalCleaninng(data_trial)
+data_et = generalCleaninng(data_et)
+
+print(paste('Remaining of subjects: ', length(unique(data_trial$run_id))))
 ```
-
-
-## data_trial_choice
-```{r}
-# Data on Trial level
-data_trial_choice <- read.table('data_jupyter/data_trial_choice.csv',
-                                header=TRUE, sep=',')  %>%
-    filter(run_id %in% data_subject$run_id)
-
-if ('logK' %in% names(data_trial_choice))
-    {data_trial_choice = data_trial_choice %>% select(!logK)}
-data_trial_choice = merge(
-    data_trial_choice,
-    data_subject %>% dplyr::select(run_id, logK),
-    by='run_id'
-)
-
-data_trial_choice = data_trial_choice %>% filter(!is.na(logK))
-
-print(paste('Number of subjects: ', length(unique(data_trial_choice$run_id))))
-data_trial_choice %>% dplyr::select(run_id, trial_index, logK)
-```
-
-## data_et_choice
-```{r}
-data_et_choice <- read.table('data_jupyter/data_et_choice.csv', 
-                             header=TRUE, sep=',') %>%
-    filter(run_id %in% data_subject$run_id)
-
-if ('choseTop' %in% names(data_et_choice))
-    {data_et_choice = data_et_choice %>% select(!choseTop)}
-data_et_choice = merge(
-    data_et_choice, 
-    data_trial_choice %>% 
-        dplyr::group_by(run_id, trial_index) %>% 
-        dplyr::summarise(choseTop = mean(choseTop)),
-    by=c('run_id', 'trial_index')
-)
-
-data_et_choice$lookTopAOI = as.integer(data_et_choice$aoi == 'TL' | data_et_choice$aoi == 'TR')
-
-print(paste('Number of subjects: ', length(unique(data_et_choice$run_id))))
-
-```
-
-# Screening
- - Response times > 4 or 5 seconds or malhalanobis? 
-
-# Cleaning
-see choice_analysis.Rmd
-
 
 
 # Correlative Analysis
-#````{r}
-library(ggplot2) # Load the librarie (you have to do this one on each new session)
+````{r}
 ggpairs(
-    data_subject %>%
-        dplyr::select(
-            choseLL,
-            attributeIndex, optionIndex, payneIndex,
-            fps), 
-    progress = F
-    ) 
+    data_subject %>% dplyr::select(
+        choseLL,
+        attributeIndex, optionIndex, payneIndex, fps),     
+    progress = F) 
 ggsave("plots/choseLL_corr_01.pdf",width=6.5, height=5)
 
 ggpairs(
-    data_subject %>%
-        dplyr::select(
-            choseLL,
-            birthyear, gender,
-            LL_top, choice_rt, logK),
-    progress = F
-    ) 
+    data_subject %>% dplyr::select(
+        choseLL, birthyear, gender,
+        LL_top, choice_rt, logK),
+    progress = F) 
 ggsave("plots/choseLL_corr_02.pdf",width=6.5, height=5)
-
-#```
+```
 
 # Logistic Regression on subject-level
 Sommet, 2017
@@ -169,7 +188,7 @@ When I do not look at the summarized scores but on every trial, I need to accoun
 https://stats.idre.ucla.edu/r/dae/mixed-effects-logistic-regression/
  - Odds for LL choice is exp(-0.62) = 0.5379444 (Jan 28). The chance to choseLL is half as high as choseSS. The average chance is exp(-0.62)/(1+exp(-0.62)) = 0.3497815. 
  - Mean log-odds for choice_LL vary across subjects. SD=0.4418, Odds could increase by factor exp(0.44)=1.55.
- - ICC=0.056, i.e. 5.6% of the variance are explained by between subject differences
+ - ICC=0.36, i.e. 36% of the variance are explained by between subject differences
 ````{r}
 m0_io = glmer(
     choseLL ~ 1 + (1 | run_id), 
@@ -184,6 +203,7 @@ summary(m0_io)
 icc <- m0_io@theta[1]^2/ (m0_io@theta[1]^2 + (3.14159^2/3))
 icc
 ```
+
 ## Within-Subject centering
 ```{r}
 grouped = data.frame(
@@ -231,12 +251,11 @@ m1_ri = glmer(
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"))
 summary(m1_ri)
-paste("FYI: The deviance of the AIM is:", m1_ri@devcomp$cmp[[8]])
 ```
 
 
 ## Random Intercept Random Slope (Augmented intermediate model)
-A likelihood ratio test (anova) shows that the model with random slopes is to be preferred.
+A likelihood ratio test (anova) shows that the model with smaller deviance and smaller AIC and BIC criteria is to be preferred.
 ```{r}
 m2_rirs = glmer(
     choseLL ~ withinTaskIndex + 
@@ -248,7 +267,6 @@ m2_rirs = glmer(
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"))
 summary(m2_rirs)
-paste("FYI: The deviance of the CIM is:", m2_rirs@devcomp$cmp[[8]])
 anova(m1_ri, m2_rirs)
 ```
 
@@ -260,48 +278,92 @@ Predictors: attributeIndex + optionIndex + payneIndex
  - Did not try to get the procentual reduction of L1 and L2 variance because the logistic regression does not have error terms
 
 ```{r}
-m3_rirs = glmer(
-    choseLL ~ withinTaskIndex + 
-        attributeIndex_cmc + optionIndex_cmc + 
-        payneIndex_cmc + 
-          (1 + attributeIndex_cmc + optionIndex_cmc + 
-           payneIndex_cmc | run_id), 
+m3_final = glmer(
+    choseLL ~ attributeIndex_cmc + optionIndex_cmc + payneIndex_cmc + 
+        (1 | run_id), 
     data = data_trial_choice, 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"))
 summary(m3_rirs)
+
 paste("FYI: The deviance of the CIM is:", m3_rirs@devcomp$cmp[[8]])
-confint(m3_rirs, method="boot", n=50) # CI with Bootstrap
+# confint(m3_rirs, method="boot", n=50) # CI with Bootstrap
 # The confidence intervals should not include 1 to be significant
 ```
 
+
 ## Simple Slopes
 ```{r}
-sd_OI_cmc <- sd(data_trial_choice$optionIndex_cmc)
-sd_PI_cmc <- sd(data_trial_choice$payneIndex_cmc)
+# SD
+sd_PI_cmc = sd(data_trial_choice$payneIndex_cmc, 
+               na.rm = TRUE)
 
-data_trial_choice$OI_sd1 =
-    data_trial_choice$optionIndex_cmc + sd_OI_cmc
+# Simple Slope 1
+data_trial_choice$PI_sd1 = data_trial_choice$payneIndex_cmc + sd_PI_cmc
+m3_sd1 = glmer(
+    choseLL ~ 
+        attributeIndex_cmc + optionIndex_cmc + payneIndex_cmc + 
+        (1 | run_id), 
+    data = data_trial_choice, 
+    family = binomial, 
+    control = glmerControl(optimizer = "bobyqa"))
+summary(m3_sd1)
 
-data_trial_choice$OI_sd1 =
-    data_trial_choice$payneIndex_cmc + sd_PI_cmc
+# Simple Slope -1
+data_trial_choice$PI_sd0 = data_trial_choice$payneIndex_cmc - sd_PI_cmc
+m3_sd0 = glmer(
+    choseLL ~ 
+        attributeIndex_cmc + optionIndex_cmc + PI_sd0 + 
+        (1 | run_id), 
+    data = data_trial_choice, 
+    family = binomial, 
+    control = glmerControl(optimizer = "bobyqa"))
+summary(m3_sd0)
+```
 
-FM_m1SD <- glmer(bieber ~ gpa_m1SD + teacher_fan_c + (1 + gpa_cmc || classes) + gpa_m1SD:teacher_fan_c, data = d, family = "binomial")
-summary(FM_m1SD)
+## Odds Ratios 
+ - The effect of "payneIndex_cmc" is not significant, payneIndex_cmc OR = 0.83, 95% CI [0.67, 1] (has to be beyond 1 to be significant). Imagine it to be signficant: with an increase of the Payne Index of 1 (e.g. if they switch from neutral to only within option transitions), results in 0.67 times the chance (a lower chance) of choosing the delayed reward. 
+ - Same for the ones with low (-1 SD) and high (+1 SD) Payne Index (If you have random slope, compare the different levels. 
 
-#Below is the command to calculate the second simple slope
-#namely the effect of "teacher_fan_c" when "gpa_cmc" is high (+1 SD).
-d$gpa_p1SD <- d$gpa_cmc - sd_gpa_cmc
-FM_p1SD <- glmer(bieber ~ gpa_p1SD + teacher_fan_c + (1 + gpa_cmc || classes) + gpa_p1SD:teacher_fan_c, data = d, family = "binomial")
-summary(FM_p1SD)
+```{R}
+OR <- exp(fixef(m3_final))
+CI <- exp(confint(m3_final, parm="beta_")) # it can be slow (~ a few minutes). As alternative, the much faster but less precise Wald's method can be used: CI <- exp(confint(FM,parm="beta_",method="Wald")) 
 
-#Below are the command to compare the coefficient estimates obtained in the final model,
-#with (glmer) or without (glm) the use of multilevel modelling.
-GLMER <- glmer(bieber ~ gpa_cmc + teacher_fan_c + (1 + gpa_cmc || classes) + gpa_cmc:teacher_fan_c, data = d, family = "binomial")
-GLM <-  glm(bieber ~ gpa_cmc + teacher_fan_c + gpa_cmc:teacher_fan_c, data = d, family = "binomial")
+OR_SD1 <- exp(fixef(m3_sd1))
+CI_SD1 <- exp(confint(m3_sd1, parm="beta_")) 
+
+OR_SD0 <- exp(fixef(m3_sd0))
+CI_SD0 <- exp(confint(m3_sd0, parm="beta_")) 
+
+OR_CI<-rbind(
+    cbind(OR,CI), 
+    cbind(OR_SD1, CI_SD1)[3,], 
+    cbind(OR_SD0, CI_SD0)[3,])
+
+rownames(OR_CI) = c(
+    rownames(cbind(OR,CI)), 
+    "payne_cmc_sd1", 
+    "payne_cmc_sd0")
+OR_CI
+```
+
+MLA vs. simple logistic model
+```{r}
+GLMER = glmer(
+    choseLL ~ 
+        attributeIndex_cmc + optionIndex_cmc + payneIndex_cmc +
+        (1 | run_id), 
+    data = data_trial_choice, 
+    family = binomial, 
+    control = glmerControl(optimizer = "bobyqa"))
+GLM = glm(
+    choseLL ~ attributeIndex_cmc + optionIndex_cmc + payneIndex_cmc, 
+    data = data_trial_choice, 
+    family = binomial)
 
 summary(GLMER)
 summary(GLM)
+anova(GLM, GLMER)
 ```
 
 
