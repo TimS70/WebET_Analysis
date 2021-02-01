@@ -164,6 +164,29 @@ subjects_noisyK = data_subject %>%
     dplyr::pull(run_id)
 subjects_noisyK
 ```
+Trials with too much missing data for Option Index
+```{r}
+grouped_NA_ET = data_trial %>%
+    group_by(run_id) %>%
+    summarise(fps = mean(fps),
+              n_NA_OI = sum(is.na(optionIndex)),
+              n_NA_AI = sum(is.na(attributeIndex)),
+              n_NA_PI = sum(is.na(payneIndex))) %>%
+    arrange(n_NA_OI, n_NA_AI, n_NA_PI)
+grouped_NA_ET
+
+subjects_NA_OI = grouped_NA_ET %>%
+    filter(n_NA_OI>40) %>%
+    dplyr::pull(run_id)
+
+subjects_NA_AI = grouped_NA_ET %>%
+    filter(n_NA_AI>40) %>%
+    dplyr::pull(run_id)
+
+subjects_NA_PI = grouped_NA_ET %>%
+    filter(n_NA_PI>40) %>%
+    dplyr::pull(run_id)
+```
 
 # Cleaning
 ```{r}
@@ -304,46 +327,8 @@ ggsave("plots/SV_Count.pdf",width=5.5, height=5)
 
 ## Correlation of Eye tracking indices and discount rate
 ```{r}
-#Plot correlation between attribute index and discount rate (k-val)
-ggplot(data_subject, aes(x=attributeIndex, y=logK)) +
-  geom_point(size=2.5, aes(alpha=.5))+
-  guides(alpha=FALSE,color=FALSE, shape=FALSE)+
-  theme_bw() + 
-  xlim(-1,1) +
-  scale_colour_grey()
-  theme(text=element_text(size=20))+
-  xlab("Attribute index") + ylab("log(k)") 
-ggsave("plots/logk_attributeIndex.pdf",width=5.7, height=5)
-cor.test(data_subject$attributeIndex, data_subject$logK) 
-
-#Plot correlation between Payne index and discount rate
-#Replication sample
-ggplot(data_subject, aes(x=payneIndex, y=logK)) +
-  geom_point(size=2.5, aes(alpha=.5))+
-  guides(alpha=FALSE,color=FALSE, shape=FALSE)+
-  theme_bw() + 
-  xlim(-1,1) + 
-  scale_colour_grey() + 
-  theme(text=element_text(size=20))+
-  xlab("Payne index") +
-  ylab("log(k)") 
-ggsave("plots/logk_payneIndex.pdf",width=5.7, height=5)
-cor.test(data_subject$payneIndex,data_subject$logK)
-
-# correlationPlot <- function(data, xVar, yVar, xName, yName) {
-#     data$xVar <- data[, xVar]
-#     data$yVar <- data[, yVar]
-#     
-#     ggplot(data, aes(x=xVar, y=yVar)) +
-#         theme_bw()+xlim(-1,1)+ylim(-10,0) +
-#         scale_colour_grey(start=.1, end=.6) +
-#         scale_shape_manual(values=c(16,17)) +
-#         theme(text=element_text(size=20), legend.position = "none") +
-#         xlab(xName) +
-#         ylab(yName) 
-# }
-
-ggplot(data_subject, aes(x=optionIndex, y=logK)) +
+ggplot(data_subject %>% filter(!run_id %in% subjects_NA_OI), 
+       aes(x=optionIndex, y=logK)) +
   geom_point(size=2.5, aes(alpha=.5)) +
   guides(alpha=FALSE,color=FALSE, shape=FALSE) +
   theme_bw() + 
@@ -354,7 +339,39 @@ ggplot(data_subject, aes(x=optionIndex, y=logK)) +
   scale_colour_grey()
 ggsave('plots/opt_logk.pdf',width=5.7, height=5)
 
-cor.test(data_subject$optionIndex, data_subject$logK) 
+data_test = data_subject %>% filter(!run_id %in% subjects_NA_OI)
+cor.test(data_test$optionIndex, data_test$logK) 
+
+ggplot(data_subject %>% filter(!run_id %in% subjects_NA_AI), 
+       aes(x=attributeIndex, y=logK)) +
+  geom_point(size=2.5, aes(alpha=.5))+
+  guides(alpha=FALSE,color=FALSE, shape=FALSE)+
+  theme_bw() + 
+  xlim(-1,1) +
+  scale_colour_grey()
+  theme(text=element_text(size=20))+
+  xlab("Attribute index") + ylab("log(k)") 
+ggsave("plots/logk_attributeIndex.pdf",width=5.7, height=5)
+
+data_test = data_subject %>% filter(!run_id %in% subjects_NA_AI)
+cor.test(data_test$attributeIndex, data_test$logK) 
+
+#Plot correlation between Payne index and discount rate
+#Replication sample
+ggplot(data_subject %>% filter(!run_id %in% subjects_NA_AI), 
+       aes(x=payneIndex, y=logK)) +
+  geom_point(size=2.5, aes(alpha=.5))+
+  guides(alpha=FALSE,color=FALSE, shape=FALSE)+
+  theme_bw() + 
+  xlim(-1,1) + 
+  scale_colour_grey() + 
+  theme(text=element_text(size=20))+
+  xlab("Payne index") +
+  ylab("log(k)") 
+ggsave("plots/logk_payneIndex.pdf",width=5.7, height=5)
+
+data_test = data_subject %>% filter(!run_id %in% subjects_NA_PI)
+cor.test(data_test$payneIndex, data_test$logK) 
 ```
 
 ### Trial bins
@@ -396,7 +413,9 @@ plot_trial_bins(data_trial, 8, "ChoseLL across trials")
 ## Correlation of Attribute index and Payne index
 ```{r}
 #Replication sample
-ggplot(data_subject, aes(x=attributeIndex, y=payneIndex)) +
+data_plot = data_subject %>% 
+    filter(!run_id %in% c(subjects_NA_AI, subjects_NA_OI))
+ggplot(data_plot, aes(x=attributeIndex, y=payneIndex)) +
     geom_point(size=2.5, alpha=.5)+
     guides(alpha=FALSE)+ theme_bw()+xlim(-1,1)+
     scale_colour_grey()+ylim(-1,1)+
@@ -404,7 +423,7 @@ ggplot(data_subject, aes(x=attributeIndex, y=payneIndex)) +
     xlab("Attribute index") + ylab("Payne index") 
 ggsave("plots/att_payne.pdf",width=5.7, height=5)
 
-cor.test(data_subject$payneIndex, data_subject$attributeIndex) 
+cor.test(data_plot$payneIndex, data_plot$attributeIndex) 
 ```
 
 
@@ -733,24 +752,50 @@ grouped
 ## t-test LL expected 
 Do subjects behave differently when they correctly choose LL (as expected) than when they unexpectedly chose SS instead?
 `````{r}
-criteria = c('rt', 'optionIndex', 'attributeIndex', 'payneIndex')
-lapply(criteria, function(x)
-     t.test(as.formula(paste(x, "errorTrial", sep="~")),
-            data=grouped %>% filter(LLexpected==1),
-            paired=TRUE, na.action=na.pass)
-)
+t.test(rt ~ errorTrial,
+       data=grouped %>% filter(
+           LLexpected==1),
+       paired=TRUE, na.action=na.pass)
+
+t.test(optionIndex ~ errorTrial,
+       data=grouped %>% filter(
+           LLexpected==1 & !run_id %in% subjects_NA_OI),
+       paired=TRUE, na.action=na.pass)
+
+t.test(attributeIndex ~ errorTrial,
+       data=grouped %>% filter(
+           LLexpected==1 & !run_id %in% subjects_NA_AI),
+       paired=TRUE, na.action=na.pass)
+
+t.test(payneIndex ~ errorTrial,
+       data=grouped %>% filter(
+           LLexpected==1 & !run_id %in% subjects_NA_PI),
+       paired=TRUE, na.action=na.pass)
 ````
 
 
 ## SS expected 
 Do subjects behave differently when they correctly choose SS (as expected) than when they unexpectedly chose LL instead?
 ````{r}
-criteria = c('rt', 'optionIndex', 'attributeIndex', 'payneIndex')
-lapply(criteria, function(x)
-     t.test(as.formula(paste(x,"errorTrial",sep="~")),
-            data=grouped %>% filter(LLexpected==0),
-            paired=TRUE, na.action=na.pass)
-)
+t.test(rt ~ errorTrial,
+       data=grouped %>% filter(
+           LLexpected==0),
+       paired=TRUE, na.action=na.pass)
+
+t.test(optionIndex ~ errorTrial,
+       data=grouped %>% filter(
+           LLexpected==0 & !run_id %in% subjects_NA_OI),
+       paired=TRUE, na.action=na.pass)
+
+t.test(attributeIndex ~ errorTrial,
+       data=grouped %>% filter(
+           LLexpected==0 & !run_id %in% subjects_NA_AI),
+       paired=TRUE, na.action=na.pass)
+
+t.test(payneIndex ~ errorTrial,
+       data=grouped %>% filter(
+           LLexpected==0 & !run_id %in% subjects_NA_PI),
+       paired=TRUE, na.action=na.pass)
 ```
 
 
@@ -791,7 +836,10 @@ ggsave("plots/error_responseTime.pdf",width=6.5, height=5)
 ```
 
 ```{r}
-ggplot(data_plot, aes(x=LLexpected, y=optionIndex, fill=errorTrial)) +
+ggplot(
+    data_plot %>% filter(
+        !run_id %in% subjects_NA_OI), 
+       aes(x=LLexpected, y=optionIndex, fill=errorTrial)) +
   geom_split_violin(alpha=.6, size=0, position=position_dodge(0)) +
   stat_summary(
       fun.data="mean_se",
