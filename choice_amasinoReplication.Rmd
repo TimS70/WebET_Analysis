@@ -410,40 +410,9 @@ cor.test(data_subject$payneIndex, data_subject$attributeIndex)
 
 # Eye Tracking Bins
 Eye tracking bins with average proportion of looking top for each 
-subject over trials when they chose the top option (binsT) or the bottom option
-(binsB).
+subject over trials when they chose the top option or the bottom option.
 
-## Calculate bins
-```{r}
-ET_bins = function(data, nBin) {
-    data$timeBin = 0 
-    
-    for (subject in unique(data$run_id)) {
-        df_thisSubject = data %>% filter(run_id == subject)
-          
-        for (trial in unique(df_thisSubject$withinTaskIndex)) {
-            df_thisTrial = df_thisSubject %>% filter(withinTaskIndex==trial)
-            
-            this_timeBin = df_thisTrial$t_task %>%
-                cut(nBin, include.lowest=TRUE, labels=c(1:nBin))
-            
-            data = data %>%
-                mutate(timeBin = replace(
-                    timeBin, 
-                    (run_id==subject & withinTaskIndex==trial),
-                    this_timeBin))
-        }
-    }
-    return(data)
-}
-
-data_et = ET_bins(data_et, 5)
-data_et %>% 
-    dplyr::select(run_id, withinTaskIndex, aoi, x, y, t_task, timeBin) %>%
-    arrange(run_id, withinTaskIndex, t_task)
-```
-
-Gaze transitions top vs. bottom across trial time
+## Exclude null AOI
 ```{r}
 subjects_highFPS = data_subject %>%
     filter(fps>10) %>%
@@ -525,7 +494,7 @@ timeBins_choseTB_long %>%
     plot_aoi_across_time(timeBins_choseTB_long$p_lookTop, 'p_lookTop')
 ```
 
-proportion of looking top, looking bottom, and no aoi across time 
+## Include null AOI: Proportion of looking top, looking bottom, and no aoi across time 
 ```{r}
 df = data_et %>%
     filter(run_id %in% subjects_highFPS) %>%
@@ -564,86 +533,53 @@ df %>%
 
 ```
 
-## Proportion of top choice based on the last fixation being to the top
-(looksT) or right (looksB)
+# Last fixation: Proportion of top choice 
 ```{r}
-add_lastFixTop = function(data_trial, data_et) {
-    grouped = data_et %>%
+add_lastGazeTop = function(data_trial, data_et) {
+    grouped_lastCoordinate = data_et %>%
         dplyr::group_by(run_id, trial_index) %>%
-        dplyr::summarise(t_task = max(t_task))
-    grouped = merge(
-        grouped,
-        data_et %>% 
-              dplyr::select(run_id, trial_index, t_task, aoi),
-        by=c('run_id', 'trial_index', 't_task')
-        )
+        dplyr::summarise(
+            t_task = max(t_task)) %>%
+        merge(data_et %>% 
+                  dplyr::select(run_id, trial_index, t_task, aoi), 
+              by=c('run_id', 'trial_index', 't_task')) %>%
+        mutate(lastGazeTop = as.numeric(aoi %in% c('TL', 'TR')))
+    grouped_lastCoordinate
     
-    grouped = grouped %>%
-        mutate(lastFixTop = as.numeric(aoi %in% c('TL', 'TR'))) %>%
-        dplyr::select(run_id, trial_index, lastFixTop)
-    
-    if ('lastFixTop' %in% names(data_trial)) {
-        data_trial = data_trial %>% select(!lastFixTop)}
-    data_trial = merge(
-        data_trial, grouped, by=c('run_id', 'trial_index'))
+    if ('lastGazeTop' %in% names(data_trial)) {
+        data_trial = data_trial %>% dplyr::select(!lastGazeTop)}
+    data_trial = data_trial %>% 
+        merge(
+            grouped_lastCoordinate %>% 
+                dplyr::select(run_id, trial_index, lastGazeTop), 
+            by=c('run_id', 'trial_index'))
     return(data_trial)
 }
 
-data_trial = add_lastFixTop(data_trial, data_et)
+data_trial = add_lastGazeTop(data_trial, data_et)
 data_trial %>%
-    dplyr::select(run_id, trial_index, choseTop, lastFixTop)
+    dplyr::select(run_id, trial_index, choseTop, lastGazeTop)
 ```
 
 ```{r}
-lookT_lastFix <- data_trial %>%
-    filter(lastFixTop == 1) %>%
-    dplyr::select(run_id, withinTaskIndex, choseTop) %>%
-    dplyr::group_by(run_id, withinTaskIndex) %>%
+lastGaze_long <- data_trial %>%
+    dplyr::select(run_id, withinTaskIndex, lastGazeTop, choseTop) %>%
+    dplyr::group_by(run_id, lastGazeTop, withinTaskIndex) %>%
     dplyr::summarise(choseTop=mean(choseTop)) %>%
-    dplyr::group_by(run_id) %>%
-    dplyr::summarise(choseTop=mean(choseTop))
+    dplyr::group_by(run_id, lastGazeTop) %>%
+    dplyr::summarise(
+        n=n(),
+        choseTop=mean(choseTop)) 
+lastGaze_long
 
-lookB_lastFix <- data_trial %>%
-    filter(lastFixTop == 0) %>%
-    dplyr::select(run_id, withinTaskIndex, choseTop) %>%
-    dplyr::group_by(run_id, withinTaskIndex) %>%
-    dplyr::summarise(choseTop=mean(choseTop)) %>%
-    dplyr::group_by(run_id) %>%
-    dplyr::summarise(choseTop=mean(choseTop))
-
-lookTB_lastFix_long <- data_trial %>%
-    dplyr::select(run_id, withinTaskIndex, lastFixTop, choseTop) %>%
-    dplyr::group_by(run_id, lastFixTop, withinTaskIndex) %>%
-    dplyr::summarise(choseTop=mean(choseTop)) %>%
-    dplyr::group_by(run_id, lastFixTop) %>%
-    dplyr::summarise(choseTop=mean(choseTop)) 
-lookTB_lastFix_long
-
-subjects_only_look_top = lookTB_lastFix_long %>% 
-    dplyr::group_by(run_id) %>% 
-    dplyr::summarise(n = n()) %>%
-    filter(n<2) %>%
-    dplyr::pull(run_id)
-lookTB_lastFix_long = lookTB_lastFix_long %>%
-    filter(!(run_id %in% subjects_only_look_top))
-lookTB_lastFix_long
-```
-
-
-
-````{r}
-#Violin plot last fixation location
-
-lookTB_lastFix_long$lastFixTop = as.factor(lookTB_lastFix_long$lastFixTop)
-t.test(choseTop ~ lastFixTop, data=lookTB_lastFix_long, paired=TRUE)
-
-lookTB_lastFix_long %>% 
-    filter(lastFixTop == 1) %>% 
-    dplyr::select(choseTop)
+lastGaze_long$lastGazeTop = factor(lastGaze_long$lastGazeTop, c('1', '0'))
+t.test(choseTop ~ lastGazeTop,
+       data=lastGaze_long, 
+       paired=TRUE)
 ```
 
 ```{r}
-ggplot(lookTB_lastFix_long, aes(x=lastFixTop, y=choseTop)) +
+ggplot(lastGaze_long, aes(x=lastGazeTop, y=choseTop)) +
     geom_violin(fill="gray", size=0) +
     stat_summary(fun=mean,geom="point",shape=45,size=10, color="white") +
     geom_text(x=1.5, y=1.02, label="***") + 
@@ -652,7 +588,7 @@ ggplot(lookTB_lastFix_long, aes(x=lastFixTop, y=choseTop)) +
     ylab("Proportion top choices") +
     xlab("last Fixation on Top AOIs") + 
     theme(text=element_text(size=20))
-ggsave("plots/ET_look_TB.pdf",width=5.5, height=5)
+ggsave("plots/LastGaze_vs_choice.pdf",width=5.5, height=5)
 ```
 
 # Error Analyis
@@ -673,14 +609,7 @@ data_trial = identify_error_trials(data_trial)
 
 data_trial %>% 
     dplyr::select(svLL, svSS, predictLL, choseLL, 
-                  errorTrial, patientError, impatientError, 
-                  )
-
-data_trial %>% 
-    dplyr::select(run_id, svLL, svSS, predictLL, choseLL, 
-                  errorTrial, patientError, impatientError, 
-                  ) %>%
-    filter(run_id==61)
+                  errorTrial, patientError, impatientError)
    
 data_trial %>%
     dplyr::group_by(run_id) %>%
@@ -739,22 +668,30 @@ matchTrials = function(data) {
     return(data)
 }
 data_trial = matchTrials(data_trial)
+
+data_trial %>% 
+#    filter(errorTrial==1) %>%
+    dplyr::select(errorTrial, patientError, 
+                  impatientError, matched_trial)
+
 ````
 
+## ET indices and reaction time for error trials
+Do subjects behave differently when they correctly choose LL (as expected) than when they unexpectedly chose SS instead?
+
+### Group by LL or SS expected
+```{r}
+data_trial = data_trial %>%
+    mutate(LLexpected = as.numeric(svLL > svSS))
+data_trial %>%
+    dplyr:: select(svLL, svSS, LLexpected)
+```
 
 
-## Reaction time and option INdexRT
-
-### LL>SS: LL was predicted. 
-Do subjects behave differently when they correctly choose LL (as expected) than when they unexpectedly chose SS instead? 
+### Filter those subjects with matched error and correct trials
 ````{r}
 subjects_LLcorrect = data_trial %>%
-    filter(
-              (
-                  (predictLL & !errorTrial) |
-                  (predictLL & errorTrial)
-              )
-          ) %>%
+    filter(LLexpected==1) %>%
     dplyr::group_by(run_id) %>%
     dplyr::summarise(n_unique_matched = length(unique(matched_trial))) %>%
     filter(n_unique_matched>2) %>%
@@ -762,103 +699,73 @@ subjects_LLcorrect = data_trial %>%
 subjects_LLcorrect
 length(subjects_LLcorrect)
 
-grouped_LLcorrect =  data_trial %>%
-    filter(
-              (
-                  (predictLL & !errorTrial) |
-                  (predictLL & errorTrial)
-              ) &
-              (run_id %in% subjects_LLcorrect)
-          ) %>%
-    dplyr::group_by(run_id, errorTrial) %>%
-    dplyr::summarise(n = n(), 
-              rt = mean(trial_duration_exact), 
-              optionIndex = mean(optionIndex), 
-              attributeIndex = mean(attributeIndex),
-              payneIndex = mean(payneIndex))
-grouped_LLcorrect$errorTrial = factor(grouped_LLcorrect$errorTrial)
-grouped_LLcorrect
-
-criteria = c('rt', 'optionIndex', 'attributeIndex', 'payneIndex')
-lapply(criteria, function(x)
-     t.test(as.formula(paste(x,"errorTrial",sep="~")),
-            data=grouped_LLcorrect,
-           paired=TRUE, na.action=na.pass)
-)
-
-grouped_LLcorrect %>%
-    dplyr::group_by(errorTrial) %>%
-    dplyr::summarise(n = sum(n), 
-              rt = mean(rt),
-              optionIndex = mean(optionIndex),
-              attributeIndex = mean(attributeIndex),
-              payneIndex = mean(payneIndex))
-```
-
-### SS>LL: SS was predicted. 
-Do subjects behave differently when they correctly choose SS (as expected) than when they unexpectedly chose LL instead?
-```{r}
 subjects_SScorrect = data_trial %>%
-    filter(
-              (
-                  (!predictLL & !errorTrial) |
-                  (!predictLL & errorTrial)
-              )
-          ) %>%
+    filter(LLexpected==0) %>%
     dplyr::group_by(run_id) %>%
     dplyr::summarise(n_unique_matched = length(unique(matched_trial))) %>%
     filter(n_unique_matched>2) %>%
     dplyr::pull(run_id)
 subjects_SScorrect
 length(subjects_SScorrect)
+```
 
-grouped_SScorrect =  data_trial %>%
+
+Dianna found differences reaction time and option index
+
+### group_by(LLexpected, run_id, errorTrial)
+```{r}
+grouped = data_trial %>%
     filter(
-              (
-                  (!predictLL & !errorTrial) |
-                  (!predictLL & errorTrial)
-              ) &
-              (run_id %in% subjects_LLcorrect)
-          ) %>%
-    dplyr::group_by(run_id, errorTrial) %>%
+        (LLexpected==1 & run_id %in% subjects_LLcorrect) |
+        (LLexpected==0 & run_id %in% subjects_SScorrect)) %>%
+    dplyr::group_by(LLexpected, run_id, errorTrial) %>%
     dplyr::summarise(n = n(), 
               rt = mean(trial_duration_exact), 
-              optionIndex = mean(optionIndex),
+              optionIndex = mean(optionIndex), 
               attributeIndex = mean(attributeIndex),
-              payneIndex = mean(payneIndex))
-grouped_SScorrect$errorTrial = factor(grouped_SScorrect$errorTrial)
-grouped_SScorrect
+              payneIndex = mean(payneIndex)) %>%
+    mutate(
+        errorTrial = factor(errorTrial),
+        rt = rt/1000)
+grouped  
+```
 
+## t-test LL expected 
+Do subjects behave differently when they correctly choose LL (as expected) than when they unexpectedly chose SS instead?
+`````{r}
+criteria = c('rt', 'optionIndex', 'attributeIndex', 'payneIndex')
+lapply(criteria, function(x)
+     t.test(as.formula(paste(x, "errorTrial", sep="~")),
+            data=grouped %>% filter(LLexpected==1),
+            paired=TRUE, na.action=na.pass)
+)
+````
+
+
+## SS expected 
+Do subjects behave differently when they correctly choose SS (as expected) than when they unexpectedly chose LL instead?
+````{r}
 criteria = c('rt', 'optionIndex', 'attributeIndex', 'payneIndex')
 lapply(criteria, function(x)
      t.test(as.formula(paste(x,"errorTrial",sep="~")),
-            data=grouped_SScorrect,
-           paired=TRUE, na.action=na.pass)
+            data=grouped %>% filter(LLexpected==0),
+            paired=TRUE, na.action=na.pass)
 )
-
-grouped_SScorrect %>%
-    dplyr::group_by(errorTrial) %>%
-    dplyr::summarise(n = sum(n), 
-              rt = mean(rt),
-              optionIndex = mean(optionIndex),
-              attributeIndex = mean(attributeIndex),
-              payneIndex = mean(payneIndex))
 ```
 
 
 ```{r}
-grouped_LLcorrect$LLexpected=1
-grouped_SScorrect$LLexpected=0
-grouped = rbind(grouped_LLcorrect, grouped_SScorrect)
-grouped$rt = grouped$rt/1000
-grouped$LLexpected = factor(grouped$LLexpected)
-grouped$errorTrial = factor(grouped$errorTrial)
-grouped$errorTrial = mapvalues(grouped$errorTrial, 
-          from = c(0, 1), 
-          to = c("Correct", "Error"))
+data_plot = grouped %>%
+    mutate(
+        errorTrial = mapvalues(
+            factor(errorTrial), 
+            from = c(0, 1), 
+            to = c("Correct", "Error")),
+        LLexpected = factor(LLexpected)
+        )
 
 
-ggplot(grouped, aes(x=LLexpected, y=rt, fill=errorTrial)) +
+ggplot(data_plot, aes(x=LLexpected, y=rt, fill=errorTrial)) +
   geom_split_violin(alpha=.6, size=0, position=position_dodge(0)) +
   stat_summary(
       fun.data="mean_se",
@@ -880,21 +787,11 @@ ggplot(grouped, aes(x=LLexpected, y=rt, fill=errorTrial)) +
   labs(fill="",color="")+
   guides(size="none") + 
   scale_colour_grey() + scale_fill_grey()
-ggsave("plots/errRT.pdf",width=6.5, height=5)
+ggsave("plots/error_responseTime.pdf",width=6.5, height=5)
 ```
 
 ```{r}
-grouped_LLcorrect$LLexpected=1
-grouped_SScorrect$LLexpected=0
-grouped = rbind(grouped_LLcorrect, grouped_SScorrect)
-lagrouped$rt = grouped$rt/1000
-grouped$LLexpected = factor(grouped$LLexpected)
-grouped$errorTrial = factor(grouped$errorTrial)
-grouped$errorTrial = mapvalues(grouped$errorTrial, 
-          from = c(0, 1), 
-          to = c("Correct", "Error"))
-
-ggplot(grouped, aes(x=LLexpected, y=optionIndex, fill=errorTrial)) +
+ggplot(data_plot, aes(x=LLexpected, y=optionIndex, fill=errorTrial)) +
   geom_split_violin(alpha=.6, size=0, position=position_dodge(0)) +
   stat_summary(
       fun.data="mean_se",
@@ -916,5 +813,5 @@ ggplot(grouped, aes(x=LLexpected, y=optionIndex, fill=errorTrial)) +
   labs(fill="",color="")+
   guides(size="none") + 
   scale_colour_grey() + scale_fill_grey()
-ggsave("plots/errOptInd.pdf",width=6.5, height=5)
+ggsave("plots/error_optionIndex.pdf",width=6.5, height=5)
 ```
