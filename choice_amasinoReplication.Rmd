@@ -464,10 +464,19 @@ timeBins_choseTB_long <- data_et %>%
         n_lookBottom = sum(lookBottom),    
         p_lookTop = sum(lookTop)/n,
         p_lookBottom = sum(lookBottom)/n) %>%
-    filter(n>10) %>%
     arrange(choseTop)
-
 timeBins_choseTB_long 
+
+timeBins_choseTB_long %>%
+    group_by(run_id, choseTop) %>%
+    summarise(n=length(unique(timeBin))) %>%
+    filter(n<5)
+
+subjects_not_enough_bins = timeBins_choseTB_long %>%
+    group_by(run_id, choseTop) %>%
+    summarise(n=length(unique(timeBin))) %>%
+    filter(n<5) %>%
+    dplyr::pull(run_id)
 
 timeBins_choseTB_long %>%
     filter(timeBin %in% c(4, 5)) %>%
@@ -475,12 +484,15 @@ timeBins_choseTB_long %>%
     dplyr::summarise(p_lookTop = mean(p_lookTop))
 #Violin plot of time bins
 
-#t.test(as.numeric(choseL[2,]), as.numeric(choseR[2,]),paired=TRUE) 
-#t.test(as.numeric(choseL[3,]), as.numeric(choseR[3,]),paired=TRUE) 
-#cohen.d(as.numeric(choseL[3,]),as.numeric(choseR[3,]),pooled=TRUE,paired=TRUE)
-#t.test(as.numeric(choseL[4,]), as.numeric(choseR[4,]),paired=TRUE) 
-#t.test(as.numeric(choseL[5,]), as.numeric(choseR[5,]),paired=TRUE) 
-#t.test(as.numeric(choseL[6,]), as.numeric(choseR[6,]), paired=TRUE) 
+timeBins_choseTB_long$choseTop = as.factor(timeBins_choseTB_long$choseTop)
+
+for (bin in unique(timeBins_choseTB_long$timeBin)) {
+    print(t.test(p_lookTop ~ choseTop, 
+                 data=timeBins_choseTB_long %>% 
+                     filter(timeBin==bin &
+                            !(run_id %in% subjects_not_enough_bins)), 
+                 paired=TRUE))
+}
 
 plot_aoi_across_time = function(
     data, yVar, title='AOI across timeBins') {
@@ -550,21 +562,6 @@ df %>%
 df %>%
     plot_aoi_across_time(df$p_nullAOI, 'p_nullAOI')
 
-```
-
-
-## Predict lookTopAOI by choseTop
-```{r}
-ET_bins_choseTB_long$choseTop = as.factor(ET_bins_choseTB_long$choseTop)
-
-for (i in 1:length(unique(ET_bins_choseTB_long$bin))) {
-    this_bin = ET_bins_choseTB_long %>%
-        filter(bin==i)
-    print(t.test(lookTopAOI ~ choseTop, data=this_bin, paired=TRUE))
-
-}
-
-#cohen.d(as.numeric(choseT[[3]]),as.numeric(choseB[[3]]),pooled=TRUE,paired=TRUE)
 ```
 
 ## Proportion of top choice based on the last fixation being to the top
