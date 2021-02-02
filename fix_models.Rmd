@@ -198,10 +198,11 @@ print(excludedSubjects)
 ## data_trial
 ```{r}
 generalCleaning = function(data) {
-    print(deparse(substitute(data)))
+    data_name = deparse(substitute(data))
+    print(data_name)
     print(paste('Raw: ', nrow(data)))
     data = data %>%
-        filter(!(run_id %in% excludeSubjects))
+        filter(!(run_id %in% excludedSubjects))
     print(paste('Cleaned: ', nrow(data)))
     return(data)
 }
@@ -226,18 +227,17 @@ print(paste('Cleaned: ', nrow(data_trial)))
 ## data_et
 On purpose, we don't exclude specific x and y values, neither positive nor negative outliers
 ```{r}
-data_et = data_et %>%
-    filter(
-        !(run_id %in% excludedSubjects) &
-        (t_task<5100)
-        )
 print(paste('Raw: ', nrow(data_et)))
+data_et = data_et %>%
+    filter((t_task<5100))
 print(paste('Cleaned: ', nrow(data_et)))
 ```
+
 # Assumptions - Long Format
 ```{r}
 predictors = c('withinTaskIndex', 'x_pos', 'y_pos', 'fps', 'glasses_binary', 'chin')
 ```
+
 ## Multicollinearity of the predictors
 ```{r}
 correlation = cor(
@@ -279,35 +279,43 @@ abline(v=0)
 
 # Visualize Predictors
 ```{r}
-ggpairs(data_trial[, append(predictors, c('precision', 'offset'))]) # Correlations
+ggpairs(data_trial[, append(predictors, c('precision', 'offset'))],
+        progress=F) # Correlations
 ```
 
 
 
 # Models
+
+## Fixed Effects model (non-MLA)
+```{r}
+lm0_io = lm(
+    choseLL ~ 1 + (1 | run_id), 
+    data = data_trial)
+summary(lm0_io)
+```
+
+
 ## IO: intercept only
 ```{r}
-m_io_0 = gls(
-    offset ~ 1, 
-    data=data_trial,
-    method='ML', 
-    na.action='na.omit'
-    )
-summary(m_io_0)
-```
-## RI: Random intercept
-Control for the fact that the subjects start at different places regarding the accuracy of the eyetracking data. Standard error has increased. Subjects vary by about 0.12 (Jan 24) around the intercept. The RI model is way better than the IO model. Therefore, we should do an MLM.
-
-```{r}
-m_ri_0 = lme(
+lme0_io = lme(
     offset ~ 1, 
     data=data_trial,
     method='ML', 
     na.action='na.omit', 
     random = ~1 | run_id
     )
-summary(m_ri_0)
-anova(m_io_0, m_ri_0)
+summary(lme0_io)
+icc <- lme0_io@theta[1]^2/ (lme0_io@theta[1]^2 + (3.14159^2/3))
+icc
+```
+
+## RI: Random intercept
+Control for the fact that the subjects start at different places regarding the accuracy of the eyetracking data. Standard error has increased. Subjects vary by about 0.12 (Jan 24) around the intercept. The RI model is way better than the IO model. Therefore, we should do an MLM.
+
+```{r}
+
+
 ```
 ## ICC
 ICC = x%. x% of the variance relate to the variance between the subjects 
@@ -365,10 +373,11 @@ anova(m_ri_1, m_rs_1)
 # anova(...)
 ```
 
+
 # Random Slope with the best predictors
 # TODO: Also try only using the top positions (see Semmelmann & Weigelt) 
 ```{r}
-m_rs_2 = lme(
+lme2_rs = lme(
     offset ~ chin + y_pos, 
     data=data_trial,
     method='ML', 
@@ -376,10 +385,28 @@ m_rs_2 = lme(
     random = ~ chin | run_id,
     control = lmeControl(msMaxIter = 200) # Get sure it converges
     )
-summary(m_rs_2)
+summary(lme2_rs)
 
-anova(m_rs_1, m_rs_2)
+anova(m_rs_1, lme2_rs)
 ```
+
+
+# Final model
+# TODO: Also try only using the top positions (see Semmelmann & Weigelt) 
+```{r}
+lme3_final = lme(
+    offset ~ chin + y_pos, 
+    data=data_trial,
+    method='ML', 
+    na.action='na.omit', 
+    random = ~ chin | run_id,
+    control = lmeControl(msMaxIter = 200) # Get sure it converges
+    )
+summary(lme2_rs)
+
+anova(m_rs_1, lme2_rs)
+```
+
 
 # Assumptions
 For this model, 
@@ -431,10 +458,31 @@ Sources:
 
 ## Multicollinearity
 ```{r}
+car::vif(glmer_final)
 ```
 
 ## Linearity
 ```{r}
+
+
+predictors <- c(
+    'attributeIndex_cmc', 'optionIndex_cmc', 
+    'payneIndex_cmc')
+
+data_plot = data_trial %>%
+    mutate(predict_choseLL_prob = 
+        predict(glmer_final, type = "response"),
+        logit = log(predict_choseLL_prob/(1-predict_choseLL_prob))) %>%
+    dplyr::select(c(logit, predictors)) %>%
+    gather(key = "predictors", value = "predictor_value", -logit)
+data_plot
+
+ggplot(data_plot, aes(logit, predictor_value))+
+    geom_point(size = 0.5, alpha = 0.5) +
+    geom_smooth(method = "loess") + 
+    theme_bw() + 
+    facet_wrap(~predictors, scales = "free_y")
+```
 ```
 
 ## Normality
