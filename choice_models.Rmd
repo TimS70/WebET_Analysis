@@ -15,7 +15,9 @@ getPackages <- function(pkg){
   sapply(pkg, require, character.only = TRUE)
 }
 
-getPackages(c('colorspace', 
+getPackages(c('broom',
+              'car', 
+              'colorspace', 
               'dplyr', 
               "effsize",
               'e1071',
@@ -27,7 +29,8 @@ getPackages(c('colorspace',
               'QuantPsyc',
               "RColorBrewer",
               'reshape2',
-              'tidyr')
+              'tidyr',
+              'tidyverse')
             )
 ```
 
@@ -175,6 +178,7 @@ ggplot(data_plot, aes(factor(run_id), choseLL_perc)) +
     coord_cartesian(ylim=c(0, 1))
 ```
 
+
 # Cleaning
 ```{r}
 # Data on subject level
@@ -203,7 +207,6 @@ generalCleaninng = function(data) {
 
 data_subject = generalCleaninng(data_subject)
 data_trial = generalCleaninng(data_trial)
-data_et = generalCleaninng(data_et)
 
 print(paste('Remaining of subjects: ', length(unique(data_trial$run_id))))
 ```
@@ -212,15 +215,27 @@ print(paste('Remaining of subjects: ', length(unique(data_trial$run_id))))
 print(paste('N subjects before cleaning: ', nrow(data_subject)))
 data_subject = data_subject %>%
     filter(
-        !is.na(choseLL) & 
         !is.na(attributeIndex) &
         !is.na(optionIndex) &
         !is.na(payneIndex)
     )
 print(paste('N subjects after cleaning: ', nrow(data_subject)))
 ```
+## data_trial
+```{r}
+print(paste('N subjects before cleaning: ', nrow(data_trial)))
+data_trial = data_trial %>%
+    filter(
+        !is.na(attributeIndex) &
+        !is.na(optionIndex) &
+        !is.na(payneIndex)
+    )
+print(paste('N subjects after cleaning: ', nrow(data_trial)))
+```
 
 # Correlative Analysis
+
+## Scatter matrix
 ````{r}
 ggpairs(
     data_subject %>% dplyr::select(
@@ -235,6 +250,26 @@ ggpairs(
         LL_top, choice_rt, logK),
     progress = F) 
 ggsave("plots/choseLL_corr_02.pdf",width=6.5, height=5)
+
+ggpairs(
+    data_trial %>% dplyr::select(
+        choseLL,
+        withinTaskIndex, trial_duration_exact,
+        attributeIndex, optionIndex, payneIndex),     
+    progress = F) 
+ggsave("plots/choseLL_corr_01.pdf",width=6.5, height=5)
+
+```
+
+## Check withinTaskIndex and trial_duration_exact
+```{r}
+ggplot(data_trial, aes(x=factor(choseLL), y=withinTaskIndex)) + 
+    geom_violin(trim=FALSE) +
+    stat_summary(fun=mean, size=1)
+
+ggplot(data_trial, aes(x=factor(choseLL), y=trial_duration_exact)) + 
+    geom_violin(trim=FALSE) +
+    stat_summary(fun=mean, size=1)
 ```
 
 # Logistic Regression on subject-level
@@ -271,21 +306,21 @@ When I do not look at the summarized scores but on every trial, I need to accoun
 
 ## Intercept Only
 https://stats.idre.ucla.edu/r/dae/mixed-effects-logistic-regression/
- - Odds for LL choice is exp(-0.62) = 0.5379444 (Jan 28). The chance to choseLL is half as high as choseSS. The average chance is exp(-0.62)/(1+exp(-0.62)) = 0.3497815. 
- - Mean log-odds for choice_LL vary across subjects. SD=0.4418, Odds could increase by factor exp(0.44)=1.55.
- - ICC=0.36, i.e. 36% of the variance are explained by between subject differences
+ - Odds for LL choice is exp(0.74) = 2.1 (Feb 02). Bias towards choseLL. The average chance for choseLL is exp(0.74)/(1+exp(0.74)) = 0.7. 
+ - Once we control for the inter-subject variance, the choice shifts more towards SS (choseLL reduces from 65% to around 50%)
+ - Mean log-odds for choice_LL vary across subjects. SD=0.4418, Odds could increase by factor exp(1.145)=3.14.
+ - ICC=0.28, i.e. 18% of the variance are explained by between subject differences
 ````{r}
-m0_io = glmer(
+glmer0_io = glmer(
     choseLL ~ 1 + (1 | run_id), 
     data = data_trial, 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"),
-    nAGQ = 10)
-summary(m0_io)
-
+    nAGQ = 1)
+summary(glmer0_io)
 
 # take pi^2 / 3 instead of the level-1 residual
-icc <- m0_io@theta[1]^2/ (m0_io@theta[1]^2 + (3.14159^2/3))
+icc <- glmer0_io@theta[1]^2/ (glmer0_io@theta[1]^2 + (3.14159^2/3))
 icc
 ```
 
@@ -301,6 +336,11 @@ names(grouped) = c('run_id',
                    'cluster_mean_AI', 
                    'cluster_mean_OI', 
                    'cluster_mean_PI')
+for (var in c('cluster_mean_AI', 'cluster_mean_OI', 'cluster_mean_PI')) {
+    if (var %in% names(data_trial)) {
+        data_trial = data_trial %>% dplyr::select(!varName)
+    }
+}
 data_trial = merge(
     data_trial,
     grouped, 
@@ -317,7 +357,7 @@ data_trial$optionIndex_cmc =
 data_trial$payneIndex_cmc = 
     data_trial$payneIndex - 
     data_trial$cluster_mean_PI
-
+data_trial
 data_trial %>% 
     dplyr::select(attributeIndex, attributeIndex_cmc,
            optionIndex, optionIndex_cmc,
@@ -328,31 +368,34 @@ data_trial %>%
 ## Random Intercept (Constrained intermediate model)
 Contains all theoretically relevant effects
 ```{r}
-m1_ri = glmer(
-    choseLL ~ withinTaskIndex + 
+glmer1_ri = glmer(
+    choseLL ~ 
         attributeIndex_cmc + optionIndex_cmc + 
         payneIndex_cmc + (1 | run_id), 
     data = data_trial, 
     family = binomial, 
-    control = glmerControl(optimizer = "bobyqa"))
-summary(m1_ri)
+    control = glmerControl(optimizer = "bobyqa"),
+    nAGQ = 1)
+summary(glmer1_ri)
+anova(glmer0_io, glmer1_ri)
 ```
 
 
 ## Random Intercept Random Slope (Augmented intermediate model)
-A likelihood ratio test (anova) shows that the model with smaller deviance and smaller AIC and BIC criteria is to be preferred.
+Check if random slopes make sense.
 ```{r}
-m2_rirs = glmer(
-    choseLL ~ withinTaskIndex + 
+glmer2_rirs = glmer(
+    choseLL ~  
         attributeIndex_cmc + optionIndex_cmc + 
         payneIndex_cmc + 
-          (1 + attributeIndex_cmc + optionIndex_cmc + 
+          (attributeIndex_cmc + optionIndex_cmc + 
            payneIndex_cmc | run_id), 
     data = data_trial, 
     family = binomial, 
-    control = glmerControl(optimizer = "bobyqa"))
-summary(m2_rirs)
-anova(m1_ri, m2_rirs)
+    control = glmerControl(optimizer = "bobyqa"),
+    nAGQ = 1)
+summary(glmer2_rirs)
+anova(glmer1_ri, glmer2_rirs)
 ```
 
 ## Fial model: RIRS
@@ -363,15 +406,17 @@ Predictors: attributeIndex + optionIndex + payneIndex
  - Did not try to get the procentual reduction of L1 and L2 variance because the logistic regression does not have error terms
 
 ```{r}
-m3_final = glmer(
-    choseLL ~ attributeIndex_cmc + optionIndex_cmc + payneIndex_cmc + 
-        (1 | run_id), 
+glmer_final = glmer(
+    choseLL ~ 
+        attributeIndex_cmc + optionIndex_cmc + 
+        payneIndex_cmc + (1 | run_id), 
     data = data_trial, 
     family = binomial, 
-    control = glmerControl(optimizer = "bobyqa"))
-summary(m3_rirs)
+    control = glmerControl(optimizer = "bobyqa"),
+    nAGQ = 1)
+summary(glmer_final)
 
-paste("FYI: The deviance of the CIM is:", m3_rirs@devcomp$cmp[[8]])
+paste("FYI: The deviance of the CIM is:", glmer_final@devcomp$cmp[[8]])
 # confint(m3_rirs, method="boot", n=50) # CI with Bootstrap
 # The confidence intervals should not include 1 to be significant
 ```
@@ -385,25 +430,24 @@ sd_PI_cmc = sd(data_trial$payneIndex_cmc,
 
 # Simple Slope 1
 data_trial$PI_sd1 = data_trial$payneIndex_cmc + sd_PI_cmc
-m3_sd1 = glmer(
-    choseLL ~ 
-        attributeIndex_cmc + optionIndex_cmc + payneIndex_cmc + 
+glmer_final_sd1 = glmer(
+    choseLL ~ attributeIndex_cmc + optionIndex_cmc + payneIndex_cmc + 
         (1 | run_id), 
     data = data_trial, 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"))
-summary(m3_sd1)
+summary(glmer_final_sd1)
 
 # Simple Slope -1
 data_trial$PI_sd0 = data_trial$payneIndex_cmc - sd_PI_cmc
-m3_sd0 = glmer(
+glmer_final_sd0 = glmer(
     choseLL ~ 
         attributeIndex_cmc + optionIndex_cmc + PI_sd0 + 
         (1 | run_id), 
     data = data_trial, 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"))
-summary(m3_sd0)
+summary(glmer_final_sd0)
 ```
 
 ## Odds Ratios 
@@ -411,14 +455,14 @@ summary(m3_sd0)
  - Same for the ones with low (-1 SD) and high (+1 SD) Payne Index (If you have random slope, compare the different levels. 
 
 ```{R}
-OR <- exp(fixef(m3_final))
-CI <- exp(confint(m3_final, parm="beta_")) # it can be slow (~ a few minutes). As alternative, the much faster but less precise Wald's method can be used: CI <- exp(confint(FM,parm="beta_",method="Wald")) 
+OR <- exp(fixef(glmer_final))
+CI <- exp(confint(glmer_final, parm="beta_")) # it can be slow (~ a few minutes). As alternative, the much faster but less precise Wald's method can be used: CI <- exp(confint(FM,parm="beta_",method="Wald")) 
 
-OR_SD1 <- exp(fixef(m3_sd1))
-CI_SD1 <- exp(confint(m3_sd1, parm="beta_")) 
+OR_SD1 <- exp(fixef(glmer_final_sd1))
+CI_SD1 <- exp(confint(glmer_final_sd1, parm="beta_")) 
 
-OR_SD0 <- exp(fixef(m3_sd0))
-CI_SD0 <- exp(confint(m3_sd0, parm="beta_")) 
+OR_SD0 <- exp(fixef(glmer_final_sd0))
+CI_SD0 <- exp(confint(glmer_final_sd0, parm="beta_")) 
 
 OR_CI<-rbind(
     cbind(OR,CI), 
@@ -495,52 +539,33 @@ fixef(m_cluster_4)[5]
 anova(m_cluster_1, m_cluster_2, m_cluster_3, m_cluster_4)
 ```
 
-## Visualize with Average Marginal Probability
-#```{r}
-summary(data_trial$optionIndex)
+# Assumptions
+
+## Linear relationship between predicted log(choseLL) and the predictors
+Looks quite linear. If not check out: 
+http://www.sthda.com/english/articles/36-classification-methods-essentials/148-logistic-regression-assumptions-and-diagnostics-in-r/
+```{r}
+predictors <- c(
+    'attributeIndex_cmc', 'optionIndex_cmc', 
+    'payneIndex_cmc')
+
+data_plot = data_trial %>%
+    mutate(predict_choseLL_prob = 
+        predict(glmer_final, type = "response"),
+        logit = log(predict_choseLL_prob/(1-predict_choseLL_prob))) %>%
+    dplyr::select(c(logit, predictors)) %>%
+    gather(key = "predictors", value = "predictor_value", -logit)
+data_plot
+
+ggplot(data_plot, aes(logit, predictor_value))+
+    geom_point(size = 0.5, alpha = 0.5) +
+    geom_smooth(method = "loess") + 
+    theme_bw() + 
+    facet_wrap(~predictors, scales = "free_y")
 ```
 
-#```{r}
-tmpdat <- data_trial[, c("choiceNr_c", 
-                                "optionIndex",  
-                                'attributeIndex', 
-                                'payneIndex', 
-                                'k',    
-                                "run_id")]
-
-# sequence of distinct values for predictor of interest
-jvalues <- with(data_trial, 
-                seq(from = min(optionIndex), 
-                    to = max(optionIndex), 
-                    length.out = 100))
-
-# calculate predicted probabilities and store in a list
-predictions <- lapply(jvalues, function(j) {
-    tmpdat$optionIndex <- j
-    predict(model, newdata = tmpdat, type = "response")
-})
+## Multicollinearity
+compute variance inflation factor. " As a rule of thumb, a VIF value that exceeds 5 or 10 indicates a problematic amount of collinearity"
+```{r}
+car::vif(glmer_final)
 ```
-
-#```{r}
-# average marginal predicted probability across a few different 
-plotdat <- sapply(predictions[c(1, 20, 40, 60, 80, 100)], mean, na.rm=TRUE)
-
-# get the means with lower and upper quartiles
-# plotdat <- t(sapply(predictions, function(x) {
-#               c(M = mean(x), quantile(x,
-#                                       c(0.25, 0.75),
-#                                       na.rm=na_rm))
-#     }
-#   )
-# )
-
-# add in LengthofStay values and convert to data frame
-plotdat <- as.data.frame(cbind(plotdat, jvalues))
-
-# better names and show the first few rows
-
-colnames(plotdat) <- c("PredictedProbability", "optionIndex")
-ggplot(plotdat, aes(x = optionIndex, y = PredictedProbability)) + geom_line() +
-    ylim(c(0, 1))
-```
-
