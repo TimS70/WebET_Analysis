@@ -17,11 +17,14 @@ getPackages <- function(pkg){
 getPackages(c(
     'boot',
     'broom',
+    'car',
     'compiler',
     'data.table',
+    'DHARMa',
     "dplyr",
     'GGally',
     'ggplot2',
+    'HLMdiag',
     'Hmisc',
     'influence.ME', 
     "ICC",
@@ -228,8 +231,7 @@ print(paste('Cleaned: ', nrow(data_trial)))
 On purpose, we don't exclude specific x and y values, neither positive nor negative outliers
 ```{r}
 print(paste('Raw: ', nrow(data_et)))
-data_et = data_et %>%
-    filter((t_task<5100))
+data_et = data_et %>% filter((t_task<5100))
 print(paste('Cleaned: ', nrow(data_et)))
 ```
 
@@ -287,16 +289,14 @@ ggpairs(data_trial[, append(predictors, c('precision', 'offset'))],
 
 # Models
 
-## Fixed Effects model (non-MLA)
+# Linear model (Fixed Effects, no MLA)
 ```{r}
-lm0_io = lm(
-    choseLL ~ 1 + (1 | run_id), 
-    data = data_trial)
-summary(lm0_io)
+lm_null = lm(offset ~ 1, data = data_trial %>% filter(!is.na(offset)))
+summary(lm_null)
 ```
 
-
 ## IO: intercept only
+ICC = 0.6182. 62% of the variance can be explained by the variance between the subjects. We should to an MLA
 ```{r}
 lme0_io = lme(
     offset ~ 1, 
@@ -305,108 +305,106 @@ lme0_io = lme(
     na.action='na.omit', 
     random = ~1 | run_id
     )
+
 summary(lme0_io)
-icc <- lme0_io@theta[1]^2/ (lme0_io@theta[1]^2 + (3.14159^2/3))
-icc
+
+ICCest(factor(data_trial$run_id), data_trial$offset, alpha=.05, CI.type="THD")
 ```
 
 ## RI: Random intercept
 Control for the fact that the subjects start at different places regarding the accuracy of the eyetracking data. Standard error has increased. Subjects vary by about 0.12 (Jan 24) around the intercept. The RI model is way better than the IO model. Therefore, we should do an MLM.
 
 ```{r}
+data_trial = data_trial %>%
+    mutate(
+        y_pos_c = scale(y_pos),
+        x_pos_c = scale(x_pos),
+        fps_c = scale(fps))
 
+lme1_control = lme(
+    offset ~ x_pos_c + y_pos_c + withinTaskIndex + fps_c, 
+    data=data_trial,
+    method='ML', 
+    na.action='na.omit', 
+    random = ~1 | run_id
+    )
 
+summary(lme1_control)
+anova(lme0_io, lme1_control)
 ```
-## ICC
-ICC = x%. x% of the variance relate to the variance between the subjects 
-```{r ICC}
-library(ICC)
-data_trial$run_id_factor <- as.factor(data_trial$run_id)
-ICCest(data_trial$run_id_factor, data_trial$offset, 
-       alpha=.05, CI.type="THD")
-fixef(m_ri_0)
-ranef(m_ri_0)
-coef(m_ri_0)
+
+Only relevant control variables
+```{r}
+lme2_control = lme(
+    offset ~ y_pos_c, 
+    data=data_trial,
+    method='ML', 
+    na.action='na.omit', 
+    random = ~1 | run_id
+    )
+
+summary(lme2_control)
+anova(lme0_io, lme2_control)
 ```
+
 
 # m_ri_1: adding chin rest
 Look at the predictor correlation
 ```{r}
-m_ri_1 = lme(
-    offset ~ chin, # x_pos + y_pos + withinTaskIndex + fps, 
+lme3_experimental = lme(
+    offset ~ y_pos_c + glasses_binary + chin, 
     data=data_trial,
     method='ML', 
     na.action='na.omit', 
     random = ~1 | run_id
     )
-summary(m_ri_1)
-anova(m_ri_0, m_ri_1)
+
+summary(lme3_experimental)
+anova(lme0_io, lme3_experimental)
 ```
-# m_ri_2: adding experimental variables
-glasses, chin
+
+Only relevant variables
 ```{r}
-m_ri_2 = lme(
-    offset ~ x_pos + y_pos + withinTaskIndex + fps + glasses_binary + chin, 
+lme4_experimental = lme(
+    offset ~ y_pos_c + chin, 
     data=data_trial,
     method='ML', 
     na.action='na.omit', 
     random = ~1 | run_id
     )
-summary(m_ri_2)
-anova(m_ri_0, m_ri_1, m_ri_2)
+
+summary(lme4_experimental)
 ```
 
 # m_rs_0: Random slopes for chin
 Standard deviation across glasses is large. Participants vary a lot around the average score. Probably another variable. Also interpret the Correlation between the fixed effects. With lower offset, chin-rest could have a greater effect. However, there are no significant findings. (Unfortunately), the RS-model is better, so the effect of chin-rest largely varies.
 
 ```{r}
-m_rs_1 = lme(
-    offset ~ chin, 
+lme5_rs = lme(
+    offset ~ y_pos_c + chin, 
     data=data_trial,
     method='ML', 
     na.action='na.omit', 
     random = ~ chin | run_id,
     control = lmeControl(msMaxIter = 200) # Get sure it converges
     )
-summary(m_rs_1)
-anova(m_ri_1, m_rs_1)
-# anova(...)
+summary(lme5_rs)
+anova(lme4_experimental, lme5_rs)
 ```
 
-
-# Random Slope with the best predictors
-# TODO: Also try only using the top positions (see Semmelmann & Weigelt) 
+# Only on top positions
+# Also try only using the top positions (see Semmelmann & Weigelt) 
 ```{r}
-lme2_rs = lme(
-    offset ~ chin + y_pos, 
-    data=data_trial,
+lme_yPos_top = lme(
+    offset ~ chin + glasses_binary, 
+    data=data_trial %>% filter(y_pos==0.2),
     method='ML', 
     na.action='na.omit', 
     random = ~ chin | run_id,
     control = lmeControl(msMaxIter = 200) # Get sure it converges
     )
-summary(lme2_rs)
-
-anova(m_rs_1, lme2_rs)
+summary(lme_yPos_top)
 ```
-
-
-# Final model
-# TODO: Also try only using the top positions (see Semmelmann & Weigelt) 
-```{r}
-lme3_final = lme(
-    offset ~ chin + y_pos, 
-    data=data_trial,
-    method='ML', 
-    na.action='na.omit', 
-    random = ~ chin | run_id,
-    control = lmeControl(msMaxIter = 200) # Get sure it converges
-    )
-summary(lme2_rs)
-
-anova(m_rs_1, lme2_rs)
-```
-
 
 # Assumptions
 For this model, 
