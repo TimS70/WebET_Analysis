@@ -66,7 +66,7 @@ merge_mean_by_subject = function(data, data_source, varName) {
 
     data = merge(
         data, 
-        data_source %>% dplyr::select(run_id, varName), 
+        grouped %>% dplyr::select(run_id, varName), 
         by='run_id')
     return(data)
 }
@@ -84,28 +84,114 @@ data_subject %>%
 ```
 
 # Screening
-Trials with too much missing data for Option Index
+
+## Criteria distribution. We need a sufficient ratio between the categories. Otherwise everything gets significant that happens in the larger category. 
 ```{r}
-grouped_NA_ET = data_trial %>%
-    group_by(run_id) %>%
-    summarise(fps = mean(fps),
-              n_NA_OI = sum(is.na(optionIndex)),
-              n_NA_AI = sum(is.na(attributeIndex)),
-              n_NA_PI = sum(is.na(payneIndex))) %>%
-    arrange(n_NA_OI, n_NA_AI, n_NA_PI)
-grouped_NA_ET
+summary(factor(data_trial$choseLL))
 
-subjects_NA_OI = grouped_NA_ET %>%
-    filter(n_NA_OI>40) %>%
-    dplyr::pull(run_id)
+summary(factor(data_trial$choseLL))[1] / 
+    summary(factor(data_trial$choseLL))[2]
+```
 
-subjects_NA_AI = grouped_NA_ET %>%
-    filter(n_NA_AI>40) %>%
-    dplyr::pull(run_id)
+## Enough data points for the categorical predictors?
+```{r}
+merge_by_subject = function(data, data_source, varName) {
+    if (varName %in% names(data)) {
+        data = data %>% dplyr::select(!varName)
+    }
 
-subjects_NA_PI = grouped_NA_ET %>%
-    filter(n_NA_PI>40) %>%
-    dplyr::pull(run_id)
+    data = merge(
+        data, 
+        data_source %>% dplyr::select(run_id, varName), 
+        by='run_id')
+    return(data)
+}
+
+table(data_trial$LL_top, data_trial$choseLL)
+    
+temp = data_trial %>% 
+    merge_by_subject(data_subject, 'birthyear') %>% 
+    merge_by_subject(data_subject, 'gender')
+
+table(temp$birthyear, temp$choseLL)
+table(temp$gender, temp$choseLL)
+```
+
+## Enough data points for the ET indices?
+```{r}
+grouped_n_ET = data_trial %>% 
+    group_by(run_id, choseLL) %>%
+    summarise(
+        n_choseLL = n(),
+        choseLL_perc = n_choseLL/80,
+        x_count = mean(x_count),
+        n_OI = sum(!is.na(optionIndex)),
+        OI = mean(optionIndex, na.rm=TRUE), 
+        n_AI = sum(!is.na(attributeIndex)),
+        AI = mean(attributeIndex, na.rm=TRUE),
+        n_PI = sum(!is.na(payneIndex)),
+        PI = mean(payneIndex, na.rm=TRUE)
+        ) %>%
+    arrange(run_id, choseLL)
+    
+grouped_n_ET %>%
+    mutate(across(
+        c('choseLL', 'choseLL_perc', 'x_count', 'OI', 'AI', 'PI'), 
+        round, 1)
+        )
+
+subjects_biased_choice = grouped_n_ET %>%
+    filter(n_choseLL<3) %>%
+    arrange(run_id) %>%
+    dplyr::pull(run_id) %>%
+    unique()
+print('Subjects with too many or too few choseLL: ')
+print(subjects_biased_choice)
+
+grouped_n_ET %>%
+    filter(
+        !(run_id %in% subjects_biased_choice) &
+        !is.na(x_count) &
+        (n_choseLL<3 | n_OI<3 | n_AI<3 | n_PI<3))
+
+subjects_NA_OI = grouped_n_ET %>%
+    filter(n_OI<3) %>%
+    dplyr::pull(run_id) %>%
+    unique()
+
+subjects_NA_AI = grouped_n_ET %>%
+    filter(n_AI<3) %>%
+    dplyr::pull(run_id) %>%
+    unique()
+
+subjects_NA_PI = grouped_n_ET %>%
+    filter(n_PI<3) %>%
+    dplyr::pull(run_id) %>%
+    unique()
+
+print('Subjects without enough data for ET indices within one choice option: ')
+print('OI')
+subjects_NA_OI
+print('AI')
+subjects_NA_AI
+print('PI')
+subjects_NA_PI
+```
+## Visualize ET indices 
+```{r}
+data_plot = grouped_n_ET %>%
+    filter(choseLL==1) %>%
+    mutate(SE = sqrt(choseLL_perc * (1-choseLL_perc)/n_choseLL))
+
+ggplot(data_plot, aes(factor(run_id), choseLL_perc)) + 
+    geom_pointrange(aes(ymin=choseLL_perc-1.96*SE, 
+                        ymax=choseLL_perc+1.96*SE)) +
+    xlab('run_id') +
+    ylab('Percent of choseLL') + 
+    theme(
+        axis.text.x = element_blank(),
+        ) +
+    coord_cartesian(ylim=c(0, 1))
 ```
 
 # Cleaning
@@ -115,12 +201,14 @@ excludeSubjects <- read.table('data_jupyter/excludeSubjects_choice.csv',
                            header=TRUE, sep=',')[, 1]
 excludeSubjects = c(
     excludeSubjects,
+    subjects_biased_choice,
     subjects_NA_OI,
     subjects_NA_AI,
     subjects_NA_PI) %>% 
     sort() %>%
     unique()
 excludeSubjects
+print(paste('Total Number of subjects to exclude: ', length(excludeSubjects)))
 ```
 
 ```{r}
