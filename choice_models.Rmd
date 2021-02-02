@@ -203,6 +203,7 @@ generalCleaninng = function(data) {
             run_id < 1000 & 
             !(run_id %in% excludeSubjects)
                 )
+    return(data)
 }
 
 data_subject = generalCleaninng(data_subject)

@@ -7,37 +7,36 @@ output: html_document
 
 ```{r setup, message=FALSE, warning=FALSE}
 setwd("C:/Users/User/GitHub/WebET_Analysis")
-# https://gist.github.com/stevenworthington/3178163
-ipak <- function(pkg){
+getPackages <- function(pkg){
   new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
   if (length(new.pkg)) 
     install.packages(new.pkg, dependencies = TRUE)
   sapply(pkg, require, character.only = TRUE)
 }
-ipak(c(
+
+getPackages(c(
+    'boot',
+    'broom',
+    'compiler',
     'data.table',
     "dplyr",
-    'Hmisc',
-    
-    "knitr",
-    'readr',
-    "rsq",
-    'lme4',
-    'nlme', 
-    'reshape',
-    "ICC",
-    'ggplot2',
     'GGally',
-    'reshape2',
+    'ggplot2',
+    'Hmisc',
+    'influence.ME', 
+    "ICC",
+    "knitr",
     'lme4',
-    'compiler',
-    'parallel',
-    'boot',
     'lattice',
+    'lme4',
     "lmerTest", # Erhalte p-Werte
-    "tinytex"
-    )
-)
+    'nlme', 
+    'parallel',
+    'readr',
+    'reshape',
+    'reshape2',
+    "rsq",
+    "tinytex"))
 
 knitr::opts_chunk$set(echo = TRUE)
 options(scipen=999) # Show R markdown output as Integers
@@ -45,86 +44,113 @@ options(scipen=999) # Show R markdown output as Integers
 
 # Prep data
 ```{r data}
-data_et_fix_raw <- read_csv('data_jupyter/data_et_fix.csv')
-data_trial_fix_raw <- read_csv('data_jupyter/data_trial_fix.csv')
-data_subject_raw <- read_csv('data_jupyter/data_subject.csv')
-str(data_et_fix_raw)
-names(data_trial_fix_raw)
-str(data_trial_fix_raw)
-head(data_trial_fix_raw)
+data_et <- read_csv('data_jupyter/data_et_fix.csv')
+data_trial <- read_csv('data_jupyter/data_trial_fix.csv')
+data_subject <- read_csv('data_jupyter/data_subject.csv')
 ```
 
-## Add glasses to data_et_fix
+## Add glasses to data_et
 ```{r}
-if ('glasses_binary' %in% names(data_trial_fix_raw))
-    {data_trial_fix_raw = data_trial_fix_raw %>% select(!glasses_binary)}
-data_trial_fix_raw = merge(
-    data_trial_fix_raw, 
-    data_subject_raw %>% 
-        select(run_id, glasses_binary) %>%
-        distinct(),
-    by='run_id'
-)
-data_trial_fix_raw
+merge_by_subject = function(data, data_source, varName) {
+    if (varName %in% names(data)) {
+        data = data %>% dplyr::select(!varName)
+    }
+
+    data = merge(
+        data, 
+        data_source %>% dplyr::select(run_id, varName), 
+        by='run_id')
+    return(data)
+}
+
+data_trial = data_trial %>%
+    merge_by_subject(data_subject, 'glasses_binary')
+
 ```
 
 # Screening
 ```{r}
-summary(data_et_fix_raw %>%
-            select(x, y, t_task)
+summary(data_et %>%
+    dplyr::select(x, y, t_task)
 )
-summary(data_trial_fix_raw %>% 
-            select(run_id, offset, precision, fps)
+
+summary(data_trial %>% 
+    dplyr::select(run_id, offset, precision, fps)
 )
 ```
+
 ## FPS for fixation task
 ```{r}
-trialFPS = data_et_fix_raw %>%
+trialFPS = data_et %>%
     group_by(run_id, trial_index) %>%
     summarise(n = n())
 
 trialFPS = merge(
     trialFPS, 
-    data_trial_fix_raw %>% select(run_id, trial_index, trial_duration_exact),
+    data_trial %>% 
+        dplyr::select(run_id, trial_index, trial_duration_exact),
     by=c('run_id', 'trial_index'))
 trialFPS$fps = 1000 * trialFPS$n / trialFPS$trial_duration_exact
 
-if ('fps_fix' %in% names(data_subject_raw))
-    {data_subject_raw = data_subject_raw %>% select(!fps_fix)}
-data_subject_raw = merge(
-    data_subject_raw, 
+if ('fps_fix' %in% names(data_subject))
+    {data_subject = data_subject %>% select(!fps_fix)}
+data_subject = merge(
+    data_subject, 
     trialFPS %>% group_by(run_id) %>% summarise(fps_fix = mean(fps)),
     by='run_id'
 )
-summary(data_subject_raw$fps_fix)
+summary(data_subject$fps_fix)
 ```
 
 ## Low FPS or not following instructions
 ```{r}
-data_subject_raw %>%
-    select(run_id, triedChin, keptHead, fps_fix) %>%
+data_subject %>%
+    dplyr::select(run_id, triedChin, keptHead, fps_fix) %>%
     filter(
         triedChin==0 | 
         keptHead==0 |
-        fps_fix<3
-        )
+        fps_fix<3)
+
+subjects_lowFPS = data_subject %>%
+    dplyr::select(run_id, triedChin, keptHead, fps_fix) %>%
+    filter(fps_fix<3) %>%
+    dplyr::pull(run_id)
+print(paste(
+    'N Subjects with low FPS: ', 
+    length(subjects_lowFPS)))
+print(subjects_lowFPS)
+
+subjects_noInstruction = data_subject %>%
+    dplyr::select(run_id, triedChin, keptHead, fps_fix) %>%
+    filter(triedChin==0 | keptHead==0) %>%
+    dplyr::pull(run_id)
+print(paste(
+    'N Subjects who did not follow the instructions: ', 
+    length(subjects_noInstruction)))
+print(subjects_noInstruction)
 ```
 
 ## Trials with insanely high t_task
 ```{r}
-high_t_task = data_et_fix_raw %>%
+high_t_task = data_et %>%
     filter(t_task>5500) %>%
     group_by(run_id, trial_index) %>%
     summarise(t_task_max = max(t_task))
 
-if ('trial_duration_exact' %in% names(high_t_task))
-    {high_t_task = high_t_task %>% select(!trial_duration_exact)}
-high_t_task = merge(
-    high_t_task, 
-    data_trial_fix_raw %>%
-        select(run_id, trial_index, trial_duration_exact),
-    by=c('run_id', 'trial_index')
-)
+merge_by_index = function(data, data_source, varName) {
+    if ('trial_duration_exact' %in% names(high_t_task)) {
+        data = data %>% dplyr::select(!varName)
+    }
+    data = merge(
+        data, 
+        data_source %>%
+            dplyr::select(run_id, trial_index, varName),
+        by=c('run_id', 'trial_index'))
+    return(data)
+}
+
+high_t_task = high_t_task %>%
+    merge_by_index(data_trial, 'trial_duration_exact')
 unique(high_t_task$run_id)
 high_t_task      
 ```
@@ -133,7 +159,8 @@ high_t_task
 ```{r}
 # Number of trials per subject
 ans = as.data.table(
-    data_trial_fix_raw %>% select(run_id, trial_index, chin, withinTaskIndex)
+    data_trial %>% 
+        dplyr::select(run_id, trial_index, chin, withinTaskIndex)
     )[, count := uniqueN(trial_index), by = run_id]
 ans %>% 
     filter(count!=18)
@@ -141,40 +168,71 @@ ans %>%
 
 ## Glasses 
 ```{r}
-data_subject_raw %>%
-    select(run_id, glasses_binary) %>%
+data_subject %>%
+    dplyr::select(run_id, glasses_binary) %>%
     filter(is.na(glasses_binary))
+
+subjects_NA_glasses = data_subject %>%
+    dplyr::select(run_id, glasses_binary) %>%
+    filter(is.na(glasses_binary)) %>%
+    dplyr::pull(run_id)
 ```
 
 # Cleaning
 ## Subjects to exclude from screening
 ```{r}
-excludedSubjects = c(1, 70, 80, 97, 131, 2012)
+excludedSubjects = c(
+    1, 70, 80, 97, 131, 2012, 
+    subjects_lowFPS,
+    subjects_noInstruction,
+    subjects_NA_glasses) %>% 
+    sort() %>%
+    unique()
+
+print(paste(
+    'N Excluded subjects: ', 
+    length(excludedSubjects)))
+print(excludedSubjects)
 ```
 
-## data_trial_fix
+## data_trial
 ```{r}
+generalCleaning = function(data) {
+    print(deparse(substitute(data)))
+    print(paste('Raw: ', nrow(data)))
+    data = data %>%
+        filter(!(run_id %in% excludeSubjects))
+    print(paste('Cleaned: ', nrow(data)))
+    return(data)
+}
 
-data_trial_fix = data_trial_fix_raw %>%
+data_trial = generalCleaning(data_trial)
+data_subject = generalCleaning(data_subject)
+```
+
+
+```{r}
+print(paste('Raw: ', nrow(data_trial)))
+
+data_trial = data_trial %>%
     filter(
         !is.na(precision) & 
-        !(run_id %in% excludedSubjects) &
         (trial_duration_exact<5100)
         )
-print(paste('Raw: ', nrow(data_trial_fix_raw)))
-print(paste('Cleaned: ', nrow(data_trial_fix)))
+
+print(paste('Cleaned: ', nrow(data_trial)))
 ```
 
-## data_et_fix
+## data_et
 On purpose, we don't exclude specific x and y values, neither positive nor negative outliers
 ```{r}
-data_et_fix = data_et_fix_raw %>%
+data_et = data_et %>%
     filter(
         !(run_id %in% excludedSubjects) &
         (t_task<5100)
         )
-print(paste('Raw: ', nrow(data_et_fix_raw)))
-print(paste('Cleaned: ', nrow(data_et_fix)))
+print(paste('Raw: ', nrow(data_et)))
+print(paste('Cleaned: ', nrow(data_et)))
 ```
 # Assumptions - Long Format
 ```{r}
@@ -183,7 +241,7 @@ predictors = c('withinTaskIndex', 'x_pos', 'y_pos', 'fps', 'glasses_binary', 'ch
 ## Multicollinearity of the predictors
 ```{r}
 correlation = cor(
-    data_trial_fix %>% 
+    data_trial %>% 
         select(predictors),
     use = 'pairwise.complete.obs'
 )
@@ -194,10 +252,10 @@ correlation
 
 ## Standardized residuals
 ```{r}
-random = rchisq(nrow(data_trial_fix_raw), 7)
+random = rchisq(nrow(data_trial), 7)
 fake = lm(
     random ~ ., 
-    data=data_trial_fix_raw %>% select(predictors)
+    data=data_trial %>% select(predictors)
     )
 
 fitted = scale(fake$fitted.values)
@@ -221,7 +279,7 @@ abline(v=0)
 
 # Visualize Predictors
 ```{r}
-ggpairs(data_trial_fix[, append(predictors, c('precision', 'offset'))]) # Correlations
+ggpairs(data_trial[, append(predictors, c('precision', 'offset'))]) # Correlations
 ```
 
 
@@ -231,7 +289,7 @@ ggpairs(data_trial_fix[, append(predictors, c('precision', 'offset'))]) # Correl
 ```{r}
 m_io_0 = gls(
     offset ~ 1, 
-    data=data_trial_fix,
+    data=data_trial,
     method='ML', 
     na.action='na.omit'
     )
@@ -243,7 +301,7 @@ Control for the fact that the subjects start at different places regarding the a
 ```{r}
 m_ri_0 = lme(
     offset ~ 1, 
-    data=data_trial_fix,
+    data=data_trial,
     method='ML', 
     na.action='na.omit', 
     random = ~1 | run_id
@@ -255,8 +313,8 @@ anova(m_io_0, m_ri_0)
 ICC = x%. x% of the variance relate to the variance between the subjects 
 ```{r ICC}
 library(ICC)
-data_trial_fix$run_id_factor <- as.factor(data_trial_fix$run_id)
-ICCest(data_trial_fix$run_id_factor, data_trial_fix$offset, 
+data_trial$run_id_factor <- as.factor(data_trial$run_id)
+ICCest(data_trial$run_id_factor, data_trial$offset, 
        alpha=.05, CI.type="THD")
 fixef(m_ri_0)
 ranef(m_ri_0)
@@ -268,7 +326,7 @@ Look at the predictor correlation
 ```{r}
 m_ri_1 = lme(
     offset ~ chin, # x_pos + y_pos + withinTaskIndex + fps, 
-    data=data_trial_fix,
+    data=data_trial,
     method='ML', 
     na.action='na.omit', 
     random = ~1 | run_id
@@ -281,7 +339,7 @@ glasses, chin
 ```{r}
 m_ri_2 = lme(
     offset ~ x_pos + y_pos + withinTaskIndex + fps + glasses_binary + chin, 
-    data=data_trial_fix,
+    data=data_trial,
     method='ML', 
     na.action='na.omit', 
     random = ~1 | run_id
@@ -296,7 +354,7 @@ Standard deviation across glasses is large. Participants vary a lot around the a
 ```{r}
 m_rs_1 = lme(
     offset ~ chin, 
-    data=data_trial_fix,
+    data=data_trial,
     method='ML', 
     na.action='na.omit', 
     random = ~ chin | run_id,
@@ -312,7 +370,7 @@ anova(m_ri_1, m_rs_1)
 ```{r}
 m_rs_2 = lme(
     offset ~ chin + y_pos, 
-    data=data_trial_fix,
+    data=data_trial,
     method='ML', 
     na.action='na.omit', 
     random = ~ chin | run_id,
@@ -327,7 +385,7 @@ anova(m_rs_1, m_rs_2)
 For this model, 
 ```{r}
 screen = lme(offset ~ chin, 
-             data = data_trial_fix, 
+             data = data_trial, 
              method = 'ML',
              na.action = "na.omit",
              random = ~ chin | run_id,
