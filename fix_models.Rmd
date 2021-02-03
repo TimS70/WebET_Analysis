@@ -322,7 +322,7 @@ lme4_experimental = lmer(
 summary(lme4_experimental)
 ```
 
-# m_rs_0: Random slopes for chin
+## m_rs_0: Random slopes for chin
 Standard deviation across glasses is large. Participants vary a lot around the average score. Probably another variable. Also interpret the Correlation between the fixed effects. With lower offset, chin-rest could have a greater effect. However, there are no significant findings. (Unfortunately), the RS-model is better, so the effect of chin-rest largely varies.
 
 ```{r}
@@ -335,8 +335,28 @@ ranef(lme5_rs)
 anova(lme4_experimental, lme5_rs)
 ```
 
+## lme6: Intercepts as outcomes
+Offset differences are predicted by fps. L2 predictor fps is centered by an unweighted mean. No evidence for an effect of subject's computation power on the offset.
+```{r}
+# Get average 
+grouped = data_trial %>%
+    group_by(run_id) %>%
+    summarise(fps_subject = mean(fps))
+data_trial = data_trial %>%
+    merge_by_subject(grouped, 'fps_subject') %>%
+    mutate(fps_subject_c = fps - mean(grouped$fps_subject))
+    
+lme6_iao = lmer(
+    offset ~ y_pos_c + chin + fps_subject_c + (chin | run_id), 
+    data=data_trial,
+    REML=FALSE)
+summary(lme6_iao)
+ranef(lme6_iao)
+anova(lme4_experimental, lme5_rs)
+```
 
-# Only on top positions (see Semmelmann & Weigelt) 
+
+## Only on top positions (see Semmelmann & Weigelt) 
 ```{r}
 lme6_yPos_top = lmer(
     offset ~ chin + glasses_binary + (chin | run_id), 
