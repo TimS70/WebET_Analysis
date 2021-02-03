@@ -39,6 +39,7 @@ getPackages(c(
     'reshape',
     'reshape2',
     "rsq",
+    'tidyverse',
     "tinytex"))
 
 knitr::opts_chunk$set(echo = TRUE)
@@ -235,52 +236,14 @@ data_et = data_et %>% filter((t_task<5100))
 print(paste('Cleaned: ', nrow(data_et)))
 ```
 
-# Assumptions - Long Format
-```{r}
-predictors = c('withinTaskIndex', 'x_pos', 'y_pos', 'fps', 'glasses_binary', 'chin')
-```
-
-## Multicollinearity of the predictors
-```{r}
-correlation = cor(
-    data_trial %>% 
-        select(predictors),
-    use = 'pairwise.complete.obs'
-)
-
-symnum(correlation)
-correlation
-```
-
-## Standardized residuals
-```{r}
-random = rchisq(nrow(data_trial), 7)
-fake = lm(
-    random ~ ., 
-    data=data_trial %>% select(predictors)
-    )
-
-fitted = scale(fake$fitted.values)
-# Studentized residuals
-standardized = rstudent(fake)
-qqnorm(standardized)
-abline(0, 1)
-```
-
-```{r}
-hist(standardized)
-```
-
-## Heteroscedasticity
-```{r}
-plot(fitted, standardized)
-abline(0, 0)
-abline(v=0)
-```
-
 
 # Visualize Predictors
+Significant correlations of the predictors witih fps, glasses_binary, and chin
 ```{r}
+predictors = c('withinTaskIndex', 
+               'x_pos', 'y_pos', 'fps', 
+               'glasses_binary', 'chin')
+
 ggpairs(data_trial[, append(predictors, c('precision', 'offset'))],
         progress=F) # Correlations
 ```
@@ -290,21 +253,19 @@ ggpairs(data_trial[, append(predictors, c('precision', 'offset'))],
 # Models
 
 # Linear model (Fixed Effects, no MLA)
+Average offset=0.17 = 17%
 ```{r}
 lm_null = lm(offset ~ 1, data = data_trial %>% filter(!is.na(offset)))
 summary(lm_null)
 ```
 
 ## IO: intercept only
-ICC = 0.6182. 62% of the variance can be explained by the variance between the subjects. We should to an MLA
+ICC = 0.6182. 62% of the variance can be explained by the variance between the subjects. Interdependence assumption of the simple linear regression is violated. We should to an MLA
 ```{r}
-lme0_io = lme(
-    offset ~ 1, 
+lme0_io = lmer(
+    offset ~ 1 + (1 | run_id), 
     data=data_trial,
-    method='ML', 
-    na.action='na.omit', 
-    random = ~1 | run_id
-    )
+    REML=FALSE) # FML for comparing different fixed effects
 
 summary(lme0_io)
 
@@ -321,13 +282,10 @@ data_trial = data_trial %>%
         x_pos_c = scale(x_pos),
         fps_c = scale(fps))
 
-lme1_control = lme(
-    offset ~ x_pos_c + y_pos_c + withinTaskIndex + fps_c, 
+lme1_control = lmer(
+    offset ~  withinTaskIndex + x_pos_c + y_pos_c + fps_c + (1 | run_id), 
     data=data_trial,
-    method='ML', 
-    na.action='na.omit', 
-    random = ~1 | run_id
-    )
+    REML=FALSE)
 
 summary(lme1_control)
 anova(lme0_io, lme1_control)
@@ -335,43 +293,31 @@ anova(lme0_io, lme1_control)
 
 Only relevant control variables
 ```{r}
-lme2_control = lme(
-    offset ~ y_pos_c, 
+lme2_control = lmer(
+    offset ~ y_pos_c + (1 | run_id), 
     data=data_trial,
-    method='ML', 
-    na.action='na.omit', 
-    random = ~1 | run_id
-    )
+    REML=FALSE)
 
 summary(lme2_control)
 anova(lme0_io, lme2_control)
 ```
-
-
 # m_ri_1: adding chin rest
 Look at the predictor correlation
 ```{r}
-lme3_experimental = lme(
-    offset ~ y_pos_c + glasses_binary + chin, 
+lme3_experimental = lmer(
+    offset ~ y_pos_c + glasses_binary + chin + (1 | run_id), 
     data=data_trial,
-    method='ML', 
-    na.action='na.omit', 
-    random = ~1 | run_id
-    )
-
+    REML=FALSE)
 summary(lme3_experimental)
 anova(lme0_io, lme3_experimental)
 ```
 
 Only relevant variables
 ```{r}
-lme4_experimental = lme(
-    offset ~ y_pos_c + chin, 
+lme4_experimental = lmer(
+    offset ~ y_pos_c + chin + (1 | run_id), 
     data=data_trial,
-    method='ML', 
-    na.action='na.omit', 
-    random = ~1 | run_id
-    )
+    REML=FALSE)
 
 summary(lme4_experimental)
 ```
@@ -380,119 +326,162 @@ summary(lme4_experimental)
 Standard deviation across glasses is large. Participants vary a lot around the average score. Probably another variable. Also interpret the Correlation between the fixed effects. With lower offset, chin-rest could have a greater effect. However, there are no significant findings. (Unfortunately), the RS-model is better, so the effect of chin-rest largely varies.
 
 ```{r}
-lme5_rs = lme(
-    offset ~ y_pos_c + chin, 
+lme5_rs = lmer(
+    offset ~ y_pos_c + chin + (chin | run_id), 
     data=data_trial,
-    method='ML', 
-    na.action='na.omit', 
-    random = ~ chin | run_id,
-    control = lmeControl(msMaxIter = 200) # Get sure it converges
-    )
+    REML=FALSE)
 summary(lme5_rs)
+ranef(lme5_rs)
 anova(lme4_experimental, lme5_rs)
 ```
 
-# Only on top positions
-# Also try only using the top positions (see Semmelmann & Weigelt) 
+
+# Only on top positions (see Semmelmann & Weigelt) 
 ```{r}
-lme_yPos_top = lme(
-    offset ~ chin + glasses_binary, 
+lme6_yPos_top = lmer(
+    offset ~ chin + glasses_binary + (chin | run_id), 
     data=data_trial %>% filter(y_pos==0.2),
-    method='ML', 
-    na.action='na.omit', 
-    random = ~ chin | run_id,
-    control = lmeControl(msMaxIter = 200) # Get sure it converges
-    )
-summary(lme_yPos_top)
+    REML=FALSE)
+summary(lme6_yPos_top)
 ```
 
-# Assumptions
-For this model, 
+# Effects
+Use formulas without random slopes (Snijders & Bosker, 2012)
 ```{r}
-screen = lme(offset ~ chin, 
-             data = data_trial, 
-             method = 'ML',
-             na.action = "na.omit",
-             random = ~ chin | run_id,
-             control = lmeControl(msMaxIter = 200))
-standardized = as.data.frame(scale(screen$residuals))
-standardized = standardized$fixed
-fitted = scale(fitted.values(screen))
-qqnorm(standardized)
-abline(0, 1)
+m0 <- lmer(offset ~ y_pos_c + (1 | run_id),
+           data=data_trial,
+           REML=FALSE)
+m1 <- lmer(offset ~ y_pos_c + chin + (1 | run_id),
+           data=data_trial,
+           REML=FALSE)
+
+L1_m0 <- sigma(m0)^2 # L1-Residualvarianz RIO Modell
+L1_m1 <- sigma(m1)^2 # L1-Residualvarianz RI Modell
+print('Pseudo R^2')
+print(paste(
+    'Reduction of L1 variance due to chin: ',
+    (L1_m0 - L1_m1)/L1_m0
+))
+
+L2_m0 <- unlist(summary(m0)$var) # Interceptvarianz RI Modell
+L2_m1 <- unlist(summary(m1)$var) # Interceptvarianz IAO Modell
+print(paste(
+    'Reduction of L2 variance due to chin: ',
+    (L2_m0 - L2_m1)/L2_m0
+))
+
 ```
-
-Normality got worse
-```{r}
-hist(standardized)
-```
-Heteroscedasticity got worse
-Concentration of dots is heavily on the left side
-```{r}
-plot(fitted, standardized)
-abline(0, 0)
-abline(v=0)
-```
-
-
-## Effects
-Varianzaufkl?rung: Pseudo-R? (VL11 F18f.)
-
-# More models? 
-Kontexteffekte (GRO-Zentrierung, VL10)?
 
 # Assumptions
 Sources: 
  - https://www.youtube.com/watch?v=UvyxSqEXBwc
  - https://www.pythonfordatascience.org/mixed-effects-regression-python/
-
-## Accuracy
+ - https://ademos.people.uic.edu/Chapter18.html
+ 
+## Linearity: Plot residuals vs. observed
 ```{r}
+plot(resid(lme5_rs), data_trial$offset)
 ```
 
-## Outliers
+## Homosedasticity: Homogeneity of residuals across groups
+ANOVA as a variation of Levene's test. Extract residuals from the model and square the absolute value. Should be not significant. Significant differences across residuals. We have Heteroscedasticity.
 ```{r}
+data_trial = data_trial %>%
+    mutate(
+        res = residuals(lme5_rs),
+        res_sq = (abs(res)^2))
+
+levene_model <- lm(res_sq ~ run_id, data=data_trial)
+anova(levene_model)
+
+plot(lme5_rs)
 ```
 
-## Multicollinearity
+## Normal distribution of residuals
+Normal distribution not given. 
 ```{r}
-car::vif(glmer_final)
+qqmath(lme5_rs, id=0.05)
 ```
 
-## Linearity
+Lets try with log transformed offset
+Does not make it any better
 ```{r}
+data_trial = data_trial %>%
+    mutate(
+        offset_log = log(offset+1),
+        offset_log10 = log10(offset+1),
+        offset_sqrt = sqrt(offset),
+        )
 
+lmer_log = lmer(
+    offset_log ~ y_pos_c + chin + (chin | run_id), 
+    data=data_trial,
+    REML=FALSE)
+summary(lmer_log)
+ranef(lmer_log)
+qqmath(lmer_log, id=0.05, main='log transformed offset')
 
-predictors <- c(
-    'attributeIndex_cmc', 'optionIndex_cmc', 
-    'payneIndex_cmc')
+lmer_log10 = lmer(
+    offset_log10 ~ y_pos_c + chin + (chin | run_id), 
+    data=data_trial,
+    REML=FALSE)
+summary(lmer_log10)
+ranef(lmer_log10)
+qqmath(lmer_log10, id=0.05, main='log10 transformed offset')
 
-data_plot = data_trial %>%
-    mutate(predict_choseLL_prob = 
-        predict(glmer_final, type = "response"),
-        logit = log(predict_choseLL_prob/(1-predict_choseLL_prob))) %>%
-    dplyr::select(c(logit, predictors)) %>%
-    gather(key = "predictors", value = "predictor_value", -logit)
-data_plot
+lmer_sqrt = lmer(
+    offset_sqrt ~ y_pos_c + chin + (chin | run_id), 
+    data=data_trial,
+    REML=FALSE)
+summary(lmer_sqrt)
+ranef(lmer_sqrt)
+qqmath(lmer_sqrt, id=0.05, main='sqrt transformed offset')
 
-ggplot(data_plot, aes(logit, predictor_value))+
-    geom_point(size = 0.5, alpha = 0.5) +
-    geom_smooth(method = "loess") + 
-    theme_bw() + 
-    facet_wrap(~predictors, scales = "free_y")
-```
-```
+````
 
-## Normality
-Voraussetzungen (Eid2015, p. 747)
- - Residuen unabh?ngig und identisch normalverteilt, u.a.
+### Residuals for sqrt transformation
+Does not look better
 ```{r}
+data_trial = data_trial %>%
+    mutate(
+        res = residuals(lmer_sqrt),
+        res_sq = (abs(res)^2))
+
+levene_model <- lm(res_sq ~ run_id, data=data_trial)
+anova(levene_model)
+
+plot(lmer_sqrt)
 ```
 
-## Homogeneity
+## Multicollinearity of the predictors
+No multicollinearity
 ```{r}
+correlation = cor(
+    data_trial %>% 
+        select(predictors),
+    use = 'pairwise.complete.obs'
+)
+
+symnum(correlation)
+correlation
+
+car::vif(lme5_rs)
 ```
 
-## Homoscedasticity
+## HLMdiag
+https://cran.rstudio.com/web/packages/HLMdiag/index.html
 ```{r}
+#case_delete() #iteratively delete groups corresponding to the levels of a hierarchical linear model, using lmer to fit the models for each deleted case
+
+#covratio() #calculate measures of the change in the covariance matrices for the fixed effects based on the deletion of an observation, or group of observations,
+
+#diagnostics() #is used to compute deletion diagnostics for a hierarchical linear model based on the building blocks returned by case_delete.
+
+#HLMresid() #extracts residuals from a hierarchical linear model fit using lmer. Can provide a variety of different types of residuals based upon the specifications when you call the function
+
+#leverage() #calculates the leverage of a hierarchical linear model fit
+
+#mdffits() #calculate measures of the change in the fixed effects estimates based on the deletetion of an observation, or group of observations
 ```
+
+

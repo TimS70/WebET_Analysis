@@ -543,8 +543,7 @@ anova(m_cluster_1, m_cluster_2, m_cluster_3, m_cluster_4)
 # Assumptions
 
 ## Linear relationship between predicted log(choseLL) and the predictors
-Looks quite linear. If not check out: 
-http://www.sthda.com/english/articles/36-classification-methods-essentials/148-logistic-regression-assumptions-and-diagnostics-in-r/
+Looks quite linear. If not check out: http://www.sthda.com/english/articles/36-classification-methods-essentials/148-logistic-regression-assumptions-and-diagnostics-in-r/
 ```{r}
 predictors <- c(
     'attributeIndex_cmc', 'optionIndex_cmc', 
@@ -569,4 +568,20 @@ ggplot(data_plot, aes(logit, predictor_value))+
 compute variance inflation factor. " As a rule of thumb, a VIF value that exceeds 5 or 10 indicates a problematic amount of collinearity"
 ```{r}
 car::vif(glmer_final)
+```
+
+## DHARMa
+"DHARMa was created by Florian Hartig in 2016 and creates readily interpretable residuals for generalized linear (mixed)"
+https://cran.r-project.org/web/packages/DHARMa/vignettes/DHARMa.html
+```{r}
+#simulateResiduals() #creates scaled (quantile) residuals through a default 250 simulations (which can be modified)
+
+#plotSimulatedResiduals #provides qqplot and residuals vs predicted plots to determine deviations from normality
+
+#Goodness of fit tests:
+#testUniformity()
+#testOverdispersion()
+#testZeroinflation()
+#testTemporalAutocorrelation()
+#testSpatialAutocorrelation()
 ```
