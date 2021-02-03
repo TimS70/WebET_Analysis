@@ -14311,7 +14311,7 @@ a.anchor-link {
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Current Working directory  C:\Users\User\GitHub\WebET_Analysis
+<pre>Current Working directory  C:\Users\User\GitHub\WebET_Analysis\prolific
 </pre>
 </div>
 </div>
@@ -14323,7 +14323,7 @@ a.anchor-link {
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[2]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[34]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_et</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/data_jupyter/data_et.csv&#39;</span><span class="p">)</span>
@@ -14334,13 +14334,7 @@ a.anchor-link {
 <span class="n">data_trial_fix</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/data_jupyter/data_trial_fix.csv&#39;</span><span class="p">)</span>
 <span class="n">data_trial_choice</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/data_jupyter/data_trial_choice.csv&#39;</span><span class="p">)</span>
 
-<span class="n">data_subject</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/data_jupyter/data_subject.csv&#39;</span><span class="p">)</span> \
-    <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span>
-            <span class="p">{</span>
-                <span class="s1">&#39;chosenAmount&#39;</span><span class="p">:</span> <span class="s1">&#39;bonus_pay&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;chosenDelay&#39;</span><span class="p">:</span> <span class="s1">&#39;bonus_delay&#39;</span>
-            <span class="p">}</span>
-           <span class="p">)</span>    
+<span class="n">data_prolific</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/data_jupyter/data_prolific.csv&#39;</span><span class="p">)</span> \
 
 <span class="n">overview</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
     <span class="p">[</span>
@@ -14350,12 +14344,12 @@ a.anchor-link {
         <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">data_trial</span><span class="p">)],</span>
         <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">data_trial_fix</span><span class="p">)],</span>
         <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">data_trial_choice</span><span class="p">)],</span>
-        <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">data_subject</span><span class="p">)]</span>
+        <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">data_prolific</span><span class="p">)]</span>
     <span class="p">],</span> 
     <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">],</span>
     <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;data_et&#39;</span><span class="p">,</span> <span class="s1">&#39;data_et_fix&#39;</span><span class="p">,</span> <span class="s1">&#39;data_et_choice&#39;</span><span class="p">,</span> 
            <span class="s1">&#39;data_trial&#39;</span><span class="p">,</span> <span class="s1">&#39;data_trial_fix&#39;</span><span class="p">,</span> <span class="s1">&#39;data_trial_choice&#39;</span><span class="p">,</span> 
-           <span class="s1">&#39;data_subject&#39;</span><span class="p">])</span>
+           <span class="s1">&#39;data_prolific&#39;</span><span class="p">])</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">overview</span><span class="p">)</span>
 </pre></div>
 
@@ -14379,11 +14373,11 @@ a.anchor-link {
 <pre>                   length
 data_et            618566
 data_et_fix         57762
-data_et_choice     148345
+data_et_choice     143127
 data_trial          30362
 data_trial_fix        918
-data_trial_choice    3655
-data_subject           84
+data_trial_choice    4423
+data_prolific          94
 </pre>
 </div>
 </div>
@@ -14400,7 +14394,7 @@ data_subject           84
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[3]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[36]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">if</span> <span class="s1">&#39;trial_length&#39;</span> <span class="ow">in</span> <span class="n">data_subject</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span> 
@@ -14415,7 +14409,10 @@ data_subject           84
                  <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;prolificID&#39;</span><span class="p">,</span> <span class="s1">&#39;trial_length&#39;</span><span class="p">]</span>
                 <span class="p">)</span>
 
-    <span class="n">data_subject</span> <span class="o">=</span> <span class="n">data_subject</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;prolificID&#39;</span><span class="p">],</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+<span class="n">data_prolific</span> <span class="o">=</span> <span class="n">data_prolific</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+    <span class="n">output</span><span class="p">,</span> 
+    <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;prolificID&#39;</span><span class="p">],</span> 
+    <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -14426,7 +14423,7 @@ data_subject           84
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[4]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[37]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_et</span> <span class="o">=</span> <span class="n">data_et</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
@@ -14444,7 +14441,7 @@ data_subject           84
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[38]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
@@ -14505,7 +14502,7 @@ data_subject           84
                                <span class="s1">&#39;m_choseTop&#39;</span><span class="p">])</span>
 <span class="n">output</span>
 
-<span class="n">data_subject</span> <span class="o">=</span> <span class="n">data_subject</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+<span class="n">data_prolific</span> <span class="o">=</span> <span class="n">data_prolific</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -14516,19 +14513,20 @@ data_subject           84
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="These-subjects-await-review">These subjects await review<a class="anchor-link" href="#These-subjects-await-review">&#182;</a></h2>
+<h1 id="These-subjects-await-review">These subjects await review<a class="anchor-link" href="#These-subjects-await-review">&#182;</a></h1>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[39]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_subject</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;AWAITING REVIEW&#39;</span><span class="p">,</span> 
-                 <span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;prolificID&#39;</span><span class="p">,</span> <span class="s1">&#39;trial_length&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;m_x_fix&#39;</span><span class="p">,</span> <span class="s1">&#39;m_y_fix&#39;</span><span class="p">,</span> <span class="s1">&#39;m_x_choice&#39;</span><span class="p">,</span> <span class="s1">&#39;m_y_choice&#39;</span><span class="p">,</span> <span class="s1">&#39;m_count_fix&#39;</span><span class="p">,</span> <span class="s1">&#39;m_count_choice&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;m_choseTop&#39;</span><span class="p">]</span>
-                <span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;prolificID&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_prolific</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="n">data_prolific</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;AWAITING REVIEW&#39;</span><span class="p">,</span> 
+    <span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;prolificID&#39;</span><span class="p">,</span> <span class="s1">&#39;trial_length&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;m_x_fix&#39;</span><span class="p">,</span> <span class="s1">&#39;m_y_fix&#39;</span><span class="p">,</span> <span class="s1">&#39;m_x_choice&#39;</span><span class="p">,</span> <span class="s1">&#39;m_y_choice&#39;</span><span class="p">,</span> <span class="s1">&#39;m_count_fix&#39;</span><span class="p">,</span> <span class="s1">&#39;m_count_choice&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;m_choseTop&#39;</span><span class="p">]</span>
+<span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;prolificID&#39;</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -14544,7 +14542,7 @@ data_subject           84
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[39]:</div>
 
 
 
@@ -14594,21 +14592,188 @@ data_subject           84
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[40]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">if</span> <span class="s1">&#39;choice_rt&#39;</span> <span class="ow">in</span> <span class="n">data_subject</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;choice_rt already added!&#39;</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span> 
-    <span class="n">grouped</span> <span class="o">=</span> <span class="n">data_trial</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data_trial</span><span class="p">[</span><span class="s1">&#39;trial_type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;eyetracking-choice&#39;</span><span class="p">,</span> <span class="p">:]</span> \
-        <span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;prolificID&#39;</span><span class="p">])[</span><span class="s1">&#39;trial_duration_exact&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> \
-        <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span> \
-        <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;trial_duration_exact&#39;</span><span class="p">:</span> <span class="s1">&#39;choice_rt&#39;</span><span class="p">})</span>
-    <span class="n">data_subject</span> <span class="o">=</span> <span class="n">data_subject</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">grouped</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;prolificID&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_prolific</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="n">data_prolific</span><span class="p">[</span><span class="s1">&#39;prolificID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span>
+    <span class="p">[</span><span class="s1">&#39;5fea6632bf9ae4a79153efdf&#39;</span><span class="p">,</span> 
+         <span class="s1">&#39;5b8969006651ea000118e42e&#39;</span><span class="p">,</span> 
+         <span class="s1">&#39;5fb2af792942a58ffe303948&#39;</span><span class="p">,</span> 
+         <span class="s1">&#39;5edc20443467e28ec4e30f93&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;5fa1192cf99e161a5cfad1cd&#39;</span><span class="p">,</span> 
+         <span class="s1">&#39;5d430fdf871f1700017b2a81&#39;</span>
+        <span class="p">]</span>
+    <span class="p">),</span> 
+    <span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;prolificID&#39;</span><span class="p">,</span> <span class="s1">&#39;trial_length&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;m_x_fix&#39;</span><span class="p">,</span> <span class="s1">&#39;m_y_fix&#39;</span><span class="p">,</span> <span class="s1">&#39;m_x_choice&#39;</span><span class="p">,</span> <span class="s1">&#39;m_y_choice&#39;</span><span class="p">,</span> <span class="s1">&#39;m_count_fix&#39;</span><span class="p">,</span> <span class="s1">&#39;m_count_choice&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;m_choseTop&#39;</span><span class="p">]</span>
+<span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;prolificID&#39;</span><span class="p">)</span>
+</pre></div>
 
-<span class="n">data_subject</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-    <span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;AWAITING REVIEW&#39;</span><span class="p">,</span> 
-    <span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;prolificID&#39;</span><span class="p">,</span> <span class="s1">&#39;webcam_fps&#39;</span><span class="p">,</span> <span class="s1">&#39;choice_rt&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_pay&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_delay&#39;</span><span class="p">]</span>
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[40]:</div>
+
+
+
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>run_id</th>
+      <th>prolificID</th>
+      <th>trial_length</th>
+      <th>m_x_fix</th>
+      <th>m_y_fix</th>
+      <th>m_x_choice</th>
+      <th>m_y_choice</th>
+      <th>m_count_fix</th>
+      <th>m_count_choice</th>
+      <th>m_choseTop</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>15</th>
+      <td>12.0</td>
+      <td>5b8969006651ea000118e42e</td>
+      <td>518.0</td>
+      <td>0.350426</td>
+      <td>0.382455</td>
+      <td>0.353909</td>
+      <td>0.366253</td>
+      <td>2073.0</td>
+      <td>2616.0</td>
+      <td>0.462500</td>
+    </tr>
+    <tr>
+      <th>71</th>
+      <td>70.0</td>
+      <td>5d430fdf871f1700017b2a81</td>
+      <td>407.0</td>
+      <td>0.265550</td>
+      <td>0.464537</td>
+      <td>1.944483</td>
+      <td>0.170135</td>
+      <td>61.0</td>
+      <td>285.0</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>86</th>
+      <td>NaN</td>
+      <td>5edc20443467e28ec4e30f93</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>49</th>
+      <td>48.0</td>
+      <td>5fa1192cf99e161a5cfad1cd</td>
+      <td>520.0</td>
+      <td>0.516436</td>
+      <td>0.451000</td>
+      <td>0.521618</td>
+      <td>0.499869</td>
+      <td>2923.0</td>
+      <td>5158.0</td>
+      <td>0.544304</td>
+    </tr>
+    <tr>
+      <th>66</th>
+      <td>61.0</td>
+      <td>5fb2af792942a58ffe303948</td>
+      <td>271.0</td>
+      <td>0.517327</td>
+      <td>0.508298</td>
+      <td>0.535167</td>
+      <td>0.454149</td>
+      <td>967.0</td>
+      <td>1247.0</td>
+      <td>0.595238</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>9.0</td>
+      <td>5fea6632bf9ae4a79153efdf</td>
+      <td>518.0</td>
+      <td>0.462945</td>
+      <td>0.394411</td>
+      <td>0.531769</td>
+      <td>0.309021</td>
+      <td>212.0</td>
+      <td>478.0</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[43]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">if</span> <span class="s1">&#39;choice_rt&#39;</span> <span class="ow">in</span> <span class="n">data_prolific</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+    <span class="n">data_prolific</span> <span class="o">=</span> <span class="n">data_prolific</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s1">&#39;choice_rt&#39;</span><span class="p">)</span>
+<span class="n">grouped</span> <span class="o">=</span> <span class="n">data_trial</span> \
+    <span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+        <span class="n">data_trial</span><span class="p">[</span><span class="s1">&#39;trial_type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;eyetracking-choice&#39;</span><span class="p">,</span> 
+        <span class="p">:]</span> \
+    <span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;prolificID&#39;</span><span class="p">])[</span><span class="s1">&#39;trial_duration_exact&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> \
+    <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span> \
+    <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;trial_duration_exact&#39;</span><span class="p">:</span> <span class="s1">&#39;choice_rt&#39;</span><span class="p">})</span>
+
+<span class="n">data_prolific</span> <span class="o">=</span> <span class="n">data_prolific</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+    <span class="n">grouped</span><span class="p">,</span> 
+    <span class="n">on</span><span class="o">=</span><span class="s1">&#39;prolificID&#39;</span><span class="p">,</span> 
+    <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+
+<span class="n">data_prolific</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="n">data_prolific</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;AWAITING REVIEW&#39;</span><span class="p">,</span> 
+    <span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;prolificID&#39;</span><span class="p">,</span> <span class="s1">&#39;webcam_fps&#39;</span><span class="p">,</span> 
+     <span class="s1">&#39;choice_rt&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_USD&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_delay&#39;</span><span class="p">]</span>
 <span class="p">]</span> \
     <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;run_id&#39;</span><span class="p">)</span>
 </pre></div>
@@ -14626,7 +14791,7 @@ data_subject           84
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[7]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[43]:</div>
 
 
 
@@ -14653,7 +14818,7 @@ data_subject           84
       <th>prolificID</th>
       <th>webcam_fps</th>
       <th>choice_rt</th>
-      <th>bonus_pay</th>
+      <th>bonus_USD</th>
       <th>bonus_delay</th>
     </tr>
   </thead>
@@ -14672,27 +14837,26 @@ data_subject           84
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="Basic-payment">Basic payment<a class="anchor-link" href="#Basic-payment">&#182;</a></h1>
+<h1 id="data_pay">data_pay<a class="anchor-link" href="#data_pay">&#182;</a></h1>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[44]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_pay</span> <span class="o">=</span> <span class="n">data_subject</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;APPROVED&#39;</span><span class="p">,</span> 
-                            <span class="p">[</span>
-                                <span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;prolificID&#39;</span><span class="p">,</span> 
-                                <span class="s1">&#39;age&#39;</span><span class="p">,</span>  <span class="s1">&#39;Country of Birth&#39;</span><span class="p">,</span> <span class="s1">&#39;Current Country of Residence&#39;</span><span class="p">,</span> <span class="s1">&#39;First Language&#39;</span><span class="p">,</span>
-                                <span class="s1">&#39;Nationality&#39;</span><span class="p">,</span> <span class="s1">&#39;Sex&#39;</span><span class="p">,</span>
-                                <span class="s1">&#39;status&#39;</span><span class="p">,</span> <span class="s1">&#39;reviewed_at_datetime&#39;</span><span class="p">,</span> <span class="s1">&#39;Country of Birth&#39;</span><span class="p">,</span> <span class="s1">&#39;entered_code&#39;</span><span class="p">,</span>
-                                <span class="s1">&#39;session_id&#39;</span><span class="p">,</span> <span class="s1">&#39;started_datetime&#39;</span><span class="p">,</span> <span class="s1">&#39;completed_date_time&#39;</span><span class="p">,</span> <span class="s1">&#39;time_taken&#39;</span><span class="p">,</span>
-                                <span class="s1">&#39;bonus_pay&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_delay&#39;</span>
-                            <span class="p">]</span>
-                           <span class="p">]</span>
-
-<span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;basic_pay&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.25</span>
-<span class="n">data_pay</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="s1">&#39;bonus_pay&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_delay&#39;</span><span class="p">]]</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_pay</span> <span class="o">=</span> <span class="n">data_prolific</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="n">data_prolific</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;APPROVED&#39;</span><span class="p">,</span> 
+    <span class="p">[</span>
+        <span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;prolificID&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;age&#39;</span><span class="p">,</span>  <span class="s1">&#39;Country of Birth&#39;</span><span class="p">,</span> <span class="s1">&#39;Current Country of Residence&#39;</span><span class="p">,</span> <span class="s1">&#39;First Language&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Nationality&#39;</span><span class="p">,</span> <span class="s1">&#39;Sex&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;status&#39;</span><span class="p">,</span> <span class="s1">&#39;reviewed_at_datetime&#39;</span><span class="p">,</span> <span class="s1">&#39;Country of Birth&#39;</span><span class="p">,</span> <span class="s1">&#39;entered_code&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;session_id&#39;</span><span class="p">,</span> <span class="s1">&#39;started_datetime&#39;</span><span class="p">,</span> <span class="s1">&#39;completed_date_time&#39;</span><span class="p">,</span> <span class="s1">&#39;time_taken&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;bonus_USD&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_delay&#39;</span>
+    <span class="p">]</span>
+<span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_pay</span><span class="p">))</span>
 </pre></div>
 
      </div>
@@ -14708,7 +14872,67 @@ data_subject           84
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[8]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>50
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h1 id="Bonus-payment">Bonus payment<a class="anchor-link" href="#Bonus-payment">&#182;</a></h1>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Reformat payments</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[45]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_delay&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_delay&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+<span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_delay&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_delay&#39;</span><span class="p">]</span> \
+    <span class="o">.</span><span class="n">replace</span><span class="p">([</span><span class="s1">&#39;Today&#39;</span><span class="p">,</span> <span class="s1">&#39;Tomorrow&#39;</span><span class="p">,</span> <span class="s1">&#39;7 days&#39;</span><span class="p">,</span> 
+          <span class="s1">&#39;15 days&#39;</span><span class="p">,</span> <span class="s1">&#39;30 days&#39;</span><span class="p">,</span> <span class="s1">&#39;90 days&#39;</span><span class="p">,</span> 
+          <span class="s1">&#39;180 days&#39;</span><span class="p">],</span> 
+         <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">])</span> \
+    <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+<span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_USD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_USD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+<span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_USD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_USD&#39;</span><span class="p">]</span> \
+    <span class="o">.</span><span class="n">replace</span><span class="p">({</span><span class="s1">&#39;\$&#39;</span><span class="p">:</span><span class="s1">&#39;&#39;</span><span class="p">},</span> <span class="n">regex</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> \
+    <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;50 cent&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span> \
+    <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+<span class="n">data_pay</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="s1">&#39;bonus_USD&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_delay&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[45]:</div>
 
 
 
@@ -14731,255 +14955,35 @@ data_subject           84
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>bonus_pay</th>
+      <th>bonus_USD</th>
       <th>bonus_delay</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>1</th>
-      <td>$4.5</td>
-      <td>180 days</td>
+      <th>0</th>
+      <td>4.5</td>
+      <td>7.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4.5</td>
+      <td>30.0</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>$3.5</td>
-      <td>Today</td>
+      <td>4.5</td>
+      <td>30.0</td>
     </tr>
     <tr>
       <th>5</th>
-      <td>NaN</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>$4.5</td>
-      <td>90 days</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>$4.5</td>
-      <td>7 days</td>
+      <td>4.0</td>
+      <td>30.0</td>
     </tr>
     <tr>
       <th>10</th>
-      <td>$5</td>
-      <td>30 days</td>
-    </tr>
-    <tr>
-      <th>11</th>
-      <td>$4</td>
-      <td>Today</td>
-    </tr>
-    <tr>
-      <th>12</th>
-      <td>$3.5</td>
-      <td>Today</td>
-    </tr>
-    <tr>
-      <th>14</th>
-      <td>$4.5</td>
-      <td>7 days</td>
-    </tr>
-    <tr>
-      <th>15</th>
-      <td>$3</td>
-      <td>Today</td>
-    </tr>
-    <tr>
-      <th>16</th>
-      <td>$4.5</td>
-      <td>90 days</td>
-    </tr>
-    <tr>
-      <th>17</th>
-      <td>$2.5</td>
-      <td>Today</td>
-    </tr>
-    <tr>
-      <th>18</th>
-      <td>$3</td>
-      <td>Today</td>
-    </tr>
-    <tr>
-      <th>19</th>
-      <td>$4.5</td>
-      <td>90 days</td>
-    </tr>
-    <tr>
-      <th>20</th>
-      <td>50 cent</td>
-      <td>Today</td>
-    </tr>
-    <tr>
-      <th>21</th>
-      <td>$3</td>
-      <td>Today</td>
-    </tr>
-    <tr>
-      <th>22</th>
-      <td>$4</td>
-      <td>Tomorrow</td>
-    </tr>
-    <tr>
-      <th>23</th>
-      <td>$4.5</td>
-      <td>30 days</td>
-    </tr>
-    <tr>
-      <th>24</th>
-      <td>$4.5</td>
-      <td>30 days</td>
-    </tr>
-    <tr>
-      <th>25</th>
-      <td>$5</td>
-      <td>Tomorrow</td>
-    </tr>
-    <tr>
-      <th>26</th>
-      <td>$4</td>
-      <td>30 days</td>
-    </tr>
-    <tr>
-      <th>27</th>
-      <td>$4.5</td>
-      <td>30 days</td>
-    </tr>
-    <tr>
-      <th>28</th>
-      <td>$4.5</td>
-      <td>Today</td>
-    </tr>
-    <tr>
-      <th>29</th>
-      <td>$4</td>
-      <td>7 days</td>
-    </tr>
-    <tr>
-      <th>31</th>
-      <td>$4.5</td>
-      <td>30 days</td>
-    </tr>
-    <tr>
-      <th>33</th>
-      <td>$4.5</td>
-      <td>Today</td>
-    </tr>
-    <tr>
-      <th>34</th>
-      <td>$5</td>
-      <td>15 days</td>
-    </tr>
-    <tr>
-      <th>35</th>
-      <td>$4</td>
-      <td>15 days</td>
-    </tr>
-    <tr>
-      <th>36</th>
-      <td>$5</td>
-      <td>15 days</td>
-    </tr>
-    <tr>
-      <th>37</th>
-      <td>NaN</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>38</th>
-      <td>$4</td>
-      <td>15 days</td>
-    </tr>
-    <tr>
-      <th>39</th>
-      <td>$5</td>
-      <td>30 days</td>
-    </tr>
-    <tr>
-      <th>40</th>
-      <td>$2</td>
-      <td>Today</td>
-    </tr>
-    <tr>
-      <th>41</th>
-      <td>$4</td>
-      <td>30 days</td>
-    </tr>
-    <tr>
-      <th>42</th>
-      <td>$5</td>
-      <td>7 days</td>
-    </tr>
-    <tr>
-      <th>44</th>
-      <td>$5</td>
-      <td>30 days</td>
-    </tr>
-    <tr>
-      <th>45</th>
-      <td>$5</td>
-      <td>30 days</td>
-    </tr>
-    <tr>
-      <th>46</th>
-      <td>$4</td>
-      <td>7 days</td>
-    </tr>
-    <tr>
-      <th>47</th>
-      <td>$3.5</td>
-      <td>Today</td>
-    </tr>
-    <tr>
-      <th>49</th>
-      <td>$4.5</td>
-      <td>Tomorrow</td>
-    </tr>
-    <tr>
-      <th>51</th>
-      <td>NaN</td>
-      <td>NaN</td>
-    </tr>
-    <tr>
-      <th>52</th>
-      <td>$3</td>
-      <td>Today</td>
-    </tr>
-    <tr>
-      <th>53</th>
-      <td>$2.5</td>
-      <td>Today</td>
-    </tr>
-    <tr>
-      <th>54</th>
-      <td>$4.5</td>
-      <td>15 days</td>
-    </tr>
-    <tr>
-      <th>55</th>
-      <td>$2</td>
-      <td>Today</td>
-    </tr>
-    <tr>
-      <th>56</th>
-      <td>$4</td>
-      <td>15 days</td>
-    </tr>
-    <tr>
-      <th>57</th>
-      <td>$4.5</td>
-      <td>90 days</td>
-    </tr>
-    <tr>
-      <th>58</th>
-      <td>$4.5</td>
-      <td>30 days</td>
-    </tr>
-    <tr>
-      <th>59</th>
-      <td>$4</td>
-      <td>30 days</td>
+      <td>5.0</td>
+      <td>30.0</td>
     </tr>
   </tbody>
 </table>
@@ -14995,49 +14999,32 @@ data_subject           84
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="Bonus-payment">Bonus payment<a class="anchor-link" href="#Bonus-payment">&#182;</a></h1>
+<h2 id="Replace-empty-values-with-the-best-bonus-reward">Replace empty values with the best bonus reward<a class="anchor-link" href="#Replace-empty-values-with-the-best-bonus-reward">&#182;</a></h2>
 </div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Reformat payments</p>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[24]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">choice_options_to_numeric</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">varName</span><span class="p">):</span> 
-    <span class="n">data</span><span class="p">[</span><span class="n">varName</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">varName</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
-    <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:</span> <span class="p">,</span> <span class="p">[</span><span class="n">varName</span><span class="p">]]</span> <span class="o">=</span> \
-        <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="n">varName</span><span class="p">]]</span> \
-            <span class="o">.</span><span class="n">replace</span><span class="p">([</span><span class="s1">&#39;Today&#39;</span><span class="p">,</span> <span class="s1">&#39;Tomorrow&#39;</span><span class="p">,</span> <span class="s1">&#39;7 days&#39;</span><span class="p">,</span> 
-                      <span class="s1">&#39;15 days&#39;</span><span class="p">,</span> <span class="s1">&#39;30 days&#39;</span><span class="p">,</span> <span class="s1">&#39;90 days&#39;</span><span class="p">,</span> 
-                      <span class="s1">&#39;180 days&#39;</span><span class="p">],</span> 
-                     <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">])</span> \
-            <span class="o">.</span><span class="n">replace</span><span class="p">({</span><span class="s1">&#39;\$&#39;</span><span class="p">:</span><span class="s1">&#39;&#39;</span><span class="p">},</span> <span class="n">regex</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> \
-            <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;50 cent&#39;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span> \
-            <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">data</span>
-
-<span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;bonus_pay&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_delay&#39;</span><span class="p">]:</span>
-    <span class="n">data_pay</span> <span class="o">=</span> <span class="n">choice_options_to_numeric</span><span class="p">(</span><span class="n">data_pay</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[26]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[46]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_pay</span><span class="p">[[</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;prolificID&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_pay&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_delay&#39;</span><span class="p">]]</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># For two subjects, the bonus payment was not recorded</span>
+<span class="n">data_pay</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;prolificID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span>
+        <span class="p">[</span><span class="s1">&#39;5fea6632bf9ae4a79153efdf&#39;</span><span class="p">,</span> 
+         <span class="s1">&#39;5b8969006651ea000118e42e&#39;</span><span class="p">,</span> 
+         <span class="s1">&#39;5fb2af792942a58ffe303948&#39;</span><span class="p">,</span> 
+         <span class="s1">&#39;5edc20443467e28ec4e30f93&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;5fa1192cf99e161a5cfad1cd&#39;</span><span class="p">,</span> 
+         <span class="s1">&#39;5d430fdf871f1700017b2a81&#39;</span>
+        <span class="p">]),</span> <span class="p">[</span><span class="s1">&#39;bonus_USD&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_delay&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="n">data_pay</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;prolificID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span>
+        <span class="p">[</span><span class="s1">&#39;5fea6632bf9ae4a79153efdf&#39;</span><span class="p">,</span> 
+         <span class="s1">&#39;5b8969006651ea000118e42e&#39;</span><span class="p">,</span> 
+         <span class="s1">&#39;5fb2af792942a58ffe303948&#39;</span><span class="p">,</span> 
+         <span class="s1">&#39;5edc20443467e28ec4e30f93&#39;</span><span class="p">,</span> 
+         <span class="s1">&#39;5d430fdf871f1700017b2a81&#39;</span>
+        <span class="p">]),</span> <span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;prolificID&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_USD&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_delay&#39;</span><span class="p">]]</span>
 </pre></div>
 
      </div>
@@ -15053,7 +15040,7 @@ data_subject           84
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[26]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[46]:</div>
 
 
 
@@ -15078,353 +15065,45 @@ data_subject           84
       <th></th>
       <th>run_id</th>
       <th>prolificID</th>
-      <th>bonus_pay</th>
+      <th>bonus_USD</th>
       <th>bonus_delay</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
-      <td>103</td>
-      <td>600063f2943eab0acc812ed8</td>
-      <td>4.5</td>
-      <td>180.0</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>11</td>
-      <td>5c5684ef9d244c0001b29f1e</td>
-      <td>3.5</td>
-      <td>0.0</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>12</td>
-      <td>5b8969006651ea000118e42e</td>
-      <td>5.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>126</td>
-      <td>5c0e4e3d87e876000151cfec</td>
-      <td>4.5</td>
-      <td>90.0</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>128</td>
-      <td>5f01a0893963d02ea1d65d12</td>
-      <td>4.5</td>
-      <td>7.0</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>13</td>
-      <td>5b4e65de09f5af0001080f45</td>
-      <td>5.0</td>
-      <td>30.0</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>130</td>
-      <td>5fea19869bf07d97b4a87ae8</td>
-      <td>4.0</td>
-      <td>0.0</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>131</td>
-      <td>5e53a7b4d9a7ea3a2b062da0</td>
-      <td>3.5</td>
-      <td>0.0</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>19</td>
-      <td>5f860a189bc695131f22ec9c</td>
-      <td>4.5</td>
-      <td>7.0</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>24</td>
-      <td>5f77a902fc647a327b77004a</td>
-      <td>3.0</td>
-      <td>0.0</td>
-    </tr>
-    <tr>
-      <th>10</th>
-      <td>25</td>
-      <td>5cf0ccf488abf10019fb775d</td>
-      <td>4.5</td>
-      <td>90.0</td>
-    </tr>
-    <tr>
       <th>11</th>
-      <td>28</td>
-      <td>5f561a95aa1c4ea13672f138</td>
-      <td>2.5</td>
-      <td>0.0</td>
-    </tr>
-    <tr>
-      <th>12</th>
-      <td>30</td>
-      <td>5eeaa0ffaa6af11cf32ce057</td>
-      <td>3.0</td>
-      <td>0.0</td>
-    </tr>
-    <tr>
-      <th>13</th>
-      <td>32</td>
-      <td>5ea94df3a879f002f3e9a812</td>
-      <td>4.5</td>
-      <td>90.0</td>
-    </tr>
-    <tr>
-      <th>14</th>
-      <td>36</td>
-      <td>5f8472685956c40c720d0936</td>
-      <td>0.5</td>
-      <td>0.0</td>
-    </tr>
-    <tr>
-      <th>15</th>
-      <td>37</td>
-      <td>5f0cb319d29147695796a208</td>
-      <td>3.0</td>
-      <td>0.0</td>
-    </tr>
-    <tr>
-      <th>16</th>
-      <td>38</td>
-      <td>5f1e9db721e4f101783fe21c</td>
-      <td>4.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>17</th>
-      <td>4</td>
-      <td>5f96fc2552ce3f040af63bbc</td>
-      <td>4.5</td>
-      <td>30.0</td>
-    </tr>
-    <tr>
-      <th>18</th>
-      <td>41</td>
-      <td>5f881c7d29650a26096e77a3</td>
-      <td>4.5</td>
-      <td>30.0</td>
-    </tr>
-    <tr>
-      <th>19</th>
-      <td>42</td>
-      <td>5fcbb3066829ff1a601fe080</td>
-      <td>5.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>20</th>
-      <td>43</td>
-      <td>5f946436ae32a127565d9405</td>
-      <td>4.0</td>
-      <td>30.0</td>
-    </tr>
-    <tr>
-      <th>21</th>
-      <td>45</td>
-      <td>5f1aac6058391f01dacbf619</td>
-      <td>4.5</td>
-      <td>30.0</td>
-    </tr>
-    <tr>
-      <th>22</th>
-      <td>47</td>
-      <td>5f5793d85411a8251740e602</td>
-      <td>4.5</td>
-      <td>0.0</td>
-    </tr>
-    <tr>
-      <th>23</th>
-      <td>48</td>
-      <td>5fa1192cf99e161a5cfad1cd</td>
-      <td>4.0</td>
-      <td>7.0</td>
-    </tr>
-    <tr>
-      <th>24</th>
-      <td>5</td>
-      <td>5ea3f75481a44e39aa318256</td>
-      <td>4.5</td>
-      <td>30.0</td>
-    </tr>
-    <tr>
-      <th>25</th>
-      <td>56</td>
-      <td>5e79d99f6873570009367716</td>
-      <td>4.5</td>
-      <td>0.0</td>
-    </tr>
-    <tr>
-      <th>26</th>
-      <td>58</td>
-      <td>5de5157820c5aa09b7a53b89</td>
-      <td>5.0</td>
-      <td>15.0</td>
-    </tr>
-    <tr>
-      <th>27</th>
-      <td>59</td>
-      <td>5fe6fb05b9b609059e4613e0</td>
-      <td>4.0</td>
-      <td>15.0</td>
-    </tr>
-    <tr>
-      <th>28</th>
-      <td>6</td>
-      <td>5f4e08aafb74230a29cb4ef0</td>
-      <td>5.0</td>
-      <td>15.0</td>
-    </tr>
-    <tr>
-      <th>29</th>
-      <td>61</td>
-      <td>5fb2af792942a58ffe303948</td>
-      <td>5.0</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>30</th>
-      <td>63</td>
-      <td>5fc6bcbc6da34d0f8dd78a3a</td>
-      <td>4.0</td>
-      <td>15.0</td>
-    </tr>
-    <tr>
-      <th>31</th>
-      <td>66</td>
-      <td>5bd170999afb5b00015ba3b1</td>
-      <td>5.0</td>
-      <td>30.0</td>
-    </tr>
-    <tr>
-      <th>32</th>
-      <td>67</td>
-      <td>5cfb9f6f288ca80001169952</td>
-      <td>2.0</td>
-      <td>0.0</td>
-    </tr>
-    <tr>
-      <th>33</th>
-      <td>7</td>
-      <td>5fd41bf508717e1833d8aed7</td>
-      <td>4.0</td>
-      <td>30.0</td>
-    </tr>
-    <tr>
-      <th>34</th>
-      <td>70</td>
-      <td>5d430fdf871f1700017b2a81</td>
-      <td>5.0</td>
-      <td>7.0</td>
-    </tr>
-    <tr>
-      <th>35</th>
-      <td>74</td>
-      <td>5aa7b522b5e2110001c74775</td>
-      <td>5.0</td>
-      <td>30.0</td>
-    </tr>
-    <tr>
-      <th>36</th>
-      <td>75</td>
-      <td>5d00bb3b51669b000136a986</td>
-      <td>5.0</td>
-      <td>30.0</td>
-    </tr>
-    <tr>
-      <th>37</th>
-      <td>80</td>
-      <td>5fa69c24315bfb2d0a37c685</td>
-      <td>4.0</td>
-      <td>7.0</td>
-    </tr>
-    <tr>
-      <th>38</th>
-      <td>81</td>
-      <td>5c6cb4163023800001e71898</td>
-      <td>3.5</td>
-      <td>0.0</td>
-    </tr>
-    <tr>
-      <th>39</th>
-      <td>85</td>
-      <td>5e2db0f07dc16b3a611516bd</td>
-      <td>4.5</td>
-      <td>1.0</td>
-    </tr>
-    <tr>
-      <th>40</th>
-      <td>9</td>
+      <td>9.0</td>
       <td>5fea6632bf9ae4a79153efdf</td>
       <td>5.0</td>
       <td>1.0</td>
     </tr>
     <tr>
-      <th>41</th>
-      <td>90</td>
-      <td>5cf67b30c5cf0e00010c00fc</td>
-      <td>3.0</td>
-      <td>0.0</td>
+      <th>15</th>
+      <td>12.0</td>
+      <td>5b8969006651ea000118e42e</td>
+      <td>5.0</td>
+      <td>1.0</td>
     </tr>
     <tr>
-      <th>42</th>
-      <td>91</td>
-      <td>5f256074297aac1d8ef7382d</td>
-      <td>2.5</td>
-      <td>0.0</td>
+      <th>66</th>
+      <td>61.0</td>
+      <td>5fb2af792942a58ffe303948</td>
+      <td>5.0</td>
+      <td>1.0</td>
     </tr>
     <tr>
-      <th>43</th>
-      <td>92</td>
-      <td>5f91b067130f8504520cdd6f</td>
-      <td>4.5</td>
-      <td>15.0</td>
+      <th>71</th>
+      <td>70.0</td>
+      <td>5d430fdf871f1700017b2a81</td>
+      <td>5.0</td>
+      <td>1.0</td>
     </tr>
     <tr>
-      <th>44</th>
-      <td>93</td>
-      <td>5f4756db83588013e9e31bfc</td>
-      <td>2.0</td>
-      <td>0.0</td>
-    </tr>
-    <tr>
-      <th>45</th>
-      <td>94</td>
-      <td>5ecfc227f036c902457fc44c</td>
-      <td>4.0</td>
-      <td>15.0</td>
-    </tr>
-    <tr>
-      <th>46</th>
-      <td>96</td>
-      <td>5eb9940830ab6c098bd1943d</td>
-      <td>4.5</td>
-      <td>90.0</td>
-    </tr>
-    <tr>
-      <th>47</th>
-      <td>97</td>
-      <td>5f68fe5be5cc370c0a0911de</td>
-      <td>4.5</td>
-      <td>30.0</td>
-    </tr>
-    <tr>
-      <th>48</th>
-      <td>98</td>
-      <td>5f779405dacc842fc44bc767</td>
-      <td>4.0</td>
-      <td>30.0</td>
+      <th>86</th>
+      <td>NaN</td>
+      <td>5edc20443467e28ec4e30f93</td>
+      <td>5.0</td>
+      <td>1.0</td>
     </tr>
   </tbody>
 </table>
@@ -15437,27 +15116,13 @@ data_subject           84
 
 </div>
 
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Replace-empty-values-with-the-best-bonus-reward">Replace empty values with the best bonus reward<a class="anchor-link" href="#Replace-empty-values-with-the-best-bonus-reward">&#182;</a></h2>
-</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[27]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[47]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># For two subjects, the bonus payment was not recorded</span>
-<span class="n">data_pay</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-    <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;prolificID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span>
-        <span class="p">[</span><span class="s1">&#39;5fea6632bf9ae4a79153efdf&#39;</span><span class="p">,</span> 
-         <span class="s1">&#39;5b8969006651ea000118e42e&#39;</span><span class="p">,</span> 
-         <span class="s1">&#39;5fb2af792942a58ffe303948&#39;</span><span class="p">,</span> 
-        <span class="p">]</span>
-    <span class="p">),</span> <span class="p">[</span><span class="s1">&#39;bonus_pay&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_delay&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-
-<span class="n">data_pay</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data_pay</span><span class="p">[[</span><span class="s1">&#39;bonus_pay&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_delay&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="p">:]</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_pay</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data_pay</span><span class="p">[[</span><span class="s1">&#39;bonus_USD&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_delay&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="p">:]</span>
 </pre></div>
 
      </div>
@@ -15473,7 +15138,7 @@ data_subject           84
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[27]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[47]:</div>
 
 
 
@@ -15506,23 +15171,19 @@ data_subject           84
       <th>Sex</th>
       <th>status</th>
       <th>reviewed_at_datetime</th>
-      <th>...</th>
+      <th>Country of Birth</th>
+      <th>entered_code</th>
       <th>session_id</th>
       <th>started_datetime</th>
       <th>completed_date_time</th>
       <th>time_taken</th>
-      <th>bonus_pay</th>
+      <th>bonus_USD</th>
       <th>bonus_delay</th>
-      <th>basic_pay</th>
-      <th>date</th>
-      <th>completed_date</th>
-      <th>reward_pound</th>
     </tr>
   </thead>
   <tbody>
   </tbody>
 </table>
-<p>0 rows × 22 columns</p>
 </div>
 </div>
 
@@ -15535,12 +15196,32 @@ data_subject           84
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="What-bonus-is-due-today?">What bonus is due today?<a class="anchor-link" href="#What-bonus-is-due-today?">&#182;</a></h2>
+<h2 id="Bonus-in-other-currencies">Bonus in other currencies<a class="anchor-link" href="#Bonus-in-other-currencies">&#182;</a></h2>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[48]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_GBP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_USD&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.75</span>
+<span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_EUR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_GBP&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1.13</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="When-is-the-bonus-due?">When is the bonus due?<a class="anchor-link" href="#When-is-the-bonus-due?">&#182;</a></h2>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[28]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[49]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">add_completed_date</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">data_trial</span><span class="p">):</span>
@@ -15567,67 +15248,19 @@ data_subject           84
         <span class="n">x</span><span class="p">[</span><span class="s1">&#39;completed_date_time&#39;</span><span class="p">],</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S.</span><span class="si">%f</span><span class="s1">&#39;</span><span class="p">)</span> \
             <span class="o">.</span><span class="n">date</span><span class="p">(),</span>
     <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_pay&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-</pre></div>
 
-     </div>
-</div>
-</div>
-</div>
+<span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;due_on&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;completed_date&#39;</span><span class="p">]</span> <span class="o">+</span> \
+    <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_delay&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">)</span> 
 
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[28]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>array([4.5, 3.5, 5. , 4. , 3. , 2.5, 0.5, 2. ])</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[29]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;reward_pound&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_pay&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.75</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[31]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;due_on&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;completed_date&#39;</span><span class="p">]</span> <span class="o">+</span>  <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_delay&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">)</span> 
-
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_pay</span><span class="p">))</span>
 <span class="n">data_pay</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> 
                <span class="p">[</span>
                    <span class="s1">&#39;prolificID&#39;</span><span class="p">,</span> <span class="s1">&#39;run_id&#39;</span><span class="p">,</span>
                    <span class="s1">&#39;Nationality&#39;</span><span class="p">,</span> <span class="s1">&#39;Sex&#39;</span><span class="p">,</span>  
-                   <span class="s1">&#39;completed_date&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_pay&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_delay&#39;</span><span class="p">,</span> 
-                   <span class="s1">&#39;reward_pound&#39;</span>
+                   <span class="s1">&#39;bonus_USD&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_GBP&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_EUR&#39;</span><span class="p">,</span> 
+                   <span class="s1">&#39;completed_date&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_delay&#39;</span><span class="p">,</span> <span class="s1">&#39;due_on&#39;</span>
                <span class="p">]</span>
-              <span class="p">]</span><span class="o">.</span> <span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;completed_date&#39;</span><span class="p">)</span>
+              <span class="p">]</span><span class="o">.</span> <span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;due_on&#39;</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -15643,7 +15276,32 @@ data_subject           84
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[31]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>50
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>C:\ProgramData\Anaconda3\lib\site-packages\pandas\core\arrays\datetimelike.py:1342: PerformanceWarning: Adding/subtracting object-dtype array to TimedeltaArray not vectorized
+  warnings.warn(
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[49]:</div>
 
 
 
@@ -15670,551 +15328,664 @@ data_subject           84
       <th>run_id</th>
       <th>Nationality</th>
       <th>Sex</th>
+      <th>bonus_USD</th>
+      <th>bonus_GBP</th>
+      <th>bonus_EUR</th>
       <th>completed_date</th>
-      <th>bonus_pay</th>
       <th>bonus_delay</th>
-      <th>reward_pound</th>
+      <th>due_on</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>24</th>
-      <td>5ea3f75481a44e39aa318256</td>
-      <td>5</td>
-      <td>Israel</td>
-      <td>Male</td>
-      <td>2021-01-18</td>
-      <td>4.5</td>
-      <td>30.0</td>
-      <td>3.375</td>
-    </tr>
-    <tr>
-      <th>28</th>
-      <td>5f4e08aafb74230a29cb4ef0</td>
-      <td>6</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>2021-01-18</td>
-      <td>5.0</td>
-      <td>15.0</td>
-      <td>3.750</td>
-    </tr>
-    <tr>
-      <th>40</th>
-      <td>5fea6632bf9ae4a79153efdf</td>
-      <td>9</td>
-      <td>Serbia</td>
-      <td>Male</td>
-      <td>2021-01-18</td>
-      <td>5.0</td>
-      <td>1.0</td>
-      <td>3.750</td>
-    </tr>
-    <tr>
-      <th>20</th>
-      <td>5f946436ae32a127565d9405</td>
-      <td>43</td>
-      <td>Portugal</td>
-      <td>Male</td>
-      <td>2021-01-18</td>
-      <td>4.0</td>
-      <td>30.0</td>
-      <td>3.000</td>
-    </tr>
-    <tr>
-      <th>19</th>
-      <td>5fcbb3066829ff1a601fe080</td>
-      <td>42</td>
-      <td>United Kingdom</td>
-      <td>Female</td>
-      <td>2021-01-18</td>
-      <td>5.0</td>
-      <td>1.0</td>
-      <td>3.750</td>
-    </tr>
-    <tr>
       <th>18</th>
-      <td>5f881c7d29650a26096e77a3</td>
-      <td>41</td>
-      <td>United Kingdom</td>
+      <td>5f0cb319d29147695796a208</td>
+      <td>37.0</td>
+      <td>Italy</td>
       <td>Male</td>
+      <td>3.0</td>
+      <td>2.250</td>
+      <td>2.54250</td>
       <td>2021-01-18</td>
-      <td>4.5</td>
-      <td>30.0</td>
-      <td>3.375</td>
+      <td>0.0</td>
+      <td>2021-01-18</td>
     </tr>
     <tr>
       <th>17</th>
-      <td>5f96fc2552ce3f040af63bbc</td>
-      <td>4</td>
-      <td>Spain</td>
+      <td>5f8472685956c40c720d0936</td>
+      <td>36.0</td>
+      <td>Italy</td>
       <td>Male</td>
+      <td>0.5</td>
+      <td>0.375</td>
+      <td>0.42375</td>
       <td>2021-01-18</td>
-      <td>4.5</td>
-      <td>30.0</td>
-      <td>3.375</td>
+      <td>0.0</td>
+      <td>2021-01-18</td>
     </tr>
     <tr>
-      <th>16</th>
-      <td>5f1e9db721e4f101783fe21c</td>
-      <td>38</td>
-      <td>Poland</td>
+      <th>7</th>
+      <td>5c5684ef9d244c0001b29f1e</td>
+      <td>11.0</td>
+      <td>United States</td>
       <td>Male</td>
+      <td>3.5</td>
+      <td>2.625</td>
+      <td>2.96625</td>
       <td>2021-01-18</td>
-      <td>4.0</td>
-      <td>1.0</td>
-      <td>3.000</td>
+      <td>0.0</td>
+      <td>2021-01-18</td>
     </tr>
     <tr>
       <th>14</th>
-      <td>5f8472685956c40c720d0936</td>
-      <td>36</td>
-      <td>Italy</td>
-      <td>Male</td>
-      <td>2021-01-18</td>
-      <td>0.5</td>
-      <td>0.0</td>
-      <td>0.375</td>
-    </tr>
-    <tr>
-      <th>13</th>
-      <td>5ea94df3a879f002f3e9a812</td>
-      <td>32</td>
-      <td>Poland</td>
-      <td>Female</td>
-      <td>2021-01-18</td>
-      <td>4.5</td>
-      <td>90.0</td>
-      <td>3.375</td>
-    </tr>
-    <tr>
-      <th>12</th>
-      <td>5eeaa0ffaa6af11cf32ce057</td>
-      <td>30</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>2021-01-18</td>
-      <td>3.0</td>
-      <td>0.0</td>
-      <td>2.250</td>
-    </tr>
-    <tr>
-      <th>15</th>
-      <td>5f0cb319d29147695796a208</td>
-      <td>37</td>
-      <td>Italy</td>
-      <td>Male</td>
-      <td>2021-01-18</td>
-      <td>3.0</td>
-      <td>0.0</td>
-      <td>2.250</td>
-    </tr>
-    <tr>
-      <th>10</th>
-      <td>5cf0ccf488abf10019fb775d</td>
-      <td>25</td>
-      <td>United Kingdom</td>
-      <td>Female</td>
-      <td>2021-01-18</td>
-      <td>4.5</td>
-      <td>90.0</td>
-      <td>3.375</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>5c5684ef9d244c0001b29f1e</td>
-      <td>11</td>
-      <td>United States</td>
-      <td>Male</td>
-      <td>2021-01-18</td>
-      <td>3.5</td>
-      <td>0.0</td>
-      <td>2.625</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>5b8969006651ea000118e42e</td>
-      <td>12</td>
-      <td>Italy</td>
-      <td>Female</td>
-      <td>2021-01-18</td>
-      <td>5.0</td>
-      <td>1.0</td>
-      <td>3.750</td>
-    </tr>
-    <tr>
-      <th>11</th>
       <td>5f561a95aa1c4ea13672f138</td>
-      <td>28</td>
+      <td>28.0</td>
       <td>Italy</td>
       <td>Male</td>
-      <td>2021-01-18</td>
       <td>2.5</td>
-      <td>0.0</td>
       <td>1.875</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>5b4e65de09f5af0001080f45</td>
-      <td>13</td>
-      <td>Poland</td>
-      <td>Male</td>
+      <td>2.11875</td>
       <td>2021-01-18</td>
-      <td>5.0</td>
-      <td>30.0</td>
-      <td>3.750</td>
-    </tr>
-    <tr>
-      <th>33</th>
-      <td>5fd41bf508717e1833d8aed7</td>
-      <td>7</td>
-      <td>Mexico</td>
-      <td>Male</td>
+      <td>0.0</td>
       <td>2021-01-18</td>
-      <td>4.0</td>
-      <td>30.0</td>
-      <td>3.000</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>5f860a189bc695131f22ec9c</td>
-      <td>19</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>2021-01-18</td>
-      <td>4.5</td>
-      <td>7.0</td>
-      <td>3.375</td>
     </tr>
     <tr>
       <th>9</th>
       <td>5f77a902fc647a327b77004a</td>
-      <td>24</td>
+      <td>24.0</td>
       <td>United Kingdom</td>
       <td>Female</td>
+      <td>3.0</td>
+      <td>2.250</td>
+      <td>2.54250</td>
       <td>2021-01-18</td>
-      <td>3.0</td>
       <td>0.0</td>
+      <td>2021-01-18</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>5eeaa0ffaa6af11cf32ce057</td>
+      <td>30.0</td>
+      <td>Poland</td>
+      <td>Male</td>
+      <td>3.0</td>
       <td>2.250</td>
+      <td>2.54250</td>
+      <td>2021-01-18</td>
+      <td>0.0</td>
+      <td>2021-01-18</td>
     </tr>
     <tr>
-      <th>43</th>
-      <td>5f91b067130f8504520cdd6f</td>
-      <td>92</td>
-      <td>Italy</td>
-      <td>Male</td>
-      <td>2021-01-19</td>
-      <td>4.5</td>
-      <td>15.0</td>
-      <td>3.375</td>
-    </tr>
-    <tr>
-      <th>45</th>
-      <td>5ecfc227f036c902457fc44c</td>
-      <td>94</td>
-      <td>United Kingdom</td>
-      <td>Female</td>
-      <td>2021-01-19</td>
-      <td>4.0</td>
-      <td>15.0</td>
-      <td>3.000</td>
-    </tr>
-    <tr>
-      <th>46</th>
-      <td>5eb9940830ab6c098bd1943d</td>
-      <td>96</td>
-      <td>Israel</td>
-      <td>Male</td>
-      <td>2021-01-19</td>
-      <td>4.5</td>
-      <td>90.0</td>
-      <td>3.375</td>
-    </tr>
-    <tr>
-      <th>34</th>
-      <td>5d430fdf871f1700017b2a81</td>
-      <td>70</td>
+      <th>49</th>
+      <td>5fea19869bf07d97b4a87ae8</td>
+      <td>130.0</td>
       <td>Spain</td>
       <td>Male</td>
-      <td>2021-01-19</td>
-      <td>5.0</td>
-      <td>7.0</td>
-      <td>3.750</td>
-    </tr>
-    <tr>
-      <th>41</th>
-      <td>5cf67b30c5cf0e00010c00fc</td>
-      <td>90</td>
-      <td>Spain</td>
-      <td>Female</td>
-      <td>2021-01-19</td>
-      <td>3.0</td>
-      <td>0.0</td>
-      <td>2.250</td>
-    </tr>
-    <tr>
-      <th>39</th>
-      <td>5e2db0f07dc16b3a611516bd</td>
-      <td>85</td>
-      <td>United Kingdom</td>
-      <td>Female</td>
-      <td>2021-01-19</td>
-      <td>4.5</td>
-      <td>1.0</td>
-      <td>3.375</td>
-    </tr>
-    <tr>
-      <th>38</th>
-      <td>5c6cb4163023800001e71898</td>
-      <td>81</td>
-      <td>Greece</td>
-      <td>Male</td>
-      <td>2021-01-19</td>
-      <td>3.5</td>
-      <td>0.0</td>
-      <td>2.625</td>
-    </tr>
-    <tr>
-      <th>37</th>
-      <td>5fa69c24315bfb2d0a37c685</td>
-      <td>80</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>2021-01-19</td>
       <td>4.0</td>
-      <td>7.0</td>
       <td>3.000</td>
-    </tr>
-    <tr>
-      <th>36</th>
-      <td>5d00bb3b51669b000136a986</td>
-      <td>75</td>
-      <td>Poland</td>
-      <td>Male</td>
+      <td>3.39000</td>
       <td>2021-01-19</td>
-      <td>5.0</td>
-      <td>30.0</td>
-      <td>3.750</td>
-    </tr>
-    <tr>
-      <th>35</th>
-      <td>5aa7b522b5e2110001c74775</td>
-      <td>74</td>
-      <td>United Kingdom</td>
-      <td>Female</td>
-      <td>2021-01-19</td>
-      <td>5.0</td>
-      <td>30.0</td>
-      <td>3.750</td>
-    </tr>
-    <tr>
-      <th>44</th>
-      <td>5f4756db83588013e9e31bfc</td>
-      <td>93</td>
-      <td>South Africa</td>
-      <td>Male</td>
-      <td>2021-01-19</td>
-      <td>2.0</td>
       <td>0.0</td>
-      <td>1.500</td>
-    </tr>
-    <tr>
-      <th>42</th>
-      <td>5f256074297aac1d8ef7382d</td>
-      <td>91</td>
-      <td>Hungary</td>
-      <td>Male</td>
       <td>2021-01-19</td>
-      <td>2.5</td>
-      <td>0.0</td>
-      <td>1.875</td>
-    </tr>
-    <tr>
-      <th>0</th>
-      <td>600063f2943eab0acc812ed8</td>
-      <td>103</td>
-      <td>Italy</td>
-      <td>Male</td>
-      <td>2021-01-19</td>
-      <td>4.5</td>
-      <td>180.0</td>
-      <td>3.375</td>
-    </tr>
-    <tr>
-      <th>31</th>
-      <td>5bd170999afb5b00015ba3b1</td>
-      <td>66</td>
-      <td>Portugal</td>
-      <td>Female</td>
-      <td>2021-01-19</td>
-      <td>5.0</td>
-      <td>30.0</td>
-      <td>3.750</td>
-    </tr>
-    <tr>
-      <th>30</th>
-      <td>5fc6bcbc6da34d0f8dd78a3a</td>
-      <td>63</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>2021-01-19</td>
-      <td>4.0</td>
-      <td>15.0</td>
-      <td>3.000</td>
-    </tr>
-    <tr>
-      <th>29</th>
-      <td>5fb2af792942a58ffe303948</td>
-      <td>61</td>
-      <td>Germany</td>
-      <td>Female</td>
-      <td>2021-01-19</td>
-      <td>5.0</td>
-      <td>1.0</td>
-      <td>3.750</td>
-    </tr>
-    <tr>
-      <th>27</th>
-      <td>5fe6fb05b9b609059e4613e0</td>
-      <td>59</td>
-      <td>Mexico</td>
-      <td>Male</td>
-      <td>2021-01-19</td>
-      <td>4.0</td>
-      <td>15.0</td>
-      <td>3.000</td>
-    </tr>
-    <tr>
-      <th>26</th>
-      <td>5de5157820c5aa09b7a53b89</td>
-      <td>58</td>
-      <td>Greece</td>
-      <td>Male</td>
-      <td>2021-01-19</td>
-      <td>5.0</td>
-      <td>15.0</td>
-      <td>3.750</td>
-    </tr>
-    <tr>
-      <th>25</th>
-      <td>5e79d99f6873570009367716</td>
-      <td>56</td>
-      <td>United Kingdom</td>
-      <td>Female</td>
-      <td>2021-01-19</td>
-      <td>4.5</td>
-      <td>0.0</td>
-      <td>3.375</td>
-    </tr>
-    <tr>
-      <th>47</th>
-      <td>5f68fe5be5cc370c0a0911de</td>
-      <td>97</td>
-      <td>United Kingdom</td>
-      <td>Female</td>
-      <td>2021-01-19</td>
-      <td>4.5</td>
-      <td>30.0</td>
-      <td>3.375</td>
-    </tr>
-    <tr>
-      <th>23</th>
-      <td>5fa1192cf99e161a5cfad1cd</td>
-      <td>48</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>2021-01-19</td>
-      <td>4.0</td>
-      <td>7.0</td>
-      <td>3.000</td>
-    </tr>
-    <tr>
-      <th>22</th>
-      <td>5f5793d85411a8251740e602</td>
-      <td>47</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>2021-01-19</td>
-      <td>4.5</td>
-      <td>0.0</td>
-      <td>3.375</td>
     </tr>
     <tr>
       <th>21</th>
-      <td>5f1aac6058391f01dacbf619</td>
-      <td>45</td>
-      <td>Poland</td>
+      <td>5f4756db83588013e9e31bfc</td>
+      <td>93.0</td>
+      <td>South Africa</td>
       <td>Male</td>
+      <td>2.0</td>
+      <td>1.500</td>
+      <td>1.69500</td>
       <td>2021-01-19</td>
-      <td>4.5</td>
-      <td>30.0</td>
-      <td>3.375</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>5e53a7b4d9a7ea3a2b062da0</td>
-      <td>131</td>
-      <td>United Kingdom</td>
-      <td>Female</td>
-      <td>2021-01-19</td>
-      <td>3.5</td>
       <td>0.0</td>
-      <td>2.625</td>
+      <td>2021-01-19</td>
     </tr>
     <tr>
-      <th>6</th>
-      <td>5fea19869bf07d97b4a87ae8</td>
-      <td>130</td>
+      <th>28</th>
+      <td>5cf67b30c5cf0e00010c00fc</td>
+      <td>90.0</td>
       <td>Spain</td>
-      <td>Male</td>
+      <td>Female</td>
+      <td>3.0</td>
+      <td>2.250</td>
+      <td>2.54250</td>
       <td>2021-01-19</td>
-      <td>4.0</td>
       <td>0.0</td>
-      <td>3.000</td>
+      <td>2021-01-19</td>
     </tr>
     <tr>
-      <th>4</th>
-      <td>5f01a0893963d02ea1d65d12</td>
-      <td>128</td>
+      <th>30</th>
+      <td>5c6cb4163023800001e71898</td>
+      <td>81.0</td>
       <td>Greece</td>
       <td>Male</td>
+      <td>3.5</td>
+      <td>2.625</td>
+      <td>2.96625</td>
       <td>2021-01-19</td>
-      <td>4.5</td>
-      <td>7.0</td>
-      <td>3.375</td>
+      <td>0.0</td>
+      <td>2021-01-19</td>
     </tr>
     <tr>
-      <th>3</th>
-      <td>5c0e4e3d87e876000151cfec</td>
-      <td>126</td>
-      <td>Poland</td>
+      <th>31</th>
+      <td>5e79d99f6873570009367716</td>
+      <td>56.0</td>
+      <td>United Kingdom</td>
       <td>Female</td>
-      <td>2021-01-19</td>
       <td>4.5</td>
-      <td>90.0</td>
       <td>3.375</td>
+      <td>3.81375</td>
+      <td>2021-01-19</td>
+      <td>0.0</td>
+      <td>2021-01-19</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>5fcbb3066829ff1a601fe080</td>
+      <td>42.0</td>
+      <td>United Kingdom</td>
+      <td>Female</td>
+      <td>5.0</td>
+      <td>3.750</td>
+      <td>4.23750</td>
+      <td>2021-01-18</td>
+      <td>1.0</td>
+      <td>2021-01-19</td>
     </tr>
     <tr>
       <th>32</th>
       <td>5cfb9f6f288ca80001169952</td>
-      <td>67</td>
+      <td>67.0</td>
       <td>Poland</td>
       <td>Male</td>
-      <td>2021-01-19</td>
       <td>2.0</td>
-      <td>0.0</td>
       <td>1.500</td>
+      <td>1.69500</td>
+      <td>2021-01-19</td>
+      <td>0.0</td>
+      <td>2021-01-19</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>5f1e9db721e4f101783fe21c</td>
+      <td>38.0</td>
+      <td>Poland</td>
+      <td>Male</td>
+      <td>4.0</td>
+      <td>3.000</td>
+      <td>3.39000</td>
+      <td>2021-01-18</td>
+      <td>1.0</td>
+      <td>2021-01-19</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>5b8969006651ea000118e42e</td>
+      <td>12.0</td>
+      <td>Italy</td>
+      <td>Female</td>
+      <td>5.0</td>
+      <td>3.750</td>
+      <td>4.23750</td>
+      <td>2021-01-18</td>
+      <td>1.0</td>
+      <td>2021-01-19</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>5fea6632bf9ae4a79153efdf</td>
+      <td>9.0</td>
+      <td>Serbia</td>
+      <td>Male</td>
+      <td>5.0</td>
+      <td>3.750</td>
+      <td>4.23750</td>
+      <td>2021-01-18</td>
+      <td>1.0</td>
+      <td>2021-01-19</td>
+    </tr>
+    <tr>
+      <th>42</th>
+      <td>5f256074297aac1d8ef7382d</td>
+      <td>91.0</td>
+      <td>Hungary</td>
+      <td>Male</td>
+      <td>2.5</td>
+      <td>1.875</td>
+      <td>2.11875</td>
+      <td>2021-01-19</td>
+      <td>0.0</td>
+      <td>2021-01-19</td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td>5f5793d85411a8251740e602</td>
+      <td>47.0</td>
+      <td>Poland</td>
+      <td>Male</td>
+      <td>4.5</td>
+      <td>3.375</td>
+      <td>3.81375</td>
+      <td>2021-01-19</td>
+      <td>0.0</td>
+      <td>2021-01-19</td>
     </tr>
     <tr>
       <th>48</th>
-      <td>5f779405dacc842fc44bc767</td>
-      <td>98</td>
+      <td>5e53a7b4d9a7ea3a2b062da0</td>
+      <td>131.0</td>
+      <td>United Kingdom</td>
+      <td>Female</td>
+      <td>3.5</td>
+      <td>2.625</td>
+      <td>2.96625</td>
+      <td>2021-01-19</td>
+      <td>0.0</td>
+      <td>2021-01-19</td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td>5fb2af792942a58ffe303948</td>
+      <td>61.0</td>
+      <td>Germany</td>
+      <td>Female</td>
+      <td>5.0</td>
+      <td>3.750</td>
+      <td>4.23750</td>
+      <td>2021-01-19</td>
+      <td>1.0</td>
+      <td>2021-01-20</td>
+    </tr>
+    <tr>
+      <th>38</th>
+      <td>5d430fdf871f1700017b2a81</td>
+      <td>70.0</td>
+      <td>Spain</td>
+      <td>Male</td>
+      <td>5.0</td>
+      <td>3.750</td>
+      <td>4.23750</td>
+      <td>2021-01-19</td>
+      <td>1.0</td>
+      <td>2021-01-20</td>
+    </tr>
+    <tr>
+      <th>43</th>
+      <td>5e2db0f07dc16b3a611516bd</td>
+      <td>85.0</td>
+      <td>United Kingdom</td>
+      <td>Female</td>
+      <td>4.5</td>
+      <td>3.375</td>
+      <td>3.81375</td>
+      <td>2021-01-19</td>
+      <td>1.0</td>
+      <td>2021-01-20</td>
+    </tr>
+    <tr>
+      <th>26</th>
+      <td>5fa1192cf99e161a5cfad1cd</td>
+      <td>48.0</td>
+      <td>Poland</td>
+      <td>Male</td>
+      <td>5.0</td>
+      <td>3.750</td>
+      <td>4.23750</td>
+      <td>2021-01-19</td>
+      <td>1.0</td>
+      <td>2021-01-20</td>
+    </tr>
+    <tr>
+      <th>45</th>
+      <td>5edc20443467e28ec4e30f93</td>
+      <td>NaN</td>
+      <td>United Kingdom</td>
+      <td>Male</td>
+      <td>5.0</td>
+      <td>3.750</td>
+      <td>4.23750</td>
+      <td>2021-01-19</td>
+      <td>1.0</td>
+      <td>2021-01-20</td>
+    </tr>
+    <tr>
+      <th>0</th>
+      <td>5f860a189bc695131f22ec9c</td>
+      <td>19.0</td>
+      <td>Poland</td>
+      <td>Male</td>
+      <td>4.5</td>
+      <td>3.375</td>
+      <td>3.81375</td>
+      <td>2021-01-18</td>
+      <td>7.0</td>
+      <td>2021-01-25</td>
+    </tr>
+    <tr>
+      <th>47</th>
+      <td>5f01a0893963d02ea1d65d12</td>
+      <td>128.0</td>
+      <td>Greece</td>
+      <td>Male</td>
+      <td>4.5</td>
+      <td>3.375</td>
+      <td>3.81375</td>
+      <td>2021-01-19</td>
+      <td>7.0</td>
+      <td>2021-01-26</td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td>5fa69c24315bfb2d0a37c685</td>
+      <td>80.0</td>
+      <td>Poland</td>
+      <td>Male</td>
+      <td>4.0</td>
+      <td>3.000</td>
+      <td>3.39000</td>
+      <td>2021-01-19</td>
+      <td>7.0</td>
+      <td>2021-01-26</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>5f4e08aafb74230a29cb4ef0</td>
+      <td>6.0</td>
+      <td>Poland</td>
+      <td>Male</td>
+      <td>5.0</td>
+      <td>3.750</td>
+      <td>4.23750</td>
+      <td>2021-01-18</td>
+      <td>15.0</td>
+      <td>2021-02-02</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>5ecfc227f036c902457fc44c</td>
+      <td>94.0</td>
+      <td>United Kingdom</td>
+      <td>Female</td>
+      <td>4.0</td>
+      <td>3.000</td>
+      <td>3.39000</td>
+      <td>2021-01-19</td>
+      <td>15.0</td>
+      <td>2021-02-03</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>5f91b067130f8504520cdd6f</td>
+      <td>92.0</td>
+      <td>Italy</td>
+      <td>Male</td>
+      <td>4.5</td>
+      <td>3.375</td>
+      <td>3.81375</td>
+      <td>2021-01-19</td>
+      <td>15.0</td>
+      <td>2021-02-03</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>5fc6bcbc6da34d0f8dd78a3a</td>
+      <td>63.0</td>
+      <td>Poland</td>
+      <td>Male</td>
+      <td>4.0</td>
+      <td>3.000</td>
+      <td>3.39000</td>
+      <td>2021-01-19</td>
+      <td>15.0</td>
+      <td>2021-02-03</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>5fe6fb05b9b609059e4613e0</td>
+      <td>59.0</td>
+      <td>Mexico</td>
+      <td>Male</td>
+      <td>4.0</td>
+      <td>3.000</td>
+      <td>3.39000</td>
+      <td>2021-01-19</td>
+      <td>15.0</td>
+      <td>2021-02-03</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>5de5157820c5aa09b7a53b89</td>
+      <td>58.0</td>
+      <td>Greece</td>
+      <td>Male</td>
+      <td>5.0</td>
+      <td>3.750</td>
+      <td>4.23750</td>
+      <td>2021-01-19</td>
+      <td>15.0</td>
+      <td>2021-02-03</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>5f946436ae32a127565d9405</td>
+      <td>43.0</td>
       <td>Portugal</td>
       <td>Male</td>
-      <td>2021-01-19</td>
       <td>4.0</td>
-      <td>30.0</td>
       <td>3.000</td>
+      <td>3.39000</td>
+      <td>2021-01-18</td>
+      <td>30.0</td>
+      <td>2021-02-17</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>5f881c7d29650a26096e77a3</td>
+      <td>41.0</td>
+      <td>United Kingdom</td>
+      <td>Male</td>
+      <td>4.5</td>
+      <td>3.375</td>
+      <td>3.81375</td>
+      <td>2021-01-18</td>
+      <td>30.0</td>
+      <td>2021-02-17</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>5f96fc2552ce3f040af63bbc</td>
+      <td>4.0</td>
+      <td>Spain</td>
+      <td>Male</td>
+      <td>4.5</td>
+      <td>3.375</td>
+      <td>3.81375</td>
+      <td>2021-01-18</td>
+      <td>30.0</td>
+      <td>2021-02-17</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>5ea3f75481a44e39aa318256</td>
+      <td>5.0</td>
+      <td>Israel</td>
+      <td>Male</td>
+      <td>4.5</td>
+      <td>3.375</td>
+      <td>3.81375</td>
+      <td>2021-01-18</td>
+      <td>30.0</td>
+      <td>2021-02-17</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>5fd41bf508717e1833d8aed7</td>
+      <td>7.0</td>
+      <td>Mexico</td>
+      <td>Male</td>
+      <td>4.0</td>
+      <td>3.000</td>
+      <td>3.39000</td>
+      <td>2021-01-18</td>
+      <td>30.0</td>
+      <td>2021-02-17</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5b4e65de09f5af0001080f45</td>
+      <td>13.0</td>
+      <td>Poland</td>
+      <td>Male</td>
+      <td>5.0</td>
+      <td>3.750</td>
+      <td>4.23750</td>
+      <td>2021-01-18</td>
+      <td>30.0</td>
+      <td>2021-02-17</td>
+    </tr>
+    <tr>
+      <th>41</th>
+      <td>5d00bb3b51669b000136a986</td>
+      <td>75.0</td>
+      <td>Poland</td>
+      <td>Male</td>
+      <td>5.0</td>
+      <td>3.750</td>
+      <td>4.23750</td>
+      <td>2021-01-19</td>
+      <td>30.0</td>
+      <td>2021-02-18</td>
+    </tr>
+    <tr>
+      <th>37</th>
+      <td>5bd170999afb5b00015ba3b1</td>
+      <td>66.0</td>
+      <td>Portugal</td>
+      <td>Female</td>
+      <td>5.0</td>
+      <td>3.750</td>
+      <td>4.23750</td>
+      <td>2021-01-19</td>
+      <td>30.0</td>
+      <td>2021-02-18</td>
+    </tr>
+    <tr>
+      <th>39</th>
+      <td>5aa7b522b5e2110001c74775</td>
+      <td>74.0</td>
+      <td>United Kingdom</td>
+      <td>Female</td>
+      <td>5.0</td>
+      <td>3.750</td>
+      <td>4.23750</td>
+      <td>2021-01-19</td>
+      <td>30.0</td>
+      <td>2021-02-18</td>
+    </tr>
+    <tr>
+      <th>36</th>
+      <td>5f68fe5be5cc370c0a0911de</td>
+      <td>97.0</td>
+      <td>United Kingdom</td>
+      <td>Female</td>
+      <td>4.5</td>
+      <td>3.375</td>
+      <td>3.81375</td>
+      <td>2021-01-19</td>
+      <td>30.0</td>
+      <td>2021-02-18</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>5f1aac6058391f01dacbf619</td>
+      <td>45.0</td>
+      <td>Poland</td>
+      <td>Male</td>
+      <td>4.5</td>
+      <td>3.375</td>
+      <td>3.81375</td>
+      <td>2021-01-19</td>
+      <td>30.0</td>
+      <td>2021-02-18</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>5f779405dacc842fc44bc767</td>
+      <td>98.0</td>
+      <td>Portugal</td>
+      <td>Male</td>
+      <td>4.0</td>
+      <td>3.000</td>
+      <td>3.39000</td>
+      <td>2021-01-19</td>
+      <td>30.0</td>
+      <td>2021-02-18</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>5cf0ccf488abf10019fb775d</td>
+      <td>25.0</td>
+      <td>United Kingdom</td>
+      <td>Female</td>
+      <td>4.5</td>
+      <td>3.375</td>
+      <td>3.81375</td>
+      <td>2021-01-18</td>
+      <td>90.0</td>
+      <td>2021-04-18</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>5ea94df3a879f002f3e9a812</td>
+      <td>32.0</td>
+      <td>Poland</td>
+      <td>Female</td>
+      <td>4.5</td>
+      <td>3.375</td>
+      <td>3.81375</td>
+      <td>2021-01-18</td>
+      <td>90.0</td>
+      <td>2021-04-18</td>
+    </tr>
+    <tr>
+      <th>46</th>
+      <td>5c0e4e3d87e876000151cfec</td>
+      <td>126.0</td>
+      <td>Poland</td>
+      <td>Female</td>
+      <td>4.5</td>
+      <td>3.375</td>
+      <td>3.81375</td>
+      <td>2021-01-19</td>
+      <td>90.0</td>
+      <td>2021-04-19</td>
+    </tr>
+    <tr>
+      <th>40</th>
+      <td>5eb9940830ab6c098bd1943d</td>
+      <td>96.0</td>
+      <td>Israel</td>
+      <td>Male</td>
+      <td>4.5</td>
+      <td>3.375</td>
+      <td>3.81375</td>
+      <td>2021-01-19</td>
+      <td>90.0</td>
+      <td>2021-04-19</td>
+    </tr>
+    <tr>
+      <th>44</th>
+      <td>600063f2943eab0acc812ed8</td>
+      <td>103.0</td>
+      <td>Italy</td>
+      <td>Male</td>
+      <td>4.5</td>
+      <td>3.375</td>
+      <td>3.81375</td>
+      <td>2021-01-19</td>
+      <td>180.0</td>
+      <td>2021-07-18</td>
     </tr>
   </tbody>
 </table>
@@ -16227,14 +15998,19 @@ data_subject           84
 
 </div>
 
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="What-bonus-is-due-today?">What bonus is due today?<a class="anchor-link" href="#What-bonus-is-due-today?">&#182;</a></h2>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[32]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[50]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">bonus_due_today</span> <span class="o">=</span> <span class="n">data_pay</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;due_on&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">(),</span> <span class="p">:]</span>
-<span class="n">bonus_due_today</span><span class="p">[</span><span class="s1">&#39;reward_pound&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bonus_due_today</span><span class="p">[</span><span class="s1">&#39;reward_pound&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">bonus_due_today</span><span class="p">[</span><span class="s1">&#39;bonus_GBP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bonus_due_today</span><span class="p">[</span><span class="s1">&#39;bonus_GBP&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">bonus_due_today</span>
 </pre></div>
 
@@ -16255,12 +16031,12 @@ data_subject           84
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>&lt;ipython-input-32-e0c5874ff982&gt;:2: SettingWithCopyWarning: 
+<pre>&lt;ipython-input-50-d6dc15fe434a&gt;:2: SettingWithCopyWarning: 
 A value is trying to be set on a copy of a slice from a DataFrame.
 Try using .loc[row_indexer,col_indexer] = value instead
 
 See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-  bonus_due_today[&#39;reward_pound&#39;] = bonus_due_today[&#39;reward_pound&#39;].round(2)
+  bonus_due_today[&#39;bonus_GBP&#39;] = bonus_due_today[&#39;bonus_GBP&#39;].round(2)
 </pre>
 </div>
 </div>
@@ -16268,7 +16044,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[32]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[50]:</div>
 
 
 
@@ -16305,115 +16081,139 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
       <th>started_datetime</th>
       <th>completed_date_time</th>
       <th>time_taken</th>
-      <th>bonus_pay</th>
+      <th>bonus_USD</th>
       <th>bonus_delay</th>
-      <th>basic_pay</th>
-      <th>completed_date</th>
-      <th>reward_pound</th>
+      <th>bonus_GBP</th>
+      <th>bonus_EUR</th>
       <th>date</th>
+      <th>completed_date</th>
       <th>due_on</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>4</th>
-      <td>128</td>
-      <td>5f01a0893963d02ea1d65d12</td>
-      <td>26.0</td>
-      <td>Germany</td>
+      <th>22</th>
+      <td>94.0</td>
+      <td>5ecfc227f036c902457fc44c</td>
+      <td>22</td>
+      <td>United Kingdom</td>
+      <td>United Kingdom</td>
+      <td>DATA EXPIRED</td>
+      <td>United Kingdom</td>
+      <td>Female</td>
+      <td>APPROVED</td>
+      <td>2021-01-19 11:00:12.689000</td>
+      <td>...</td>
+      <td>2021-01-19 09:09:18.429000</td>
+      <td>2021-01-19 09:42:59.122000</td>
+      <td>2020.693</td>
+      <td>4.0</td>
+      <td>15.0</td>
+      <td>3.00</td>
+      <td>3.39000</td>
+      <td>2021-01-19</td>
+      <td>2021-01-19</td>
+      <td>2021-02-03</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>92.0</td>
+      <td>5f91b067130f8504520cdd6f</td>
+      <td>25</td>
+      <td>Italy</td>
+      <td>United Kingdom</td>
+      <td>DATA EXPIRED</td>
+      <td>Italy</td>
+      <td>Male</td>
+      <td>APPROVED</td>
+      <td>2021-01-19 11:00:37.754000</td>
+      <td>...</td>
+      <td>2021-01-19 09:13:46.534000</td>
+      <td>2021-01-19 09:40:37.424000</td>
+      <td>1610.890</td>
+      <td>4.5</td>
+      <td>15.0</td>
+      <td>3.38</td>
+      <td>3.81375</td>
+      <td>2021-01-19</td>
+      <td>2021-01-19</td>
+      <td>2021-02-03</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>63.0</td>
+      <td>5fc6bcbc6da34d0f8dd78a3a</td>
+      <td>18</td>
+      <td>Poland</td>
+      <td>Poland</td>
+      <td>DATA EXPIRED</td>
+      <td>Poland</td>
+      <td>Male</td>
+      <td>APPROVED</td>
+      <td>2021-01-19 11:00:59.173000</td>
+      <td>...</td>
+      <td>2021-01-19 09:09:22.626000</td>
+      <td>2021-01-19 09:59:49.124000</td>
+      <td>3026.498</td>
+      <td>4.0</td>
+      <td>15.0</td>
+      <td>3.00</td>
+      <td>3.39000</td>
+      <td>2021-01-19</td>
+      <td>2021-01-19</td>
+      <td>2021-02-03</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>59.0</td>
+      <td>5fe6fb05b9b609059e4613e0</td>
+      <td>23</td>
+      <td>Mexico</td>
+      <td>Mexico</td>
+      <td>DATA EXPIRED</td>
+      <td>Mexico</td>
+      <td>Male</td>
+      <td>APPROVED</td>
+      <td>2021-01-19 11:01:03.595000</td>
+      <td>...</td>
+      <td>2021-01-19 09:09:30.711000</td>
+      <td>2021-01-19 09:41:48.951000</td>
+      <td>1938.240</td>
+      <td>4.0</td>
+      <td>15.0</td>
+      <td>3.00</td>
+      <td>3.39000</td>
+      <td>2021-01-19</td>
+      <td>2021-01-19</td>
+      <td>2021-02-03</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>58.0</td>
+      <td>5de5157820c5aa09b7a53b89</td>
+      <td>21</td>
+      <td>Greece</td>
       <td>Greece</td>
       <td>Greek</td>
       <td>Greece</td>
       <td>Male</td>
       <td>APPROVED</td>
-      <td>2021-01-19 12:36:47.163000</td>
+      <td>2021-01-19 10:59:59.217000</td>
       <td>...</td>
-      <td>2021-01-19 10:23:21.887000</td>
-      <td>2021-01-19 11:01:30.874000</td>
-      <td>2288.987</td>
-      <td>4.5</td>
-      <td>7.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.38</td>
-      <td>2021-01-19</td>
-      <td>2021-01-26</td>
-    </tr>
-    <tr>
-      <th>23</th>
-      <td>48</td>
-      <td>5fa1192cf99e161a5cfad1cd</td>
-      <td>18.0</td>
-      <td>Poland</td>
-      <td>Poland</td>
-      <td>DATA EXPIRED</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:00:41.549000</td>
-      <td>...</td>
-      <td>2021-01-19 09:09:18.617000</td>
-      <td>2021-01-19 09:44:13.747000</td>
-      <td>2095.130</td>
-      <td>4.0</td>
-      <td>7.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.00</td>
-      <td>2021-01-19</td>
-      <td>2021-01-26</td>
-    </tr>
-    <tr>
-      <th>34</th>
-      <td>70</td>
-      <td>5d430fdf871f1700017b2a81</td>
-      <td>49.0</td>
-      <td>Spain</td>
-      <td>Spain</td>
-      <td>Catalan</td>
-      <td>Spain</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 10:41:24.134000</td>
-      <td>...</td>
-      <td>2021-01-19 09:10:03.087000</td>
-      <td>2021-01-19 10:41:23.434000</td>
-      <td>5480.347</td>
+      <td>2021-01-19 09:09:30.980000</td>
+      <td>2021-01-19 09:37:53.111000</td>
+      <td>1702.131</td>
       <td>5.0</td>
-      <td>7.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
+      <td>15.0</td>
       <td>3.75</td>
+      <td>4.23750</td>
       <td>2021-01-19</td>
-      <td>2021-01-26</td>
-    </tr>
-    <tr>
-      <th>37</th>
-      <td>80</td>
-      <td>5fa69c24315bfb2d0a37c685</td>
-      <td>20.0</td>
-      <td>Poland</td>
-      <td>Poland</td>
-      <td>DATA EXPIRED</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:00:49.360000</td>
-      <td>...</td>
-      <td>2021-01-19 09:09:12.814000</td>
-      <td>2021-01-19 09:44:37.014000</td>
-      <td>2124.200</td>
-      <td>4.0</td>
-      <td>7.0</td>
-      <td>2.25</td>
       <td>2021-01-19</td>
-      <td>3.00</td>
-      <td>2021-01-19</td>
-      <td>2021-01-26</td>
+      <td>2021-02-03</td>
     </tr>
   </tbody>
 </table>
-<p>4 rows × 23 columns</p>
+<p>5 rows × 23 columns</p>
 </div>
 </div>
 
@@ -16426,11 +16226,11 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[33]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[51]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">bonus_due_today</span><span class="o">.</span><span class="n">loc</span><span class="p">[:</span> <span class="p">,</span> <span class="p">[</span><span class="s1">&#39;prolificID&#39;</span><span class="p">,</span> <span class="s1">&#39;reward_pound&#39;</span><span class="p">]]</span> \
-    <span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;C:/Users/User/Google Drive/Masterarbeit/Acquise/bonusToday.csv&#39;</span><span class="p">,</span> 
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">bonus_due_today</span><span class="o">.</span><span class="n">loc</span><span class="p">[:</span> <span class="p">,</span> <span class="p">[</span><span class="s1">&#39;prolificID&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_GBP&#39;</span><span class="p">]]</span> \
+    <span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/prolific/bonusToday.csv&#39;</span><span class="p">,</span> 
             <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
             <span class="n">header</span><span class="o">=</span><span class="kc">False</span>
            <span class="p">)</span>
@@ -16454,7 +16254,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>[datetime.date(2021, 1, 26)]
+<pre>[datetime.date(2021, 2, 3)]
 </pre>
 </div>
 </div>
@@ -16468,17 +16268,19 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h1 id="Total-costs">Total costs<a class="anchor-link" href="#Total-costs">&#182;</a></h1>
 </div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Basic-payment">Basic payment<a class="anchor-link" href="#Basic-payment">&#182;</a></h2>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[34]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[52]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;basic_cost&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;basic_pay&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1.4</span>
-<span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;total_cost&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;basic_pay&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_pay&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1.4</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Basic Costs: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;basic_cost&#39;</span><span class="p">])))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total Costs: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;total_cost&#39;</span><span class="p">])))</span>
-<span class="n">data_pay</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;basic_GBP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.25</span>
+<span class="n">data_pay</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="s1">&#39;basic_GBP&#39;</span><span class="p">,</span> <span class="s1">&#39;bonus_GBP&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -16494,20 +16296,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-
-
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Basic Costs: 154.35000000000014
-Total Costs: 432.9499999999997
-</pre>
-</div>
-</div>
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[34]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[52]:</div>
 
 
 
@@ -16530,1209 +16319,350 @@ Total Costs: 432.9499999999997
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>run_id</th>
-      <th>prolificID</th>
-      <th>age</th>
-      <th>Country of Birth</th>
-      <th>Current Country of Residence</th>
-      <th>First Language</th>
-      <th>Nationality</th>
-      <th>Sex</th>
-      <th>status</th>
-      <th>reviewed_at_datetime</th>
-      <th>...</th>
-      <th>time_taken</th>
-      <th>bonus_pay</th>
-      <th>bonus_delay</th>
-      <th>basic_pay</th>
-      <th>completed_date</th>
-      <th>reward_pound</th>
-      <th>date</th>
-      <th>due_on</th>
-      <th>basic_cost</th>
-      <th>total_cost</th>
+      <th>basic_GBP</th>
+      <th>bonus_GBP</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>103</td>
-      <td>600063f2943eab0acc812ed8</td>
-      <td>19.0</td>
-      <td>Italy</td>
-      <td>Italy</td>
-      <td>NaN</td>
-      <td>Italy</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 10:58:01.081000</td>
-      <td>...</td>
-      <td>1760.968</td>
-      <td>4.5</td>
-      <td>180.0</td>
       <td>2.25</td>
-      <td>2021-01-19</td>
       <td>3.375</td>
-      <td>2021-01-19</td>
-      <td>2021-07-18</td>
-      <td>3.15</td>
-      <td>9.45</td>
     </tr>
     <tr>
       <th>1</th>
-      <td>11</td>
-      <td>5c5684ef9d244c0001b29f1e</td>
-      <td>29.0</td>
-      <td>Hong Kong</td>
-      <td>United States</td>
-      <td>Chinese</td>
-      <td>United States</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 10:53:28.738000</td>
-      <td>...</td>
-      <td>1227.532</td>
-      <td>3.5</td>
-      <td>0.0</td>
       <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>2.625</td>
-      <td>2021-01-18</td>
-      <td>2021-01-18</td>
-      <td>3.15</td>
-      <td>8.05</td>
+      <td>3.375</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>12</td>
-      <td>5b8969006651ea000118e42e</td>
-      <td>22.0</td>
-      <td>Italy</td>
-      <td>Italy</td>
-      <td>Italian</td>
-      <td>Italy</td>
-      <td>Female</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 10:42:25.881000</td>
-      <td>...</td>
-      <td>1403.632</td>
-      <td>5.0</td>
-      <td>1.0</td>
       <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>3.750</td>
-      <td>2021-01-18</td>
-      <td>2021-01-19</td>
-      <td>3.15</td>
-      <td>10.15</td>
+      <td>3.375</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>126</td>
-      <td>5c0e4e3d87e876000151cfec</td>
-      <td>29.0</td>
-      <td>Poland</td>
-      <td>Poland</td>
-      <td>Polish</td>
-      <td>Poland</td>
-      <td>Female</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 12:36:10.712000</td>
-      <td>...</td>
-      <td>1912.745</td>
-      <td>4.5</td>
-      <td>90.0</td>
       <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.375</td>
-      <td>2021-01-19</td>
-      <td>2021-04-19</td>
-      <td>3.15</td>
-      <td>9.45</td>
+      <td>3.000</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>128</td>
-      <td>5f01a0893963d02ea1d65d12</td>
-      <td>26.0</td>
-      <td>Germany</td>
-      <td>Greece</td>
-      <td>Greek</td>
-      <td>Greece</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 12:36:47.163000</td>
-      <td>...</td>
-      <td>2288.987</td>
-      <td>4.5</td>
-      <td>7.0</td>
       <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.375</td>
-      <td>2021-01-19</td>
-      <td>2021-01-26</td>
-      <td>3.15</td>
-      <td>9.45</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>13</td>
-      <td>5b4e65de09f5af0001080f45</td>
-      <td>29.0</td>
-      <td>Poland</td>
-      <td>Poland</td>
-      <td>Polish</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 10:56:07.011000</td>
-      <td>...</td>
-      <td>1692.194</td>
-      <td>5.0</td>
-      <td>30.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
       <td>3.750</td>
-      <td>2021-01-18</td>
-      <td>2021-02-17</td>
-      <td>3.15</td>
-      <td>10.15</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>130</td>
-      <td>5fea19869bf07d97b4a87ae8</td>
-      <td>19.0</td>
-      <td>Spain</td>
-      <td>Spain</td>
-      <td>NaN</td>
-      <td>Spain</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 13:24:23.588000</td>
-      <td>...</td>
-      <td>1349.099</td>
-      <td>4.0</td>
-      <td>0.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.000</td>
-      <td>2021-01-19</td>
-      <td>2021-01-19</td>
-      <td>3.15</td>
-      <td>8.75</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>131</td>
-      <td>5e53a7b4d9a7ea3a2b062da0</td>
-      <td>40.0</td>
-      <td>United Kingdom</td>
-      <td>United Kingdom</td>
-      <td>English</td>
-      <td>United Kingdom</td>
-      <td>Female</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 13:24:22.246000</td>
-      <td>...</td>
-      <td>1415.591</td>
-      <td>3.5</td>
-      <td>0.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>2.625</td>
-      <td>2021-01-19</td>
-      <td>2021-01-19</td>
-      <td>3.15</td>
-      <td>8.05</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>19</td>
-      <td>5f860a189bc695131f22ec9c</td>
-      <td>20.0</td>
-      <td>Poland</td>
-      <td>Poland</td>
-      <td>DATA EXPIRED</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 10:57:59.489000</td>
-      <td>...</td>
-      <td>2116.522</td>
-      <td>4.5</td>
-      <td>7.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>3.375</td>
-      <td>2021-01-18</td>
-      <td>2021-01-25</td>
-      <td>3.15</td>
-      <td>9.45</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>24</td>
-      <td>5f77a902fc647a327b77004a</td>
-      <td>27.0</td>
-      <td>United Kingdom</td>
-      <td>United Kingdom</td>
-      <td>DATA EXPIRED</td>
-      <td>United Kingdom</td>
-      <td>Female</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 17:54:59.440000</td>
-      <td>...</td>
-      <td>2115.673</td>
-      <td>3.0</td>
-      <td>0.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>2.250</td>
-      <td>2021-01-18</td>
-      <td>2021-01-18</td>
-      <td>3.15</td>
-      <td>7.35</td>
-    </tr>
-    <tr>
-      <th>10</th>
-      <td>25</td>
-      <td>5cf0ccf488abf10019fb775d</td>
-      <td>18.0</td>
-      <td>New Zealand</td>
-      <td>United Kingdom</td>
-      <td>Twi</td>
-      <td>United Kingdom</td>
-      <td>Female</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 17:55:09.667000</td>
-      <td>...</td>
-      <td>1913.891</td>
-      <td>4.5</td>
-      <td>90.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>3.375</td>
-      <td>2021-01-18</td>
-      <td>2021-04-18</td>
-      <td>3.15</td>
-      <td>9.45</td>
-    </tr>
-    <tr>
-      <th>11</th>
-      <td>28</td>
-      <td>5f561a95aa1c4ea13672f138</td>
-      <td>37.0</td>
-      <td>Italy</td>
-      <td>United Kingdom</td>
-      <td>DATA EXPIRED</td>
-      <td>Italy</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 17:55:18.379000</td>
-      <td>...</td>
-      <td>1197.589</td>
-      <td>2.5</td>
-      <td>0.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>1.875</td>
-      <td>2021-01-18</td>
-      <td>2021-01-18</td>
-      <td>3.15</td>
-      <td>6.65</td>
-    </tr>
-    <tr>
-      <th>12</th>
-      <td>30</td>
-      <td>5eeaa0ffaa6af11cf32ce057</td>
-      <td>20.0</td>
-      <td>Poland</td>
-      <td>Poland</td>
-      <td>Polish</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 17:55:26.984000</td>
-      <td>...</td>
-      <td>1351.104</td>
-      <td>3.0</td>
-      <td>0.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>2.250</td>
-      <td>2021-01-18</td>
-      <td>2021-01-18</td>
-      <td>3.15</td>
-      <td>7.35</td>
-    </tr>
-    <tr>
-      <th>13</th>
-      <td>32</td>
-      <td>5ea94df3a879f002f3e9a812</td>
-      <td>23.0</td>
-      <td>Poland</td>
-      <td>Poland</td>
-      <td>Polish</td>
-      <td>Poland</td>
-      <td>Female</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 17:55:32.282000</td>
-      <td>...</td>
-      <td>4402.360</td>
-      <td>4.5</td>
-      <td>90.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>3.375</td>
-      <td>2021-01-18</td>
-      <td>2021-04-18</td>
-      <td>3.15</td>
-      <td>9.45</td>
-    </tr>
-    <tr>
-      <th>14</th>
-      <td>36</td>
-      <td>5f8472685956c40c720d0936</td>
-      <td>21.0</td>
-      <td>Italy</td>
-      <td>Italy</td>
-      <td>DATA EXPIRED</td>
-      <td>Italy</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 17:55:37.264000</td>
-      <td>...</td>
-      <td>1453.841</td>
-      <td>0.5</td>
-      <td>0.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>0.375</td>
-      <td>2021-01-18</td>
-      <td>2021-01-18</td>
-      <td>3.15</td>
-      <td>3.85</td>
-    </tr>
-    <tr>
-      <th>15</th>
-      <td>37</td>
-      <td>5f0cb319d29147695796a208</td>
-      <td>36.0</td>
-      <td>Italy</td>
-      <td>United Kingdom</td>
-      <td>Italian</td>
-      <td>Italy</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 17:55:43.824000</td>
-      <td>...</td>
-      <td>1531.289</td>
-      <td>3.0</td>
-      <td>0.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>2.250</td>
-      <td>2021-01-18</td>
-      <td>2021-01-18</td>
-      <td>3.15</td>
-      <td>7.35</td>
-    </tr>
-    <tr>
-      <th>16</th>
-      <td>38</td>
-      <td>5f1e9db721e4f101783fe21c</td>
-      <td>19.0</td>
-      <td>Poland</td>
-      <td>Poland</td>
-      <td>Polish</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:09:24.649000</td>
-      <td>...</td>
-      <td>3482.451</td>
-      <td>4.0</td>
-      <td>1.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>3.000</td>
-      <td>2021-01-18</td>
-      <td>2021-01-19</td>
-      <td>3.15</td>
-      <td>8.75</td>
-    </tr>
-    <tr>
-      <th>17</th>
-      <td>4</td>
-      <td>5f96fc2552ce3f040af63bbc</td>
-      <td>23.0</td>
-      <td>Spain</td>
-      <td>Spain</td>
-      <td>DATA EXPIRED</td>
-      <td>Spain</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 10:57:45.132000</td>
-      <td>...</td>
-      <td>1886.868</td>
-      <td>4.5</td>
-      <td>30.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>3.375</td>
-      <td>2021-01-18</td>
-      <td>2021-02-17</td>
-      <td>3.15</td>
-      <td>9.45</td>
-    </tr>
-    <tr>
-      <th>18</th>
-      <td>41</td>
-      <td>5f881c7d29650a26096e77a3</td>
-      <td>28.0</td>
-      <td>United Kingdom</td>
-      <td>United Kingdom</td>
-      <td>DATA EXPIRED</td>
-      <td>United Kingdom</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 17:55:48.738000</td>
-      <td>...</td>
-      <td>1310.641</td>
-      <td>4.5</td>
-      <td>30.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>3.375</td>
-      <td>2021-01-18</td>
-      <td>2021-02-17</td>
-      <td>3.15</td>
-      <td>9.45</td>
-    </tr>
-    <tr>
-      <th>19</th>
-      <td>42</td>
-      <td>5fcbb3066829ff1a601fe080</td>
-      <td>34.0</td>
-      <td>United Kingdom</td>
-      <td>United Kingdom</td>
-      <td>DATA EXPIRED</td>
-      <td>United Kingdom</td>
-      <td>Female</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 17:55:53.348000</td>
-      <td>...</td>
-      <td>1506.437</td>
-      <td>5.0</td>
-      <td>1.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>3.750</td>
-      <td>2021-01-18</td>
-      <td>2021-01-19</td>
-      <td>3.15</td>
-      <td>10.15</td>
-    </tr>
-    <tr>
-      <th>20</th>
-      <td>43</td>
-      <td>5f946436ae32a127565d9405</td>
-      <td>24.0</td>
-      <td>Portugal</td>
-      <td>Portugal</td>
-      <td>NaN</td>
-      <td>Portugal</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 17:55:58.249000</td>
-      <td>...</td>
-      <td>1667.728</td>
-      <td>4.0</td>
-      <td>30.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>3.000</td>
-      <td>2021-01-18</td>
-      <td>2021-02-17</td>
-      <td>3.15</td>
-      <td>8.75</td>
-    </tr>
-    <tr>
-      <th>21</th>
-      <td>45</td>
-      <td>5f1aac6058391f01dacbf619</td>
-      <td>32.0</td>
-      <td>Poland</td>
-      <td>Poland</td>
-      <td>Polish</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:00:16.312000</td>
-      <td>...</td>
-      <td>1609.939</td>
-      <td>4.5</td>
-      <td>30.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.375</td>
-      <td>2021-01-19</td>
-      <td>2021-02-18</td>
-      <td>3.15</td>
-      <td>9.45</td>
-    </tr>
-    <tr>
-      <th>22</th>
-      <td>47</td>
-      <td>5f5793d85411a8251740e602</td>
-      <td>19.0</td>
-      <td>Poland</td>
-      <td>Poland</td>
-      <td>DATA EXPIRED</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:00:28.992000</td>
-      <td>...</td>
-      <td>1557.240</td>
-      <td>4.5</td>
-      <td>0.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.375</td>
-      <td>2021-01-19</td>
-      <td>2021-01-19</td>
-      <td>3.15</td>
-      <td>9.45</td>
-    </tr>
-    <tr>
-      <th>23</th>
-      <td>48</td>
-      <td>5fa1192cf99e161a5cfad1cd</td>
-      <td>18.0</td>
-      <td>Poland</td>
-      <td>Poland</td>
-      <td>DATA EXPIRED</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:00:41.549000</td>
-      <td>...</td>
-      <td>2095.130</td>
-      <td>4.0</td>
-      <td>7.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.000</td>
-      <td>2021-01-19</td>
-      <td>2021-01-26</td>
-      <td>3.15</td>
-      <td>8.75</td>
-    </tr>
-    <tr>
-      <th>24</th>
-      <td>5</td>
-      <td>5ea3f75481a44e39aa318256</td>
-      <td>26.0</td>
-      <td>Israel</td>
-      <td>Israel</td>
-      <td>Russian</td>
-      <td>Israel</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 10:57:35.455000</td>
-      <td>...</td>
-      <td>1536.061</td>
-      <td>4.5</td>
-      <td>30.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>3.375</td>
-      <td>2021-01-18</td>
-      <td>2021-02-17</td>
-      <td>3.15</td>
-      <td>9.45</td>
-    </tr>
-    <tr>
-      <th>25</th>
-      <td>56</td>
-      <td>5e79d99f6873570009367716</td>
-      <td>26.0</td>
-      <td>United Kingdom</td>
-      <td>United Kingdom</td>
-      <td>English</td>
-      <td>United Kingdom</td>
-      <td>Female</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:50:27.571000</td>
-      <td>...</td>
-      <td>1159.061</td>
-      <td>4.5</td>
-      <td>0.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.375</td>
-      <td>2021-01-19</td>
-      <td>2021-01-19</td>
-      <td>3.15</td>
-      <td>9.45</td>
-    </tr>
-    <tr>
-      <th>26</th>
-      <td>58</td>
-      <td>5de5157820c5aa09b7a53b89</td>
-      <td>21.0</td>
-      <td>Greece</td>
-      <td>Greece</td>
-      <td>Greek</td>
-      <td>Greece</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 10:59:59.217000</td>
-      <td>...</td>
-      <td>1702.131</td>
-      <td>5.0</td>
-      <td>15.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.750</td>
-      <td>2021-01-19</td>
-      <td>2021-02-03</td>
-      <td>3.15</td>
-      <td>10.15</td>
-    </tr>
-    <tr>
-      <th>27</th>
-      <td>59</td>
-      <td>5fe6fb05b9b609059e4613e0</td>
-      <td>23.0</td>
-      <td>Mexico</td>
-      <td>Mexico</td>
-      <td>DATA EXPIRED</td>
-      <td>Mexico</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:01:03.595000</td>
-      <td>...</td>
-      <td>1938.240</td>
-      <td>4.0</td>
-      <td>15.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.000</td>
-      <td>2021-01-19</td>
-      <td>2021-02-03</td>
-      <td>3.15</td>
-      <td>8.75</td>
-    </tr>
-    <tr>
-      <th>28</th>
-      <td>6</td>
-      <td>5f4e08aafb74230a29cb4ef0</td>
-      <td>19.0</td>
-      <td>Poland</td>
-      <td>Poland</td>
-      <td>DATA EXPIRED</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 10:58:32.736000</td>
-      <td>...</td>
-      <td>1589.581</td>
-      <td>5.0</td>
-      <td>15.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>3.750</td>
-      <td>2021-01-18</td>
-      <td>2021-02-02</td>
-      <td>3.15</td>
-      <td>10.15</td>
-    </tr>
-    <tr>
-      <th>29</th>
-      <td>61</td>
-      <td>5fb2af792942a58ffe303948</td>
-      <td>28.0</td>
-      <td>Germany</td>
-      <td>Germany</td>
-      <td>NaN</td>
-      <td>Germany</td>
-      <td>Female</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 10:27:47.454000</td>
-      <td>...</td>
-      <td>1648.576</td>
-      <td>5.0</td>
-      <td>1.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.750</td>
-      <td>2021-01-19</td>
-      <td>2021-01-20</td>
-      <td>3.15</td>
-      <td>10.15</td>
-    </tr>
-    <tr>
-      <th>30</th>
-      <td>63</td>
-      <td>5fc6bcbc6da34d0f8dd78a3a</td>
-      <td>18.0</td>
-      <td>Poland</td>
-      <td>Poland</td>
-      <td>DATA EXPIRED</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:00:59.173000</td>
-      <td>...</td>
-      <td>3026.498</td>
-      <td>4.0</td>
-      <td>15.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.000</td>
-      <td>2021-01-19</td>
-      <td>2021-02-03</td>
-      <td>3.15</td>
-      <td>8.75</td>
-    </tr>
-    <tr>
-      <th>31</th>
-      <td>66</td>
-      <td>5bd170999afb5b00015ba3b1</td>
-      <td>51.0</td>
-      <td>Portugal</td>
-      <td>Portugal</td>
-      <td>Portuguese</td>
-      <td>Portugal</td>
-      <td>Female</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 10:59:31.598000</td>
-      <td>...</td>
-      <td>1921.967</td>
-      <td>5.0</td>
-      <td>30.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.750</td>
-      <td>2021-01-19</td>
-      <td>2021-02-18</td>
-      <td>3.15</td>
-      <td>10.15</td>
-    </tr>
-    <tr>
-      <th>32</th>
-      <td>67</td>
-      <td>5cfb9f6f288ca80001169952</td>
-      <td>30.0</td>
-      <td>Poland</td>
-      <td>Poland</td>
-      <td>Polish</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 10:59:40.829000</td>
-      <td>...</td>
-      <td>1554.791</td>
-      <td>2.0</td>
-      <td>0.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>1.500</td>
-      <td>2021-01-19</td>
-      <td>2021-01-19</td>
-      <td>3.15</td>
-      <td>5.95</td>
-    </tr>
-    <tr>
-      <th>33</th>
-      <td>7</td>
-      <td>5fd41bf508717e1833d8aed7</td>
-      <td>26.0</td>
-      <td>Mexico</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>Mexico</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 10:57:15.631000</td>
-      <td>...</td>
-      <td>2039.578</td>
-      <td>4.0</td>
-      <td>30.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>3.000</td>
-      <td>2021-01-18</td>
-      <td>2021-02-17</td>
-      <td>3.15</td>
-      <td>8.75</td>
-    </tr>
-    <tr>
-      <th>34</th>
-      <td>70</td>
-      <td>5d430fdf871f1700017b2a81</td>
-      <td>49.0</td>
-      <td>Spain</td>
-      <td>Spain</td>
-      <td>Catalan</td>
-      <td>Spain</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 10:41:24.134000</td>
-      <td>...</td>
-      <td>5480.347</td>
-      <td>5.0</td>
-      <td>7.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.750</td>
-      <td>2021-01-19</td>
-      <td>2021-01-26</td>
-      <td>3.15</td>
-      <td>10.15</td>
-    </tr>
-    <tr>
-      <th>35</th>
-      <td>74</td>
-      <td>5aa7b522b5e2110001c74775</td>
-      <td>37.0</td>
-      <td>United Kingdom</td>
-      <td>United Kingdom</td>
-      <td>English</td>
-      <td>United Kingdom</td>
-      <td>Female</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 10:41:07.404000</td>
-      <td>...</td>
-      <td>1165.564</td>
-      <td>5.0</td>
-      <td>30.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.750</td>
-      <td>2021-01-19</td>
-      <td>2021-02-18</td>
-      <td>3.15</td>
-      <td>10.15</td>
-    </tr>
-    <tr>
-      <th>36</th>
-      <td>75</td>
-      <td>5d00bb3b51669b000136a986</td>
-      <td>38.0</td>
-      <td>Poland</td>
-      <td>Poland</td>
-      <td>Polish</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:50:31.960000</td>
-      <td>...</td>
-      <td>2749.949</td>
-      <td>5.0</td>
-      <td>30.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.750</td>
-      <td>2021-01-19</td>
-      <td>2021-02-18</td>
-      <td>3.15</td>
-      <td>10.15</td>
-    </tr>
-    <tr>
-      <th>37</th>
-      <td>80</td>
-      <td>5fa69c24315bfb2d0a37c685</td>
-      <td>20.0</td>
-      <td>Poland</td>
-      <td>Poland</td>
-      <td>DATA EXPIRED</td>
-      <td>Poland</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:00:49.360000</td>
-      <td>...</td>
-      <td>2124.200</td>
-      <td>4.0</td>
-      <td>7.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.000</td>
-      <td>2021-01-19</td>
-      <td>2021-01-26</td>
-      <td>3.15</td>
-      <td>8.75</td>
-    </tr>
-    <tr>
-      <th>38</th>
-      <td>81</td>
-      <td>5c6cb4163023800001e71898</td>
-      <td>26.0</td>
-      <td>Greece</td>
-      <td>Greece</td>
-      <td>Greek</td>
-      <td>Greece</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 10:59:36.907000</td>
-      <td>...</td>
-      <td>1939.612</td>
-      <td>3.5</td>
-      <td>0.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>2.625</td>
-      <td>2021-01-19</td>
-      <td>2021-01-19</td>
-      <td>3.15</td>
-      <td>8.05</td>
-    </tr>
-    <tr>
-      <th>39</th>
-      <td>85</td>
-      <td>5e2db0f07dc16b3a611516bd</td>
-      <td>38.0</td>
-      <td>United Kingdom</td>
-      <td>United Kingdom</td>
-      <td>English</td>
-      <td>United Kingdom</td>
-      <td>Female</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:00:04.816000</td>
-      <td>...</td>
-      <td>1199.651</td>
-      <td>4.5</td>
-      <td>1.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.375</td>
-      <td>2021-01-19</td>
-      <td>2021-01-20</td>
-      <td>3.15</td>
-      <td>9.45</td>
-    </tr>
-    <tr>
-      <th>40</th>
-      <td>9</td>
-      <td>5fea6632bf9ae4a79153efdf</td>
-      <td>44.0</td>
-      <td>Serbia</td>
-      <td>Austria</td>
-      <td>DATA EXPIRED</td>
-      <td>Serbia</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-18 10:31:49.885000</td>
-      <td>...</td>
-      <td>2630.121</td>
-      <td>5.0</td>
-      <td>1.0</td>
-      <td>2.25</td>
-      <td>2021-01-18</td>
-      <td>3.750</td>
-      <td>2021-01-18</td>
-      <td>2021-01-19</td>
-      <td>3.15</td>
-      <td>10.15</td>
-    </tr>
-    <tr>
-      <th>41</th>
-      <td>90</td>
-      <td>5cf67b30c5cf0e00010c00fc</td>
-      <td>38.0</td>
-      <td>Spain</td>
-      <td>Spain</td>
-      <td>Spanish</td>
-      <td>Spain</td>
-      <td>Female</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:50:23.483000</td>
-      <td>...</td>
-      <td>1760.117</td>
-      <td>3.0</td>
-      <td>0.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>2.250</td>
-      <td>2021-01-19</td>
-      <td>2021-01-19</td>
-      <td>3.15</td>
-      <td>7.35</td>
-    </tr>
-    <tr>
-      <th>42</th>
-      <td>91</td>
-      <td>5f256074297aac1d8ef7382d</td>
-      <td>23.0</td>
-      <td>Hungary</td>
-      <td>Hungary</td>
-      <td>Hungarian</td>
-      <td>Hungary</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:00:20.935000</td>
-      <td>...</td>
-      <td>1761.560</td>
-      <td>2.5</td>
-      <td>0.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>1.875</td>
-      <td>2021-01-19</td>
-      <td>2021-01-19</td>
-      <td>3.15</td>
-      <td>6.65</td>
-    </tr>
-    <tr>
-      <th>43</th>
-      <td>92</td>
-      <td>5f91b067130f8504520cdd6f</td>
-      <td>25.0</td>
-      <td>Italy</td>
-      <td>United Kingdom</td>
-      <td>DATA EXPIRED</td>
-      <td>Italy</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:00:37.754000</td>
-      <td>...</td>
-      <td>1610.890</td>
-      <td>4.5</td>
-      <td>15.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.375</td>
-      <td>2021-01-19</td>
-      <td>2021-02-03</td>
-      <td>3.15</td>
-      <td>9.45</td>
-    </tr>
-    <tr>
-      <th>44</th>
-      <td>93</td>
-      <td>5f4756db83588013e9e31bfc</td>
-      <td>30.0</td>
-      <td>South Africa</td>
-      <td>South Africa</td>
-      <td>DATA EXPIRED</td>
-      <td>South Africa</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:00:24.989000</td>
-      <td>...</td>
-      <td>1964.713</td>
-      <td>2.0</td>
-      <td>0.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>1.500</td>
-      <td>2021-01-19</td>
-      <td>2021-01-19</td>
-      <td>3.15</td>
-      <td>5.95</td>
-    </tr>
-    <tr>
-      <th>45</th>
-      <td>94</td>
-      <td>5ecfc227f036c902457fc44c</td>
-      <td>22.0</td>
-      <td>United Kingdom</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>United Kingdom</td>
-      <td>Female</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:00:12.689000</td>
-      <td>...</td>
-      <td>2020.693</td>
-      <td>4.0</td>
-      <td>15.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.000</td>
-      <td>2021-01-19</td>
-      <td>2021-02-03</td>
-      <td>3.15</td>
-      <td>8.75</td>
-    </tr>
-    <tr>
-      <th>46</th>
-      <td>96</td>
-      <td>5eb9940830ab6c098bd1943d</td>
-      <td>25.0</td>
-      <td>Israel</td>
-      <td>Israel</td>
-      <td>Hebrew</td>
-      <td>Israel</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:00:08.479000</td>
-      <td>...</td>
-      <td>1679.141</td>
-      <td>4.5</td>
-      <td>90.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.375</td>
-      <td>2021-01-19</td>
-      <td>2021-04-19</td>
-      <td>3.15</td>
-      <td>9.45</td>
-    </tr>
-    <tr>
-      <th>47</th>
-      <td>97</td>
-      <td>5f68fe5be5cc370c0a0911de</td>
-      <td>32.0</td>
-      <td>United Kingdom</td>
-      <td>United Kingdom</td>
-      <td>DATA EXPIRED</td>
-      <td>United Kingdom</td>
-      <td>Female</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:00:34.269000</td>
-      <td>...</td>
-      <td>2384.451</td>
-      <td>4.5</td>
-      <td>30.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.375</td>
-      <td>2021-01-19</td>
-      <td>2021-02-18</td>
-      <td>3.15</td>
-      <td>9.45</td>
-    </tr>
-    <tr>
-      <th>48</th>
-      <td>98</td>
-      <td>5f779405dacc842fc44bc767</td>
-      <td>24.0</td>
-      <td>Portugal</td>
-      <td>Portugal</td>
-      <td>DATA EXPIRED</td>
-      <td>Portugal</td>
-      <td>Male</td>
-      <td>APPROVED</td>
-      <td>2021-01-19 11:50:19.976000</td>
-      <td>...</td>
-      <td>1782.482</td>
-      <td>4.0</td>
-      <td>30.0</td>
-      <td>2.25</td>
-      <td>2021-01-19</td>
-      <td>3.000</td>
-      <td>2021-01-19</td>
-      <td>2021-02-18</td>
-      <td>3.15</td>
-      <td>8.75</td>
     </tr>
   </tbody>
 </table>
-<p>49 rows × 25 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Total">Total<a class="anchor-link" href="#Total">&#182;</a></h2>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[55]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;N =&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_pay</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="n">reward_basic</span> <span class="o">=</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;basic_GBP&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">service_fee</span> <span class="o">=</span> <span class="n">reward_basic</span> <span class="o">*</span> <span class="mf">0.2</span>
+<span class="n">vat</span> <span class="o">=</span> <span class="n">reward_basic</span> <span class="o">*</span> <span class="mf">0.2</span><span class="o">*</span><span class="mf">0.2</span>
+<span class="n">total_basic</span> <span class="o">=</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;basic_GBP&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1.4</span>
+<span class="n">total_bonus</span> <span class="o">=</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_GBP&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1.4</span>
+<span class="n">total</span> <span class="o">=</span> <span class="n">total_basic</span> <span class="o">+</span> <span class="n">total_bonus</span>
+
+<span class="n">overview</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="n">reward_basic</span><span class="p">],</span> 
+        <span class="p">[</span><span class="n">service_fee</span><span class="p">],</span> <span class="p">[</span><span class="n">vat</span><span class="p">],</span> 
+        <span class="p">[</span><span class="n">total_basic</span><span class="p">],</span> <span class="p">[</span><span class="n">total_bonus</span><span class="p">],</span> <span class="p">[</span><span class="n">total</span><span class="p">]</span>
+    <span class="p">],</span> 
+    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GBP&#39;</span><span class="p">],</span>
+    <span class="n">index</span><span class="o">=</span> <span class="p">[</span><span class="s1">&#39;reward_basic&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;service_fee&#39;</span><span class="p">,</span> <span class="s1">&#39;vat&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;total_basic&#39;</span><span class="p">,</span> <span class="s1">&#39;total_bonus&#39;</span><span class="p">,</span> <span class="s1">&#39;total&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">overview</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total in €, incl. transaction fee: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">total</span> <span class="o">*</span> <span class="mf">1.14</span><span class="p">))</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>N =50
+
+                 GBP
+reward_basic  112.50
+service_fee    22.50
+vat             4.50
+total_basic   157.50
+total_bonus   215.25
+total         372.75
+
+Total in €, incl. transaction fee: 424.93499999999995
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Total-already-paid">Total already paid<a class="anchor-link" href="#Total-already-paid">&#182;</a></h2><p>Basic + bonus until today. Use that to compare with prolific bills</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[56]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">bonus_GBP_already_paid</span> <span class="o">=</span> <span class="n">data_pay</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;due_on&#39;</span><span class="p">]</span><span class="o">&lt;=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">date</span><span class="p">(),</span> 
+    <span class="s1">&#39;bonus_GBP&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+<span class="n">reward_basic</span> <span class="o">=</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;basic_GBP&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">service_fee</span> <span class="o">=</span> <span class="p">(</span><span class="n">reward_basic</span> <span class="o">+</span> <span class="n">bonus_GBP_already_paid</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.2</span>
+<span class="n">vat</span> <span class="o">=</span> <span class="p">(</span><span class="n">reward_basic</span> <span class="o">+</span> <span class="n">bonus_GBP_already_paid</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.2</span><span class="o">*</span><span class="mf">0.2</span>
+<span class="n">total_basic</span> <span class="o">=</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;basic_GBP&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1.4</span>
+<span class="n">total_bonus</span> <span class="o">=</span> <span class="n">bonus_GBP_already_paid</span> <span class="o">*</span> <span class="mf">1.4</span>
+<span class="n">total</span> <span class="o">=</span> <span class="n">total_basic</span> <span class="o">+</span> <span class="n">total_bonus</span>
+
+<span class="n">overview</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="n">reward_basic</span><span class="p">],</span> 
+        <span class="p">[</span><span class="n">service_fee</span><span class="p">],</span> <span class="p">[</span><span class="n">vat</span><span class="p">],</span> 
+        <span class="p">[</span><span class="n">total_basic</span><span class="p">],</span> <span class="p">[</span><span class="n">total_bonus</span><span class="p">],</span> <span class="p">[</span><span class="n">total</span><span class="p">]</span>
+    <span class="p">],</span> 
+    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GBP&#39;</span><span class="p">],</span>
+    <span class="n">index</span><span class="o">=</span> <span class="p">[</span><span class="s1">&#39;reward_basic&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;service_fee&#39;</span><span class="p">,</span> <span class="s1">&#39;vat&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;total_basic&#39;</span><span class="p">,</span> <span class="s1">&#39;total_bonus&#39;</span><span class="p">,</span> <span class="s1">&#39;total&#39;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">overview</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Total in €, incl. transaction fee: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">total</span> <span class="o">*</span> <span class="mf">1.14</span><span class="p">))</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>                 GBP
+reward_basic  112.50
+service_fee    41.70
+vat             8.34
+total_basic   157.50
+total_bonus   134.40
+total         291.90
+
+Total in €, incl. transaction fee: 332.76599999999996
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h1 id="Prognosis-for-the-larger-sample">Prognosis for the larger sample<a class="anchor-link" href="#Prognosis-for-the-larger-sample">&#182;</a></h1>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[62]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">cost_prognosis</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="n">reward_basic</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;basic_GBP&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">reward_bonus</span> <span class="o">=</span> <span class="n">n</span> <span class="o">*</span> <span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;bonus_GBP&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        
+    <span class="n">service_fee</span>  <span class="o">=</span> <span class="p">(</span><span class="n">reward_basic</span> <span class="o">+</span> <span class="n">bonus_GBP_already_paid</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.2</span>
+    <span class="n">vat</span>          <span class="o">=</span> <span class="p">(</span><span class="n">reward_basic</span> <span class="o">+</span> <span class="n">bonus_GBP_already_paid</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.2</span><span class="o">*</span><span class="mf">0.2</span>
+    <span class="n">total_basic</span>  <span class="o">=</span> <span class="n">reward_basic</span> <span class="o">*</span> <span class="mf">1.4</span>
+    <span class="n">total_bonus</span>  <span class="o">=</span> <span class="n">reward_bonus</span> <span class="o">*</span> <span class="mf">1.4</span>
+    <span class="n">total</span>        <span class="o">=</span> <span class="n">total_basic</span> <span class="o">+</span> <span class="n">total_bonus</span>
+
+    <span class="n">overview</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">[</span><span class="n">reward_basic</span><span class="p">],</span> 
+            <span class="p">[</span><span class="n">service_fee</span><span class="p">],</span> <span class="p">[</span><span class="n">vat</span><span class="p">],</span> 
+            <span class="p">[</span><span class="n">total_basic</span><span class="p">],</span> <span class="p">[</span><span class="n">total_bonus</span><span class="p">],</span> <span class="p">[</span><span class="n">total</span><span class="p">],</span> <span class="p">[</span><span class="n">total</span> <span class="o">*</span> <span class="mf">1.14</span><span class="p">]</span>
+        <span class="p">],</span> 
+        <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">n</span><span class="p">],</span>
+        <span class="n">index</span><span class="o">=</span> <span class="p">[</span><span class="s1">&#39;reward_basic&#39;</span><span class="p">,</span> 
+            <span class="s1">&#39;service_fee&#39;</span><span class="p">,</span> <span class="s1">&#39;vat&#39;</span><span class="p">,</span> 
+            <span class="s1">&#39;total_basic&#39;</span><span class="p">,</span> <span class="s1">&#39;total_bonus&#39;</span><span class="p">,</span> <span class="s1">&#39;total&#39;</span><span class="p">,</span> <span class="s1">&#39;total_EUR&#39;</span><span class="p">])</span>
+    <span class="n">overview</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">overview</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">overview</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;All costs in GBP!&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;My budget is 2.101€&#39;</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span>
+    <span class="n">cost_prognosis</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+    <span class="n">cost_prognosis</span><span class="p">(</span><span class="mi">50</span><span class="p">),</span>
+    <span class="n">cost_prognosis</span><span class="p">(</span><span class="mi">150</span><span class="p">),</span>
+    <span class="n">cost_prognosis</span><span class="p">(</span><span class="mi">200</span><span class="p">),</span>
+    <span class="n">cost_prognosis</span><span class="p">(</span><span class="mi">240</span><span class="p">)</span>
+<span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>All costs in GBP!
+My budget is 2.101€
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[62]:</div>
+
+
+
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>1</th>
+      <th>50</th>
+      <th>150</th>
+      <th>200</th>
+      <th>240</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>reward_basic</th>
+      <td>2.25</td>
+      <td>112.50</td>
+      <td>337.50</td>
+      <td>450.00</td>
+      <td>540.00</td>
+    </tr>
+    <tr>
+      <th>service_fee</th>
+      <td>19.65</td>
+      <td>41.70</td>
+      <td>86.70</td>
+      <td>109.20</td>
+      <td>127.20</td>
+    </tr>
+    <tr>
+      <th>vat</th>
+      <td>3.93</td>
+      <td>8.34</td>
+      <td>17.34</td>
+      <td>21.84</td>
+      <td>25.44</td>
+    </tr>
+    <tr>
+      <th>total_basic</th>
+      <td>3.15</td>
+      <td>157.50</td>
+      <td>472.50</td>
+      <td>630.00</td>
+      <td>756.00</td>
+    </tr>
+    <tr>
+      <th>total_bonus</th>
+      <td>4.30</td>
+      <td>215.25</td>
+      <td>645.75</td>
+      <td>861.00</td>
+      <td>1033.20</td>
+    </tr>
+    <tr>
+      <th>total</th>
+      <td>7.46</td>
+      <td>372.75</td>
+      <td>1118.25</td>
+      <td>1491.00</td>
+      <td>1789.20</td>
+    </tr>
+    <tr>
+      <th>total_EUR</th>
+      <td>8.50</td>
+      <td>424.93</td>
+      <td>1274.80</td>
+      <td>1699.74</td>
+      <td>2039.69</td>
+    </tr>
+  </tbody>
+</table>
 </div>
 </div>
 
@@ -17750,10 +16680,10 @@ Total Costs: 432.9499999999997
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[35]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[63]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_pay</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;C:/Users/User/Google Drive/Masterarbeit/Acquise/data_pay.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_pay</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/prolific/data_pay.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -17769,7 +16699,7 @@ Total Costs: 432.9499999999997
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[36]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[64]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Success! Script ran through.&#39;</span><span class="p">)</span>
