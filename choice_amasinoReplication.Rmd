@@ -110,6 +110,18 @@ data_subject %>%
 ```
 
 # Screening
+Visually impaired without aids? 
+```{r}
+subjects_cannotSee = data_subject %>%
+    filter(sight == 'notCorrected' & 
+           glasses == 'longSight') %>%
+    dplyr::pull(run_id)
+print(paste(
+    'Subjects who are long-sighted but do not wear corrections: ',
+    subjects_cannotSee
+))
+
+```
 
 ## Distribution of k-values
 ````{r}
@@ -192,7 +204,8 @@ excludeSubjects <- read.table('data_jupyter/excludeSubjects_choice.csv',
 excludeSubjects = c(
     excludeSubjects,
     subjects_biasedChoices,
-    subjects_missingLogK
+    subjects_missingLogK,
+    subjects_cannotSee
 )
 excludeSubjects
 ```

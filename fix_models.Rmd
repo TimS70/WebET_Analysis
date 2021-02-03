@@ -73,6 +73,20 @@ data_trial = data_trial %>%
 ```
 
 # Screening
+Visually impaired without aids? 
+```{r}
+subjects_cannotSee = data_subject %>%
+    filter(sight == 'notCorrected' & 
+           glasses == 'longSight') %>%
+    dplyr::pull(run_id)
+print(paste(
+    'Subjects who are long-sighted but do not wear corrections: ',
+    subjects_cannotSee
+))
+
+```
+
+
 ```{r}
 summary(data_et %>%
     dplyr::select(x, y, t_task)
@@ -189,7 +203,8 @@ excludedSubjects = c(
     1, 70, 80, 97, 131, 2012, 
     subjects_lowFPS,
     subjects_noInstruction,
-    subjects_NA_glasses) %>% 
+    subjects_NA_glasses,
+    subjects_cannotSee) %>% 
     sort() %>%
     unique()
 

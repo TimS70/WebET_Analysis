@@ -73,6 +73,18 @@ data_subject %>%
 ```
 
 # Screening
+Visually impaired without aids? 
+```{r}
+subjects_cannotSee = data_subject %>%
+    filter(sight == 'notCorrected' & 
+           glasses == 'longSight') %>%
+    dplyr::pull(run_id)
+print(paste(
+    'Subjects who are long-sighted but do not wear corrections: ',
+    subjects_cannotSee
+))
+
+```
 
 ## Criteria distribution. We need a sufficient ratio between the categories. Otherwise everything gets significant that happens in the larger category. 
 ```{r}
@@ -187,6 +199,7 @@ excludeSubjects <- read.table('data_jupyter/excludeSubjects_choice.csv',
 excludeSubjects = c(
     excludeSubjects,
     subjects_biased_choice,
+    subjects_cannotSee,
     subjects_NA_OI,
     subjects_NA_AI,
     subjects_NA_PI) %>% 
