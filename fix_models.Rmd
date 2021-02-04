@@ -251,11 +251,10 @@ data_et = data_et %>% filter((t_task<5100))
 print(paste('Cleaned: ', nrow(data_et)))
 ```
 
-
 # Visualize Predictors
 Significant correlations of the predictors witih fps, glasses_binary, and chin
 ```{r}
-predictors = c('withinTaskIndex', 
+predictors = c('withinTaskIndex', 'window_diagonal',
                'x_pos', 'y_pos', 'fps', 
                'glasses_binary', 'chin')
 
@@ -294,10 +293,11 @@ data_trial = data_trial %>%
     mutate(
         y_pos_c = scale(y_pos),
         x_pos_c = scale(x_pos),
-        fps_c = scale(fps))
+        fps_c = scale(fps),
+        window_c = scale(window_diagonal))
 
 lmer1_control = lmer(
-    offset ~  withinTaskIndex + x_pos_c + y_pos_c + fps_c + (1 | run_id), 
+    offset ~  withinTaskIndex + x_pos_c + y_pos_c + window_c + fps_c + (1 | run_id), 
     data=data_trial,
     REML=FALSE)
 
