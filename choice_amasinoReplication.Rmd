@@ -441,6 +441,48 @@ cor.test(data_plot$payneIndex, data_plot$attributeIndex)
 Eye tracking bins with average proportion of looking top for each 
 subject over trials when they chose the top option or the bottom option.
 
+## Create time bins
+```{r}
+createTimeBins = function(data, nBins) {
+    data$timeBin = 0
+    
+    for (subject in unique(data$run_id)){
+        df_subject = data %>% filter(run_id == subject)
+        
+        for (trial in unique(df_subject$withinTaskIndex)) {
+            df_trial = df_subject %>% filter(withinTaskIndex == trial)
+            
+            this_timeBin = cut(
+                df_trial$t_task, nBins,
+                labels = c(1:nBins),
+                include.lowest=TRUE)
+            
+            data = data %>%
+                mutate(timeBin=replace(
+                    timeBin, 
+                    run_id==subject & withinTaskIndex==trial, 
+                    this_timeBin))
+        }
+        
+    }
+    return(data)
+        
+     #   data = data %>%
+    #    mutate(trial_bin = cut(withinTaskIndex, nBins, include.lowest=TRUE, labels=c(1:nBins)))
+    
+}
+
+data_et = createTimeBins(data_et, 5)
+data_et %>%
+    group_by(run_id, withinTaskIndex, timeBin) %>%
+    summarise(n=n())
+
+data_et %>%
+    dplyr::select(run_id, withinTaskIndex, timeBin, t_task) %>%
+    arrange(run_id, withinTaskIndex, timeBin, t_task)
+```
+
+
 ## Exclude null AOI
 ```{r}
 subjects_highFPS = data_subject %>%
@@ -451,7 +493,6 @@ subjects_highFPS = data_subject %>%
 timeBins_choseTB_long <- data_et %>%
     filter(!is.na(aoi) & aoi!=0 &
            run_id %in% subjects_highFPS) %>%
-    ET_bins(5) %>%
     mutate(
         lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
         lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
@@ -517,6 +558,7 @@ plot_aoi_across_time = function(
             labels=c("Chose Top", "Chose Bottom"))
                   # If significant
     print(plot)
+    ggsave("plots/et_bins_tb.pdf",width=5.5, height=5)
 }
  
 timeBins_choseTB_long %>%
