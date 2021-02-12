@@ -466,10 +466,6 @@ createTimeBins = function(data, nBins) {
         
     }
     return(data)
-        
-     #   data = data %>%
-    #    mutate(trial_bin = cut(withinTaskIndex, nBins, include.lowest=TRUE, labels=c(1:nBins)))
-    
 }
 
 data_et = createTimeBins(data_et, 5)
@@ -555,15 +551,48 @@ plot_aoi_across_time = function(
             labels=c("Chose Top", "Chose Bottom")) +
         scale_fill_grey(
             start=.3, end=.7, name="",
-            labels=c("Chose Top", "Chose Bottom"))
+            labels=c("Chose Top", "Chose Bottom")) +
                   # If significant
+        ylab(deparse(substitute(yVar))) +
+        xlab("Time bins")
+            
     print(plot)
-    ggsave("plots/et_bins_tb.pdf",width=5.5, height=5)
 }
  
 timeBins_choseTB_long %>%
     plot_aoi_across_time(timeBins_choseTB_long$p_lookTop, 'p_lookTop')
 ```
+
+## Pretty plot 
+```{r}
+ggplot(timeBins_choseTB_long, 
+       aes(x=factor(timeBin), y=p_lookTop, fill=factor(choseTop, c('1', '0')))) +
+    geom_split_violin(alpha=.7, size=1, position="dodge") +
+    stat_summary(
+        fun=mean, geom="point",
+        shape=45,size=10,
+        position=position_dodge(.9), 
+        aes(color=factor(choseTop, c('1', '0')))) +
+    theme_bw() + 
+    theme(text=element_text(size=20), 
+    legend.position="bottom") +
+    ggtitle('Eye-tracking time bins') +
+    scale_colour_manual(
+        values=c("1"="black", "0"="white"), 
+        name="", 
+        labels=c("Chose Top", "Chose Bottom")) +
+    scale_fill_grey(
+        start=.3, end=.7, name="",
+        labels=c("Chose Top", "Chose Bottom")) +
+              # If significant
+    geom_text(x=5, y=1.03, label="***") + 
+    annotate("segment",x=4.7, xend=5.3, y=1.02, yend=1.02) +
+    ylab("Proportion looking top") +
+    xlab("Time bins")
+ggsave("plots/et_bins_tb.pdf",width=5.5, height=5)
+```
+
+
 
 ## Include null AOI: Proportion of looking top, looking bottom, and no aoi across time 
 ```{r}
