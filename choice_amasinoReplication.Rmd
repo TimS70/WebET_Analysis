@@ -64,13 +64,13 @@ data_et
 K values and noise
 ```{r}
 #run_matlab_script('fitK/fit_discount_k.m')
-logK <- read.table('fitK/logK.csv', header=TRUE, sep=',')
 
 add_logK = function(data) {
+    logK <- read.table('fitK/logK.csv', header=TRUE, sep=',')
     if ('logK' %in% names(data)) {
         data = data %>% dplyr::select(!'logK')
     }
-    if ('noise' %in% names(data_subject)) {
+    if ('noise' %in% names(data)) {
         data = data %>% dplyr::select(!'noise')
     } 
     
@@ -81,14 +81,12 @@ add_logK = function(data) {
 data_subject = add_logK(data_subject)
 data_trial = add_logK(data_trial)
 
-
-
 data_subject %>%
     dplyr::select(run_id, logK, noise)
 
 data_trial %>%
     dplyr::group_by(run_id) %>%
-    dplyr::summarise(logK, noise)
+    dplyr::summarise(logK, noise, .groups='keep')
 ```
 
 
@@ -104,7 +102,6 @@ print(paste(
     'Subjects who are long-sighted but do not wear corrections: ',
     subjects_cannotSee
 ))
-
 ```
 
 ## Distribution of k-values
