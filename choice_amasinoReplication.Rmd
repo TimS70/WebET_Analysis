@@ -6,6 +6,7 @@ output:
     df_print: paged
 ---
 
+# Setup
 ```{r}
 setwd("C:/Users/User/GitHub/WebET_Analysis")
 getPackages <- function(pkg){
@@ -22,40 +23,20 @@ getPackages(c('plyr',
               'e1071',
               "ggplot2",
               "ggsignif",
+              'knitrProgressBar',
               'matlabr',
+              'progress',
               'QuantPsyc',
               "RColorBrewer",
               'reshape2',
               'tidyr')
             )
-```
-```{r echo=FALSE}
-# https://stackoverflow.com/a/45614547
-GeomSplitViolin <- ggproto("GeomSplitViolin", GeomViolin, draw_group = function(self, data, ..., draw_quantiles = NULL){
-  data <- transform(data, xminv = x - violinwidth * (x - xmin), xmaxv = x + violinwidth * (xmax - x))
-  grp <- data[1,'group']
-  newdata <- plyr::arrange(transform(data, x = if(grp%%2==1) xminv else xmaxv), if(grp%%2==1) y else -y)
-  newdata <- rbind(newdata[1, ], newdata, newdata[nrow(newdata), ], newdata[1, ])
-  newdata[c(1,nrow(newdata)-1,nrow(newdata)), 'x'] <- round(newdata[1, 'x']) 
-  if (length(draw_quantiles) > 0 & !scales::zero_range(range(data$y))) {
-    stopifnot(all(draw_quantiles >= 0), all(draw_quantiles <= 
-                                              1))
-    quantiles <- ggplot2:::create_quantile_segment_frame(data, draw_quantiles)
-    aesthetics <- data[rep(1, nrow(quantiles)), setdiff(names(data), c("x", "y")), drop = FALSE]
-    aesthetics$alpha <- rep(1, nrow(quantiles))
-    both <- cbind(quantiles, aesthetics)
-    quantile_grob <- GeomPath$draw_panel(both, ...)
-    ggplot2:::ggname("geom_split_violin", grid::grobTree(GeomPolygon$draw_panel(newdata, ...), quantile_grob))
-  }
-  else {
-    ggplot2:::ggname("geom_split_violin", GeomPolygon$draw_panel(newdata, ...))
-  }
-})
 
-geom_split_violin <- function (mapping = NULL, data = NULL, stat = "ydensity", position = "identity", ..., draw_quantiles = NULL, trim = TRUE, scale = "area", na.rm = FALSE, show.legend = NA, inherit.aes = TRUE) {
-  layer(data = data, mapping = mapping, stat = stat, geom = GeomSplitViolin, position = position, show.legend = show.legend, inherit.aes = inherit.aes, params = list(trim = trim, scale = scale, draw_quantiles = draw_quantiles, na.rm = na.rm, ...))
-}
+
+source("r_functions/geom_split_violin.R")
+source("r_functions/merge_mean_by_subject.R")
 ```
+
 
 # Read and create datasets
 ```{r}
@@ -78,39 +59,42 @@ data_et = merge(data_et, grouped, by=c('run_id', 'trial_index'))
 data_et
 ```
 
-## k-values
+
+# k-values
 K values and noise
 ```{r}
-merge_mean_by_subject = function(data, data_source, varName) {
-    grouped = data_source %>%
-        dplyr::group_by(run_id) %>%
-        dplyr::summarise(varName = mean(varName))
-      
-    if (varName %in% names(data)) {
-        data = data %>% dplyr::select(!varName)
-    }
+#run_matlab_script('fitK/fit_discount_k.m')
+logK <- read.table('fitK/logK.csv', header=TRUE, sep=',')
 
-    data = merge(
-        data, 
-        data_source %>% dplyr::select(run_id, varName), 
-        by='run_id')
+add_logK = function(data) {
+    if ('logK' %in% names(data)) {
+        data = data %>% dplyr::select(!'logK')
+    }
+    if ('noise' %in% names(data_subject)) {
+        data = data %>% dplyr::select(!'noise')
+    } 
+    
+    data = merge(data, logK, by='run_id')
     return(data)
 }
 
-run_matlab_script('fitK/fit_discount_k.m')
-logK <- read.table('fitK/logK.csv', header=TRUE, sep=',')
-data_subject = merge_mean_by_subject(data_subject, logK, 'logK')
-data_subject = merge_mean_by_subject(data_subject, logK, 'noise')
+data_subject = add_logK(data_subject)
+data_trial = add_logK(data_trial)
 
-data_trial = merge_mean_by_subject(data_trial, logK, 'noise')
-data_trial = merge_mean_by_subject(data_trial, logK, 'logK')
+
 
 data_subject %>%
     dplyr::select(run_id, logK, noise)
+
+data_trial %>%
+    dplyr::group_by(run_id) %>%
+    dplyr::summarise(logK, noise)
 ```
 
+
 # Screening
-Visually impaired without aids? 
+
+## Visually impaired without aids? 
 ```{r}
 subjects_cannotSee = data_subject %>%
     filter(sight == 'notCorrected' & 
@@ -143,21 +127,32 @@ ggplot(data_subject, aes(x=logK, y=noise)) +
     theme_bw() + 
     scale_colour_grey() + 
     theme(text=element_text(size=20)) +
-    xlab("logK") + ylab("neg_logLikelihood") +
+    xlab("logK") + ylab("noise") +
+    ggtitle('logK vs. noise') 
+
+ggplot(data_subject %>% filter(noise < 500), aes(x=logK, y=noise)) +
+    geom_point(size=2.5, aes(alpha=.5))+
+    guides(alpha=FALSE,color=FALSE, shape=FALSE)+
+    theme_bw() + 
+    scale_colour_grey() + 
+    theme(text=element_text(size=20)) +
+    xlab("logK") + ylab("noise") +
     ggtitle('logK vs. noise') 
 ````
 
+## Biased choices
 ````{r}
 subjects_biasedChoices = data_subject %>%
     filter(
-        choseLL>0.99 | choseLL<0.01 |
-        choseTop>0.99 | choseTop<0.01     
+        choseLL>0.98 | choseLL<0.02 |
+        choseTop>0.98 | choseTop<0.02     
           ) %>%
     arrange(run_id) %>%
     dplyr::pull(run_id)
 subjects_biasedChoices
 ```
 
+## Missing LogK
 ```{r}
 subjects_missingLogK = data_subject %>%
     filter(is.na(logK)) %>%
@@ -165,19 +160,31 @@ subjects_missingLogK = data_subject %>%
     dplyr::pull(run_id)
 subjects_missingLogK
 ```
-# High noise
+
+## High noise
 ```{r}
-subjects_noisyK = data_subject %>%
-    filter(noise>10) %>%
+subjects_noisy_logK = data_subject %>%
+    filter(noise>40) %>%
     arrange(run_id) %>%
     dplyr::pull(run_id)
-subjects_noisyK
+subjects_noisy_logK
 ```
-Trials with too much missing data for Option Index
+
+## Positive logK 
+```{r}
+subjects_pos_logK = data_subject %>%
+    filter(logK>0) %>%
+    arrange(run_id) %>%
+    dplyr::pull(run_id)
+subjects_pos_logK
+```
+
+## Trials with too much missing data for Option Index
 ```{r}
 grouped_NA_ET = data_trial %>%
+    filter(!is.na(fps)) %>%
     group_by(run_id) %>%
-    summarise(fps = mean(fps),
+    dplyr::summarise(fps = mean(fps),
               n_NA_OI = sum(is.na(optionIndex)),
               n_NA_AI = sum(is.na(attributeIndex)),
               n_NA_PI = sum(is.na(payneIndex))) %>%
@@ -197,6 +204,7 @@ subjects_NA_PI = grouped_NA_ET %>%
     dplyr::pull(run_id)
 ```
 
+
 # Cleaning
 ```{r}
 excludeSubjects <- read.table('data_jupyter/excludeSubjects_choice.csv', 
@@ -204,10 +212,14 @@ excludeSubjects <- read.table('data_jupyter/excludeSubjects_choice.csv',
 excludeSubjects = c(
     excludeSubjects,
     subjects_biasedChoices,
+    subjects_pos_logK,
+    subjects_noisy_logK,
     subjects_missingLogK,
-    subjects_cannotSee
-)
+    subjects_cannotSee) %>%
+    unique()
 excludeSubjects
+
+print(length(excludeSubjects))
 ```
 
 ```{r}
@@ -236,9 +248,9 @@ ggplot(data_subject, aes(x=choseTop))+
 ggsave("plots/choiceSide.pdf",width=5.5, height=5)
 ```
 
-# Discount rate k (logK)
 
-Histogram of log(k)
+# Discount rate k (logK)
+## Histogram of log(k)
 ```{r}
 ggplot(data_subject, aes(x=logK))+
   geom_histogram(binwidth=.5, alpha=.5, position="identity")+
@@ -246,6 +258,8 @@ ggplot(data_subject, aes(x=logK))+
   theme_bw()+theme(text=element_text(size=40))
   ggsave("plots/logk_hist.pdf", width=5.5, height=5)
 ```
+
+
 # Subjective value 
 ## Subjective value for top and bottom options
 ```{r}
@@ -272,7 +286,7 @@ data_trial %>%
     arrange(dSV_TB)
 ```
 
-## choseTop by dSV bins
+## ChoseTop by dSV bins
 ```{r}
 data_trial$dSV_bin = 
     cut(data_trial$dSV_TB,
@@ -290,7 +304,9 @@ SV_bins = data_trial %>%
         noise = mean(noise),
         choseTop=mean(choseTop), 
         rt=mean(trial_duration_exact)/1000, 
-        count=mean(x_count)) %>%
+        count=mean(x_count),
+        .groups = 'keep') %>%
+    filter(n>1) %>%
     arrange(dSV_bin)
 SV_bins
 
@@ -315,9 +331,10 @@ ggplot(data=SV_bins, aes(x=dSV_bin, y=choseTop)) +
 ggsave("plots/SV_choseTop.pdf", width=5.5, height=5)
 
 ggplot(data=SV_bins, aes(x=dSV_bin, y=rt)) +
+    theme_bw() +
     geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
     xlim(-5,5) + ylim(0, 6.5) +
-    geom_line(stat="summary", fun.y="mean", size=.5) +
+    geom_line(stat="summary", fun="mean", size=.5) +
     stat_summary(fun.data=mean_se, geom="errorbar", width=.8) +
     xlab("SV top - SV bottom") + 
     ylab("Response Time (s)") +
@@ -325,9 +342,10 @@ ggplot(data=SV_bins, aes(x=dSV_bin, y=rt)) +
 ggsave("plots/SV_RT.pdf",width=5.5, height=5)
 
 ggplot(data=SV_bins, aes(x=dSV_bin, y=count)) +
+    theme_bw() +
     geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
     xlim(-5,5) + ylim(0,20) + 
-    geom_line(stat="summary", fun.y="mean", size=.5) +
+    geom_line(stat="summary", fun="mean", size=.5) +
     stat_summary(fun.data=mean_se, geom="errorbar", width=.8) +
     xlab("SV top - SV bottom") + 
     ylab("Number of Fixations") +
@@ -335,6 +353,7 @@ ggplot(data=SV_bins, aes(x=dSV_bin, y=count)) +
 ggsave("plots/SV_Count.pdf",width=5.5, height=5)
 ```
 
+# Eye tracking indices
 ## Correlation of Eye tracking indices and discount rate
 ```{r}
 ggplot(data_subject %>% filter(!run_id %in% subjects_NA_OI), 
@@ -347,7 +366,7 @@ ggplot(data_subject %>% filter(!run_id %in% subjects_NA_OI),
   xlab("Option index") +
   ylab("log(k)") + 
   scale_colour_grey()
-ggsave('plots/opt_logk.pdf',width=5.7, height=5)
+ggsave('plots/logK_OI.pdf',width=5.7, height=5)
 
 data_test = data_subject %>% filter(!run_id %in% subjects_NA_OI)
 cor.test(data_test$optionIndex, data_test$logK) 
@@ -361,7 +380,7 @@ ggplot(data_subject %>% filter(!run_id %in% subjects_NA_AI),
   scale_colour_grey()
   theme(text=element_text(size=20))+
   xlab("Attribute index") + ylab("log(k)") 
-ggsave("plots/logk_attributeIndex.pdf",width=5.7, height=5)
+ggsave("plots/logk_AI.pdf",width=5.7, height=5)
 
 data_test = data_subject %>% filter(!run_id %in% subjects_NA_AI)
 cor.test(data_test$attributeIndex, data_test$logK) 
@@ -378,10 +397,65 @@ ggplot(data_subject %>% filter(!run_id %in% subjects_NA_AI),
   theme(text=element_text(size=20))+
   xlab("Payne index") +
   ylab("log(k)") 
-ggsave("plots/logk_payneIndex.pdf",width=5.7, height=5)
+ggsave("plots/logk_PI.pdf",width=5.7, height=5)
 
 data_test = data_subject %>% filter(!run_id %in% subjects_NA_PI)
 cor.test(data_test$payneIndex, data_test$logK) 
+```
+
+## Correlation of Eye tracking indices among each other
+```{r}
+ggplot(data_subject %>% 
+           filter(!run_id %in% c(subjects_NA_OI, subjects_NA_AI)), 
+       aes(x=optionIndex, y=attributeIndex)) +
+  geom_point(size=2.5, aes(alpha=.5)) +
+  guides(alpha=FALSE,color=FALSE, shape=FALSE) +
+  theme_bw() + 
+  xlim(-1,1) +
+  theme(text=element_text(size=20))+
+  xlab("Option index") +
+  ylab("Attribute Index") + 
+  scale_colour_grey()
+ggsave('plots/ET_indices_OI_AI.pdf',width=5.7, height=5)
+
+data_test = data_subject %>% 
+    filter(!run_id %in% c(subjects_NA_OI, subjects_NA_AI))
+cor.test(data_test$optionIndex, data_test$attributeIndex) 
+
+ggplot(data_subject %>% 
+           filter(!run_id %in% c(subjects_NA_OI, subjects_NA_PI)), 
+       aes(x=optionIndex, y=payneIndex)) +
+  geom_point(size=2.5, aes(alpha=.5))+
+  guides(alpha=FALSE,color=FALSE, shape=FALSE)+
+  theme_bw() + 
+  xlim(-1,1) +
+  scale_colour_grey()
+  theme(text=element_text(size=20))+
+  xlab("Option Index") + ylab("Payne Index") 
+ggsave("plots/ET_indices_OI_PI.pdf",width=5.7, height=5)
+
+data_test = data_subject %>% 
+    filter(!run_id %in% c(subjects_NA_OI, subjects_NA_PI))
+cor.test(data_test$optionIndex, data_test$payneIndex) 
+
+#Plot correlation between Payne index and discount rate
+#Replication sample
+ggplot(data_subject %>% 
+    filter(!run_id %in% c(subjects_NA_PI, subjects_NA_AI)), 
+       aes(x=attributeIndex, y=payneIndex)) +
+  geom_point(size=2.5, aes(alpha=.5))+
+  guides(alpha=FALSE,color=FALSE, shape=FALSE)+
+  theme_bw() + 
+  xlim(-1,1) + 
+  scale_colour_grey() + 
+  theme(text=element_text(size=20))+
+  xlab("Attribute index") +
+  ylab("Payne Index") 
+ggsave("plots/ET_indices_AI_PI.pdf",width=5.7, height=5)
+
+data_test = data_subject %>% 
+    filter(!run_id %in% c(subjects_NA_PI, subjects_NA_AI))
+cor.test(data_test$attributeIndex, data_test$payneIndex) 
 ```
 
 ### Trial bins
@@ -420,22 +494,6 @@ plot_trial_bins(data_trial, 8, "ChoseLL across trials")
 ```
 
 
-## Correlation of Attribute index and Payne index
-```{r}
-#Replication sample
-data_plot = data_subject %>% 
-    filter(!run_id %in% c(subjects_NA_AI, subjects_NA_OI))
-ggplot(data_plot, aes(x=attributeIndex, y=payneIndex)) +
-    geom_point(size=2.5, alpha=.5)+
-    guides(alpha=FALSE)+ theme_bw()+xlim(-1,1)+
-    scale_colour_grey()+ylim(-1,1)+
-    theme(text=element_text(size=20))+
-    xlab("Attribute index") + ylab("Payne index") 
-ggsave("plots/att_payne.pdf",width=5.7, height=5)
-
-cor.test(data_plot$payneIndex, data_plot$attributeIndex) 
-```
-
 
 # Eye Tracking Bins
 Eye tracking bins with average proportion of looking top for each 
@@ -445,6 +503,7 @@ subject over trials when they chose the top option or the bottom option.
 ```{r}
 createTimeBins = function(data, nBins) {
     data$timeBin = 0
+    progress_bar <- progress_estimated(length(unique(data$run_id)), 0)
     
     for (subject in unique(data$run_id)){
         df_subject = data %>% filter(run_id == subject)
@@ -463,23 +522,19 @@ createTimeBins = function(data, nBins) {
                     run_id==subject & withinTaskIndex==trial, 
                     this_timeBin))
         }
-        
+        progress_bar$pause(0.1)$tick()$print()
     }
     return(data)
 }
 
 data_et = createTimeBins(data_et, 5)
-data_et %>%
-    group_by(run_id, withinTaskIndex, timeBin) %>%
-    summarise(n=n())
 
 data_et %>%
-    dplyr::select(run_id, withinTaskIndex, timeBin, t_task) %>%
+    dplyr::select(run_id, withinTaskIndex, timeBin, t_task, aoi) %>%
     arrange(run_id, withinTaskIndex, timeBin, t_task)
 ```
 
-
-## Exclude null AOI
+## Plot without null AOI
 ```{r}
 subjects_highFPS = data_subject %>%
     filter(fps>10) %>%
@@ -593,47 +648,146 @@ ggsave("plots/et_bins_tb.pdf",width=5.5, height=5)
 ```
 
 
-
-## Include null AOI: Proportion of looking top, looking bottom, and no aoi across time 
+## Eyetracking data bins
 ```{r}
-df = data_et %>%
-    filter(run_id %in% subjects_highFPS) %>%
-    mutate(
-    lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
-    lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
-    group_by(run_id, choseTop, timeBin) %>%
-    summarise(
-        n = n(),
-        n_nullAOI = sum(aoi==0),
-        n_lookTop = sum(lookTop),
-        n_lookBottom = sum(lookBottom),
-        p_nullAOI = n_nullAOI/n,
-        p_lookTop = sum(lookTop)/n,
-        p_lookBottom = sum(lookBottom)/n) %>%
-    mutate(choseTop = factor(choseTop),
-           timeBin = factor(timeBin))
-df
-df %>%
-    group_by(timeBin, choseTop) %>%
-    summarise(
-        p_lookTop = mean(p_lookTop),
-        p_lookBottom = mean(p_lookBottom),
-        p_nullAOI = mean(p_nullAOI)) %>%
-    arrange(choseTop, timeBin)
+create_eyeTracking_Bins = function(data, nBins) {
+    data$et_bin = 0
+    
+    progress_bar <- progress_estimated(length(unique(data$run_id)), 0)
+    
+    for (subject in unique(data$run_id)){
+    
+        df_subject = data %>% filter(run_id == subject)
+        
+        for (trial in unique(df_subject$withinTaskIndex)) {
+            df_trial = df_subject %>% filter(withinTaskIndex == trial)
+            
+            this_et_bin = cut(
+                c(1:nrow(df_trial)), 
+                nBins,
+                labels = c(1:nBins),
+                include.lowest=TRUE)
+            
+            data = data %>%
+                mutate(et_bin=replace(
+                    et_bin, 
+                    run_id==subject & withinTaskIndex==trial, 
+                    this_et_bin))
+        }
+        
+        progress_bar$pause(0.1)$tick()$print()
+        
+    }
+    return(data)
+}
 
 
-df %>%
-    plot_aoi_across_time(df$p_lookTop, 'p_lookTop')
 
-df %>%
-    plot_aoi_across_time(df$p_lookBottom, 'p_lookBottom')
+data_et = create_eyeTracking_Bins(data_et, 5)
+data_et %>%
+    group_by(run_id, withinTaskIndex, et_bin) %>%
+    summarise(n=n())
 
-df %>%
-    plot_aoi_across_time(df$p_nullAOI, 'p_nullAOI')
-
+data_et %>%
+    dplyr::select(run_id, withinTaskIndex, et_bin, t_task) %>%
+    arrange(run_id, withinTaskIndex, et_bin, t_task)
 ```
 
-# Last fixation: Proportion of top choice 
+
+## Plot
+```{r}
+subjects_highFPS = data_subject %>%
+    filter(fps>10) %>%
+    arrange(run_id) %>%
+    dplyr::pull(run_id)
+
+et_bins_choseTB_long = data_et %>%
+    filter(!is.na(aoi) & aoi!=0 &
+           run_id %in% subjects_highFPS) %>%
+    mutate(
+        lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
+        lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
+    dplyr::group_by(run_id, choseTop, et_bin) %>%
+    dplyr::summarise(
+        n = n(),
+        n_lookTop = sum(lookTop),
+        n_lookBottom = sum(lookBottom),    
+        p_lookTop = sum(lookTop)/n,
+        p_lookBottom = sum(lookBottom)/n) %>%
+    arrange(choseTop)
+et_bins_choseTB_long 
+
+et_bins_choseTB_long %>%
+    group_by(run_id, choseTop) %>%
+    summarise(n=length(unique(et_bin))) %>%
+    filter(n<5)
+
+subjects_not_enough_bins = et_bins_choseTB_long %>%
+    group_by(run_id, choseTop) %>%
+    summarise(n=length(unique(et_bin))) %>%
+    filter(n<5) %>%
+    dplyr::pull(run_id)
+
+et_bins_choseTB_long %>%
+    filter(et_bin %in% c(4, 5)) %>%
+    dplyr::group_by(et_bin, choseTop) %>%
+    dplyr::summarise(p_lookTop = mean(p_lookTop))
+#Violin plot of time bins
+
+et_bins_choseTB_long$choseTop = as.factor(et_bins_choseTB_long$choseTop)
+
+for (bin in unique(et_bins_choseTB_long$et_bin)) {
+    print(t.test(p_lookTop ~ choseTop, 
+                 data=et_bins_choseTB_long %>% 
+                     filter(et_bin==bin &
+                            !(run_id %in% subjects_not_enough_bins)), 
+                 paired=TRUE))
+}
+
+plot_aoi_across_time = function(
+    data, yVar, title='AOI across et_bins') {
+    
+    plot = ggplot(
+        data, 
+        aes(x=factor(et_bin), y=yVar, fill=factor(choseTop, c('1', '0')))) +
+        geom_split_violin(alpha=.7, size=1, position="dodge") +
+        stat_summary(
+            fun=mean, geom="point",
+            shape=45,size=10,
+            position=position_dodge(.9), 
+            aes(color=factor(choseTop, c('1', '0')))) +
+        theme_bw() + 
+        theme(text=element_text(size=20), 
+        legend.position="bottom") +
+        ggtitle(title) +
+        scale_colour_manual(
+            values=c("1"="black", "0"="white"), 
+            name="", 
+            labels=c("Chose Top", "Chose Bottom")) +
+        scale_fill_grey(
+            start=.3, end=.7, name="",
+            labels=c("Chose Top", "Chose Bottom")) +
+                  # If significant
+        ylab(deparse(substitute(yVar))) +
+        xlab("Time bins")
+            
+    print(plot)
+}
+ 
+et_bins_choseTB_long %>%
+    plot_aoi_across_time(et_bins_choseTB_long$p_lookTop, 'p_lookTop')
+
+et_bins_choseTB_long %>%
+    plot_aoi_across_time(et_bins_choseTB_long$p_lookBottom, 'p_lookBottom')
+
+et_bins_choseTB_long %>%
+    plot_aoi_across_time(et_bins_choseTB_long$p_nullAOI, 'p_nullAOI')
+```
+
+
+
+# Last fixation
+## Proportion of top choice 
 ```{r}
 add_lastGazeTop = function(data_trial, data_et) {
     grouped_lastCoordinate = data_et %>%
@@ -669,13 +823,23 @@ lastGaze_long <- data_trial %>%
     dplyr::group_by(run_id, lastGazeTop) %>%
     dplyr::summarise(
         n=n(),
-        choseTop=mean(choseTop)) 
+    choseTop=mean(choseTop)) 
+
 lastGaze_long
 
+subjects_noGaze = 
+    lastGaze_long %>% 
+    group_by(run_id) %>%
+    dplyr::summarise(n_subj = n()) %>%
+    filter(n_subj<2) %>%
+    arrange(run_id) %>%
+    dplyr::pull(run_id)
+
 lastGaze_long$lastGazeTop = factor(lastGaze_long$lastGazeTop, c('1', '0'))
-t.test(choseTop ~ lastGazeTop,
-       data=lastGaze_long, 
-       paired=TRUE)
+t.test(
+    choseTop ~ lastGazeTop,
+    data=lastGaze_long %>% filter(!(run_id %in% subjects_noGaze)), 
+    paired=TRUE)
 ```
 
 ```{r}
@@ -688,13 +852,106 @@ ggplot(lastGaze_long, aes(x=lastGazeTop, y=choseTop)) +
     ylab("Proportion top choices") +
     xlab("last Fixation on Top AOIs") + 
     theme(text=element_text(size=20))
-ggsave("plots/LastGaze_vs_choice.pdf",width=5.5, height=5)
+ggsave("plots/lastGaze_vs_choice.pdf",width=5.5, height=5)
 ```
+
+
+## Proportion of LL choice 
+```{r}
+add_lastGazeLL = function(data_trial, data_et) {
+    grouped_lastCoordinate = data_et %>%
+        dplyr::group_by(run_id, trial_index) %>%
+        dplyr::summarise(
+            t_task = max(t_task)) %>%
+        merge(data_et %>% 
+                  dplyr::select(run_id, trial_index, t_task, aoi, LL_top) %>%
+                  filter(aoi!="0"), 
+              by=c('run_id', 'trial_index', 't_task')) %>%
+        mutate(lastGazeLL = as.numeric(
+            (aoi %in% c('TL', 'TR') & LL_top==1) |
+            (aoi %in% c('BL', 'BR') & LL_top==0)), 
+        ) 
+    
+    print(grouped_lastCoordinate)
+    
+    if ('lastGazeTop' %in% names(data_trial)) {
+        data_trial = data_trial %>% dplyr::select(!lastGazeLL)}
+    data_trial = data_trial %>% 
+        merge(
+            grouped_lastCoordinate %>% 
+                dplyr::select(run_id, trial_index, lastGazeLL), 
+            by=c('run_id', 'trial_index'))
+    
+    return(data_trial)
+}
+
+data_trial = add_lastGazeLL(data_trial, data_et)
+```
+
+```{r}
+grouped_lastCoordinate = data_et %>%
+    dplyr::group_by(run_id, trial_index) %>%
+    dplyr::summarise(
+        t_task = max(t_task)) %>%
+    merge(data_et %>% 
+              dplyr::select(run_id, trial_index, t_task, aoi, LL_top) %>%
+              filter(aoi!="0"), 
+          by=c('run_id', 'trial_index', 't_task')) %>%
+    mutate(lastGazeLL = as.numeric(
+        (aoi %in% c('TL', 'TR') & LL_top==1) |
+        (aoi %in% c('BL', 'BR') & LL_top==0)), 
+    ) %>% 
+    merge(data_trial %>%
+              dplyr::select(run_id, trial_index, 
+                            option_TL, option_TR, option_BR, option_BL,
+                            choseLL),
+          by=c('run_id', 'trial_index'))
+
+grouped_lastCoordinate %>%
+    filter(lastGazeLL==0)
+```
+
+```{r}
+lastGaze_long <- data_trial %>% 
+    dplyr::select(run_id, withinTaskIndex, lastGazeLL, choseLL) %>%
+    dplyr::group_by(run_id, lastGazeLL, withinTaskIndex) %>%
+    dplyr::summarise(choseLL=mean(choseLL)) %>%
+    dplyr::group_by(run_id, lastGazeLL) %>%
+    dplyr::summarise(
+        n=n(),
+        choseLL=mean(choseLL)) 
+lastGaze_long
+
+subjects_noGaze = lastGaze_long %>% 
+    group_by(run_id) %>%
+    dplyr::summarise(n_subj = n()) %>%
+    filter(n_subj<2) %>%
+    arrange(run_id) %>%
+    dplyr::pull(run_id)
+
+lastGaze_long$lastGazeLL = factor(lastGaze_long$lastGazeLL, c('1', '0'))
+t.test(
+    choseLL ~ lastGazeLL,
+    data=lastGaze_long %>% filter(!(run_id %in% subjects_noGaze)), 
+    paired=TRUE)
+
+ggplot(lastGaze_long, 
+       aes(x=lastGazeLL, y=choseLL)) +
+    geom_violin(fill="gray", size=0) +
+    stat_summary(fun=mean,geom="point",shape=45,size=10, color="white") +
+    geom_text(x=1.5, y=1.02, label="***") + 
+    annotate("segment",x=1, xend=2, y=1.01, yend=1.01) +
+    theme_bw()+ylim(0,1.03)+xlab("") + 
+    ylab("Proportion LL choices") +
+    xlab("last Fixation on LL AOIs") + 
+    theme(text=element_text(size=20))
+```
+
+
 
 # Error Analyis
 Error trials are those that are not predicted based on the subjective values, 
 which themselves are based on individual's fitted k value
-
 ## Find Error trials
 ```{r}
 identify_error_trials = function(data) {

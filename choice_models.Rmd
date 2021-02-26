@@ -114,8 +114,8 @@ We need two more requirements to our data:
 grouped_n_ET = data_trial %>% 
     group_by(run_id, choseLL) %>%
     summarise(
-        n_choseLL = n(),
-        choseLL_perc = n_choseLL/80,
+        n = n(),
+        choice_perc = n/80,
         x_count = mean(x_count),
         n_OI = sum(!is.na(optionIndex)),
         OI = mean(optionIndex, na.rm=TRUE), 
@@ -128,60 +128,73 @@ grouped_n_ET = data_trial %>%
     
 grouped_n_ET %>%
     mutate(across(
-        c('choseLL', 'choseLL_perc', 'x_count', 'OI', 'AI', 'PI'), 
+        c('choseLL', 'choice_perc', 'x_count', 'OI', 'AI', 'PI'), 
         round, 1)
         )
 
-subjects_biased_choice = grouped_n_ET %>%
-    filter(n_choseLL<3) %>%
+subjects_biased_choices = grouped_n_ET %>%
+    filter(n<4) %>% 
     arrange(run_id) %>%
-    dplyr::pull(run_id) %>%
-    unique()
-print('Subjects with too many or too few choseLL: ')
-print(subjects_biased_choice)
+    dplyr::pull(run_id)
+print(paste('Subjects with less than 3 trials in one category: ', 
+            length(subjects_biased_choices)))
+subjects_biased_choices
 
-grouped_n_ET %>%
-    filter(
-        !(run_id %in% subjects_biased_choice) &
-        !is.na(x_count) &
-        (n_choseLL<3 | n_OI<3 | n_AI<3 | n_PI<3) |
-        n_OI/n_choseLL<0.4 |
-        n_AI/n_choseLL<0.4 |
-        n_PI/n_choseLL<0.4)
+
+min_percentage = 0
 
 subjects_NA_OI = grouped_n_ET %>%
-    filter(n_OI<3 | n_OI/n_choseLL<0.4) %>%
+    filter(n_OI<3 | n_OI/n<min_percentage) %>%
     dplyr::pull(run_id) %>%
     unique()
+
+print(paste('OI - length: ', 
+            length(subjects_NA_OI))
+)
+subjects_NA_OI
 
 subjects_NA_AI = grouped_n_ET %>%
-    filter(n_AI<3 | n_AI/n_choseLL<0.4) %>%
+    filter(n_AI<3 | n_AI/n<min_percentage) %>%
     dplyr::pull(run_id) %>%
     unique()
+
+print(paste('AI - length: ', 
+      length(subjects_NA_AI))
+)
+subjects_NA_AI
 
 subjects_NA_PI = grouped_n_ET %>%
-    filter(n_PI<3 | n_PI/n_choseLL<0.4) %>%
+    filter(n_PI<3 | n_PI/n<min_percentage) %>%
     dplyr::pull(run_id) %>%
     unique()
-
-print('Subjects without enough data for ET indices within one choice option: ')
-print('OI')
-subjects_NA_OI
-print('AI')
-subjects_NA_AI
-print('PI')
+print(paste('PI - length: ', 
+      length(subjects_NA_PI))
+)
 subjects_NA_PI
+
+subjects_NA_ET = unique(
+    c(subjects_NA_OI, subjects_NA_AI, subjects_NA_PI)
+)
+
+print(paste(
+    'Subjects without enough data for ET indices within one choice option: ',
+    length(subjects_NA_ET))
+)
+subjects_NA_ET
+
+grouped_n_ET %>%
+    filter(run_id %in% subjects_NA_ET)
 ```
 
 ## Visualize ET indices 
 ```{r}
 data_plot = grouped_n_ET %>%
     filter(choseLL==1) %>%
-    mutate(SE = sqrt(choseLL_perc * (1-choseLL_perc)/n_choseLL))
+    mutate(SE = sqrt(choice_perc * (1-choice_perc)/n))
 
-ggplot(data_plot, aes(factor(run_id), choseLL_perc)) + 
-    geom_pointrange(aes(ymin=choseLL_perc-1.96*SE, 
-                        ymax=choseLL_perc+1.96*SE)) +
+ggplot(data_plot, aes(factor(run_id), choice_perc)) + 
+    geom_pointrange(aes(ymin=choice_perc-1.96*SE, 
+                        ymax=choice_perc+1.96*SE)) +
     xlab('run_id') +
     ylab('Percent of choseLL') + 
     theme(
@@ -196,8 +209,11 @@ ggplot(data_plot, aes(factor(run_id), choseLL_perc)) +
 # Data on subject level
 excludeSubjects <- read.table('data_jupyter/excludeSubjects_choice.csv', 
                            header=TRUE, sep=',')[, 1]
+
+
+
 excludeSubjects = c(
-    excludeSubjects,
+    # excludeSubjects,
     subjects_biased_choice,
     subjects_cannotSee,
     subjects_NA_OI,
@@ -205,27 +221,60 @@ excludeSubjects = c(
     subjects_NA_PI) %>% 
     sort() %>%
     unique()
-excludeSubjects
-print(paste('Total Number of subjects to exclude: ', length(excludeSubjects)))
+
+grouped = data.frame(
+    source =     c(    
+        'subjects_biased_choice',
+        'subjects_cannotSee',
+        'subjects_NA_OI',
+        'subjects_NA_AI',
+        'subjects_NA_PI', 
+        'total'),
+    len = c(
+        length(subjects_biased_choice),
+        length(subjects_cannotSee),
+        length(subjects_NA_OI),
+        length(subjects_NA_AI),
+        length(subjects_NA_PI), 
+        length(excludeSubjects)
+    )
+)
+grouped
 ```
 
 ```{r}
 generalCleaninng = function(data) {
+    print(deparse(substitute(data)))
+    print(paste('length raw: ', nrow(data)))
     data = data %>%
         filter(
             run_id < 1000 & 
             !(run_id %in% excludeSubjects)
                 )
+    print(paste('length cleaned: ', nrow(data)))
     return(data)
 }
 
 data_subject = generalCleaninng(data_subject)
 data_trial = generalCleaninng(data_trial)
-
-print(paste('Remaining of subjects: ', length(unique(data_trial$run_id))))
 ```
 ## data_subject
 ```{r}
+remove_missing_et_indices = function(data) {
+    
+    print(paste('N subjects before cleaning: ', nrow(data_subject)))
+    data_subject = data_subject %>%
+        filter(
+            !is.na(attributeIndex) &
+            !is.na(optionIndex) &
+            !is.na(payneIndex)
+        )
+    print(paste('N subjects after cleaning: ', nrow(data_subject)))
+
+
+    return(data)
+}
+
 print(paste('N subjects before cleaning: ', nrow(data_subject)))
 data_subject = data_subject %>%
     filter(
@@ -260,7 +309,7 @@ ggsave("plots/choseLL_corr_01.pdf",width=6.5, height=5)
 
 ggpairs(
     data_subject %>% dplyr::select(
-        choseLL, birthyear, gender,
+        choseLL, birthyear, gender, degree,
         LL_top, choice_rt, logK),
     progress = F) 
 ggsave("plots/choseLL_corr_02.pdf",width=6.5, height=5)
