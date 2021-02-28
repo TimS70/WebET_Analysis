@@ -91,6 +91,23 @@ data_trial %>%
     dplyr::summarise(logK, noise, .groups='keep')
 ```
 
+## fixations
+```{r}
+grouped_fixations = data_et %>%
+    group_by(run_id, withinTaskIndex) %>%
+    dplyr::summarise(
+        n_fixations = length(unique(fix_counter))
+    )
+
+data_trial = merge(
+    data_trial,
+    grouped_fixations,
+    by=c('run_id', 'withinTaskIndex')
+)
+
+summary(data_trial$n_fixations)
+```
+
 # Screening
 
 ## Visually impaired without aids? 
@@ -301,6 +318,7 @@ SV_bins = data_trial %>%
         noise = mean(noise),
         choseTop=mean(choseTop), 
         rt=mean(trial_duration_exact)/1000, 
+        n_fixations = mean(n_fixations),
         count=mean(x_count),
         .groups = 'keep') %>%
     filter(n>1) %>%
@@ -338,10 +356,10 @@ ggplot(data=SV_bins, aes(x=dSV_bin, y=rt)) +
     theme(text=element_text(size=20))
 ggsave("plots/SV_RT.pdf",width=5.5, height=5)
 
-ggplot(data=SV_bins, aes(x=dSV_bin, y=count)) +
+ggplot(data=SV_bins, aes(x=dSV_bin, y=n_fixations)) +
     theme_bw() +
     geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
-    xlim(-5,5) + ylim(0,20) + 
+    xlim(-5,5) + ylim(0,10) + 
     geom_line(stat="summary", fun="mean", size=.5) +
     stat_summary(fun.data=mean_se, geom="errorbar", width=.8) +
     xlab("SV top - SV bottom") + 
