@@ -52,7 +52,9 @@ data_et <- read.table('data_jupyter/data_et_choice.csv',
                              header=TRUE, sep=',')
 grouped = data_trial %>% 
       dplyr::group_by(run_id, trial_index) %>% 
-      dplyr::summarise(choseTop = mean(choseTop))
+      dplyr::summarise(
+          choseTop = mean(choseTop),
+          .groups = 'keep')
 if ('choseTop' %in% names(data_et))
     {data_et = data_et %>% select(!choseTop)}
 data_et = merge(data_et, grouped, by=c('run_id', 'trial_index'))
@@ -60,7 +62,7 @@ data_et
 ```
 
 
-# k-values
+## k-values
 K values and noise
 ```{r}
 #run_matlab_script('fitK/fit_discount_k.m')
@@ -88,7 +90,6 @@ data_trial %>%
     dplyr::group_by(run_id) %>%
     dplyr::summarise(logK, noise, .groups='keep')
 ```
-
 
 # Screening
 
@@ -272,8 +273,6 @@ subjectiveValues = function(data) {
     return(data)
 }
 
-data_trial = merge_mean_by_subject(data_trial, data_subject, 'logK')
-data_trial = merge_mean_by_subject(data_trial, logK, 'noise')
 data_trial = subjectiveValues(data_trial)
 
 
@@ -281,6 +280,7 @@ data_trial %>%
     dplyr::select(run_id, aT, tT, svT, aB, tB, svB, dSV_TB, choseTop) %>%
     mutate(across(c('svT', 'svB', 'dSV_TB'), round, 2)) %>%
     arrange(dSV_TB)
+
 ```
 
 ## ChoseTop by dSV bins
