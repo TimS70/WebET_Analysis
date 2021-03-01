@@ -108,19 +108,8 @@ data_trial = merge(
 summary(data_trial$n_fixations)
 ```
 
-# Screening
-
-## Visually impaired without aids? 
-```{r}
-subjects_cannotSee = data_subject %>%
-    filter(sight == 'notCorrected' & 
-           glasses == 'longSight') %>%
-    dplyr::pull(run_id)
-print(paste(
-    'Subjects who are long-sighted but do not wear corrections: ',
-    subjects_cannotSee
-))
-```
+# Screening & Cleaning
+See Jupyter notebooks
 
 ## Distribution of k-values
 ````{r}
