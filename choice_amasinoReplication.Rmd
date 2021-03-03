@@ -40,15 +40,15 @@ source("r_functions/merge_mean_by_subject.R")
 
 # Read and create datasets
 ```{r}
-data_subject <- read.table('data_jupyter/data_subject.csv', 
+data_subject <- read.table('data_jupyter/choice_task/data_subject_choice.csv', 
                            header=TRUE, sep=',')
 data_subject
 
-data_trial <- read.table('data_jupyter/data_trial_choice.csv',
+data_trial <- read.table('data_jupyter/choice_task/data_trial_choice.csv',
                                 header=TRUE, sep=',')
 data_trial
 
-data_et <- read.table('data_jupyter/data_et_choice.csv', 
+data_et <- read.table('data_jupyter/choice_task/data_et_choice.csv', 
                              header=TRUE, sep=',')
 grouped = data_trial %>% 
       dplyr::group_by(run_id, trial_index) %>% 
@@ -96,7 +96,8 @@ data_trial %>%
 grouped_fixations = data_et %>%
     group_by(run_id, withinTaskIndex) %>%
     dplyr::summarise(
-        n_fixations = length(unique(fix_counter))
+        n_fixations = length(unique(fix_counter)),
+        .groups='keep'
     )
 
 data_trial = merge(

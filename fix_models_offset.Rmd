@@ -48,9 +48,9 @@ options(scipen=999) # Show R markdown output as Integers
 
 # Prep data
 ```{r data}
-data_et <- read_csv('data_jupyter/data_et_fix.csv')
-data_trial <- read_csv('data_jupyter/data_trial_fix.csv')
-data_subject <- read_csv('data_jupyter/data_subject.csv')
+data_et <- read_csv('data_jupyter/fix_task/data_et_fix.csv')
+data_trial <- read_csv('data_jupyter/fix_task/data_trial_fix.csv')
+data_subject <- read_csv('data_jupyter/fix_task/data_subject_fix.csv')
 ```
 
 ## Add glasses to data_et
