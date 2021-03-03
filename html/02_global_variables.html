@@ -3,7 +3,7 @@
 <head><meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>global_variables</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>02_global_variables</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 
 
 
@@ -14326,9 +14326,9 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[2]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_et</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/data_jupyter/data_et.csv&#39;</span><span class="p">)</span>
-<span class="n">data_trial</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/data_jupyter/data_trial.csv&#39;</span><span class="p">)</span>
-<span class="n">data_subject</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/data_jupyter/data_subject_raw.csv&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_et</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/data_jupyter/raw/data_et.csv&#39;</span><span class="p">)</span>
+<span class="n">data_trial</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/data_jupyter/raw/data_trial.csv&#39;</span><span class="p">)</span>
+<span class="n">data_subject</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/data_jupyter/raw/data_subject.csv&#39;</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="nb">len</span><span class="p">(</span><span class="n">data_et</span><span class="p">)],</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">data_trial</span><span class="p">)],</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">data_subject</span><span class="p">)]],</span> 
                    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">],</span>
@@ -14355,8 +14355,8 @@ a.anchor-link {
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>               length
 data_et       2700001
-data_trial     132631
-data_subject      302
+data_trial     133206
+data_subject      316
 </pre>
 </div>
 </div>
@@ -14483,7 +14483,7 @@ data_subject      302
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>rt and trial_duration_exact show a deviation of &gt;50 ms. Please check on the following indices: 
 
-Int64Index([48741], dtype=&#39;int64&#39;)
+Int64Index([49016], dtype=&#39;int64&#39;)
 Success! trial_duration and trial_duration_exact do not deviate by &gt;50ms.
 </pre>
 </div>
@@ -14496,12 +14496,420 @@ Success! trial_duration and trial_duration_exact do not deviate by &gt;50ms.
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Trial-nr">Trial nr<a class="anchor-link" href="#Trial-nr">&#182;</a></h2>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">new_task_nr</span><span class="p">(</span><span class="n">task_nr</span><span class="p">):</span>
+    
+    <span class="n">y</span> <span class="o">=</span> <span class="n">task_nr</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">new_task_nr</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">task_nr</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">task_nr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span><span class="o">!=</span><span class="s1">&#39;&quot;&#39;</span><span class="p">):</span> 
+            <span class="n">new_task_nr</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_task_nr</span>
+
+    <span class="k">return</span> <span class="n">y</span>
+
+<span class="k">def</span> <span class="nf">add_new_task_nr</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;trial_index&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;task_nr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> 
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;task_nr_new&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_task_nr</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;task_nr&#39;</span><span class="p">])</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;task_nr_new&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;task_nr_new&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span>
+
+<span class="n">data_trial</span> <span class="o">=</span> <span class="n">add_new_task_nr</span><span class="p">(</span><span class="n">data_trial</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Trial-type-new">Trial type new<a class="anchor-link" href="#Trial-type-new">&#182;</a></h2><p>Most of these subjects reloaded when the eye-tracking initialized as well as during the first calibration</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">add_trial_type_new</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;trial_type_new&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+        <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">144</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;chinFirst&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">),</span> 
+        <span class="s1">&#39;trial_type_new&#39;</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+            <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">144</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;chinFirst&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">),</span> 
+            <span class="s1">&#39;trial_index&#39;</span><span class="p">],</span> 
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="mf">1.5</span><span class="p">,</span> <span class="c1"># start_page</span>
+            <span class="mf">2.5</span><span class="p">,</span> <span class="c1"># prolific_id</span>
+            <span class="mf">4.5</span><span class="p">,</span> <span class="c1"># pre_et_init</span>
+            <span class="mf">5.5</span><span class="p">,</span> <span class="c1"># et_init</span>
+            <span class="mi">11</span><span class="p">,</span> <span class="c1"># et_adjustment</span>
+            <span class="mf">17.5</span><span class="p">,</span> <span class="c1"># calibration_1_briefing</span>
+            <span class="mf">18.5</span><span class="p">,</span> <span class="c1"># first_cal</span>
+            <span class="mi">97</span><span class="p">,</span> <span class="c1"># calibration_1</span>
+            <span class="mi">134</span><span class="p">,</span> <span class="c1"># fixation_1</span>
+            <span class="mi">221</span><span class="p">,</span> <span class="c1"># calibration_2</span>
+            <span class="mi">259</span><span class="p">,</span> <span class="c1"># fixation_2</span>
+            <span class="mi">514</span><span class="p">,</span> <span class="c1"># choice</span>
+            <span class="mi">520</span> <span class="c1"># end</span>
+        <span class="p">]),</span>
+        <span class="n">labels</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="s1">&#39;start_page&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;prolific_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;pre_et_init&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;et_init&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;et_adjustment&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;calibration_1_briefing&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;first_cal&#39;</span><span class="p">,</span> 
+            <span class="s1">&#39;calibration_1&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;fixation_1&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;calibration_2&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;fixation_2&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;choice&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;end&#39;</span>
+        <span class="p">]),</span>
+        <span class="n">include_lowest</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+    <span class="p">)</span>
+
+    <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+        <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">144</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;chinFirst&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">),</span> 
+        <span class="s1">&#39;trial_type_new&#39;</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+            <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">144</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;chinFirst&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">),</span> 
+            <span class="s1">&#39;trial_index&#39;</span><span class="p">],</span> 
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="c1"># </span>
+            <span class="mf">1.5</span><span class="p">,</span> <span class="c1"># start_page</span>
+            <span class="mf">2.5</span><span class="p">,</span> <span class="c1"># prolific_id</span>
+            <span class="mf">4.5</span><span class="p">,</span> <span class="c1"># pre_et_init</span>
+            <span class="mf">5.5</span><span class="p">,</span> <span class="c1"># et_init</span>
+            <span class="mi">11</span><span class="p">,</span> <span class="c1"># et_adjustment</span>
+            <span class="mf">17.5</span><span class="p">,</span> <span class="c1"># calibration_1_briefing</span>
+            <span class="mf">18.5</span><span class="p">,</span> <span class="c1"># first_cal</span>
+            <span class="mi">97</span><span class="p">,</span> <span class="c1"># calibration_1</span>
+            <span class="mi">134</span><span class="p">,</span> <span class="c1"># fixation_1</span>
+            <span class="mi">387</span><span class="p">,</span> <span class="c1"># choice</span>
+            <span class="mi">473</span><span class="p">,</span> <span class="c1"># calibration_2</span>
+            <span class="mi">513</span><span class="p">,</span> <span class="c1"># fixation_2</span>
+            <span class="mi">520</span> <span class="c1"># end</span>
+        <span class="p">]),</span>
+        <span class="n">labels</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="s1">&#39;start_page&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;prolific_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;pre_et_init&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;et_init&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;et_adjustment&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;calibration_1_briefing&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;first_cal&#39;</span><span class="p">,</span> 
+            <span class="s1">&#39;calibration_1&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;fixation_1&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;choice&#39;</span><span class="p">,</span>        
+            <span class="s1">&#39;calibration_2&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;fixation_2&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;end&#39;</span>
+        <span class="p">]),</span>
+        <span class="n">include_lowest</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+    <span class="p">)</span>
+
+    <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+        <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">143</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;chinFirst&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">),</span> 
+        <span class="s1">&#39;trial_type_new&#39;</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+            <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">143</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;chinFirst&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">),</span> 
+            <span class="s1">&#39;trial_index&#39;</span><span class="p">],</span> 
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="mf">1.5</span><span class="p">,</span> <span class="c1"># start_page</span>
+            <span class="mf">2.5</span><span class="p">,</span> <span class="c1"># prolific_id</span>
+            <span class="mf">4.5</span><span class="p">,</span> <span class="c1"># pre_et_init</span>
+            <span class="mf">5.5</span><span class="p">,</span> <span class="c1"># et_init</span>
+            <span class="mi">11</span><span class="p">,</span> <span class="c1"># et_adjustment</span>
+            <span class="mf">17.5</span><span class="p">,</span> <span class="c1"># calibration_1_briefing</span>
+            <span class="mi">97</span><span class="p">,</span> <span class="c1"># calibration_1</span>
+            <span class="mi">143</span><span class="p">,</span> <span class="c1"># fixation_1</span>
+            <span class="mi">231</span><span class="p">,</span> <span class="c1"># calibration_2</span>
+            <span class="mi">277</span><span class="p">,</span> <span class="c1"># fixation_2</span>
+            <span class="mi">532</span><span class="p">,</span> <span class="c1"># choice</span>
+            <span class="mi">540</span> <span class="c1"># end</span>
+        <span class="p">]),</span>
+        <span class="n">labels</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="s1">&#39;start_page&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;prolific_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;pre_et_init&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;et_init&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;et_adjustment&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;calibration_1_briefing&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;calibration_1&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;fixation_1&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;calibration_2&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;fixation_2&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;choice&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;end&#39;</span>
+        <span class="p">]),</span>
+        <span class="n">include_lowest</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+    <span class="p">)</span>
+
+    <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+        <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">143</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;chinFirst&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">),</span> 
+        <span class="s1">&#39;trial_type_new&#39;</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+            <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">143</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;chinFirst&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">),</span> 
+            <span class="s1">&#39;trial_index&#39;</span><span class="p">],</span> 
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="c1"># </span>
+            <span class="mf">1.5</span><span class="p">,</span> <span class="c1"># start_page</span>
+            <span class="mf">2.5</span><span class="p">,</span> <span class="c1"># prolific_id</span>
+            <span class="mf">4.5</span><span class="p">,</span> <span class="c1"># pre_et_init</span>
+            <span class="mf">5.5</span><span class="p">,</span> <span class="c1"># et_init</span>
+            <span class="mi">11</span><span class="p">,</span> <span class="c1"># et_adjustment</span>
+            <span class="mf">17.5</span><span class="p">,</span> <span class="c1"># calibration_1_briefing</span>
+            <span class="mi">97</span><span class="p">,</span> <span class="c1"># calibration_1</span>
+            <span class="mi">143</span><span class="p">,</span> <span class="c1"># fixation_1</span>
+            <span class="mi">397</span><span class="p">,</span> <span class="c1"># choice</span>
+            <span class="mi">483</span><span class="p">,</span> <span class="c1"># calibration_2</span>
+            <span class="mi">532</span><span class="p">,</span> <span class="c1"># fixation_2</span>
+            <span class="mi">540</span> <span class="c1"># end</span>
+        <span class="p">]),</span>
+        <span class="n">labels</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+            <span class="s1">&#39;start_page&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;prolific_id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;pre_et_init&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;et_init&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;et_adjustment&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;calibration_1_briefing&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;calibration_1&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;fixation_1&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;choice&#39;</span><span class="p">,</span>        
+            <span class="s1">&#39;calibration_2&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;fixation_2&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;end&#39;</span>
+        <span class="p">]),</span>
+        <span class="n">include_lowest</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+    <span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">data</span>
+
+<span class="n">data_trial</span> <span class="o">=</span> <span class="n">add_trial_type_new</span><span class="p">(</span><span class="n">data_trial</span><span class="p">)</span>
+
+<span class="n">data_trial</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">data_trial</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">143</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data_trial</span><span class="p">[</span><span class="s1">&#39;chinFirst&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">),</span> 
+    <span class="p">[</span><span class="s1">&#39;trial_index&#39;</span><span class="p">,</span> <span class="s1">&#39;task_nr_new&#39;</span><span class="p">,</span> <span class="s1">&#39;trial_type_new&#39;</span><span class="p">,</span> <span class="s1">&#39;trial_type&#39;</span><span class="p">,</span> <span class="s1">&#39;stimulus&#39;</span><span class="p">,</span> <span class="s1">&#39;task_nr&#39;</span><span class="p">]</span>
+<span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">530</span><span class="p">:</span><span class="mi">540</span><span class="p">]</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
+
+
+
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>trial_index</th>
+      <th>task_nr_new</th>
+      <th>trial_type_new</th>
+      <th>trial_type</th>
+      <th>stimulus</th>
+      <th>task_nr</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>5258</th>
+      <td>530</td>
+      <td>3</td>
+      <td>fixation_2</td>
+      <td>html-keyboard-response</td>
+      <td>"</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>5259</th>
+      <td>531</td>
+      <td>3</td>
+      <td>fixation_2</td>
+      <td>html-keyboard-response</td>
+      <td>"</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>5260</th>
+      <td>532</td>
+      <td>3</td>
+      <td>fixation_2</td>
+      <td>fullscreen</td>
+      <td>"</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>5261</th>
+      <td>533</td>
+      <td>3</td>
+      <td>end</td>
+      <td>html-keyboard-response</td>
+      <td>You completed the study to 90% Press Space to ...</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>5262</th>
+      <td>534</td>
+      <td>3</td>
+      <td>end</td>
+      <td>survey-html-form</td>
+      <td>"</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>5263</th>
+      <td>535</td>
+      <td>3</td>
+      <td>end</td>
+      <td>survey-html-form</td>
+      <td>"</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>5264</th>
+      <td>536</td>
+      <td>3</td>
+      <td>end</td>
+      <td>survey-html-form</td>
+      <td>"</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>5265</th>
+      <td>537</td>
+      <td>3</td>
+      <td>end</td>
+      <td>survey-html-form</td>
+      <td>"</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>5813</th>
+      <td>0</td>
+      <td>0</td>
+      <td>start_page</td>
+      <td>html-keyboard-response</td>
+      <td>"</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>5814</th>
+      <td>1</td>
+      <td>0</td>
+      <td>start_page</td>
+      <td>html-button-response</td>
+      <td>Welcome, dear participant! Thank you for your ...</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">order_trial_types</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span><span class="s1">&#39;trial_type_new&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s1">&#39;start_page&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;prolific_id&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;pre_et_init&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;et_init&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;et_adjustment&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;calibration_1_briefing&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;calibration_1&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;fixation_1&#39;</span><span class="p">,</span>     
+                <span class="s1">&#39;calibration_2&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;fixation_2&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;choice&#39;</span><span class="p">,</span>   
+                <span class="s1">&#39;end&#39;</span>
+            <span class="p">],</span>
+     <span class="s1">&#39;trial_type_nr&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="k">if</span> <span class="s1">&#39;trial_type_nr&#39;</span> <span class="ow">in</span> <span class="n">data_trial</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span> 
+    <span class="n">data_trial</span> <span class="o">=</span> <span class="n">data_trial</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="s1">&#39;trial_type_nr&#39;</span><span class="p">)</span>
+    
+<span class="n">data_trial</span> <span class="o">=</span> <span class="n">data_trial</span> \
+    <span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">order_trial_types</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;trial_type_new&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span> 
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h1 id="Identify-fixation-task">Identify fixation task<a class="anchor-link" href="#Identify-fixation-task">&#182;</a></h1>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_trial</span><span class="p">[</span><span class="s1">&#39;fixTask&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
@@ -14527,7 +14935,7 @@ Success! trial_duration and trial_duration_exact do not deviate by &gt;50ms.
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[8]:</div>
 
 
 
@@ -14550,7 +14958,7 @@ Success! trial_duration and trial_duration_exact do not deviate by &gt;50ms.
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">withinTaskIndex</span><span class="p">(</span><span class="n">data</span><span class="p">):</span> 
@@ -14602,7 +15010,7 @@ Success! trial_duration and trial_duration_exact do not deviate by &gt;50ms.
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>100%|████████████████████████████████████████████████████████████████████████████████| 259/259 [00:12&lt;00:00, 20.01it/s]
+<pre>100%|████████████████████████████████████████████████████████████████████████████████| 316/316 [00:12&lt;00:00, 25.67it/s]
 </pre>
 </div>
 </div>
@@ -14614,7 +15022,7 @@ Success! trial_duration and trial_duration_exact do not deviate by &gt;50ms.
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_trial</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
@@ -14639,7 +15047,7 @@ Success! trial_duration and trial_duration_exact do not deviate by &gt;50ms.
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[7]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[10]:</div>
 
 
 
@@ -14672,45 +15080,45 @@ Success! trial_duration and trial_duration_exact do not deviate by &gt;50ms.
   </thead>
   <tbody>
     <tr>
-      <th>144</th>
+      <th>145</th>
       <td>1</td>
-      <td>145.0</td>
+      <td>145</td>
       <td>2.0</td>
       <td>eyetracking-choice</td>
       <td>0</td>
       <td>1.0</td>
     </tr>
     <tr>
-      <th>147</th>
+      <th>148</th>
       <td>1</td>
-      <td>148.0</td>
+      <td>148</td>
       <td>2.0</td>
       <td>eyetracking-choice</td>
       <td>0</td>
       <td>2.0</td>
     </tr>
     <tr>
-      <th>150</th>
+      <th>151</th>
       <td>1</td>
-      <td>151.0</td>
+      <td>151</td>
       <td>2.0</td>
       <td>eyetracking-choice</td>
       <td>0</td>
       <td>3.0</td>
     </tr>
     <tr>
-      <th>153</th>
+      <th>154</th>
       <td>1</td>
-      <td>154.0</td>
+      <td>154</td>
       <td>2.0</td>
       <td>eyetracking-choice</td>
       <td>0</td>
       <td>4.0</td>
     </tr>
     <tr>
-      <th>156</th>
+      <th>157</th>
       <td>1</td>
-      <td>157.0</td>
+      <td>157</td>
       <td>2.0</td>
       <td>eyetracking-choice</td>
       <td>0</td>
@@ -14726,45 +15134,45 @@ Success! trial_duration and trial_duration_exact do not deviate by &gt;50ms.
       <td>...</td>
     </tr>
     <tr>
-      <th>370</th>
+      <th>371</th>
       <td>1</td>
-      <td>371.0</td>
+      <td>371</td>
       <td>2.0</td>
       <td>eyetracking-choice</td>
       <td>0</td>
       <td>76.0</td>
     </tr>
     <tr>
-      <th>373</th>
+      <th>374</th>
       <td>1</td>
-      <td>374.0</td>
+      <td>374</td>
       <td>2.0</td>
       <td>eyetracking-choice</td>
       <td>0</td>
       <td>77.0</td>
     </tr>
     <tr>
-      <th>376</th>
+      <th>377</th>
       <td>1</td>
-      <td>377.0</td>
+      <td>377</td>
       <td>2.0</td>
       <td>eyetracking-choice</td>
       <td>0</td>
       <td>78.0</td>
     </tr>
     <tr>
-      <th>379</th>
+      <th>380</th>
       <td>1</td>
-      <td>380.0</td>
+      <td>380</td>
       <td>2.0</td>
       <td>eyetracking-choice</td>
       <td>0</td>
       <td>79.0</td>
     </tr>
     <tr>
-      <th>382</th>
+      <th>383</th>
       <td>1</td>
-      <td>383.0</td>
+      <td>383</td>
       <td>2.0</td>
       <td>eyetracking-choice</td>
       <td>0</td>
@@ -14795,7 +15203,7 @@ Success! trial_duration and trial_duration_exact do not deviate by &gt;50ms.
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">merge_count_by_index</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">large_data</span><span class="p">,</span> <span class="n">varName</span><span class="p">):</span>
@@ -14825,7 +15233,7 @@ Success! trial_duration and trial_duration_exact do not deviate by &gt;50ms.
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[8]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[11]:</div>
 
 
 
@@ -14851,7 +15259,7 @@ Name: fps, dtype: float64</pre>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[12]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">spaghettiPlot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">xVar</span><span class="p">,</span> <span class="n">yVar</span><span class="p">,</span> <span class="n">highlightedSubject</span><span class="p">):</span>
@@ -14891,7 +15299,7 @@ Name: fps, dtype: float64</pre>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[10]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[13]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">spaghettiPlot</span><span class="p">(</span>
@@ -14947,7 +15355,7 @@ Name: fps, dtype: float64</pre>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[14]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">spaghettiPlot</span><span class="p">(</span>
@@ -15008,7 +15416,7 @@ Name: fps, dtype: float64</pre>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[12]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[15]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">merge_by_subject</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">large_data</span><span class="p">,</span> <span class="n">varName</span><span class="p">):</span>
@@ -15035,7 +15443,7 @@ Name: fps, dtype: float64</pre>
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[12]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[15]:</div>
 
 
 
@@ -15075,135 +15483,30 @@ Name: fps, dtype: float64</pre>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="subject-data">subject data<a class="anchor-link" href="#subject-data">&#182;</a></h1>
+<h1 id="Position-index-(for-fixation-tasks)">Position index (for fixation tasks)<a class="anchor-link" href="#Position-index-(for-fixation-tasks)">&#182;</a></h1>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[13]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;degree&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;degree&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">({</span>
-    <span class="s1">&#39;Middle School&#39;</span><span class="p">:</span> <span class="s1">&#39;middle&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;middleSchool&#39;</span><span class="p">:</span> <span class="s1">&#39;middle&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;High School&#39;</span><span class="p">:</span> <span class="s1">&#39;high&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;high school&#39;</span><span class="p">:</span> <span class="s1">&#39;high&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;highSchool&#39;</span><span class="p">:</span> <span class="s1">&#39;high&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Associates Degree&#39;</span><span class="p">:</span> <span class="s1">&#39;high&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Associate &#39;</span><span class="p">:</span> <span class="s1">&#39;high&#39;</span><span class="p">,</span>
-
-    <span class="s1">&#39;College / Undergraduate / Bachelor&#39;</span><span class="p">:</span> <span class="s1">&#39;college&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Bachelor&#39;</span><span class="p">:</span> <span class="s1">&#39;college&#39;</span><span class="p">,</span>    
-    
-    <span class="s1">&#39;masters degree&#39;</span><span class="p">:</span> <span class="s1">&#39;grad&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;graduate&#39;</span><span class="p">:</span> <span class="s1">&#39;grad&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Grad&#39;</span><span class="p">:</span> <span class="s1">&#39;grad&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;Graduate / PhD / Master&#39;</span><span class="p">:</span> <span class="s1">&#39;grad&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;masters degree&#39;</span><span class="p">:</span> <span class="s1">&#39;grad&#39;</span><span class="p">,</span>
-<span class="p">})</span>
-<span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;degree&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[13]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>array([&#39;high&#39;, &#39;college&#39;, nan, &#39;grad&#39;, &#39;middle&#39;], dtype=object)</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[14]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;degree&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;degree&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;category&#39;</span><span class="p">)</span>
-<span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;degree&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">reorder_categories</span><span class="p">([</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="s1">&#39;high&#39;</span><span class="p">,</span> <span class="s1">&#39;college&#39;</span><span class="p">,</span> <span class="s1">&#39;grad&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;degree&#39;</span><span class="p">]</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[14]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>0         high
-1      college
-2          NaN
-3          NaN
-4      college
-        ...   
-297       grad
-298    college
-299        NaN
-300        NaN
-301        NaN
-Name: degree, Length: 302, dtype: category
-Categories (4, object): [&#39;middle&#39;, &#39;high&#39;, &#39;college&#39;, &#39;grad&#39;]</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[15]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;webcam_fps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;webcam_fps&#39;</span><span class="p">])</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[16]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;optionalNote&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">addPositionIndex</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;positionIndex&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">x_pos</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">,</span> <span class="mf">0.65</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">,</span> <span class="mf">0.65</span><span class="p">]</span>
+    <span class="n">y_pos</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">,</span> <span class="mf">0.65</span><span class="p">,</span> <span class="mf">0.65</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_pos</span><span class="p">)):</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;x_pos&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">x_pos</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;y_pos&#39;</span><span class="p">]</span><span class="o">==</span><span class="n">y_pos</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="s1">&#39;positionIndex&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">i</span>
+    <span class="k">return</span> <span class="n">data</span>
+
+<span class="n">data_trial</span> <span class="o">=</span> <span class="n">addPositionIndex</span><span class="p">(</span><span class="n">data_trial</span><span class="p">)</span>
+
+<span class="n">data_trial</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="n">data_trial</span><span class="p">[</span><span class="s1">&#39;trial_type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;eyetracking-calibration&#39;</span><span class="p">),</span> <span class="p">[</span><span class="s1">&#39;x_pos&#39;</span><span class="p">,</span> <span class="s1">&#39;y_pos&#39;</span><span class="p">,</span> <span class="s1">&#39;positionIndex&#39;</span><span class="p">]]</span> \
+    <span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span> \
+    <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;positionIndex&#39;</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -15223,9 +15526,112 @@ Categories (4, object): [&#39;middle&#39;, &#39;high&#39;, &#39;college&#39;, &#
 
 
 
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
 
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>array([nan])</pre>
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>x_pos</th>
+      <th>y_pos</th>
+      <th>positionIndex</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>42</th>
+      <td>0.20</td>
+      <td>0.20</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>0.50</td>
+      <td>0.20</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>0.80</td>
+      <td>0.20</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>0.20</td>
+      <td>0.50</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>38</th>
+      <td>0.50</td>
+      <td>0.50</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>0.80</td>
+      <td>0.50</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>40</th>
+      <td>0.20</td>
+      <td>0.80</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <th>32</th>
+      <td>0.50</td>
+      <td>0.80</td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td>0.80</td>
+      <td>0.80</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>26</th>
+      <td>0.35</td>
+      <td>0.35</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>0.65</td>
+      <td>0.35</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <th>36</th>
+      <td>0.35</td>
+      <td>0.65</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>0.65</td>
+      <td>0.65</td>
+      <td>12</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 </div>
 
 </div>
@@ -15234,16 +15640,164 @@ Categories (4, object): [&#39;middle&#39;, &#39;high&#39;, &#39;college&#39;, &#
 
 </div>
 
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h1 id="data_subject">data_subject<a class="anchor-link" href="#data_subject">&#182;</a></h1>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Trials">Trials<a class="anchor-link" href="#Trials">&#182;</a></h2>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[17]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Nationality&#39;</span><span class="p">,</span> <span class="s1">&#39;Employment Status&#39;</span><span class="p">,</span> <span class="s1">&#39;webcam_fps&#39;</span><span class="p">,</span> <span class="s1">&#39;ethnic&#39;</span><span class="p">,</span> <span class="s1">&#39;gender&#39;</span><span class="p">]:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">data_subject</span><span class="p">[</span><span class="n">col</span><span class="p">],</span>
-                      <span class="n">columns</span><span class="o">=</span><span class="s2">&quot;count&quot;</span><span class="p">)</span>
-         <span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_subject</span> <span class="o">=</span> <span class="n">data_subject</span> \
+    <span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+        <span class="n">data_trial</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;run_id&#39;</span><span class="p">],</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="s1">&#39;trial_index&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+        <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">],</span> 
+        <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span> \
+    <span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;trial_index&#39;</span><span class="p">:</span> <span class="s1">&#39;max_trial&#39;</span><span class="p">})</span>
+
+<span class="n">data_subject</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">:,</span>
+    <span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;max_trial&#39;</span><span class="p">]</span>
+<span class="p">]</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[17]:</div>
+
+
+
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>run_id</th>
+      <th>max_trial</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>518</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>103</td>
+      <td>518</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>105</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>106</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>108</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>311</th>
+      <td>94</td>
+      <td>519</td>
+    </tr>
+    <tr>
+      <th>312</th>
+      <td>96</td>
+      <td>519</td>
+    </tr>
+    <tr>
+      <th>313</th>
+      <td>97</td>
+      <td>519</td>
+    </tr>
+    <tr>
+      <th>314</th>
+      <td>98</td>
+      <td>519</td>
+    </tr>
+    <tr>
+      <th>315</th>
+      <td>99</td>
+      <td>4</td>
+    </tr>
+  </tbody>
+</table>
+<p>316 rows × 2 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Glasses-binary">Glasses binary<a class="anchor-link" href="#Glasses-binary">&#182;</a></h2>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[18]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;glasses_binary&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;sight&#39;</span><span class="p">]</span> \
+    <span class="o">.</span><span class="n">replace</span><span class="p">({</span><span class="s1">&#39;contactLenses&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> 
+             <span class="s1">&#39;glasses&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+             <span class="s1">&#39;notCorrected&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+             <span class="s1">&#39;perfectSight&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+           <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;glasses_binary&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;glasses&#39;</span><span class="p">,</span> <span class="s1">&#39;sight&#39;</span><span class="p">,</span> <span class="s1">&#39;glasses_binary&#39;</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">data_subject</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="s2">&quot;count&quot;</span><span class="p">))</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
 </pre></div>
 
@@ -15264,76 +15818,281 @@ Categories (4, object): [&#39;middle&#39;, &#39;high&#39;, &#39;college&#39;, &#
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>col_0                              count
-Nationality                             
-Bangladesh                             2
-CONSENT REVOKED                        6
-Cambodia                               1
-Canada                                 1
-Chile                                  1
-China                                  1
-Croatia                                1
-Germany                                1
-Greece                                 3
-Hungary                                1
-India                                  4
-Israel                                 2
-Italy                                  9
-Jamaica                                1
-Korea                                  2
-Mexico                                 4
-Nepal                                  1
-Netherlands                            1
-Peru                                   1
-Poland                                14
-Portugal                               3
-Russian Federation                     1
-Serbia                                 1
-South Africa                           1
-Spain                                  4
-United Kingdom                        10
-United States                        176
-Venezuela, Bolivarian Republic of      1
-Vietnam                                1
+<pre>[ 1.  0. nan]
+col_0         count
+glasses            
+longSight        27
+noCorrection    112
+progressive      19
+shortSight       85
 
 
-col_0                                               count
-Employment Status                                        
-CONSENT REVOKED                                         6
-DATA EXPIRED                                            2
-Due to start a new job within the next month            3
-Full-Time                                             114
-Not in paid work (e.g. homemaker&#39;, &#39;retired or ...     21
-Other                                                  21
-Part-Time                                              42
-Unemployed (and job seeking)                           44
+col_0          count
+sight               
+contactLenses     27
+glasses           97
+notCorrected      12
+perfectSight     107
 
 
-col_0       count
-webcam_fps       
-15.0            2
-25.0            2
-30.0          296
-60.0            1
-
-
-col_0      count
-ethnic          
-asian         45
-black         18
-caucasian    160
-hispanic      20
-
-
-col_0    count
-gender        
-diverse      5
-female     109
-male       129
+col_0           count
+glasses_binary       
+0.0               146
+1.0                97
 
 
 </pre>
 </div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Var-recorded_at">Var recorded_at<a class="anchor-link" href="#Var-recorded_at">&#182;</a></h2>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[19]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">add_completed_date</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">data_trial</span><span class="p">):</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">subject</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">data_trial</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()):</span>
+        <span class="n">thisSubject</span> <span class="o">=</span> <span class="n">data_trial</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data_trial</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">subject</span><span class="p">]</span> \
+            <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">date_time_obj</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span>
+            <span class="n">thisSubject</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;recorded_at&#39;</span><span class="p">],</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span>
+
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">thisSubject</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;run_id&#39;</span><span class="p">],</span> <span class="n">date_time_obj</span><span class="o">.</span><span class="n">date</span><span class="p">()])</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;recorded_date&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="s1">&#39;recorded_date&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span> <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;recorded_date&#39;</span><span class="p">])</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span>
+
+<span class="n">data_subject</span> <span class="o">=</span> <span class="n">add_completed_date</span><span class="p">(</span><span class="n">data_subject</span><span class="p">,</span> <span class="n">data_trial</span><span class="p">)</span>
+<span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;recorded_date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>100%|███████████████████████████████████████████████████████████████████████████████| 316/316 [00:00&lt;00:00, 782.83it/s]
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[19]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>count            316
+unique             6
+top       2021-02-13
+freq             111
+Name: recorded_date, dtype: object</pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Degree">Degree<a class="anchor-link" href="#Degree">&#182;</a></h2>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[20]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;degree&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;degree&#39;</span><span class="p">]</span> \
+    <span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="p">[</span><span class="s1">&#39;-3.0&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;1.25&#39;</span><span class="p">,</span> <span class="s1">&#39;1.5&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;4.25&#39;</span><span class="p">],</span> 
+        <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+<span class="p">)</span>
+
+<span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;degree&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;degree&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">({</span>
+    <span class="s1">&#39;Middle School&#39;</span><span class="p">:</span> <span class="s1">&#39;middle&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;middleSchool&#39;</span><span class="p">:</span> <span class="s1">&#39;middle&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;High School&#39;</span><span class="p">:</span> <span class="s1">&#39;high&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;high school&#39;</span><span class="p">:</span> <span class="s1">&#39;high&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;highSchool&#39;</span><span class="p">:</span> <span class="s1">&#39;high&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Associates Degree&#39;</span><span class="p">:</span> <span class="s1">&#39;high&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Associate &#39;</span><span class="p">:</span> <span class="s1">&#39;high&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;College / Undergraduate / Bachelor&#39;</span><span class="p">:</span> <span class="s1">&#39;college&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Bachelor&#39;</span><span class="p">:</span> <span class="s1">&#39;college&#39;</span><span class="p">,</span>    
+    
+    <span class="s1">&#39;masters degree&#39;</span><span class="p">:</span> <span class="s1">&#39;grad&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;graduate&#39;</span><span class="p">:</span> <span class="s1">&#39;grad&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Grad&#39;</span><span class="p">:</span> <span class="s1">&#39;grad&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Graduate / PhD / Master&#39;</span><span class="p">:</span> <span class="s1">&#39;grad&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;masters degree&#39;</span><span class="p">:</span> <span class="s1">&#39;grad&#39;</span><span class="p">,</span>
+<span class="p">})</span>
+<span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;degree&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;degree&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;category&#39;</span><span class="p">)</span>
+<span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;degree&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">reorder_categories</span><span class="p">([</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="s1">&#39;high&#39;</span><span class="p">,</span> <span class="s1">&#39;college&#39;</span><span class="p">,</span> <span class="s1">&#39;grad&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;degree&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[20]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>[&#39;high&#39;, &#39;college&#39;, NaN, &#39;grad&#39;, &#39;middle&#39;]
+Categories (4, object): [&#39;high&#39;, &#39;college&#39;, &#39;grad&#39;, &#39;middle&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[21]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;webcam_fps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;webcam_fps&#39;</span><span class="p">])</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Emloyment">Emloyment<a class="anchor-link" href="#Emloyment">&#182;</a></h2>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[22]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;Employment Status&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[22]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>array([nan, &#39;Other&#39;, &#39;Full-Time&#39;, &#39;CONSENT REVOKED&#39;, &#39;Part-Time&#39;,
+       &#34;Not in paid work (e.g. homemaker&#39;, &#39;retired or disabled)&#34;,
+       &#39;DATA EXPIRED&#39;, &#39;Unemployed (and job seeking)&#39;,
+       &#39;Due to start a new job within the next month&#39;], dtype=object)</pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[23]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;employment_status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;Employment Status&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">({</span>
+    <span class="sd">&quot;&quot;&quot;Not in paid work (e.g. homemaker&#39;, &#39;retired or disabled)&quot;&quot;&quot;</span><span class="p">:</span> <span class="s1">&#39;not_in_paid_work&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;DATA EXPIRED&#39;</span><span class="p">:</span> <span class="s1">&#39;Other&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Unemployed (and job seeking)&#39;</span><span class="p">:</span> <span class="s1">&#39;not_in_paid_work&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Due to start a new job within the next month&#39;</span><span class="p">:</span> <span class="s1">&#39;Other&#39;</span>
+<span class="p">})</span>
+<span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;Employment Status&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[23]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>array([nan, &#39;Other&#39;, &#39;Full-Time&#39;, &#39;CONSENT REVOKED&#39;, &#39;Part-Time&#39;,
+       &#34;Not in paid work (e.g. homemaker&#39;, &#39;retired or disabled)&#34;,
+       &#39;DATA EXPIRED&#39;, &#39;Unemployed (and job seeking)&#39;,
+       &#39;Due to start a new job within the next month&#39;], dtype=object)</pre>
+</div>
+
 </div>
 
 </div>
@@ -15348,7 +16107,7 @@ male       129
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[18]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[24]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_trial</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;data_jupyter/data_trial.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -15368,7 +16127,7 @@ male       129
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[19]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[25]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Success! Script ran through&#39;</span><span class="p">)</span>

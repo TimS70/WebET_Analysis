@@ -3,7 +3,7 @@
 <head><meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>global_screening_and_cleaning</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>03_global_screening_and_cleaning</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 
 
 
@@ -14327,14 +14327,27 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[2]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_et</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/data_jupyter/data_et.csv&#39;</span><span class="p">)</span>
-<span class="n">data_trial</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/data_jupyter/data_trial.csv&#39;</span><span class="p">)</span>
-<span class="n">data_subject</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/data_jupyter/data_subject.csv&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_et</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/data_jupyter/raw/data_et.csv&#39;</span><span class="p">)</span>
+<span class="n">data_trial</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/data_jupyter/raw/data_trial.csv&#39;</span><span class="p">)</span>
+<span class="n">data_subject</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;C:/Users/User/GitHub/WebET_Analysis/data_jupyter/raw/data_subject.csv&#39;</span><span class="p">)</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="nb">len</span><span class="p">(</span><span class="n">data_et</span><span class="p">)],</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">data_trial</span><span class="p">)],</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">data_subject</span><span class="p">)]],</span> 
-                   <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">],</span>
-                   <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;data_et&#39;</span><span class="p">,</span> <span class="s1">&#39;data_trial&#39;</span><span class="p">,</span> <span class="s1">&#39;data_subject&#39;</span><span class="p">])</span>
-     <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span>
+    <span class="p">[</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">data_et</span><span class="p">),</span> 
+        <span class="nb">len</span><span class="p">(</span><span class="n">data_et</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+    <span class="p">],</span> 
+    <span class="p">[</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">data_trial</span><span class="p">),</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">data_trial</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+    <span class="p">],</span> 
+    <span class="p">[</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">data_subject</span><span class="p">),</span> 
+        <span class="nb">len</span><span class="p">(</span><span class="n">data_subject</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+    <span class="p">]</span>
+<span class="p">],</span> 
+   <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">,</span> <span class="s1">&#39;run&#39;</span><span class="p">],</span>
+   <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;data_et&#39;</span><span class="p">,</span> <span class="s1">&#39;data_trial&#39;</span><span class="p">,</span> <span class="s1">&#39;data_subject&#39;</span><span class="p">])</span>
+<span class="p">)</span>
 </pre></div>
 
      </div>
@@ -14354,10 +14367,10 @@ a.anchor-link {
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>               length
-data_et       2700001
-data_trial     133206
-data_subject      316
+<pre>               length  run
+data_et       2700001  252
+data_trial     133206  316
+data_subject      316  316
 </pre>
 </div>
 </div>
@@ -16047,11 +16060,11 @@ Average max trial index: 440.0
       <th>Sex</th>
       <th>Student Status</th>
       <th>Webcam</th>
-      <th>glasses_binary</th>
-      <th>employment_status</th>
       <th>fps</th>
       <th>max_trial</th>
+      <th>glasses_binary</th>
       <th>recorded_date</th>
+      <th>employment_status</th>
     </tr>
   </thead>
   <tbody>
@@ -16074,10 +16087,10 @@ Average max trial index: 440.0
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
       <td>0</td>
+      <td>NaN</td>
       <td>2021-01-19</td>
+      <td>NaN</td>
     </tr>
   </tbody>
 </table>
@@ -16133,7 +16146,7 @@ Average max trial index: 440.0
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Not-enough-trials">Not enough trials<a class="anchor-link" href="#Not-enough-trials">&#182;</a></h2>
+<h3 id="Not-enough-trials">Not enough trials<a class="anchor-link" href="#Not-enough-trials">&#182;</a></h3>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
@@ -16342,12 +16355,104 @@ Length of sub dataset: 11
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Low-FPS">Low FPS<a class="anchor-link" href="#Low-FPS">&#182;</a></h3>
+<h3 id="Full-trial-but-not-enough-eye-tracking-data">Full trial but not enough eye-tracking data<a class="anchor-link" href="#Full-trial-but-not-enough-eye-tracking-data">&#182;</a></h3><p>How many subjects are not represented in the eye-tracking data?</p>
+
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[25]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">runs_no_et_data</span> <span class="o">=</span> <span class="n">data_trial</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="p">(</span><span class="o">~</span><span class="n">data_trial</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">data_et</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()))</span> <span class="o">&amp;</span>
+    <span class="p">(</span><span class="n">data_trial</span><span class="p">[</span><span class="s1">&#39;trial_type_new&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;end&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;run_id&#39;</span>
+<span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Full runs without et_data: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">runs_no_et_data</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="p">)</span>
+
+<span class="n">runs_full</span> <span class="o">=</span> <span class="n">data_trial</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="n">data_trial</span><span class="p">[</span><span class="s1">&#39;trial_type_new&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;end&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;run_id&#39;</span>
+<span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+
+<span class="n">et_trials</span> <span class="o">=</span> <span class="n">data_trial</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="n">data_trial</span><span class="p">[</span><span class="s1">&#39;trial_type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span>
+        <span class="s1">&#39;eyetracking-calibration&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;eyetracking-fix-object&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;eyetracking-choice&#39;</span>
+    <span class="p">]),</span> 
+    <span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;trial_index&#39;</span><span class="p">,</span> <span class="s1">&#39;x_count&#39;</span><span class="p">]</span>
+<span class="p">]</span>
+
+<span class="n">na_et_by_run</span> <span class="o">=</span> <span class="n">et_trials</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">et_trials</span><span class="p">[</span><span class="s1">&#39;x_count&#39;</span><span class="p">]),</span> 
+    <span class="p">:</span>
+<span class="p">]</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;run_id&#39;</span><span class="p">],</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+
+<span class="n">runs_not_enough_et_data</span> <span class="o">=</span> <span class="n">na_et_by_run</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+    <span class="n">na_et_by_run</span><span class="p">[</span><span class="s1">&#39;trial_index&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">10</span><span class="p">,</span> 
+    <span class="s1">&#39;run_id&#39;</span>
+<span class="p">]</span>
+
+<span class="n">runs_full_but_few_et</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span>
+    <span class="n">runs_not_enough_et_data</span><span class="p">,</span> 
+    <span class="n">runs_full</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Of those runs, who have et_data, &quot;&quot;&quot;</span>
+    <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">runs_full_but_few_et</span><span class="p">)</span><span class="si">}</span><span class="s2"> runs have &gt;10 trials with no et data&quot;&quot;&quot;</span>
+<span class="p">)</span>
+
+<span class="n">runs_full_but_not_enough_et</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+    <span class="nb">set</span><span class="p">(</span><span class="n">runs_no_et_data</span><span class="p">)</span> <span class="o">|</span>
+    <span class="nb">set</span><span class="p">(</span><span class="n">runs_full_but_few_et</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;In total, that is n=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">runs_full_but_not_enough_et</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>Full runs without et_data: 9
+Of those runs, who have et_data, 9 runs have &gt;10 trials with no et data
+In total, that is n=12
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h3 id="Low-FPS">Low FPS<a class="anchor-link" href="#Low-FPS">&#182;</a></h3>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[26]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">runs_lowFPS</span> <span class="o">=</span> <span class="n">data_subject</span> \
@@ -16387,30 +16492,6 @@ Length of sub dataset: 11
 
 </div>
 
-</div>
-
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Full-trial-but-no-eye-tracking-data">Full trial but no eye-tracking data<a class="anchor-link" href="#Full-trial-but-no-eye-tracking-data">&#182;</a></h3><p>How many subjects are not represented in the eye-tracking data?</p>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[26]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">runs_no_et_data</span> <span class="o">=</span> <span class="n">data_trial</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-    <span class="p">(</span><span class="o">~</span><span class="n">data_trial</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">data_et</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()))</span> <span class="o">&amp;</span>
-    <span class="p">(</span><span class="n">data_trial</span><span class="p">[</span><span class="s1">&#39;trial_type_new&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;end&#39;</span><span class="p">),</span>
-    <span class="s1">&#39;run_id&#39;</span>
-<span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
 </div>
 
 </div>
@@ -16475,7 +16556,7 @@ Length of sub dataset: 11
     <span class="nb">set</span><span class="p">(</span><span class="n">runs_noInstruction</span><span class="p">)</span> <span class="o">|</span>
     <span class="nb">set</span><span class="p">(</span><span class="n">runs_lowFPS</span><span class="p">)</span> <span class="o">|</span>
     <span class="nb">set</span><span class="p">(</span><span class="n">runs_cannotSee</span><span class="p">)</span> <span class="o">|</span>
-    <span class="nb">set</span><span class="p">(</span><span class="n">runs_no_et_data</span><span class="p">)</span>
+    <span class="nb">set</span><span class="p">(</span><span class="n">runs_full_but_not_enough_et</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="n">n_runs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_trial</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
@@ -16486,7 +16567,7 @@ Length of sub dataset: 11
                <span class="s1">&#39;runs_noInstruction&#39;</span><span class="p">,</span>
                <span class="s1">&#39;runs_lowFPS&#39;</span><span class="p">,</span>
                <span class="s1">&#39;runs_cannotSee&#39;</span><span class="p">,</span>
-               <span class="s1">&#39;runs_no_et_data&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;runs_full_but_not_enough_et&#39;</span><span class="p">,</span>
                <span class="s1">&#39;total&#39;</span>
    <span class="p">],</span>
     <span class="s1">&#39;length&#39;</span><span class="p">:</span> <span class="p">[</span>
@@ -16494,7 +16575,7 @@ Length of sub dataset: 11
                 <span class="nb">len</span><span class="p">(</span><span class="n">runs_noInstruction</span><span class="p">),</span>
                 <span class="nb">len</span><span class="p">(</span><span class="n">runs_lowFPS</span><span class="p">),</span>
                 <span class="nb">len</span><span class="p">(</span><span class="n">runs_cannotSee</span><span class="p">),</span>
-                <span class="nb">len</span><span class="p">(</span><span class="n">runs_no_et_data</span><span class="p">),</span> 
+                <span class="nb">len</span><span class="p">(</span><span class="n">runs_full_but_not_enough_et</span><span class="p">),</span> 
                 <span class="nb">len</span><span class="p">(</span><span class="n">excluded_runs</span><span class="p">)</span>
            <span class="p">],</span>
     <span class="s1">&#39;perc&#39;</span><span class="p">:</span> <span class="p">[</span>
@@ -16536,7 +16617,7 @@ Length of sub dataset: 11
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>Total number of runs: n=302
-Number of subjects with invalid runs: n=76 
+Number of subjects with invalid runs: n=78 
 
 Invalid_runs: 
 </pre>
@@ -16601,15 +16682,15 @@ Invalid_runs:
     </tr>
     <tr>
       <th>4</th>
-      <td>runs_no_et_data</td>
-      <td>9</td>
+      <td>runs_full_but_not_enough_et</td>
+      <td>12</td>
       <td>0.03</td>
     </tr>
     <tr>
       <th>5</th>
       <td>total</td>
-      <td>90</td>
-      <td>0.30</td>
+      <td>93</td>
+      <td>0.31</td>
     </tr>
   </tbody>
 </table>
@@ -16667,11 +16748,11 @@ Invalid_runs:
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>Raw: 240
-Cleaned: 212
+Cleaned: 209
 Raw: 302
-Cleaned: 212
+Cleaned: 209
 Raw: 277
-Cleaned: 212
+Cleaned: 209
 </pre>
 </div>
 </div>
@@ -16761,19 +16842,19 @@ Cleaned: 212
       <th>0</th>
       <td>data_et</td>
       <td>-</td>
-      <td>212</td>
+      <td>209</td>
     </tr>
     <tr>
       <th>1</th>
       <td>data_trial</td>
-      <td>212</td>
-      <td>212</td>
+      <td>209</td>
+      <td>209</td>
     </tr>
     <tr>
       <th>2</th>
       <td>data_subject</td>
-      <td>212</td>
-      <td>212</td>
+      <td>209</td>
+      <td>209</td>
     </tr>
   </tbody>
 </table>
@@ -16794,17 +16875,60 @@ Cleaned: 212
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[32]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[31]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data_et</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;data_jupyter/data_et_cleaned.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">data_trial</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;data_jupyter/data_trial_cleaned.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">data_subject</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;data_jupyter/data_subject_cleaned.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;./data_jupyter/cleaned&#39;</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s1">&#39;./data_jupyter/cleaned&#39;</span><span class="p">)</span>
+    
+<span class="n">data_et</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;data_jupyter/cleaned/data_et.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">data_trial</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;data_jupyter/cleaned/data_trial.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">data_subject</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">&quot;data_jupyter/cleaned/data_subject.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
      </div>
 </div>
 </div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h1 id="Feedback">Feedback<a class="anchor-link" href="#Feedback">&#182;</a></h1>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[32]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Success! Script ran through&#39;</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>Success! Script ran through
+</pre>
+</div>
+</div>
+
+</div>
+
 </div>
 
 </div>
