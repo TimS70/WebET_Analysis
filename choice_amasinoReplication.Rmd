@@ -40,7 +40,7 @@ source("r_functions/merge_mean_by_subject.R")
 
 # Read and create datasets
 ```{r}
-data_subject <- read.table('data_jupyter/choice_task/data_subject_choice.csv', 
+data_subject <- read.table('data_jupyter/choice_task/data_subject.csv', 
                            header=TRUE, sep=',')
 data_subject
 

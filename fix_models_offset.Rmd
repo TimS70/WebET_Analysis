@@ -51,38 +51,44 @@ options(scipen=999) # Show R markdown output as Integers
 data_et <- read_csv('data_jupyter/fix_task/data_et_fix.csv')
 data_trial <- read_csv('data_jupyter/fix_task/data_trial_fix.csv')
 data_subject <- read_csv('data_jupyter/fix_task/data_subject_fix.csv')
-```
 
-## Add glasses to data_et
-```{r}
-merge_by_subject = function(data, data_source, varName) {
-    if (varName %in% names(data)) {
-        data = data %>% dplyr::select(!varName)
-    }
-
-    data = merge(
-        data, 
-        data_source %>% dplyr::select(run_id, varName), 
-        by='run_id')
-    return(data)
-}
-
-data_trial = data_trial %>%
-    merge_by_subject(data_subject, 'glasses_binary')
-
+describe_datasets = data.frame(
+    names  = c("data_et", "data_trial", "data_subject"),
+    rows = c(
+        nrow(data_et),
+        nrow(data_trial),
+        nrow(data_subject)
+    ),
+    subjects = c(
+        length(unique(data_et$run_id)),
+        length(unique(data_trial$run_id)),   
+        length(unique(data_subject$run_id))
+        )
+)
+describe_datasets
 ```
 
 # Screening & Cleaning 
-Happens in Jupyter Notebook fix_variables_and_analysis
+Happens in Jupyter Notebook fix_variables_and_analysis.ipynb
 
 # Visualize Predictors
 Significant correlations of the predictors witih fps, glasses_binary, and chin
 ```{r}
-predictors = c('withinTaskIndex', 'window_diagonal',
-               'x_pos', 'y_pos', 'fps', 
-               'glasses_binary', 'chin')
+ggpairs(data_trial %>%
+            merge(
+                data_subject %>% dplyr::select('run_id', 'age'),
+                by='run_id') %>%
+            dplyr::select(
+                'withinTaskIndex', 'window_diagonal', 'age', 'fps', 
+                'precision', 'offset'
+                ),
+        progress=F) # Correlations
 
-ggpairs(data_trial[, append(predictors, c('precision', 'offset'))],
+
+ggpairs(data_trial %>%
+            dplyr::select(
+                'x_pos', 'y_pos', 'glasses_binary', 'chin', 
+                'precision', 'offset'),
         progress=F) # Correlations
 ```
 
