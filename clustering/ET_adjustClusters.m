@@ -34,9 +34,12 @@ function ET_adjustClusters()
 ET_adj=[];
 
 %Load data
-dataPath=pwd; %adapt to your location
-cd(dataPath)
-load('data_source/schneegansEtAl_ET.csv')
+cd('C:\Users\User\GitHub\WebET_Analysis\clustering')
+data = readtable('..\data_jupyter\choice_task\data_et.csv');
+data = data(:, {'run_id', 'withinTaskIndex', ...
+    'x', 'y', 't_task', 'fix_counter'});
+
+
 data=schneegansEtAl_ET;
 subj = unique(data(:, 1));
 

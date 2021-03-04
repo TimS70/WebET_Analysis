@@ -14,7 +14,7 @@ function fit_discount_k()
 cd('C:\Users\User\GitHub\WebET_Analysis\fitK')
 data = readtable('..\data_jupyter\choice_task\data_trial.csv');
 data = data(:, {'run_id', 'aSS', 'aLL', 'tSS', 'tLL', ...
-    'choseLL', 'trial_duration_exact', 'LL_top', 'choseTop'})
+    'choseLL', 'trial_duration_exact', 'LL_top', 'choseTop'});
 output=[];
 
 subject = unique(data.run_id);
