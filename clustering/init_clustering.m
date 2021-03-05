@@ -38,8 +38,8 @@ cd('C:\Users\User\GitHub\WebET_Analysis\clustering')
 
 f = waitbar(0,'Reading data');
 
-data = readtable('..\data_jupyter\choice_task\data_et.csv');
-data = data(:, {'run_id', 'withinTaskIndex', ...
+data = readtable('..\data_jupyter\choice_task\cleaned\data_et.csv');
+data = data(:, {'run_id', 'trial_index', 'withinTaskIndex', ...
     'x', 'y', 't_task'});
 
 set(0,'DefaultFigureVisible','off');
@@ -64,8 +64,11 @@ end
 n_subj_sep = sum(separate_clustering_overview(:, 2));
 n_subj_sep_prop = n_subj_sep/length(separate_clustering_overview);
 strcat(...
-    {'N runs equired separate clustering: n = '}, int2str(n_subj_sep), ...
-    {' = '}, sprintf('%.2f', n_subj_sep_prop), {'%'})
+    {'n='}, ...
+    int2str(n_subj_sep), ...
+    {' ('}, sprintf('%.2f', n_subj_sep_prop), {'%) '}, ...
+    {' runs required separate clustering. '})
+
       
 waitbar(1,f,'Writing data');
 
@@ -73,10 +76,12 @@ ET_adj(ET_adj(:,1)==0,:)=[]; %Get rid of points not in AOI
    
 %Save output
 output = array2table(ET_adj);
-output.Properties.VariableNames(1:6) = {...
-    'run_id', 'withinTaskIndex', ...
+output.Properties.VariableNames(1:7) = {...
+    'run_id', 'trial_index', 'withinTaskIndex', ...
     'x', 'y', 't_task', 'aoi'};
-writetable(output, '../data_jupyter/choice_task/data_et_adjusted.csv');
+
+mkdir('../data_jupyter/choice_task/adjusted');
+writetable(output, '../data_jupyter/choice_task/adjusted/data_et.csv');
 
 close(f)
 end

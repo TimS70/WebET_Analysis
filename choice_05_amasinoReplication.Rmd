@@ -38,18 +38,40 @@ source("r_functions/merge_mean_by_subject.R")
 ```
 
 
+# Adjusted or uncorrected et data?
+```{r}
+use_adjusted_et_data = TRUE
+if (use_adjusted_et_data) {
+    print('hello')
+}
+```
+
+
 # Read and create datasets
 ```{r}
-data_subject <- read.table('data_jupyter/choice_task/data_subject.csv', 
-                           header=TRUE, sep=',')
-data_subject
+if use_adjusted_et_data {
+    data_subject <- read.table('data_jupyter/choice_task/data_subject.csv', 
+                               header=TRUE, sep=',')
+    
+    data_trial <- read.table('data_jupyter/choice_task/data_trial_choice.csv',
+                                    header=TRUE, sep=',')
+    
+    data_et <- read.table('data_jupyter/choice_task/data_et_choice.csv', 
+                             header=TRUE, sep=',') 
 
-data_trial <- read.table('data_jupyter/choice_task/data_trial_choice.csv',
-                                header=TRUE, sep=',')
-data_trial
+} else {
 
-data_et <- read.table('data_jupyter/choice_task/data_et_choice.csv', 
+    data_subject <- read.table('data_jupyter/choice_task/data_subject.csv', 
+                               header=TRUE, sep=',')
+    
+    data_trial <- read.table('data_jupyter/choice_task/data_trial_choice.csv',
+                                    header=TRUE, sep=',')
+    
+    data_et <- read.table('data_jupyter/choice_task/data_et_choice.csv', 
                              header=TRUE, sep=',')
+
+}
+
 grouped = data_trial %>% 
       dplyr::group_by(run_id, trial_index) %>% 
       dplyr::summarise(
