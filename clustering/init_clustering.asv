@@ -64,9 +64,13 @@ end
 n_subj_sep = sum(separate_clustering_overview(:, 2));
 n_subj_sep_prop = n_subj_sep/length(separate_clustering_overview);
 strcat(...
-    {'N runs equired separate clustering: n = '}, int2str(n_subj_sep), ...
-    {' = '}, sprintf('%.2f', n_subj_sep_prop), {'%'})
-      
+    {'N runs equired separate clustering: '}, ...
+    int2str(n_subj_sep), ...
+    {' = '}, ...
+    sprintf('%.2f', n_subj_sep_prop))
+
+       
+
 waitbar(1,f,'Writing data');
 
 ET_adj(ET_adj(:,1)==0,:)=[]; %Get rid of points not in AOI

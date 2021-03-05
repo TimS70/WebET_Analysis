@@ -1,4 +1,5 @@
-function [adjET] = adjust_clusters(data, n_clusters, aoi_width, aoi_height)
+function [adjET, require_separate_clustering] = adjust_clusters(...
+    data, n_clusters, aoi_width, aoi_height)
 
     % data
     % col 1: 'run_id', 
@@ -46,7 +47,7 @@ function [adjET] = adjust_clusters(data, n_clusters, aoi_width, aoi_height)
     if require_separate_clustering
         
         strcat('Separate clustering for run: ', int2str(unique(data(:, 1))))
-        
+
         adjET_1 = move_clusters(...
             data(data(:, 2)<41, :), largest_clusters_sub_1, ...
             aoi_width, aoi_height);
