@@ -61,6 +61,7 @@ for i = 1:length(subject)
     
 end
 
+separate_clustering_overview
 n_subj_sep = sum(separate_clustering_overview(:, 2));
 n_subj_sep_prop = n_subj_sep/length(separate_clustering_overview);
 strcat(...
