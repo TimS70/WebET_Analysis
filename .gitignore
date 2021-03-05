@@ -1,5 +1,4 @@
 data_jupyter/
 data_prolific/
-amasino_dataPrep/data_source/
-amasino_dataPrep/intermediateCSVs/
-venv/
+clustering/plots/
+clustering/source/
