@@ -1,3 +1,4 @@
+from IPython.display import HTML
 def View(df):
     css = """<style>
     table { border-collapse: collapse; border: 3px solid #eee; }
