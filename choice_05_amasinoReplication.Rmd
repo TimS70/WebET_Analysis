@@ -33,50 +33,77 @@ getPackages(c('plyr',
             )
 
 
-source("r_functions/geom_split_violin.R")
-source("r_functions/merge_mean_by_subject.R")
+source("functions_r/geom_split_violin.R")
+source("functions_r/merge_mean_by_subject.R")
 ```
 
 
 # Adjusted or uncorrected et data?
 ```{r}
-use_adjusted_et_data = TRUE
+use_adjusted_et_data = FALSE
 if (use_adjusted_et_data) {
-    print('hello')
+    print('Using adjusted et_data. As a consequence there is no et data beyond the corrected aoi clusters')
 }
 ```
 
 
 # Read and create datasets
 ```{r}
-if use_adjusted_et_data {
-    data_subject <- read.table('data_jupyter/choice_task/data_subject.csv', 
-                               header=TRUE, sep=',')
+if (use_adjusted_et_data) {
     
-    data_trial <- read.table('data_jupyter/choice_task/data_trial_choice.csv',
-                                    header=TRUE, sep=',')
+    data_subject = read.csv(
+        'data_jupyter/choice_task/adjusted/data_subject.csv')
     
-    data_et <- read.table('data_jupyter/choice_task/data_et_choice.csv', 
-                             header=TRUE, sep=',') 
+    data_trial = read.csv(
+        'data_jupyter/choice_task/adjusted/data_trial.csv')
+    
+    data_et = read.csv(
+        'data_jupyter/choice_task/adjusted/data_et.csv') 
 
 } else {
 
-    data_subject <- read.table('data_jupyter/choice_task/data_subject.csv', 
-                               header=TRUE, sep=',')
+    data_subject = read.csv(
+        'data_jupyter/choice_task/uncorrected/data_subject.csv')
     
-    data_trial <- read.table('data_jupyter/choice_task/data_trial_choice.csv',
-                                    header=TRUE, sep=',')
+    data_trial = read.csv(
+        'data_jupyter/choice_task/uncorrected/data_trial.csv')
     
-    data_et <- read.table('data_jupyter/choice_task/data_et_choice.csv', 
-                             header=TRUE, sep=',')
-
+    data_et = read.csv(
+        'data_jupyter/choice_task/uncorrected/data_et.csv')
 }
 
+et_trials = data_et %>%
+    dplyr::select(run_id, trial_index) %>%
+    distinct()
+
+summary = data.frame(
+    name = c(
+       'data_et',
+       'data_trial',
+       'data_subject'
+    ),
+    runs = c( 
+        length(unique(data_et$run_id)),
+        length(unique(data_trial$run_id)),
+        length(unique(data_subject$run_id))
+    ),
+    n_trials = c(
+        nrow(data_trial),
+        nrow(et_trials), 
+        '-'
+    )
+) 
+
+summary
+```
+
+```{r}
 grouped = data_trial %>% 
       dplyr::group_by(run_id, trial_index) %>% 
       dplyr::summarise(
           choseTop = mean(choseTop),
           .groups = 'keep')
+grouped
 if ('choseTop' %in% names(data_et))
     {data_et = data_et %>% select(!choseTop)}
 data_et = merge(data_et, grouped, by=c('run_id', 'trial_index'))
@@ -87,7 +114,7 @@ data_et
 ## k-values
 K values and noise
 ```{r}
-#run_matlab_script('fitK/fit_discount_k.m')
+run_matlab_script('fitK/fit_discount_k.m')
 
 add_logK = function(data) {
     logK <- read.table('fitK/logK.csv', header=TRUE, sep=',')
@@ -234,19 +261,30 @@ subjects_NA_PI = grouped_NA_ET %>%
 
 # Cleaning
 ```{r}
-excludeSubjects <- read.table('data_jupyter/excludeSubjects_choice.csv', 
-                           header=TRUE, sep=',')[, 1]
 excludeSubjects = c(
-    excludeSubjects,
     subjects_biasedChoices,
     subjects_pos_logK,
     subjects_noisy_logK,
-    subjects_missingLogK,
-    subjects_cannotSee) %>%
+    subjects_missingLogK) %>%
     unique()
-excludeSubjects
 
-print(length(excludeSubjects))
+summary = data.frame(
+    names = c(
+        'biasedChoices',
+        'pos_logK',
+        'noisy_logK',
+        'missingLogK', 
+        'total'
+    ),
+    n = c(
+        length(subjects_biasedChoices),
+        length(subjects_pos_logK),
+        length(subjects_noisy_logK),
+        length(subjects_missingLogK),
+        length(excludeSubjects)
+    )
+)
+summary
 ```
 
 ```{r}
@@ -262,7 +300,9 @@ data_subject = generalCleaninng(data_subject)
 data_trial = generalCleaninng(data_trial)
 data_et = generalCleaninng(data_et)
 
-print(paste('Number of subjects: ', length(unique(data_trial$run_id))))
+print(paste(
+    'Number of remaining participants: n =', 
+    length(unique(data_trial$run_id))))
 ```
 
 
@@ -611,42 +651,6 @@ for (bin in unique(timeBins_choseTB_long$timeBin)) {
                  paired=TRUE))
 }
 
-plot_aoi_across_time = function(
-    data, yVar, title='AOI across timeBins') {
-    
-    plot = ggplot(
-        data, 
-        aes(x=factor(timeBin), y=yVar, fill=factor(choseTop, c('1', '0')))) +
-        geom_split_violin(alpha=.7, size=1, position="dodge") +
-        stat_summary(
-            fun=mean, geom="point",
-            shape=45,size=10,
-            position=position_dodge(.9), 
-            aes(color=factor(choseTop, c('1', '0')))) +
-        theme_bw() + 
-        theme(text=element_text(size=20), 
-        legend.position="bottom") +
-        ggtitle(title) +
-        scale_colour_manual(
-            values=c("1"="black", "0"="white"), 
-            name="", 
-            labels=c("Chose Top", "Chose Bottom")) +
-        scale_fill_grey(
-            start=.3, end=.7, name="",
-            labels=c("Chose Top", "Chose Bottom")) +
-                  # If significant
-        ylab(deparse(substitute(yVar))) +
-        xlab("Time bins")
-            
-    print(plot)
-}
- 
-timeBins_choseTB_long %>%
-    plot_aoi_across_time(timeBins_choseTB_long$p_lookTop, 'p_lookTop')
-```
-
-## Pretty plot 
-```{r}
 ggplot(timeBins_choseTB_long, 
        aes(x=factor(timeBin), y=p_lookTop, fill=factor(choseTop, c('1', '0')))) +
     geom_split_violin(alpha=.7, size=1, position="dodge") +
@@ -676,6 +680,8 @@ ggsave("plots/et_bins_tb.pdf",width=5.5, height=5)
 
 
 ## Eyetracking data bins
+
+### Create bins
 ```{r}
 create_eyeTracking_Bins = function(data, nBins) {
     data$et_bin = 0
@@ -721,7 +727,7 @@ data_et %>%
 ```
 
 
-## Plot
+### Group bins
 ```{r}
 subjects_highFPS = data_subject %>%
     filter(fps>10) %>%
@@ -729,25 +735,21 @@ subjects_highFPS = data_subject %>%
     dplyr::pull(run_id)
 
 et_bins_choseTB_long = data_et %>%
-    filter(!is.na(aoi) & aoi!=0 &
-           run_id %in% subjects_highFPS) %>%
     mutate(
         lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
-        lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
+        lookBottom = as.numeric(aoi %in% c('BL', 'BR')),
+        null_aoi = as.numeric(aoi=='0')) %>%
     dplyr::group_by(run_id, choseTop, et_bin) %>%
     dplyr::summarise(
         n = n(),
         n_lookTop = sum(lookTop),
-        n_lookBottom = sum(lookBottom),    
+        n_lookBottom = sum(lookBottom), 
+        n_null_aoi = sum(null_aoi),
         p_lookTop = sum(lookTop)/n,
-        p_lookBottom = sum(lookBottom)/n) %>%
+        p_lookBottom = sum(lookBottom)/n,
+        p_null_aoi = sum(null_aoi)/n) %>%
     arrange(choseTop)
 et_bins_choseTB_long 
-
-et_bins_choseTB_long %>%
-    group_by(run_id, choseTop) %>%
-    summarise(n=length(unique(et_bin))) %>%
-    filter(n<5)
 
 subjects_not_enough_bins = et_bins_choseTB_long %>%
     group_by(run_id, choseTop) %>%
@@ -755,12 +757,17 @@ subjects_not_enough_bins = et_bins_choseTB_long %>%
     filter(n<5) %>%
     dplyr::pull(run_id)
 
+et_bins_choseTB_long = et_bins_choseTB_long %>%
+    filter(!run_id %in% subjects_not_enough_bins)
+
 et_bins_choseTB_long %>%
     filter(et_bin %in% c(4, 5)) %>%
     dplyr::group_by(et_bin, choseTop) %>%
     dplyr::summarise(p_lookTop = mean(p_lookTop))
 #Violin plot of time bins
 
+
+# ttest
 et_bins_choseTB_long$choseTop = as.factor(et_bins_choseTB_long$choseTop)
 
 for (bin in unique(et_bins_choseTB_long$et_bin)) {
@@ -770,13 +777,68 @@ for (bin in unique(et_bins_choseTB_long$et_bin)) {
                             !(run_id %in% subjects_not_enough_bins)), 
                  paired=TRUE))
 }
+```
 
-plot_aoi_across_time = function(
-    data, yVar, title='AOI across et_bins') {
+### Plot
+```{r}
+ggplot(et_bins_choseTB_long, 
+       aes(x=factor(et_bin), y=p_lookTop, fill=factor(choseTop, c('1', '0')))) +
+    geom_split_violin(alpha=.7, size=1, position="dodge") +
+    stat_summary(
+        fun=mean, geom="point",
+        shape=45,size=10,
+        position=position_dodge(.9), 
+        aes(color=factor(choseTop, c('1', '0')))) +
+    theme_bw() + 
+    theme(text=element_text(size=20), 
+    legend.position="bottom") +
+    ggtitle('Eye-tracking time bins') +
+    scale_colour_manual(
+        values=c("1"="black", "0"="white"), 
+        name="", 
+        labels=c("Chose Top", "Chose Bottom")) +
+    scale_fill_grey(
+        start=.3, end=.7, name="",
+        labels=c("Chose Top", "Chose Bottom")) +
+    ylab("Proportion looking top") +
+    xlab("ET bins")
+
+ggplot(et_bins_choseTB_long, 
+       aes(
+           x=factor(et_bin), 
+           y=p_lookBottom, 
+           fill=factor(choseTop, c('1', '0'))
+           )
+       ) +
+    geom_split_violin(alpha=.7, size=1, position="dodge") +
+    stat_summary(
+        fun=mean, geom="point",
+        shape=45,size=10,
+        position=position_dodge(.9), 
+        aes(color=factor(choseTop, c('1', '0')))) +
+    theme_bw() + 
+    theme(text=element_text(size=20), 
+    legend.position="bottom") +
+    ggtitle('Eye-tracking time bins') +
+    scale_colour_manual(
+        values=c("1"="black", "0"="white"), 
+        name="", 
+        labels=c("Chose Top", "Chose Bottom")) +
+    scale_fill_grey(
+        start=.3, end=.7, name="",
+        labels=c("Chose Top", "Chose Bottom")) +
+    ylab("Proportion looking bottom") +
+    xlab("ET bins")
+
+if (!use_adjusted_et_data) {
     
-    plot = ggplot(
-        data, 
-        aes(x=factor(et_bin), y=yVar, fill=factor(choseTop, c('1', '0')))) +
+    ggplot(et_bins_choseTB_long, 
+           aes(
+               x=factor(et_bin), 
+               y=p_null_aoi, 
+               fill=factor(choseTop, c('1', '0'))
+               )
+           ) +
         geom_split_violin(alpha=.7, size=1, position="dodge") +
         stat_summary(
             fun=mean, geom="point",
@@ -786,7 +848,7 @@ plot_aoi_across_time = function(
         theme_bw() + 
         theme(text=element_text(size=20), 
         legend.position="bottom") +
-        ggtitle(title) +
+        ggtitle('Eye-tracking time bins') +
         scale_colour_manual(
             values=c("1"="black", "0"="white"), 
             name="", 
@@ -794,21 +856,11 @@ plot_aoi_across_time = function(
         scale_fill_grey(
             start=.3, end=.7, name="",
             labels=c("Chose Top", "Chose Bottom")) +
-                  # If significant
-        ylab(deparse(substitute(yVar))) +
-        xlab("Time bins")
-            
-    print(plot)
+        ylab("Proportion no AOI") +
+        xlab("ET bins")
 }
- 
-et_bins_choseTB_long %>%
-    plot_aoi_across_time(et_bins_choseTB_long$p_lookTop, 'p_lookTop')
 
-et_bins_choseTB_long %>%
-    plot_aoi_across_time(et_bins_choseTB_long$p_lookBottom, 'p_lookBottom')
-
-et_bins_choseTB_long %>%
-    plot_aoi_across_time(et_bins_choseTB_long$p_nullAOI, 'p_nullAOI')
+et_bins_choseTB_long
 ```
 
 
