@@ -24,7 +24,7 @@ def combine_prolific_data(n_files='all'):
 
 
 def concat_csv_files(n_files):
-    path = 'data/prolific'
+    path = 'data/cognition_run'
     subject_files = os.listdir(path)
 
     if n_files == 'all':

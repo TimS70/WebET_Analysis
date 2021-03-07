@@ -1,5 +1,11 @@
-import numpy as np
+import datetime
+
+import matplotlib.pyplot as plt
 import pandas as pd
+
+from tqdm import tqdm
+
+from utils.combine_data import merge_by_subject
 
 
 def add_subject_variables(data_subject, data_trial):
@@ -28,9 +34,9 @@ def add_fps_subject_level(data_subject, data_trial):
 def add_max_trials(data_subject, data_trial):
     data_subject = data_subject \
         .merge(
-            data_trial.groupby(['run_id'], as_index=False)['trial_index'].max(),
-            on=['run_id'],
-            how='left') \
+        data_trial.groupby(['run_id'], as_index=False)['trial_index'].max(),
+        on=['run_id'],
+        how='left') \
         .rename(columns={'trial_index': 'max_trial'})
 
     return data_subject
@@ -43,7 +49,6 @@ def add_glasses_binary(data_subject):
                   'notCorrected': 0,
                   'perfectSight': 0}
                  )
-    print(f"""Unique values glasses_binary: {data_subject['glasses_binary'].unique()}""")
 
     return data_subject
 
@@ -51,7 +56,9 @@ def add_glasses_binary(data_subject):
 def add_completed_date(data_subject, data_trial):
     output = []
 
-    for subject in tqdm(data_trial['run_id'].unique()):
+    for subject in tqdm(
+            data_trial['run_id'].unique(),
+            desc='Add completed date for each participant: '):
         this_subject = data_trial.loc[data_trial['run_id'] == subject] \
             .reset_index(drop=True)
         date_time_obj = datetime.datetime.strptime(

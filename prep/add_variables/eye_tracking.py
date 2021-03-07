@@ -13,7 +13,6 @@ def add_et_variables(data_et):
 
 def invert_y_axis(data_et):
     data_et['y'] = 1 - data_et['y']
-    print('y_axis inverted')
     data_et['y'].describe()
 
     return data_et

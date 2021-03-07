@@ -1,8 +1,10 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 from utils.plots import spaghetti_plot
-from utils.combine_data import merge_by_subject
+from utils.path import makedir
 
 
 def add_trial_variables(data_trial):
@@ -21,18 +23,13 @@ def add_trial_variables(data_trial):
 
 
 def add_window_size(data):
+    grouped = data.groupby(["run_id"], as_index=False)[[
+        "window_width", "window_height"]].apply(max)
 
-    grouped = data \
-        .groupby(["run_id", "subject"])[
-            "window_width", "window_height"].max() \
-        .reset_index()
-
-    grouped.columns = [
-        "run_id", "subject",
-        "window_width_max", "window_height_max"]
+    grouped.columns = ["run_id", "window_width_max", "window_height_max"]
 
     grouped['window_diagonal_max'] = np.sqrt(
-        grouped['window_width_max']**2 + grouped['window_height_max']**2)
+        grouped['window_width_max'] ** 2 + grouped['window_height_max'] ** 2)
 
     if "window_width_max" in data.columns:
         data = data.drop(columns=['window_width_max'])
@@ -40,7 +37,8 @@ def add_window_size(data):
         data = data.drop(columns=['window_height_max'])
     if "window_diagonal_max" in data.columns:
         data = data.drop(columns=['window_diagonal_max'])
-    data = data.merge(grouped, on=['run_id', "subject"], how='left')
+
+    data = data.merge(grouped, on=['run_id'], how='left')
 
     data['window_diagonal'] = np.sqrt(
         data['window_width'] ** 2 + data['window_height'] ** 2)
@@ -49,8 +47,11 @@ def add_window_size(data):
 
 
 def exact_trial_duration(data):
-    data["t_startTrial"] = pd.concat([pd.Series([0]), data["time_elapsed"]], ignore_index=True)
-    data["trial_duration_exact"] = data.loc[:, ("time_elapsed")] - data.loc[:, ("t_startTrial")]
+    data["t_startTrial"] = pd.concat(
+        [pd.Series([0]), data["time_elapsed"]],
+        ignore_index=True)
+    data["trial_duration_exact"] = \
+        data.loc[:, "time_elapsed"] - data.loc[:, "t_startTrial"]
     data.drop(len(data) - 1)
 
     check_time_deviation(data, 'rt', 'trial_duration_exact', 50)
@@ -59,23 +60,23 @@ def exact_trial_duration(data):
     return data
 
 
-def check_time_deviation(data, column1, column2, maxTimeDiffAllowed):
+def check_time_deviation(data, column1, column2, max_time_diff_allowed):
     diff = data[column1] - data['trial_duration_exact']
-    longtrials_runID = data.loc[diff[diff > maxTimeDiffAllowed].index, 'run_id']
-    longtrials_previousrunID = pd.DataFrame(data.loc[diff[diff > maxTimeDiffAllowed].index - 1, 'run_id']) \
+    long_trials_run_id = data.loc[diff[diff > max_time_diff_allowed].index, 'run_id']
+    long_trials_previous_run_id = pd.DataFrame(data.loc[diff[diff > max_time_diff_allowed].index - 1, 'run_id']) \
         .rename(columns={'run_id': 'previous_run_id'})
-    longtrials_previousrunID.index = longtrials_runID.index
-    compare_runIDs = pd.concat([longtrials_runID, longtrials_previousrunID], axis=1)
+    long_trials_previous_run_id.index = long_trials_run_id.index
+    compare_run_ids = pd.concat([long_trials_run_id, long_trials_previous_run_id], axis=1)
 
-    if sum(compare_runIDs['run_id'] == compare_runIDs['previous_run_id']) > 0:
+    if sum(compare_run_ids['run_id'] == compare_run_ids['previous_run_id']) > 0:
         print(column1 + ' and ' + column2 + ' show a deviation of ' +
-              '>' + str(maxTimeDiffAllowed) +
+              '>' + str(max_time_diff_allowed) +
               ' ms. Please check on the following indices: \n')
-        print(compare_runIDs.loc[(compare_runIDs['run_id'] == compare_runIDs['previous_run_id']), :].index)
+        print(compare_run_ids.loc[(compare_run_ids['run_id'] == compare_run_ids['previous_run_id']), :].index)
 
     else:
         print('Success! ' + column1 + ' and ' + column2 + ' do not deviate by ' +
-              '>' + str(maxTimeDiffAllowed) + 'ms.')
+              '>' + str(max_time_diff_allowed) + 'ms.')
 
 
 def add_new_task_nr(data):
@@ -85,6 +86,7 @@ def add_new_task_nr(data):
     return data
 
 
+# noinspection PyShadowingNames
 def new_task_nr(task_nr):
     y = task_nr.copy()
     new_task_nr = 0
@@ -100,11 +102,11 @@ def new_task_nr(task_nr):
 
 
 def add_trial_type_new(data):
-    '''
+    """
         Most of these subjects reloaded when the eye-tracking initialized
         as well as during the first calibration
 
-    '''
+    """
     data['trial_type_new'] = 0
 
     data.loc[
@@ -313,15 +315,18 @@ def identify_fix_task(data_trial):
 
 
 def add_within_task_index(data):
-    newIndices = withinTaskIndex(data)
-    if 'withinTaskIndex' in data.columns: data = data.drop(columns=['withinTaskIndex'])
-    data = data.merge(newIndices, on=['run_id', 'trial_index'], how='left')
+    new_indices = within_task_index(data)
+    if 'withinTaskIndex' in data.columns:
+        data = data.drop(columns=['withinTaskIndex'])
+    data = data.merge(new_indices, on=['run_id', 'trial_index'], how='left')
     return data
 
 
 def within_task_index(data):
     all_trial_indices = []
-    for subject in tqdm(data["run_id"].unique()):
+    for subject in tqdm(
+            data["run_id"].unique(),
+            desc='Calculate withinTaskIndex'):
         df_subj = data.loc[data['run_id'] == subject, :]
 
         for trial_type in df_subj['trial_type'].unique():
@@ -331,14 +336,14 @@ def within_task_index(data):
                 df_task = df_trial.loc[df_trial['task_nr'] == task_nr, :]
 
                 for fixTask in df_task['fixTask'].unique():
-                    df_fixTask = df_task.loc[
+                    df_fix_task = df_task.loc[
                         df_task['fixTask'] == fixTask,
                         ['run_id', 'trial_index']] \
                         .drop_duplicates() \
                         .reset_index(drop=True)
 
-                    df_fixTask['withinTaskIndex'] = df_fixTask.index + 1
-                    all_trial_indices.append(df_fixTask)
+                    df_fix_task['withinTaskIndex'] = df_fix_task.index + 1
+                    all_trial_indices.append(df_fix_task)
     all_trial_indices = pd.concat(all_trial_indices).reset_index(drop=True)
     return all_trial_indices
 
@@ -350,7 +355,7 @@ def add_position_index(data):
     y_pos = [0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8, 0.35, 0.35, 0.65, 0.65]
 
     for i in range(0, len(x_pos)):
-        data.loc[(data['x_pos']==x_pos[i]) & (data['y_pos']==y_pos[i]), 'positionIndex']=i
+        data.loc[(data['x_pos'] == x_pos[i]) & (data['y_pos'] == y_pos[i]), 'positionIndex'] = i
 
     grouped_position_indices = data.loc[
         (data['trial_type'] == 'eyetracking-calibration'), ['x_pos', 'y_pos', 'positionIndex']] \
@@ -374,11 +379,12 @@ def add_fps_trial_level(data_trial, data_et):
     return data_trial
 
 
-def merge_count_by_index(data, large_data, varName):
-    if varName + '_count' in data.columns: data = data.drop(columns=[varName + '_count'])
-    grouped = large_data.groupby(["run_id", "trial_index"])[varName].count() \
+def merge_count_by_index(data, large_data, var_name):
+    if var_name + '_count' in data.columns:
+        data = data.drop(columns=[var_name + '_count'])
+    grouped = large_data.groupby(["run_id", "trial_index"])[var_name].count() \
         .reset_index() \
-        .rename(columns={varName: varName + '_count'})
+        .rename(columns={var_name: var_name + '_count'})
     data = data.merge(grouped, on=["run_id", "trial_index"], how='left')
 
     return data
@@ -401,8 +407,9 @@ def plot_fps_over_trials(data_trial):
     plt.text(230 + 1, 50, s='fix Task')
     plt.vlines(269, 45, 50, colors='k', linestyles='solid')
     plt.text(269 + 1, 50, s='choice Task')
-    plt.savefig('plots/fps/chin_first_0.png')
 
+    makedir('plots', 'fps')
+    plt.savefig('plots/fps/chin_first_0.png')
 
     spaghetti_plot(
         data_trial.loc[(data_trial['chinFirst'] == 1) & pd.notna(data_trial['fps']), :],
@@ -421,4 +428,3 @@ def plot_fps_over_trials(data_trial):
     plt.vlines(482, 45, 50, colors='k', linestyles='solid')
     plt.text(482 + 1, 50, s='fix Task')
     plt.savefig('plots/fps/chin_first_1.png')
-

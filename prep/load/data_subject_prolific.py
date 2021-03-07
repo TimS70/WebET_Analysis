@@ -1,12 +1,7 @@
-import sys
+import os
 
 import numpy as np
 import pandas as pd
-
-if sys.version_info[0] < 3:
-    pass
-else:
-    pass
 
 from prep.load.survey_data import create_survey_data
 from utils.path import makedir
@@ -27,9 +22,9 @@ def create_data_subject(data_raw):
 
     data_subject = data_subject \
         .merge(
-            survey_data,
-            on='run_id',
-            how='left') \
+        survey_data,
+        on='run_id',
+        how='left') \
         .rename(columns={'age': 'birthyear'})
 
     data_subject = add_data_from_prolific(data_subject)
@@ -54,10 +49,10 @@ def create_data_prolific(data_subject):
 
     data_prolific = data_prolific.merge(
         temp.loc[
-            :,
-            np.append(
-                ['prolificID'],
-                temp.columns.difference(data_prolific.columns))],
+        :,
+        np.append(
+            ['prolificID'],
+            temp.columns.difference(data_prolific.columns))],
         on='prolificID',
         how='left')
 
@@ -67,10 +62,12 @@ def create_data_prolific(data_subject):
 
 
 def read_prolific_data():
-    data_prolific_int = pd.read_csv(r'/prolific/prolific_export_int.csv') \
+    data_prolific_int = pd.read_csv(
+        os.path.join('data', 'prolific', 'prolific_export_int.csv')) \
         .rename(columns={'participant_id': 'prolificID'})
 
-    data_prolific_us = pd.read_csv(r'/prolific/prolific_export_us.csv') \
+    data_prolific_us = pd.read_csv(
+        os.path.join('data', 'prolific', 'prolific_export_us.csv')) \
         .rename(columns={'participant_id': 'prolificID'})
 
     data_prolific = data_prolific_int \
