@@ -2,3 +2,4 @@ data/
 plots/
 clustering/source/
 .idea/
+**/__pycache__
