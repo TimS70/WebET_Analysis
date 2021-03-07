@@ -14366,13 +14366,13 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[3]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">cleanhtml</span><span class="p">(</span><span class="n">raw_html</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">clean_html</span><span class="p">(</span><span class="n">raw_html</span><span class="p">):</span>
     <span class="c1"># https://stackoverflow.com/questions/9662346/python-code-to-remove-html-tags-from-a-string</span>
     <span class="n">cleanr</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;&lt;.*?&gt;&#39;</span><span class="p">)</span>
     <span class="n">cleanText</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">cleanr</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">raw_html</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">cleanText</span>
 
-<span class="k">def</span> <span class="nf">cleanETText</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">clean_et_text</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
     <span class="n">textWithinBrackets</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;\[.*?\]&#39;</span><span class="p">),</span> <span class="n">text</span><span class="p">)</span>
     <span class="n">output</span> <span class="o">=</span> <span class="n">text</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">textWithinBrackets</span><span class="p">)):</span>
@@ -14395,8 +14395,8 @@ a.anchor-link {
     <span class="n">all_subjects</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">subject_files</span><span class="p">))):</span>
         <span class="n">csv_thisSubject</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">subject_files</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-        <span class="n">csv_thisSubject</span> <span class="o">=</span> <span class="n">cleanhtml</span><span class="p">(</span><span class="n">csv_thisSubject</span><span class="p">)</span>
-        <span class="n">csv_thisSubject</span> <span class="o">=</span> <span class="n">cleanETText</span><span class="p">(</span><span class="n">csv_thisSubject</span><span class="p">)</span>
+        <span class="n">csv_thisSubject</span> <span class="o">=</span> <span class="n">clean_html</span><span class="p">(</span><span class="n">csv_thisSubject</span><span class="p">)</span>
+        <span class="n">csv_thisSubject</span> <span class="o">=</span> <span class="n">clean_et_text</span><span class="p">(</span><span class="n">csv_thisSubject</span><span class="p">)</span>
         <span class="n">csv_thisSubject</span> <span class="o">=</span> <span class="n">cleanSurveyText</span><span class="p">(</span><span class="n">csv_thisSubject</span><span class="p">)</span>
         <span class="n">df_thisSubject</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="n">csv_thisSubject</span><span class="p">))</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_thisSubject</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> 
@@ -15155,7 +15155,7 @@ dtype: object</pre>
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[12]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">textToDataframe</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">text_to_data_frame</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
     <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;$&#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">)</span>
     <span class="n">dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;records&#39;</span><span class="p">)</span>
     <span class="k">return</span><span class="p">(</span><span class="n">dataframe</span><span class="p">)</span>
@@ -15172,7 +15172,7 @@ dtype: object</pre>
     
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">et_indices</span><span class="p">):</span>
         
-        <span class="n">df</span> <span class="o">=</span> <span class="n">textToDataframe</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;et_data&#39;</span><span class="p">])</span>        
+        <span class="n">df</span> <span class="o">=</span> <span class="n">text_to_data_frame</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;et_data&#39;</span><span class="p">])</span>
 
         <span class="n">df</span><span class="p">[</span><span class="s2">&quot;t_task&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;t&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">])</span>
         <span class="n">df</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;run_id&#39;</span><span class="p">]</span>

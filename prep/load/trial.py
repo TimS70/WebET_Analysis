@@ -1,5 +1,16 @@
-def create_data_trial(data_raw):
+import numpy as np
+import pandas as pd
+import sys
 
+if sys.version_info[0] < 3:
+    pass
+else:
+    pass
+
+from utils.path import makedir
+
+
+def create_trial_data(data_raw):
     data_trial = data_raw.loc[
                  :,
                  [
@@ -31,11 +42,10 @@ def create_data_trial(data_raw):
         data_trial[col] = data_trial[col].replace({'"': np.nan})
         data_trial[col] = pd.to_numeric(data_trial[col])
 
-    if not os.path.exists('./data_jupyter/raw'):
-        os.mkdir('./data_jupyter/raw')
+    makedir('data', 'combined')
 
     data_trial.to_csv(
-        "data_jupyter/raw/data_trial.csv",
+        "data/combined/data_trial.csv",
         index=False, header=True)
 
     print('data_trial saved!')

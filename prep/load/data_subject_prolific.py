@@ -1,3 +1,17 @@
+import sys
+
+import numpy as np
+import pandas as pd
+
+if sys.version_info[0] < 3:
+    pass
+else:
+    pass
+
+from prep.load.survey_data import create_survey_data
+from utils.path import makedir
+
+
 def create_data_subject(data_raw):
     data_subject = data_raw.loc[
                    :,
@@ -9,32 +23,54 @@ def create_data_subject(data_raw):
                    ]
                    ].drop_duplicates()
 
-    survey_data = read_survey_data(data_raw)
+    survey_data = create_survey_data(data_raw)
 
     data_subject = data_subject \
         .merge(
-        survey_data,
-        on='run_id',
-        how='left') \
+            survey_data,
+            on='run_id',
+            how='left') \
         .rename(columns={'age': 'birthyear'})
 
     data_subject = add_data_from_prolific(data_subject)
 
-    if not os.path.exists('./data_jupyter/raw'):
-        os.mkdir('./data_jupyter/raw')
-
+    makedir('data', 'combined')
     data_subject.to_csv(
-        "data_jupyter/raw/data_subject.csv",
+        "data/combined/data_subject.csv",
         index=False, header=True)
+    print('data_subject saved!')
 
     return data_subject
 
 
+def create_data_prolific(data_subject):
+    data_prolific = read_prolific_data()
+
+    temp = data_subject.rename(columns={
+        'chosenAmount': 'bonus_USD',
+        'chosenDelay': 'bonus_delay'
+    }
+    )
+
+    data_prolific = data_prolific.merge(
+        temp.loc[
+            :,
+            np.append(
+                ['prolificID'],
+                temp.columns.difference(data_prolific.columns))],
+        on='prolificID',
+        how='left')
+
+    makedir('data', 'combined')
+    data_prolific.to_csv("data/combined/data_prolific.csv", index=False, header=True)
+    print('data_prolific saved!')
+
+
 def read_prolific_data():
-    data_prolific_int = pd.read_csv(r'C:/Users/User/GitHub/WebET_Analysis/prolific/prolific_export_int.csv') \
+    data_prolific_int = pd.read_csv(r'/prolific/prolific_export_int.csv') \
         .rename(columns={'participant_id': 'prolificID'})
 
-    data_prolific_us = pd.read_csv(r'C:/Users/User/GitHub/WebET_Analysis/prolific/prolific_export_us.csv') \
+    data_prolific_us = pd.read_csv(r'/prolific/prolific_export_us.csv') \
         .rename(columns={'participant_id': 'prolificID'})
 
     data_prolific = data_prolific_int \
@@ -50,29 +86,3 @@ def add_data_from_prolific(data_subject):
     data_subject.loc[:, ['run_id', 'prolificID']].head(5)
 
     return data_subject
-
-
-def create_data_prolific(data_subject):
-    data_subject = create_data_subject(data_raw)
-    data_prolific = read_prolific_data()
-
-    temp = data_subject.rename(columns={
-        'chosenAmount': 'bonus_USD',
-        'chosenDelay': 'bonus_delay'
-    }
-    )
-
-    data_prolific = data_prolific.merge(
-        temp.loc[:,
-        np.append(['prolificID'],
-                  temp.columns.difference(data_prolific.columns))],
-        on='prolificID',
-        how='left')
-
-    if not os.path.exists('./data_jupyter/raw'):
-        os.mkdir('./data_jupyter/raw')
-
-    data_prolific.to_csv("data_jupyter/raw/data_prolific.csv", index=False, header=True)
-
-
-    return data_prolific

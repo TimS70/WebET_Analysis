@@ -1,3 +1,4 @@
-data_jupyter/
-clustering/plots/
+data/
+plots/
 clustering/source/
+.idea/
