@@ -299,7 +299,7 @@ lmer_log = lmer(
     REML=FALSE)
 summary(lmer_log)
 ranef(lmer_log)
-qqmath(lmer_log, id=0.05, main='log transformed offset')
+qqmath(lmer_log, id=0.05, prep_global_data='log transformed offset')
 
 lmer_log10 = lmer(
     offset_log10 ~ y_pos_c + chin + (chin | run_id), 
@@ -307,7 +307,7 @@ lmer_log10 = lmer(
     REML=FALSE)
 summary(lmer_log10)
 ranef(lmer_log10)
-qqmath(lmer_log10, id=0.05, main='log10 transformed offset')
+qqmath(lmer_log10, id=0.05, prep_global_data='log10 transformed offset')
 
 lmer_sqrt = lmer(
     offset_sqrt ~ y_pos_c + chin + (chin | run_id), 
@@ -315,7 +315,7 @@ lmer_sqrt = lmer(
     REML=FALSE)
 summary(lmer_sqrt)
 ranef(lmer_sqrt)
-qqmath(lmer_sqrt, id=0.05, main='sqrt transformed offset')
+qqmath(lmer_sqrt, id=0.05, prep_global_data='sqrt transformed offset')
 
 ````
 

@@ -1,53 +1,20 @@
-import os
-import pandas as pd
-
-from prep.load.data_subject_prolific import create_data_subject
-from prep.load.data_subject_prolific import create_data_prolific
-from prep.load.eye_tracking import create_et_data
-from prep.load.prolific import combine_prolific_data
-from prep.load.trial import create_trial_data
-
-from prep.add_variables.eye_tracking import add_et_variables
-from prep.add_variables.trial import add_trial_variables
-from prep.add_variables.trial import add_fps_trial_level
-from prep.add_variables.subject import add_subject_variables
-
-from prep.replace.subject import clean_subject_variables
-from prep.exclude_subjects.exclude import exclude_na_data_et
-
-from utils.tables import summarize_datasets
+from analysis.dropouts import dropout_analysis
+from data_prep.add_variables.init import global_add_variables_to_datasets
+from data_prep.screening_and_cleaning.choice import clean_choice_data
 
 
-def main(new_data=False):
-    if new_data:
-        # Create datasets from Prolific data
-        data_combined = combine_prolific_data(30)
-        data_trial = create_trial_data(data_combined)
-        data_et = create_et_data(data_combined)
-        data_subject = create_data_subject(data_combined)
-        create_data_prolific(data_subject)
-        summarize_datasets(data_et, data_trial, data_subject)
+def main():
+    # Global
+    # TODO: Use if statements and function parameters
+    # create_datasets_from_cognition()
 
-    else:
-        data_et = pd.read_csv(
-            os.path.join('data', 'combined', 'data_et.csv'))
-        data_trial = pd.read_csv(
-            os.path.join('data', 'combined', 'data_trial.csv'))
-        data_subject = pd.read_csv(
-            os.path.join('data', 'combined', 'data_subject.csv'))
-        print('Imported from data/combined:')
-        summarize_datasets(data_et, data_trial, data_subject)
+    global_add_variables_to_datasets()
 
-    # Add variables
-    data_et = add_et_variables(data_et)
-    data_trial = add_trial_variables(data_trial)
-    data_trial = add_fps_trial_level(data_trial, data_et)
-    data_subject = add_subject_variables(data_subject, data_trial)
+    dropout_analysis()
 
-    # Cleaning
-    # data_subject = clean_subject_variables(data_subject)
-    # data_et = exclude_na_data_et(data_et)
+    # Choice data
+    # clean_choice_data()
 
 
 if __name__ == '__main__':
-    main(new_data=False)
+    main()

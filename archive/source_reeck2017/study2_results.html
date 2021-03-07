@@ -208,7 +208,7 @@ div.tocify {
 
 </style>
 
-<!-- setup 3col/9col grid for toc_float and main content  -->
+<!-- setup 3col/9col grid for toc_float and prep_global_data content  -->
 <div class="row-fluid">
 <div class="col-xs-12 col-sm-4 col-md-3">
 <div id="TOC" class="tocify">
@@ -1150,7 +1150,7 @@ per_avoid_per_item_p # Make plot</code></pre>
 <h3><span class="header-section-number">2.4.2</span> Choice Models</h3>
 <div id="compliance-factor-interaction" class="section level4">
 <h4><span class="header-section-number">2.4.2.1</span> Compliance factor interaction</h4>
-<p>In alignment with the results reported in the main text, there was also a significant interaction between option framing and condition, Î² = 0.24, s.e. = 0.07, p &lt; .001. Importantly, there was also a three-way interaction between the use of diagonal transitions, framing, and condition, (no avoiding transitions versus all avoiding transitions: Î² = -0.38, s.e. = 0.08, p &lt; .001; mixed versus all avoiding transitions: Î² = -0.13, s.e. = 0.09, p = .142). Thus, the use of transitions to avoid the manipulation does appear to moderate the effect of the manipulation of search strategy and option framing on choices.</p>
+<p>In alignment with the results reported in the prep_global_data text, there was also a significant interaction between option framing and condition, Î² = 0.24, s.e. = 0.07, p &lt; .001. Importantly, there was also a three-way interaction between the use of diagonal transitions, framing, and condition, (no avoiding transitions versus all avoiding transitions: Î² = -0.38, s.e. = 0.08, p &lt; .001; mixed versus all avoiding transitions: Î² = -0.13, s.e. = 0.09, p = .142). Thus, the use of transitions to avoid the manipulation does appear to moderate the effect of the manipulation of search strategy and option framing on choices.</p>
 <pre class="r"><code>ch_compl_glmer4 &lt;- glmer(choice ~ accel_delay * Easy * compliance_fac_naother + (1 | serial), 
                          study2_payne, family = binomial,
                          control=glmerControl(optimizer=&quot;bobyqa&quot;,
@@ -1342,12 +1342,12 @@ dev.off()</code></pre>
 </div>
 <div id="consistent-transitions" class="section level3">
 <h3><span class="header-section-number">2.4.3</span> Consistent Transitions</h3>
-<p>. Analyses revealed that there was a significant main effect condition, Î² = 0.36, s.e. = 0.10, p &lt; .001, with those in the Easy Comparative condition making more patient choices, and that the main effect of framing was significant, Î² = -0.17, s.e. = 0.04, p&lt; .001. Importantly, and in alignment with our prediction, the interaction between frame and condition was significant, Î² = -0.15, s.e. = 0.04, p &lt; .001, with trials in the Easy Comparative condition exhibiting an effect of option framing, Î² = -0.65, s.e. = 0.12, p &lt; .001, while those in the Easy Integrative condition did not, p = .702. Thus, on trials in which the diagonal transitions matched the encouraged search strategy, participants in the Easy Comparative condition made more patient choices and showed a larger effect of acceleration versus delay framing.</p>
+<p>. Analyses revealed that there was a significant prep_global_data effect condition, Î² = 0.36, s.e. = 0.10, p &lt; .001, with those in the Easy Comparative condition making more patient choices, and that the prep_global_data effect of framing was significant, Î² = -0.17, s.e. = 0.04, p&lt; .001. Importantly, and in alignment with our prediction, the interaction between frame and condition was significant, Î² = -0.15, s.e. = 0.04, p &lt; .001, with trials in the Easy Comparative condition exhibiting an effect of option framing, Î² = -0.65, s.e. = 0.12, p &lt; .001, while those in the Easy Integrative condition did not, p = .702. Thus, on trials in which the diagonal transitions matched the encouraged search strategy, participants in the Easy Comparative condition made more patient choices and showed a larger effect of acceleration versus delay framing.</p>
 <p>See <code>Only Consistent Trial Analysis</code> above</p>
 </div>
 <div id="inconsistent-transitions" class="section level3">
 <h3><span class="header-section-number">2.4.4</span> Inconsistent transitions</h3>
-<p>Finally, we conducted a similar analysis for the trials that only featured diagonal transitions that avoided the search condition manipulation. For these trials, participants are deploying the opposite strategy from the one their condition intended to encourage (e.g., someone in the Easy Comparative condition is actually searching Integratively). Thus, we predicted there would still be an interaction between framing and condition for trials featuring Comparative searching, which in this case would be trials in the Easy Integrative condition. Analyses revealed no main effect of framing, Î² = -0.08, s.e. = 0.07, p =.27, and a significant main effect of search condition, Î² = -0.94, s.e. = 0.31, p &lt; .005, with more patience observed in the Easy Comparative condition. Most critically, the interaction between option framing and search condition was significant, Î² = .728, s.e. = 0.072, p &lt; .001, with trials in the Easy Integrative condition (which actually featured comparative searching) exhibiting a significant effect of framing, Î² = -0.91, s.e. = 0.23, p &lt; .001, while trials in the Easy Comparative condition (which actually featured integrative searching) exhibited the opposite pattern, Î² = 0.39, s.e. = 0.17, p = .019. Thus, on trials in which people were using Comparative search, they exhibited a larger effect of option framing on choice.</p>
+<p>Finally, we conducted a similar analysis for the trials that only featured diagonal transitions that avoided the search condition manipulation. For these trials, participants are deploying the opposite strategy from the one their condition intended to encourage (e.g., someone in the Easy Comparative condition is actually searching Integratively). Thus, we predicted there would still be an interaction between framing and condition for trials featuring Comparative searching, which in this case would be trials in the Easy Integrative condition. Analyses revealed no prep_global_data effect of framing, Î² = -0.08, s.e. = 0.07, p =.27, and a significant prep_global_data effect of search condition, Î² = -0.94, s.e. = 0.31, p &lt; .005, with more patience observed in the Easy Comparative condition. Most critically, the interaction between option framing and search condition was significant, Î² = .728, s.e. = 0.072, p &lt; .001, with trials in the Easy Integrative condition (which actually featured comparative searching) exhibiting a significant effect of framing, Î² = -0.91, s.e. = 0.23, p &lt; .001, while trials in the Easy Comparative condition (which actually featured integrative searching) exhibited the opposite pattern, Î² = 0.39, s.e. = 0.17, p = .019. Thus, on trials in which people were using Comparative search, they exhibited a larger effect of option framing on choice.</p>
 <pre class="r"><code>ch_compl_neg1_glmer4 &lt;- glmer(choice ~ accel_delay * Easy + (1 | serial), 
                               study2_payne %&gt;% 
                                 filter(compliance_fac_naother == &quot;neg_1&quot;), family = binomial)
@@ -1433,7 +1433,7 @@ summary(ch_compl_neg1_glmer4)</code></pre>
 </div>
 <div id="mixture-transitions" class="section level3">
 <h3><span class="header-section-number">2.4.5</span> Mixture transitions</h3>
-<p>We conducted a similar analysis for the trials that featured a mixture of diagonal transitions that avoided or did not avoid the manipulation (or that featured no diagonal transitions). There was not a significant main effect of framing, Î² = .065, s.e. = 0.06, p = .29, or search condition, Î² =.061, s.e. = 0.13, p = .64, and the interaction between option framing and search condition was marginally significant, Î² = 0.1, s.e. = 0.06, p = .095.</p>
+<p>We conducted a similar analysis for the trials that featured a mixture of diagonal transitions that avoided or did not avoid the manipulation (or that featured no diagonal transitions). There was not a significant prep_global_data effect of framing, Î² = .065, s.e. = 0.06, p = .29, or search condition, Î² =.061, s.e. = 0.13, p = .64, and the interaction between option framing and search condition was marginally significant, Î² = 0.1, s.e. = 0.06, p = .095.</p>
 <pre class="r"><code>ch_compl_other_glmer4 &lt;- glmer(choice ~ accel_delay * Easy + (1 | serial), 
                               study2_payne %&gt;% 
                                 filter(compliance_fac_naother == &quot;other&quot;), family = binomial)
@@ -1730,7 +1730,7 @@ study2_payne %&gt;%
 <pre><code>## [1] 7175</code></pre>
 <pre class="r"><code>50/7175</code></pre>
 <pre><code>## [1] 0.006968641</code></pre>
-<p>A hierarchical linear regression modeled response times as a function of the framing (acceleration or delay; trial-level predictor) and condition (Easy Comparative or Easy Integrative, participant-level predictor, Figure S11). There was a significant main effect of framing, Î² = -0.01, s.e. = 0.00, p &lt; .001, as responses were faster when choices were framed as a decision to delay consumption. No other effects were significant in the model (pâs &gt; .75)</p>
+<p>A hierarchical linear regression modeled response times as a function of the framing (acceleration or delay; trial-level predictor) and condition (Easy Comparative or Easy Integrative, participant-level predictor, Figure S11). There was a significant prep_global_data effect of framing, Î² = -0.01, s.e. = 0.00, p &lt; .001, as responses were faster when choices were framed as a decision to delay consumption. No other effects were significant in the model (pâs &gt; .75)</p>
 <pre class="r"><code>rtlog_lmer &lt;- lmer(total_time_ms_log10 ~ Easy * accel_delay  + (1|serial), 
                 study2_payne %&gt;%
                    filter(total_time_ms &lt; payne_meantime$max_time))

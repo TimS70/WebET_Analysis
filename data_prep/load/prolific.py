@@ -4,7 +4,7 @@ import sys
 
 import pandas as pd
 
-from prep.load.survey_data import create_survey_data
+from data_prep.load.survey_data import create_survey_data
 
 if sys.version_info[0] < 3:
     from StringIO import StringIO
@@ -14,7 +14,7 @@ else:
 from tqdm import tqdm
 
 
-def combine_prolific_data(n_files='all'):
+def combine_cognition_data(n_files='all'):
     data_raw = concat_csv_files(n_files)
     data_raw['chinFirst'] = data_raw['chinFirst'] \
         .replace({'no': 0, 'yes': 1})

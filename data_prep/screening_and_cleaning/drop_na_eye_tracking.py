@@ -1,7 +1,7 @@
+import pandas as pd
 
 
-
-def exclude_na_data_et(data_et):
+def drop_na_data_et(data_et):
 
     na_data = data_et.loc[
         pd.isna(data_et['x']) |
@@ -19,3 +19,5 @@ def exclude_na_data_et(data_et):
               :]
 
     return data_et
+
+

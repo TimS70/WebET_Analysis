@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from prep.load.survey_data import create_survey_data
+from data_prep.load.survey_data import create_survey_data
 from utils.path import makedir
 
 

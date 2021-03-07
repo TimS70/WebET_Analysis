@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-def clean_subject_variables(data_subject):
+def replace_subject_variables(data_subject):
     data_subject = clean_degree(data_subject)
     data_subject['webcam_fps'] = np.round(data_subject['webcam_fps'])
 
@@ -35,6 +35,7 @@ def clean_degree(data_subject):
         'masters degree': 'grad',
     })
     data_subject['degree'] = data_subject['degree'].astype('category')
+    print(data_subject['degree'].unique())
     data_subject['degree'].cat.reorder_categories(
         ['middle', 'high', 'college', 'grad'], inplace=True)
 

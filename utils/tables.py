@@ -50,4 +50,4 @@ def summarize_datasets(data_et, data_trial, data_subject):
                 ]
         }
     )
-    print(summary)
+    print(f"""{summary} \n""")

@@ -9346,7 +9346,7 @@ Licensed under the Apache License, Version 2.0.
 /**
 * TODO: come up with non css-hack solution for showing the busy icon on top
 *  of the close icon
-* CSS for complex behavior of close icon of tabs in the main area tabbar
+* CSS for complex behavior of close icon of tabs in the prep_global_data area tabbar
 */
 .lm-DockPanel-tabBar
   .lm-TabBar-tab.lm-mod-closable.jp-mod-dirty
@@ -13806,7 +13806,7 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
 |----------------------------------------------------------------------------*/
 
 /*
-The following CSS variables define the main, public API for styling JupyterLab.
+The following CSS variables define the prep_global_data, public API for styling JupyterLab.
 These variables should be used by all plugins wherever possible. In other
 words, plugins should not define custom colors, sizes, etc unless absolutely
 necessary. This enables users to change the visual theme of JupyterLab
@@ -13915,7 +13915,7 @@ all of MD as it is not optimized for dense, information rich UIs.
     Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
 
   /*
-   * Use these font colors against the corresponding main layout colors.
+   * Use these font colors against the corresponding prep_global_data layout colors.
    * In a light theme, these go from dark to light.
    */
 
@@ -13995,7 +13995,7 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* Layout
    *
-   * The following are the main layout colors use in JupyterLab. In a light
+   * The following are the prep_global_data layout colors use in JupyterLab. In a light
    * theme these would go from light to dark.
    */
 
@@ -15475,7 +15475,7 @@ data_prolific      357
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[24]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">add_completed_date</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">data_trial</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">add_recorded_date</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">data_trial</span><span class="p">):</span>
     <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">subject</span> <span class="ow">in</span> <span class="n">data_trial</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
@@ -15492,7 +15492,7 @@ data_prolific      357
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">data</span>
 
-<span class="n">data_pay</span> <span class="o">=</span> <span class="n">add_completed_date</span><span class="p">(</span><span class="n">data_pay</span><span class="p">,</span> <span class="n">data_trial</span><span class="p">)</span>
+<span class="n">data_pay</span> <span class="o">=</span> <span class="n">add_recorded_date</span><span class="p">(</span><span class="n">data_pay</span><span class="p">,</span> <span class="n">data_trial</span><span class="p">)</span>
     
 <span class="n">data_pay</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data_pay</span><span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">444</span><span class="p">,</span> <span class="s1">&#39;completed_date_time&#39;</span><span class="p">]</span> <span class="o">=</span> \
     <span class="s1">&#39;2021-02-13 21:52:30.000000&#39;</span>

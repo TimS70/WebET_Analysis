@@ -15,9 +15,6 @@ def add_trial_variables(data_trial):
     data_trial = identify_fix_task(data_trial)
     data_trial = add_within_task_index(data_trial)
     data_trial = add_position_index(data_trial)
-    data_trial.to_csv(
-        "data/added_var/data_trial.csv",
-        index=False, header=True)
 
     return data_trial
 
@@ -43,6 +40,11 @@ def add_window_size(data):
     data['window_diagonal'] = np.sqrt(
         data['window_width'] ** 2 + data['window_height'] ** 2)
 
+    print(
+        f"""data_trial: Added window height, width, and """
+        f"""diagonal variables. \n"""
+    )
+
     return data
 
 
@@ -54,8 +56,25 @@ def exact_trial_duration(data):
         data.loc[:, "time_elapsed"] - data.loc[:, "t_startTrial"]
     data.drop(len(data) - 1)
 
-    check_time_deviation(data, 'rt', 'trial_duration_exact', 50)
-    check_time_deviation(data, 'trial_duration', 'trial_duration_exact', 50)
+    print(f"""data_trial: Added trial_duration_exact: """)
+
+    problematic_trials = check_time_deviation(
+        data, 'rt', 'trial_duration_exact', 50)
+
+    if len(problematic_trials)>0:
+        print(data.loc[
+            problematic_trials,
+            ['run_id', 'trial_index', 'trial_type',
+             'rt', 'trial_duration', 'trial_duration_exact']])
+
+    problematic_trials = check_time_deviation(
+        data, 'trial_duration', 'trial_duration_exact', 50)
+
+    if len(problematic_trials)>0:
+        print(data.loc[
+            problematic_trials,
+            ['run_id', 'trial_index', 'trial_type',
+             'rt', 'trial_duration', 'trial_duration_exact']])
 
     return data
 
@@ -68,21 +87,35 @@ def check_time_deviation(data, column1, column2, max_time_diff_allowed):
     long_trials_previous_run_id.index = long_trials_run_id.index
     compare_run_ids = pd.concat([long_trials_run_id, long_trials_previous_run_id], axis=1)
 
-    if sum(compare_run_ids['run_id'] == compare_run_ids['previous_run_id']) > 0:
-        print(column1 + ' and ' + column2 + ' show a deviation of ' +
-              '>' + str(max_time_diff_allowed) +
-              ' ms. Please check on the following indices: \n')
-        print(compare_run_ids.loc[(compare_run_ids['run_id'] == compare_run_ids['previous_run_id']), :].index)
+    problematic_trials = np.array([])
+
+    if sum(compare_run_ids['run_id'] == \
+           compare_run_ids['previous_run_id']) > 0:
+        problematic_trials = compare_run_ids.loc[
+            (compare_run_ids['run_id'] == \
+             compare_run_ids['previous_run_id']), :].index
+
+        print(
+            f"""{column1}  and {column2} show a deviation of """
+            f"""> {max_time_diff_allowed}  ms. """
+            f"""Please check on the following indices: \n"""
+            f"""{problematic_trials} \n""")
 
     else:
-        print('Success! ' + column1 + ' and ' + column2 + ' do not deviate by ' +
-              '>' + str(max_time_diff_allowed) + 'ms.')
+        print(
+            f"""Success! {column1} and {column2} do not deviate """
+            f"""by > {max_time_diff_allowed} ms. """
+            f"""Will use trial_duration_exact in the future. \n""")
 
+    return problematic_trials
 
 def add_new_task_nr(data):
     data.loc[data['trial_index'] == 0, 'task_nr'] = 0
     data['task_nr_new'] = new_task_nr(data['task_nr'])
     data['task_nr_new'] = data['task_nr_new'].astype(int)
+
+    print('data_trial: Add new task nr. \n')
+
     return data
 
 
@@ -271,6 +304,8 @@ def add_trial_type_new(data):
 
     data = order_trial_types(data)
 
+    print('Added new trial_type_new (abstraction of trial_type)')
+
     return data
 
 
@@ -311,6 +346,9 @@ def identify_fix_task(data_trial):
         (data_trial['trial_duration'] == 5000),
         'fixTask'
     ] = 1
+
+    print('data_trial: Added fixation task. \n')
+
     return data_trial
 
 
@@ -318,7 +356,22 @@ def add_within_task_index(data):
     new_indices = within_task_index(data)
     if 'withinTaskIndex' in data.columns:
         data = data.drop(columns=['withinTaskIndex'])
-    data = data.merge(new_indices, on=['run_id', 'trial_index'], how='left')
+    data = data.merge(
+        new_indices,
+        on=['run_id', 'trial_index'],
+        how='left')
+
+    example = data.loc[
+        (data['run_id']==data['run_id'].unique()[0]) &
+        (data['fixTask']==1),
+        ['run_id', 'trial_index', 'withinTaskIndex', 'trial_type']
+    ].head(5)
+
+    print(
+        f"""Added withinTaskIndex: \n"""
+        f"""{example} \n"""
+    )
+
     return data
 
 
@@ -362,7 +415,7 @@ def add_position_index(data):
         .drop_duplicates() \
         .sort_values(by='positionIndex')
 
-    print(f'Position indices \n {grouped_position_indices}')
+    print(f'Added position index: \n {grouped_position_indices} \n')
 
     return data
 
@@ -375,6 +428,8 @@ def add_fps_trial_level(data_trial, data_et):
         data_trial['trial_duration_exact']
 
     plot_fps_over_trials(data_trial)
+
+    print('data_trial: Added fps: See plots/fps/ \n')
 
     return data_trial
 

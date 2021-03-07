@@ -1,18 +1,16 @@
-import numpy as np
-import pandas as pd
+from utils.path import makedir
 
 
 def add_et_variables(data_et):
     data_et = invert_y_axis(data_et)
-    data_et.to_csv(
-        "data/added_var/data_et.csv",
-        index=False, header=True)
 
     return data_et
 
 
 def invert_y_axis(data_et):
     data_et['y'] = 1 - data_et['y']
-    data_et['y'].describe()
+    print(
+        f"""data_et: Inverted y-axis: \n """
+        f"""{data_et['y'].describe()} \n""")
 
     return data_et
