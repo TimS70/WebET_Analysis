@@ -2,17 +2,32 @@ import datetime
 import pandas as pd
 import os
 
-print("Current Working directory: ", os.getcwd())
+
+calculate_bonus_payments()
+
+
+def calculate_bonus_payments():
+    data_prolific = load_data()
+    data_pay = filter_data(data_prolific)
+    data_pay = reformat_payments(data_pay)
+    data_pay = insert_missing_values(data_pay)
+    data_pay = add_variable_due_on(data_pay)
+    data_pay = add_currencies(data_pay)
+    save_data_bonus_due_on(data_pay)
+    save_data_bonus_due_today(data_pay)
 
 
 def load_data():
-    data_prolific_int = pd.read_csv(r'input_data/prolific_export_int.csv') \
+    data_prolific_int = pd.read_csv(
+        os.path.join('data', 'prolific', 'prolific_export_int.csv')) \
         .rename(columns={'participant_id': 'prolificID'})
 
-    data_prolific_us = pd.read_csv(r'input_data/prolific_export_us.csv') \
+    data_prolific_us = pd.read_csv(
+        os.path.join('data', 'prolific', 'prolific_export_us.csv')) \
         .rename(columns={'participant_id': 'prolificID'})
 
-    data_subject = pd.read_csv(r'input_data/data_subject_raw.csv') \
+    data_subject = pd.read_csv(
+        os.path.join('data', 'combined', 'ata_subject.csv')) \
         .loc[
                    :,
                    ['run_id', 'prolificID', 'recorded_date',
@@ -32,9 +47,6 @@ def load_data():
     return data
 
 
-data_prolific = load_data()
-
-
 def filter_data(data):
     data = data.loc[
         data['status'] == 'APPROVED',
@@ -49,9 +61,6 @@ def filter_data(data):
     ]
     print(f'Number of approved subjects: {len(data)}')
     return data
-
-
-data_pay = filter_data(data_prolific)
 
 
 def reformat_payments(data):
@@ -69,9 +78,6 @@ def reformat_payments(data):
         .replace('50 cent', 0.5) \
         .astype(float)
     return data
-
-
-data_pay = reformat_payments(data_pay)
 
 
 def insert_missing_values(data):
@@ -104,16 +110,10 @@ def insert_missing_values(data):
     return data
 
 
-data_pay = insert_missing_values(data_pay)
-
-
 def add_currencies(data):
     data['bonus_GBP'] = data['bonus_USD'] * 0.75
     data['bonus_EUR'] = data['bonus_GBP'] * 1.13
     return data
-
-
-data_pay = add_currencies(data_pay)
 
 
 def add_variable_due_on(data):
@@ -129,9 +129,6 @@ def add_variable_due_on(data):
     return data
 
 
-data_pay = add_variable_due_on(data_pay)
-
-
 def save_data_bonus_due_on(data):
     data \
         .loc[
@@ -145,13 +142,10 @@ def save_data_bonus_due_on(data):
             ] \
         .sort_values(by='due_on') \
         .to_csv(
-            'output_data/bonus_due_on.csv',
+            'bonus_due/all.csv',
             index=False,
             header=False
         )
-
-
-save_data_bonus_due_on(data_pay)
 
 
 def save_data_bonus_due_today(data):
@@ -164,11 +158,11 @@ def save_data_bonus_due_today(data):
 
     bonus_due_today['bonus_GBP'] = bonus_due_today['bonus_GBP'].round(2)
 
-    if not os.path.exists(r'output_data'):
-        os.mkdir(r'output_data')
+    if not os.path.exists(r'../data/payment/bonus_due'):
+        os.mkdir(r'../data/payment/bonus_due')
 
     bonus_due_today.to_csv(
-        'output_data/bonus_due_today.csv',
+        'bonus_due/today.csv',
         index=False,
         header=False
     )
@@ -177,7 +171,7 @@ def save_data_bonus_due_today(data):
         bonus_due_today['run_id'] <= 130,
         ['prolificID', 'bonus_GBP']] \
         .to_csv(
-        'output_data/bonus_due_today_int.csv',
+        'bonus_due/today_int.csv',
         index=False,
         header=False
     )
@@ -186,7 +180,7 @@ def save_data_bonus_due_today(data):
         bonus_due_today['run_id'] > 130,
         ['prolificID', 'bonus_GBP']] \
         .to_csv(
-        'output_data/bonus_due_today_us.csv',
+        'bonus_due/today_us.csv',
         index=False,
         header=False
     )
@@ -201,6 +195,3 @@ def save_data_bonus_due_today(data):
         (data['due_on'] > datetime.datetime.now().date()),
         'due_on'].min()
     print(f'Next due date: {next_due_date}')
-
-
-save_data_bonus_due_today(data_pay)
