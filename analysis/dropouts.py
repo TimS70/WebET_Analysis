@@ -105,9 +105,13 @@ def group_last_trial_for_each_run(data_trial):
     last_trial_for_each_run = data_trial \
         .groupby(['run_id'])['trial_index'].max() \
         .reset_index() \
-        .merge(grouped_trial_type_new, on=['run_id', 'trial_index'], how='left')
+        .merge(
+            grouped_trial_type_new,
+            on=['run_id', 'trial_index'],
+            how='left')
 
-    last_trial_for_each_run = add_next_trial(last_trial_for_each_run, data_trial)
+    last_trial_for_each_run = add_next_trial(
+        last_trial_for_each_run, data_trial)
     return last_trial_for_each_run
 
 
