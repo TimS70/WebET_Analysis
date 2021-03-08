@@ -1,7 +1,8 @@
+import os
+
 import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import seaborn as sns
+
+from utils.path import makedir
 
 
 def spaghetti_plot(data, x_var, y_var, highlighted_subject):
@@ -31,3 +32,22 @@ def spaghetti_plot(data, x_var, y_var, highlighted_subject):
                     data.loc[data['run_id'] == subject, y_var].tail(1),
                     s=subject, horizontalalignment='left', size='small', color='orange')
     return plt
+
+
+def save_table_as_plot(data_frame, file_name, *args):
+    fig, ax = plt.subplots()
+    fig.patch.set_visible(False)
+    ax.axis('off')
+    ax.axis('tight')
+
+    ax.table(
+        cellText=data_frame.values,
+        colLabels=data_frame.columns,
+        loc='center')
+
+    fig.tight_layout()
+
+    plt.show()
+
+    makedir(*args)
+    plt.savefig(os.path.join(*args, file_name), bbox_inches='tight')

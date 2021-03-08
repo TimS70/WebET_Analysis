@@ -1,6 +1,10 @@
+import os
+
 import pandas as pd
 
 from IPython.display import HTML
+
+from utils.path import makedir
 
 
 def view(df):
@@ -51,3 +55,8 @@ def summarize_datasets(data_et, data_trial, data_subject):
         }
     )
     print(f"""{summary} \n""")
+
+
+def write_csv(data_frame, file_name, *args):
+    makedir(*args)
+    data_frame.to_csv(os.path.join(*args, file_name))

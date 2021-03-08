@@ -8,7 +8,7 @@ def main():
     # TODO: Use if statements and function parameters
     # create_datasets_from_cognition()
 
-    global_add_variables_to_datasets()
+    # global_add_variables_to_datasets()
 
     dropout_analysis()
 

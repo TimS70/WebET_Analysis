@@ -1,5 +1,5 @@
 data/
-plots/
+results/plots/
 clustering/source/
 .idea/
 **/__pycache__
