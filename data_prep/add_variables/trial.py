@@ -8,6 +8,7 @@ from utils.path import makedir
 
 
 def add_trial_variables(data_trial):
+    data_trial = invert_y_pos(data_trial)
     data_trial = add_window_size(data_trial)
     data_trial = exact_trial_duration(data_trial)
     data_trial = add_new_task_nr(data_trial)
@@ -15,6 +16,12 @@ def add_trial_variables(data_trial):
     data_trial = identify_fix_task(data_trial)
     data_trial = add_within_task_index(data_trial)
     data_trial = add_position_index(data_trial)
+
+    return data_trial
+
+
+def invert_y_pos(data_trial):
+    data_trial['y_pos'] = 1 - data_trial['y_pos']
 
     return data_trial
 
@@ -463,8 +470,8 @@ def plot_fps_over_trials(data_trial):
     plt.vlines(269, 45, 50, colors='k', linestyles='solid')
     plt.text(269 + 1, 50, s='choice Task')
 
-    makedir('plots', 'fps')
-    plt.savefig('plots/fps/chin_first_0.png')
+    makedir('results', 'plots', 'fps')
+    plt.savefig('results/plots/fps/chin_first_0.png')
 
     spaghetti_plot(
         data_trial.loc[(data_trial['chinFirst'] == 1) & pd.notna(data_trial['fps']), :],

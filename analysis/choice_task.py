@@ -10,7 +10,7 @@ import seaborn as sns
 
 import statsmodels.graphics.api as smg
 from scipy.ndimage.filters import gaussian_filter
-from utils.data_frames import add_var_to_data_et
+from utils.data_frames import merge_by_index
 from utils.path import makedir
 from utils.tables import summarize_datasets, write_csv
 
@@ -93,7 +93,7 @@ def plot_categorical_confounders(data_subject):
 def plot_example_eye_movement(data_et, data_trial, data_subject, run):
     data_plot = data_et.loc[data_et['run_id'] == run, :]
 
-    data_plot = add_var_to_data_et(
+    data_plot = merge_by_index(
         data_plot, data_trial, 'trial_duration_exact')
 
     data_plot['t_task_rel'] = \

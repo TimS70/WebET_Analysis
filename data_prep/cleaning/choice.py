@@ -5,7 +5,7 @@ import pandas as pd
 
 from data_prep.cleaning.invalid_runs \
     import filter_runs_low_fps
-from utils.data_frames import add_var_to_data_et
+from utils.data_frames import merge_by_index
 from utils.path import makedir
 from utils.tables import summarize_datasets
 
@@ -34,7 +34,7 @@ def create_and_clean_choice_data():
     print('Cleaning trials: \n')
     data_trial = clean_choice_trial_data(
         data_trial, 'data_trial', invalid_runs)
-    data_et = add_var_to_data_et(
+    data_et = merge_by_index(
         data_et, data_trial, 'trial_duration_exact')
     data_et = clean_choice_trial_data(
         data_et, 'data_et', invalid_runs)
@@ -78,8 +78,8 @@ def select_choice_columns(data_trial):
 
 
 def filter_et_choice(data_et, data_trial):
-    data_et = add_var_to_data_et(data_et, data_trial, 'trial_type')
-    data_et = add_var_to_data_et(data_et, data_trial, 'withinTaskIndex')
+    data_et = merge_by_index(data_et, data_trial, 'trial_type')
+    data_et = merge_by_index(data_et, data_trial, 'withinTaskIndex')
 
     data_et = data_et.loc[
               data_et['trial_type'] == 'eyetracking-choice', :] \

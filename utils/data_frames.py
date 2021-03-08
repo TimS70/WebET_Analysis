@@ -17,7 +17,7 @@ def merge_by_subject(data, large_data, *args):
     return data
 
 
-def add_var_to_data_et(data_et, source_data, *args):
+def merge_by_index(data_et, source_data, *args):
 
     for var in [*args]:
 
@@ -29,14 +29,6 @@ def add_var_to_data_et(data_et, source_data, *args):
             on=['run_id', 'trial_index'], how='left')
 
     return data_et
-
-
-def merge_by_index(data_trial, data_grouped, var_string):
-    if var_string in data_trial.columns:
-        data_trial = data_trial.drop(columns=[var_string])
-    data_trial = data_trial.merge(
-        data_grouped, on=['run_id', 'trial_index'], how='left')
-    return data_trial
 
 
 def merge_mean_by_index(data, large_data, *args):

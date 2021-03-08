@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 
-from utils.data_frames import add_var_to_data_et
+from utils.data_frames import merge_by_index
 from utils.path import makedir
 from utils.tables import summarize_datasets
 
@@ -17,7 +17,7 @@ def create_fix_tasks_datasets():
     print('Data read from data/all_trials/cleaned: ')
     summarize_datasets(data_et, data_trial, data_subject)
 
-    data_et = add_var_to_data_et(data_et, data_trial,
+    data_et = merge_by_index(data_et, data_trial,
                                  'task_nr', 'chin', 'chinFirst', 'trial_type',
                                  'trial_duration', 'trial_duration_exact', 'x_pos', 'y_pos',
                                  'window_width', 'window_height')

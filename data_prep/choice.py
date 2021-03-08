@@ -8,7 +8,7 @@ from analysis.test_clusters import test_transition_clusters
 from data_prep.add_variables.aoi import add_fixation_counter, count_fixations_on_trial_level, \
     add_aoi_counts_on_trial_level, add_aoi_et
 from data_prep.add_variables.et_indices import add_et_indices
-from utils.data_frames import add_var_to_data_et, merge_by_subject
+from utils.data_frames import merge_by_index, merge_by_subject
 from utils.path import makedir
 from utils.tables import summarize_datasets
 
@@ -46,7 +46,7 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
     data_trial['k'] = k(
         data_trial['aLL'], data_trial['aSS'], data_trial['tLL'])
 
-    data_et = add_var_to_data_et(
+    data_et = merge_by_index(
         data_et, data_trial,
         'amountLeft', 'LL_top')
 

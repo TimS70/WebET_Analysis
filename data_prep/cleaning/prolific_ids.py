@@ -13,7 +13,7 @@ def drop_duplicate_ids(data_subject):
         .duplicated(subset=['prolificID']) \
         .sum()
 
-    print(f'Number of duplicate prolific IDs: {n_duplicated}')
+    print(f'Number of duplicate prolific IDs: {n_duplicated} \n')
 
     data_subject = data_subject \
         .sort_values(by=['prolificID', 'max_trial']) \
@@ -32,14 +32,14 @@ def drop_missing_prolific_ids(data):
     return data
 
 
-def match_ids_with_subjects(data, data_subject):
+def match_ids_with_subjects(data, data_subject, data_name):
 
     data = data.loc[
-           data['run_id'].isin(data_subject['run_id']),
-              :]
+           data['run_id'].isin(data_subject['run_id']), :]
 
     print(
-        f"""match_ids_with_subjects """
-        f"""{len(data.loc[:, 'run_id'].unique())}""")
+        f"""overlapping subjects between data_subject """
+        f"""and {data_name}: n = """
+        f"""{len(data.loc[:, 'run_id'].unique())} \n""")
 
     return data

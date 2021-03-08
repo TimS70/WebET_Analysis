@@ -3,7 +3,7 @@ import os
 import pandas as pd
 
 from data_prep.cleaning.invalid_runs import clean_runs
-from utils.data_frames import add_var_to_data_et
+from utils.data_frames import merge_by_index
 from utils.path import makedir
 from utils.tables import summarize_datasets
 
@@ -40,6 +40,9 @@ def clean_fix_task_datasets():
     data_et = remove_high_tTask(data_et, 'data_et')
     data_trial_fix = remove_high_tTask(data_trial_fix, 'data_trial_fix')
     data_et_fix = remove_high_tTask(data_et_fix, 'data_et_fix')
+
+    data_trial_fix = data_trial_fix.loc[
+                     pd.notna(data_trial_fix['x_count']), :]
 
     makedir('data', 'fix_task', 'cleaned')
     data_et.to_csv(

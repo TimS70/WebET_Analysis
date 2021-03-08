@@ -12,15 +12,15 @@ from utils.path import makedir
 from utils.tables import summarize_datasets
 
 
-def global_cleaning(analyze_dropouts=True):
+def global_cleaning():
 
     data_et = pd.read_csv(
-        os.path.join('data', 'added_var', 'data_et.csv'))
+        os.path.join('data', 'all_trials', 'added_var', 'data_et.csv'))
     data_trial = pd.read_csv(
-        os.path.join('data', 'added_var', 'data_trial.csv'))
+        os.path.join('data', 'all_trials', 'added_var', 'data_trial.csv'))
     data_subject = pd.read_csv(
-        os.path.join('data', 'added_var', 'data_subject.csv'))
-    print('Imported from data/added_var:')
+        os.path.join('data', 'all_trials', 'added_var', 'data_subject.csv'))
+    print('Imported from data/all_trials/added_var:')
     summarize_datasets(data_et, data_trial, data_subject)
 
     data_et = drop_na_data_et(data_et)
@@ -31,25 +31,30 @@ def global_cleaning(analyze_dropouts=True):
     data_subject = filter_approved(data_subject, data_subject)
 
     data_subject = clean_prolific_ids(data_subject)
-    data_trial = match_ids_with_subjects(data_trial, data_subject)
-    data_et = match_ids_with_subjects(data_et, data_subject)
+    data_trial = match_ids_with_subjects(
+        data_trial, data_subject, 'data_trial')
+    data_et = match_ids_with_subjects(
+        data_et, data_subject, 'data_et')
 
     excluded_runs = filter_invalid_runs(
         data_trial, data_et, data_subject)
 
-    data_et = clean_runs(data_et, excluded_runs)
-    data_trial = clean_runs(data_trial, excluded_runs)
-    data_subject = clean_runs(data_subject, excluded_runs)
+    data_et = clean_runs(data_et, excluded_runs, 'data_et')
+    data_trial = clean_runs(data_trial, excluded_runs, 'data_trial')
+    data_subject = clean_runs(data_subject, excluded_runs, 'data_subject')
 
     summarize_datasets(data_et, data_trial, data_subject)
 
-    makedir('data', 'cleaned')
+    makedir('data', 'all_trials', 'cleaned')
     data_et.to_csv(
-        os.path.join('data', 'cleaned', 'data_et.csv'),
+        os.path.join('data', 'all_trials', 'cleaned',
+                     'data_et.csv'),
         index=False, header=True)
     data_trial.to_csv(
-        os.path.join('data', 'cleaned', 'data_trial.csv'),
+        os.path.join('data', 'all_trials', 'cleaned',
+                     'data_trial.csv'),
         index=False, header=True)
     data_subject.to_csv(
-        os.path.join('data', 'cleaned', 'data_subject.csv'),
+        os.path.join('data', 'all_trials', 'cleaned',
+                     'data_subject.csv'),
         index=False, header=True)
