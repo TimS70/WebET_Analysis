@@ -287,4 +287,4 @@ def run_et_cluster_correction():
 
     subprocess.run(run_matlab, shell=True, check=True)
 
-    os.chdir(os.path.join('..'))
+    os.chdir(os.path.join(''))

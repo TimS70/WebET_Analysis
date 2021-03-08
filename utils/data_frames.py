@@ -37,3 +37,16 @@ def merge_by_index(data_trial, data_grouped, var_string):
     data_trial = data_trial.merge(
         data_grouped, on=['run_id', 'trial_index'], how='left')
     return data_trial
+
+
+def merge_mean_by_index(data, large_data, *args):
+
+    for var in [*args]:
+
+        if var in data.columns:
+            data = data.drop(columns=[var])
+        grouped = large_data.groupby(['run_id', 'trial_index'])[var].mean() \
+            .reset_index()
+        data = data.merge(grouped, on=['run_id', 'trial_index'], how='left')
+
+    return data

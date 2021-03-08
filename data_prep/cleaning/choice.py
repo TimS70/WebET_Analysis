@@ -3,22 +3,22 @@ import os
 import numpy as np
 import pandas as pd
 
-from data_prep.screening_and_cleaning.invalid_runs \
+from data_prep.cleaning.invalid_runs \
     import filter_runs_low_fps
 from utils.data_frames import add_var_to_data_et
 from utils.path import makedir
 from utils.tables import summarize_datasets
 
 
-def clean_choice_data():
+def create_and_clean_choice_data():
     print('Cleaning choice data... \n')
     data_et = pd.read_csv(
-        os.path.join('data', 'cleaned', 'data_et.csv'))
+        os.path.join('data', 'all_trials', 'cleaned', 'data_et.csv'))
     data_trial = pd.read_csv(
-        os.path.join('data', 'cleaned', 'data_trial.csv'))
+        os.path.join('data', 'all_trials', 'cleaned', 'data_trial.csv'))
     data_subject = pd.read_csv(
-        os.path.join('data', 'cleaned', 'data_subject.csv'))
-    print('Imported from data/cleaned: ')
+        os.path.join('data', 'all_trials', 'cleaned', 'data_subject.csv'))
+    print('Imported from data/all_trials/cleaned: ')
     summarize_datasets(data_et, data_trial, data_subject)
 
     data_trial = select_choice_columns(data_trial)
@@ -53,7 +53,6 @@ def clean_choice_data():
     data_subject.to_csv(
         os.path.join('data', 'choice_task', 'cleaned', 'data_subject.csv'),
         index=False, header=True)
-    print(data_trial.columns)
     summarize_datasets(data_et, data_trial, data_subject)
 
     check_unequal_trial_numbers(data_et, data_trial)

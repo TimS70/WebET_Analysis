@@ -3,6 +3,7 @@ import pandas as pd
 
 from utils.data_frames import merge_by_index
 
+
 def filter_invalid_runs(data_trial, data_et, data_subject):
     # Not enough trials
     subjects_full_trial = data_trial \
@@ -23,7 +24,7 @@ def filter_invalid_runs(data_trial, data_et, data_subject):
     runs_cannot_see = filter_wrong_glasses(data_subject)
 
 
-    excluded_runs = list(
+    invalid_runs = list(
         set(subjects_not_full_trial) |
         set(runs_not_follow_instructions) |
         set(runs_lowFPS) |
@@ -33,7 +34,7 @@ def filter_invalid_runs(data_trial, data_et, data_subject):
 
     n_runs = len(data_trial['run_id'].unique())
 
-    invalid_runs = pd.DataFrame(
+    summary = pd.DataFrame(
        {'name': [
                    'subjects_not_full_trial',
                    'runs_noInstruction',
@@ -48,7 +49,7 @@ def filter_invalid_runs(data_trial, data_et, data_subject):
                     len(runs_lowFPS),
                     len(runs_cannot_see),
                     len(runs_full_but_not_enough_et),
-                    len(excluded_runs)
+                    len(invalid_runs)
                ],
         'perc': [
                     len(subjects_not_full_trial)/n_runs,
@@ -56,7 +57,7 @@ def filter_invalid_runs(data_trial, data_et, data_subject):
                     len(runs_lowFPS)/n_runs,
                     len(runs_cannot_see)/len(data_subject),
                     len(runs_full_but_not_enough_et)/n_runs,
-                    len(excluded_runs)/n_runs
+                    len(invalid_runs)/n_runs
         ]
        }
     )
@@ -65,7 +66,7 @@ def filter_invalid_runs(data_trial, data_et, data_subject):
 
     n_invalid_runs = len(
         data_trial.loc[
-            data_trial['run_id'].isin(excluded_runs),
+            data_trial['run_id'].isin(invalid_runs),
             'prolificID'].unique())
 
     print(
@@ -74,9 +75,9 @@ def filter_invalid_runs(data_trial, data_et, data_subject):
     )
 
     print('Invalid_runs: ')
-    round(invalid_runs, 2)
+    round(summary, 2)
 
-    return excluded_runs
+    return invalid_runs
 
 
 def filter_runs_no_instruction(data_subject):
@@ -211,14 +212,15 @@ def filter_wrong_glasses(data_subject):
     return runs_cannot_see
 
 
-def clean_runs(data, excluded_runs):
-    length = len(data['run_id'].unique())
-    print(f'Raw: {length}')
-    data = data.loc[
-        ~data['run_id'].isin(excluded_runs),
-        :
-    ]
-    length = len(data['run_id'].unique())
-    print(f'Cleaned: {length}')
+def clean_runs(data, excluded_runs, name):
+
+    data_raw = data
+
+    data = data_raw.loc[~data_raw['run_id'].isin(excluded_runs), :]
+
+    print(
+        f"""Removing invalid runs from {name}: \n"""
+        f"""Raw: {len(data_raw['run_id'].unique())} \n"""
+        f"""Cleaned: {len(data['run_id'].unique())} \n""")
 
     return data

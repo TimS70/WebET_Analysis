@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from data_prep.screening_and_cleaning.filter_approved import filter_approved
+from data_prep.cleaning.filter_approved import filter_approved
 from utils.path import makedir
 from utils.plots import save_table_as_plot
 from utils.tables import write_csv
@@ -12,9 +12,9 @@ from utils.tables import write_csv
 
 def dropout_analysis():
     data_trial = pd.read_csv(
-        os.path.join('data', 'added_var', 'data_trial.csv'))
+        os.path.join('data', 'all_trials', 'added_var', 'data_trial.csv'))
     data_subject = pd.read_csv(
-        os.path.join('data', 'added_var', 'data_subject.csv'))
+        os.path.join('data', 'all_trials', 'added_var', 'data_subject.csv'))
 
     data_trial = filter_approved(data_trial, data_subject)
 

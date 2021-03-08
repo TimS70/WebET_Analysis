@@ -3,11 +3,11 @@ import os
 import pandas as pd
 
 from analysis.dropouts import dropout_analysis
-from data_prep.screening_and_cleaning.drop_na_eye_tracking import drop_na_data_et
-from data_prep.screening_and_cleaning.filter_approved import filter_approved
-from data_prep.screening_and_cleaning.invalid_runs import filter_invalid_runs, clean_runs
-from data_prep.screening_and_cleaning.prolific_ids import clean_prolific_ids, match_ids_with_subjects
-from data_prep.screening_and_cleaning.replace_subject_vars import replace_subject_variables
+from data_prep.cleaning.drop_na_eye_tracking import drop_na_data_et
+from data_prep.cleaning.filter_approved import filter_approved
+from data_prep.cleaning.invalid_runs import filter_invalid_runs, clean_runs
+from data_prep.cleaning.prolific_ids import clean_prolific_ids, match_ids_with_subjects
+from data_prep.cleaning.replace_subject_vars import replace_subject_variables
 from utils.path import makedir
 from utils.tables import summarize_datasets
 
