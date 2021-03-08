@@ -38,14 +38,13 @@ cd('C:\Users\User\GitHub\WebET_Analysis\clustering')
 
 f = waitbar(0,'Reading data');
 
-data = readtable('..\data_jupyter\choice_task\cleaned\data_et.csv');
+data = readtable('..\data\choice_task\cleaned\data_et.csv');
 data = data(:, {'run_id', 'trial_index', 'withinTaskIndex', ...
     'x', 'y', 't_task'});
 
 set(0,'DefaultFigureVisible','off');
 
 subject = unique(data.run_id);
-
 separate_clustering_overview = zeros(size(subject, 1), 2);
 
 for i = 1:length(subject)
@@ -53,7 +52,9 @@ for i = 1:length(subject)
     waitbar(i/length(subject),f,'Looping over subjects');
     data_this_subject = data(data.run_id==subject(i), :);
     [ET_adj_this_subject, separate_clustering] = adjust_clusters(...
-        data_this_subject, n_clusters, aoi_width, aoi_height);
+        data_this_subject, n_clusters, ...
+        aoi_width, aoi_height, ...
+        true);
     
     separate_clustering_overview(i, :) = [subject(i), separate_clustering];
     
@@ -81,8 +82,9 @@ output.Properties.VariableNames(1:7) = {...
     'run_id', 'trial_index', 'withinTaskIndex', ...
     'x', 'y', 't_task', 'aoi'};
 
-mkdir('../data_jupyter/choice_task/adjusted');
-writetable(output, '../data_jupyter/choice_task/adjusted/data_et.csv');
+mkdir(fullfile('..', 'data', 'choice_task', 'adjusted'));
+writetable(output, ...
+    fullfile('..', 'data', 'choice_task', 'adjusted', 'data_et.csv'));
 
 close(f)
 end

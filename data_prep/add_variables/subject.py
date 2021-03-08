@@ -5,7 +5,7 @@ import pandas as pd
 
 from tqdm import tqdm
 
-from utils.combine_data import merge_by_subject
+from utils.data_frames import merge_by_subject
 from utils.path import makedir
 
 

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from utils.combine_data import merge_by_index
+from utils.data_frames import merge_by_index
 
 def filter_invalid_runs(data_trial, data_et, data_subject):
     # Not enough trials
@@ -168,8 +168,10 @@ def filter_full_but_no_et_data(data_et, data_trial):
 
 
 def filter_runs_low_fps(data_trial, data_et, min_fps):
-    grouped = data_et \
-        .groupby(['run_id', 'task_index'])['x'].count() \
+
+    grouped = data_et.groupby(
+            ['run_id', 'trial_index'],
+            as_index=False)['x'].count() \
         .reset_index() \
         .rename(columns={'x': 'x_count'})
 

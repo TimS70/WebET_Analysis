@@ -22,5 +22,5 @@ def merge_by_index(data_trial, data_grouped, var_string):
     if var_string in data_trial.columns:
         data_trial = data_trial.drop(columns=[var_string])
     data_trial = data_trial.merge(
-        data_grouped, on=['run_id', 'task_index'], how='left')
+        data_grouped, on=['run_id', 'trial_index'], how='left')
     return data_trial

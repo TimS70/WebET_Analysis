@@ -91,9 +91,9 @@ def how_many_runs_with_dropouts(data_trial):
     for ax in fig.axes:
         ax.tick_params(labelrotation=90)
 
-    makedir('plots', 'dropouts')
+    makedir('results', 'plots', 'dropouts')
     plt.savefig(
-        os.path.join('plots', 'dropouts', 'dropouts.png'))
+        os.path.join('results', 'plots', 'dropouts', 'dropouts.png'))
 
 
 def group_last_trial_for_each_run(data_trial):
