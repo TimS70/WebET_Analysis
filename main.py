@@ -16,9 +16,9 @@ def main():
     # Choice data
     # clean_choice_data()
 
-    run_et_cluster_correction()
+    # run_et_cluster_correction()
 
-    # add_variables_to_choice_task_datasets(use_adjusted_et_data=False)
+    add_variables_to_choice_task_datasets(use_adjusted_et_data=False)
 
 
 if __name__ == '__main__':

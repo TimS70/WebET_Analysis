@@ -15451,7 +15451,7 @@ Cleaned: 630024
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[15]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">reformatAttributes</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>    
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">reformat_attributes</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;aSS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> 
     <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;amountLeft&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;aSS&#39;</span><span class="p">]</span><span class="o">=</span> \
         <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
@@ -15501,7 +15501,7 @@ Cleaned: 630024
     
     <span class="k">return</span> <span class="n">data</span>
 
-<span class="n">data_trial_choice</span> <span class="o">=</span> <span class="n">reformatAttributes</span><span class="p">(</span><span class="n">data_trial_choice</span><span class="p">)</span>
+<span class="n">data_trial_choice</span> <span class="o">=</span> <span class="n">reformat_attributes</span><span class="p">(</span><span class="n">data_trial_choice</span><span class="p">)</span>
 <span class="n">data_trial_choice</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
     <span class="p">:</span> <span class="p">,</span> 
     <span class="p">[</span>
@@ -16798,7 +16798,7 @@ tSS values: [0]
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[23]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">addAOI</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">aoi_width</span><span class="p">,</span> <span class="n">aoi_height</span><span class="p">):</span> 
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">add_aoi</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">aoi_width</span><span class="p">,</span> <span class="n">aoi_height</span><span class="p">):</span>
     <span class="n">aoiCenters</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="p">[(</span><span class="mf">0.05</span><span class="o">+</span><span class="mf">0.9</span><span class="o">*</span><span class="mf">0.2</span><span class="p">),</span> <span class="mf">0.25</span><span class="p">],</span>
@@ -16821,7 +16821,7 @@ tSS values: [0]
              <span class="p">),</span> <span class="s1">&#39;aoi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aoi</span>
     <span class="k">return</span> <span class="n">data</span> 
 
-<span class="n">data_et_choice</span> <span class="o">=</span> <span class="n">addAOI</span><span class="p">(</span><span class="n">data_et_choice</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">)</span>
+<span class="n">data_et_choice</span> <span class="o">=</span> <span class="n">add_aoi</span><span class="p">(</span><span class="n">data_et_choice</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">)</span>
 <span class="n">data_et_choice</span><span class="p">[</span><span class="s1">&#39;aoi&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
 
 <span class="n">data_plot</span> <span class="o">=</span> <span class="n">data_et_choice</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">data_et_choice</span><span class="p">[</span><span class="s1">&#39;aoi&#39;</span><span class="p">]</span><span class="o">!=</span><span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">]]</span>
@@ -16882,7 +16882,7 @@ tSS values: [0]
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[24]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">createAOIColumns</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">create_aoi_columns</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;aoi_aLL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;aoi_tLL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> 
     <span class="n">data</span><span class="p">[</span><span class="s1">&#39;aoi_aSS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span> 
@@ -16931,7 +16931,7 @@ tSS values: [0]
              <span class="s1">&#39;aoi_aLL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">data</span>
 
-<span class="n">data_et_choice</span> <span class="o">=</span> <span class="n">createAOIColumns</span><span class="p">(</span><span class="n">data_et_choice</span><span class="p">)</span>
+<span class="n">data_et_choice</span> <span class="o">=</span> <span class="n">create_aoi_columns</span><span class="p">(</span><span class="n">data_et_choice</span><span class="p">)</span>
 </pre></div>
 
      </div>
