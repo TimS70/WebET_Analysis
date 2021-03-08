@@ -18,7 +18,7 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
     print('Adding variables to choice_task... \n')
 
     if use_adjusted_et_data:
-        print('Using adjusted et data \n')
+        print('Using adjusted et data. \n')
         data_et = pd.read_csv(
             os.path.join(
                 'data', 'choice_task', 'adjusted', 'data_et.csv'))
@@ -27,12 +27,13 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
         data_et = pd.read_csv(
             os.path.join(
                 'data', 'choice_task', 'cleaned', 'data_et.csv'))
-        data_trial = pd.read_csv(
-            os.path.join(
-                'data', 'choice_task', 'cleaned', 'data_trial.csv'))
-        data_subject = pd.read_csv(
-            os.path.join(
-                'data', 'choice_task', 'cleaned', 'data_subject.csv'))
+
+    data_trial = pd.read_csv(
+        os.path.join(
+            'data', 'choice_task', 'cleaned', 'data_trial.csv'))
+    data_subject = pd.read_csv(
+        os.path.join(
+            'data', 'choice_task', 'cleaned', 'data_subject.csv'))
 
     print('Imported from data/choice_task/cleaned: ')
     summarize_datasets(data_et, data_trial, data_subject)
@@ -59,6 +60,7 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
     # AOIs
     data_et = add_aoi_et(data_et, use_adjusted_et_data)
     data_et = add_fixation_counter(data_et)
+
     data_trial = count_fixations_on_trial_level(data_trial, data_et)
     data_trial = add_aoi_counts_on_trial_level(data_trial, data_et)
 

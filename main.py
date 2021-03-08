@@ -1,5 +1,7 @@
+from analysis.choice_task import analyze_choice_task
 from analysis.dropouts import dropout_analysis
 from data_prep.add_variables.choice import add_variables_to_choice_task_datasets, run_et_cluster_correction
+from data_prep.add_variables.fix_task import add_fix_task_variables
 from data_prep.add_variables.init import global_add_variables_to_datasets
 from data_prep.screening_and_cleaning.choice import clean_choice_data
 
@@ -18,7 +20,12 @@ def main():
 
     # run_et_cluster_correction()
 
-    add_variables_to_choice_task_datasets(use_adjusted_et_data=False)
+    add_variables_to_choice_task_datasets(use_adjusted_et_data=True)
+
+    # Analyze Choice task
+    # analyze_choice_task(use_adjusted_et_data = True)
+
+    # add_fix_task_variables()
 
 
 if __name__ == '__main__':
