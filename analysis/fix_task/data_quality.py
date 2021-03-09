@@ -4,64 +4,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from analysis.fix_task.calibration import analyze_calibration
+from analysis.fix_task.correlations import corr_analysis
 from analysis.fix_task.gaze_saccade import check_gaze_saccade
-from analysis.fix_task.main_effects import main_effects
+from analysis.fix_task.main_effects import main_effect
 from analysis.fix_task.positions import compare_positions
 from analysis.fix_task.randomization import check_randomization
 from analysis.fix_task.visualize_gaze import fix_heatmap, visualize_exemplary_run
 from utils.data_frames import merge_by_index
 from utils.path import makedir
+from utils.plots import get_box_plots
 from utils.tables import write_csv, summarize_datasets
-
-
-def data_quality_analysis():
-    data_et = pd.read_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_et.csv'))
-    data_et_fix = pd.read_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_et_fix.csv'))
-    data_trial_fix = pd.read_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_trial_fix.csv'))
-    data_trial = pd.read_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_trial.csv'))
-    data_subject = pd.read_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_subject.csv'))
-
-    print('Datasets read from data/fix_task/added_var (all trials): ')
-    summarize_datasets(data_et, data_trial, data_subject)
-
-    print('Datasets read from data/fix_task/added_var (fix trials): ')
-    summarize_datasets(data_et_fix, data_trial_fix, data_subject)
-
-    # Only for dev
-    data_trial = data_trial.loc[data_trial['run_id'] < 50, :]
-    data_trial_fix = data_trial_fix.loc[
-                     data_trial_fix['run_id'] < 50, :]
-
-    data_et = data_et.loc[data_et['run_id'] < 50, :]
-    data_et_fix = data_et_fix.loc[data_et_fix['run_id'] < 50, :]
-    data_subject = data_subject.loc[data_subject['run_id'] < 50, :]
-
-    # check_gaze_saccade(data_et, data_trial)
-    # compare_conditions_subject(
-    #     data_subject, data_trial_fix, 'offset')
-    # data_trial_fix = grand_mean_offset(
-    #     data_et_fix, data_trial_fix)
-    #
-    # outcome_over_trials(data_trial_fix, 'precision')
-    # compare_positions(data_trial_fix, 'precision')
-    # compare_conditions_subject(
-    #     data_subject, data_trial_fix, 'precision')
-
-    # check_randomization(data_trial_fix)
-
-    # main_effects(data_trial_fix, data_subject)
-
-    fix_heatmap(data_et_fix)
-
-    data_plot = merge_by_index(data_et_fix, data_trial_fix, 'chin')
-    visualize_exemplary_run(
-        data_plot.loc[
-            (data_plot['run_id'] == 43) & (data_plot['chin'] == 0), :])
 
 
 def outcome_over_trials(data_trial, outcome):

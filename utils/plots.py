@@ -1,9 +1,13 @@
 import os
 
 import matplotlib.pyplot as plt
+import numpy as np
+import pingouin as pg
 import seaborn as sns
+import statsmodels.graphics.api as smg
 
 from utils.path import makedir
+from utils.tables import write_csv
 
 
 def spaghetti_plot(data, x_var, y_var, highlighted_subject):
@@ -66,6 +70,83 @@ def split_violin_plot(data_trial, outcome, factor, split_factor):
     plt.close()
 
 
+def get_box_plots(data_subject, outcome, predictors, file_name, *args):
+    fig, ax = plt.subplots(nrows=2, ncols=4, figsize=(16, 10))
+    fig.suptitle(outcome + ' for various categorical predictors', fontsize=20)
+    plt.subplots_adjust(hspace=0.5)
+
+    ax = ax.ravel()
+
+    for i in range(0, 8):
+        sns.boxplot(ax=ax[i], x=predictors[i], y=outcome, data=data_subject)
+
+        ax[i].tick_params(labelrotation=45, labelsize=13)
+        ax[i].tick_params(axis='y', labelrotation=None)
+
+        nobs = data_subject[predictors[i]].value_counts().values
+        nobs = [str(x) for x in nobs.tolist()]
+        nobs = ["n: " + i for i in nobs]
+        # Add it to the plot
+        pos = range(len(nobs))
+
+        max_value = data_subject[outcome].max()
+        yPos = max_value + max_value * 0.1
+
+        for tick, label in zip(pos, ax[i].get_xticklabels()):
+            ax[i].text(
+                pos[tick], yPos, nobs[tick],
+                verticalalignment='top',
+                horizontalalignment='center', size=13, weight='normal')
+
+    save_plot(file_name, *args)
+    plt.close()
+
+
+def corr_plot(data_plot, correlation_columns,
+              file_name, factor=None, *args):
+    sns.set()
+
+    if factor is None:
+        sns.pairplot(
+            data_plot.loc[:, correlation_columns],
+            kind='reg',
+            corner=True)
+    else:
+        sns.pairplot(
+            data_plot.loc[:, np.append(correlation_columns, [factor])],
+            hue=factor,
+            kind='reg',
+            corner=True)
+
+    save_plot(file_name, *args)
+    plt.close()
+
+
+def corr_matrix(data_plot, corr_columns, option,
+                file_name, *args):
+
+    corr_matrix = np.corrcoef(data_plot.loc[:, corr_columns].T)
+
+    if option == 'table_p':
+        corr_table_p = data_plot[corr_columns].rcorr()
+        write_csv(
+            corr_table_p,
+            file_name,
+            *args)
+
+    if option == 'table_n':
+        corr_table_n = data_plot[corr_columns].rcorr(upper='n')
+        write_csv(
+            corr_table_n,
+            file_name,
+            *args)
+
+    if option == 'heatmap':
+        smg.plot_corr(corr_matrix, xnames=corr_columns)
+        makedir('results', 'plots', 'choice_task')
+        save_plot(file_name, *args)
+
+
 def save_table_as_plot(data_frame, file_name, *args):
     fig, ax = plt.subplots()
     fig.patch.set_visible(False)
@@ -79,10 +160,8 @@ def save_table_as_plot(data_frame, file_name, *args):
 
     fig.tight_layout()
 
-    plt.show()
-
-    makedir(*args)
-    plt.savefig(os.path.join(*args, file_name), bbox_inches='tight')
+    save_plot(file_name, *args)
+    plt.close()
 
 
 def save_plot(file_name, *args):

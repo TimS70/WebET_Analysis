@@ -15,7 +15,7 @@ from utils.tables import write_csv
 
 
 
-def main_effects(data_trial_fix, data_subject):
+def main_effect(data_trial_fix, data_subject):
     for outcome in ['offset', 'precision', 'fps']:
         violin_plot(data_trial_fix, outcome, 'chin')
 
@@ -31,7 +31,9 @@ def main_effects(data_trial_fix, data_subject):
     plot_sight_vs_outcomes(data_subject)
     anova_outcomes_sight(data_subject)
 
-    t_test_ind_outcomes_vs_factor(data_subject, 'glasses_binary')
+    t_test_ind_outcomes_vs_factor(data_subject, 'glasses_binary', '',
+                                  'results', 'tables', 'fix_task',
+                                  'main_effect')
 
     for outcome in ['offset', 'precision', 'fps']:
         split_violin_plot(data_trial_fix, outcome, 'chin', 'glasses_binary')
@@ -45,7 +47,8 @@ def main_effects(data_trial_fix, data_subject):
         data_subject['run_id'].isin(run_high_fps), :]
 
     t_test_ind_outcomes_vs_factor(
-        data_subject_high_fps, 'glasses_binary', 'high_fps')
+        data_subject_high_fps, 'glasses_binary', 'high_fps',
+        'results', 'tables', 'fix_task', 'main_effect')
 
     data_trial_fix_high_fps = data_trial_fix.loc[
         data_trial_fix['run_id'].isin(run_high_fps), :]
@@ -127,7 +130,7 @@ def t_test_rel(outcome, data_outcome_by_factor):
     )
 
 
-def t_test_ind_outcomes_vs_factor(data, factor, note=''):
+def t_test_ind_outcomes_vs_factor(data, factor, note='', *args):
     outcomes_by_factor = pivot_outcomes_by_factor(data, factor)
 
     summary = outcomes_by_factor.mean() \
@@ -174,7 +177,7 @@ def t_test_ind_outcomes_vs_factor(data, factor, note=''):
     write_csv(
         summary,
         ('t_test_' + factor + '_vs_outcomes' + str(note) + '.csv'),
-        'results', 'tables', 'fix_task', 'main_effect')
+        *args)
 
 
 def t_test_ind(outcome, data_outcome_by_factor):

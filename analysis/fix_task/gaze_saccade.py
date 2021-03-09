@@ -19,13 +19,10 @@ def check_gaze_saccade(data_et, data_trial):
         'fixTask', 'positionIndex')
 
     data_et_cross_and_task = select_fix_cross_and_fix_task(data_et)
-    data_trial_cross_and_task = select_fix_cross_and_fix_task(data_trial)
+
+    data_et_cross_and_task = add_new_position(data_et_cross_and_task)
 
     data_et_cross_and_task = shift_t_task_for_fix_cross(
-        data_et_cross_and_task)
-    data_et_cross_and_task = new_yx_pos(
-        data_et_cross_and_task)
-    data_et_cross_and_task = new_position_index(
         data_et_cross_and_task)
 
     data_et_cross_and_task['offset'] = euclidean_distance(
@@ -34,18 +31,6 @@ def check_gaze_saccade(data_et, data_trial):
         data_et_cross_and_task['y'],
         data_et_cross_and_task['new_y_pos']
     )
-
-    example = data_et_cross_and_task.loc[:,
-              ['run_id', 'trial_index', 'fixTask',
-               'x', 'y', 't_task',
-               'x_pos', 'y_pos',
-               'new_x_pos', 'new_y_pos', 'positionIndex',
-               'offset']]
-
-    write_csv(
-        example,
-        'check_saccade.csv',
-        'results', 'tables', 'fix_task')
 
     for subject in tqdm(
             data_et_cross_and_task['run_id'].unique(),
@@ -67,6 +52,7 @@ def plot_gaze_saccade(data_et_cross_and_task, file_name):
         data_et_cross_and_task.loc[
         data_et_cross_and_task['chin'] == 1, :])
 
+    # noinspection PyTypeChecker
     fig, axes = plt.subplots(
         nrows=1, ncols=2, sharey=True, figsize=(18, 12))
     fig.suptitle(
@@ -135,108 +121,61 @@ def select_fixTask_and_fixCross(data):
 def shift_t_task_for_fix_cross(data):
     data.loc[
         (data['trial_type'] == 'eyetracking-fix-object') &
-        (data['fixTask'] == 0) &
         (data['trial_duration'] == 1500),
         't_task'
     ] = data.loc[
             (data['trial_type'] == 'eyetracking-fix-object') &
-            (data['fixTask'] == 0) &
             (data['trial_duration'] == 1500),
             't_task'] - 1500
+
+    print('Shifted t_task for fixation cross. \n')
 
     return data
 
 
-def new_yx_pos(data_et):
-    data_et['new_x_pos'] = data_et['x_pos']
-    data_et['new_y_pos'] = data_et['y_pos']
+def add_new_position(data_et):
+    data_new_pos = create_new_pos_datasets(data_et)
+    data_et = data_et.merge(
+        data_new_pos,
+        on=['run_id', 'trial_index'],
+        how='left')
 
-    for subject in tqdm(data_et['run_id'].unique(),
-                        desc='Adding new x and y position: '):
-        df_subj = data_et.loc[data_et['run_id'] == subject]
-
-        for fix_trial in df_subj.loc[
-            (df_subj['run_id'] == subject) &
-            (df_subj['fixTask'] == 1), 'trial_index'].unique():
-            # Get x_pos of current fix dot
-            x_pos = data_et.loc[
-                (data_et['run_id'] == subject) &
-                (data_et['trial_index'] == fix_trial),
-                'x_pos'].values[0]
-
-            # Insert x_pos at the previous fix cross
-            data_et.loc[
-                (data_et['run_id'] == subject) &
-                (data_et['trial_index'] == (fix_trial - 1)),
-                'new_x_pos'] = x_pos
-
-            # Get y_pos of current fix dot
-            y_pos = data_et.loc[
-                (data_et['run_id'] == subject) &
-                (data_et['trial_index'] == fix_trial),
-                'y_pos'].values[0]
-
-            # Insert y_pos at the previous fix cross
-            data_et.loc[
-                (data_et['run_id'] == subject) &
-                (data_et['trial_index'] == (fix_trial - 1)),
-                'new_y_pos'] = y_pos
-
-            # Same for position Index
-            # Get y_pos of current fix dot
-            positionIndex = data_et.loc[
-                (data_et['run_id'] == subject) &
-                (data_et['trial_index'] == fix_trial),
-                'positionIndex'].values[0]
-
-            # Insert y_pos at the previous fix cross
-            data_et.loc[
-                (data_et['run_id'] == subject) &
-                (data_et['trial_index'] == (fix_trial - 1)),
-                'positionIndex'] = positionIndex
-
-    summary = data_et.groupby(
-        ['run_id', 'trial_index', 'fixTask', 'trial_duration'],
-        as_index=False)[[
-        'new_x_pos', 'new_y_pos']].mean()
-
-    print(
-        f"""Assigned new x and y positions: \n"""
-        f"""{summary.head(10)} \n"""
-    )
+    print('Added new position variables. \n')
 
     return data_et
 
 
-def new_position_index(data_et):
-    for subject in tqdm(data_et['run_id'].unique(),
-                        desc='new Position Index: '):
-        df_subj = data_et.loc[data_et['run_id'] == subject]
+def create_new_pos_datasets(data_et_fix):
+    data_trial = data_et_fix.loc[:, ['run_id', 'trial_index', 'trial_duration',
+                              'x_pos', 'y_pos', 'positionIndex']] \
+        .reset_index() \
+        .drop_duplicates()
 
-        for fix_trial in df_subj.loc[
-            (df_subj['run_id'] == subject) &
-            (df_subj['fixTask'] == 0), 'trial_index'].unique():
-            # Same for position Index
-            position_index = data_et.loc[
-                (data_et['run_id'] == subject) &
-                (data_et['trial_index'] == (fix_trial + 1)),
-                'positionIndex'].values[0]
+    data_trial['new_x_pos'] = data_trial['x_pos']
+    data_trial['new_y_pos'] = data_trial['y_pos']
+    data_trial['new_position_index'] = data_trial['positionIndex']
 
-            data_et.loc[
-                (data_et['run_id'] == subject) &
-                (data_et['trial_index'] == fix_trial),
-                'positionIndex'] = position_index
+    for subject in tqdm(data_trial['run_id'].unique(),
+                        desc='Create new positions'):
 
-    summary = data_et.groupby(
-        ['new_x_pos', 'new_y_pos', 'trial_duration'],
-        as_index=False)['positionIndex'].mean()
+        df_subject = data_trial.loc[data_trial['run_id'] == subject]
 
-    print(
-        f"""Changed position index: \n"""
-        f"""{summary.head(5)} \n"""
-    )
+        for i in df_subject.index[:-1]:
 
-    return data_et
+            cross_trial = (data_trial.loc[i, 'trial_duration'] == 1500) & \
+                (data_trial.loc[i+1, 'trial_duration'] == 5000)
+
+            if cross_trial:
+                data_trial.loc[i, 'new_x_pos'] = data_trial.loc[i + 1, 'x_pos']
+                data_trial.loc[i, 'new_y_pos'] = data_trial.loc[i + 1, 'y_pos']
+                data_trial.loc[i, 'new_position_index'] = \
+                    data_trial.loc[i + 1, 'positionIndex']
+
+    data_trial = data_trial.loc[:, [
+        'run_id', 'trial_index',
+        'new_x_pos', 'new_y_pos', 'new_position_index']]
+
+    return data_trial
 
 
 def euclidean_distance(x, x_target, y, y_target):

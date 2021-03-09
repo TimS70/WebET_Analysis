@@ -5,13 +5,15 @@ import matplotlib.patches as patches
 import matplotlib.cm as cm
 import numpy as np
 import pandas as pd
-import pingouin as pg
 import seaborn as sns
 
-import statsmodels.graphics.api as smg
+
 from scipy.ndimage.filters import gaussian_filter
+
+from data_prep.cleaning.corr_data import clean_corr_data
 from utils.data_frames import merge_by_index
 from utils.path import makedir
+from utils.plots import corr_plot, corr_matrix
 from utils.tables import summarize_datasets, write_csv
 
 
@@ -183,24 +185,24 @@ def corr_analysis_subject(data_subject):
         ]
     )
 
-    corr_plot_chinFirst(
-        data_plot,
-        ['chinFirst', 'age', 'choseLL',
-         'attributeIndex', 'optionIndex', 'payneIndex', 'choice_rt'],
-        'corr_by_chinFirst_subject.png')
-
     corr_columns = [
         'chinFirst', 'age', 'choseLL',
         'attributeIndex', 'optionIndex', 'payneIndex',
         'choice_rt'
     ]
+    corr_plot(data_plot, corr_columns,
+              'corr_vars_vs_chinFirst_trial.png', 'chinFirst',
+              'results')
 
     corr_matrix(data_plot, corr_columns,
-                option='table_p', name='subject_corr_p.csv')
+                'table_p', 'subject_corr_p.csv',
+                'results', 'tables', 'choice_task')
     corr_matrix(data_plot, corr_columns,
-                option='table_n', name='subject_corr_n.csv')
+                'table_n', 'subject_corr_n.csv',
+                'results', 'tables', 'choice_task')
     corr_matrix(data_plot, corr_columns,
-                option='heatmap', name='subject_corr_heatmap.png')
+                'heatmap', 'subject_corr_heatmap.png',
+                'results', 'plots', 'choice_task')
 
 
 def corr_analysis_trial(data_trial):
@@ -211,93 +213,24 @@ def corr_analysis_trial(data_trial):
             'trial_duration_exact']
         ])
 
-    corr_plot_chinFirst(
-        data_plot,
-        ['chinFirst', 'k',
-         'attributeIndex', 'optionIndex', 'payneIndex', 'trial_duration_exact'],
-        'corrrelation_by_chinFirst_trial.png')
+    corr_columns = [
+        'chinFirst', 'choseLL', 'k', 'attributeIndex', 
+        'optionIndex', 'payneIndex', 'trial_duration_exact']
+    
+    corr_plot(data_plot, corr_columns,
+              'corr_vars_vs_chinFirst_trial.png', 'chinFirst', 
+              'results')    
 
     corr_columns = [
-                'chinFirst', 'choseLL', 'k',
-                'attributeIndex', 'optionIndex', 'payneIndex', 'trial_duration_exact'
-            ]
+        'chinFirst', 'choseLL', 'k', 'attributeIndex', 
+        'optionIndex', 'payneIndex', 'trial_duration_exact']
 
     corr_matrix(data_plot, corr_columns,
-                option='table_p', name='trial_corr_p.csv')
+                'table_p', 'trial_corr_p.csv',
+                'results', 'tables', 'choice_task')
     corr_matrix(data_plot, corr_columns,
-                option='table_n', name='trial_corr_n.csv')
+                'table_n', 'trial_corr_n.csv',
+                'results', 'tables', 'choice_task')
     corr_matrix(data_plot, corr_columns,
-                option='heatmap', name='trial_corr_heatmap.png')
-
-
-def clean_corr_data(data):
-
-    output_data = data.copy()
-
-    null_data = output_data.loc[output_data.isnull().any(axis=1), :]
-
-    show_null_data = null_data \
-                         .groupby(['run_id'], as_index=False).count() \
-                         .iloc[:, :2]
-    show_null_data.columns = ['run_id', 'n']
-
-    if len(null_data) > 0:
-        print('! Attention ! Missing values \n')
-        print(
-            f"""Length of data raw: {len(output_data)} | """
-            f"""Unique runs: {len(output_data['run_id'].unique())}"""
-
-        )
-    else:
-        print('No missing data found')
-
-    output_data = output_data.loc[~output_data.isnull().any(axis=1), :]
-
-    print(
-        f"""Length of data clean: {len(output_data)} | """
-        f"""Unique runs: {len(output_data['run_id'].unique())} \n \n"""
-        f"""Excluded runs and trials: \n"""
-        f"""{show_null_data.head(5)} \n"""
-    )
-    return output_data
-
-
-def corr_plot_chinFirst(data_plot, columns, name):
-    sns.set()
-    sns.pairplot(
-        data_plot.loc[:, columns],
-        kind='reg',
-        corner=True,
-        hue='chinFirst'
-    )
-
-    makedir('results', 'plots', 'choice_task')
-    plt.savefig(
-        os.path.join(
-            'results', 'plots', 'choice_task', name))
-
-
-def corr_matrix(data_plot, corr_columns, option, name):
-
-    corr_matrix = np.corrcoef(data_plot.loc[:, corr_columns].T)
-
-    if option == 'table_p':
-        corr_table_p = data_plot[corr_columns].rcorr()
-        write_csv(
-            corr_table_p,
-            name,
-            'results', 'tables', 'choice_task')
-
-    if option == 'table_n':
-        corr_table_n = data_plot[corr_columns].rcorr(upper='n')
-        write_csv(
-            corr_table_n,
-            name,
-            'results', 'tables', 'choice_task')
-
-    if option == 'heatmap':
-        smg.plot_corr(corr_matrix, xnames=corr_columns)
-        makedir('results', 'plots', 'choice_task')
-        plt.savefig(
-            os.path.join(
-                'results', 'plots', 'choice_task', name))
+                'heatmap', 'trial_corr_heatmap.png',
+                'results', 'plots', 'choice_task')

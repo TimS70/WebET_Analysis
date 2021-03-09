@@ -1,5 +1,5 @@
 from analysis.dropouts import dropout_analysis
-from analysis.fix_task.data_quality import data_quality_analysis
+from analysis.fix_task.init import data_quality_analysis
 from data_prep.add_variables.data_quality import add_data_quality_var
 from data_prep.add_variables.init import global_add_variables_to_datasets
 from data_prep.cleaning.choice import create_and_clean_choice_data

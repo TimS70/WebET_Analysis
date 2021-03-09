@@ -8,29 +8,26 @@ import statsmodels.stats.multitest as smt
 
 from scipy import stats
 
+from analysis.fix_task.main_effects import t_test_ind_outcomes_vs_factor
 from utils.path import makedir
+from utils.plots import save_plot
 from utils.tables import write_csv
 
 
 def check_randomization(data_trial_fix):
     plot_chinFirst_vs_outcomes(data_trial_fix)
-    t_test_chinFirst_vs_outcomes(data_trial_fix)
+    t_test_ind_outcomes_vs_factor(data_trial_fix, 'chinFirst', '',
+                                  'results', 'tables', 'fix_task',
+                                  'check_randomization')
 
     plot_outcomes_by_task_order(data_trial_fix)
 
-    print(
-        f"""
-            Plots show a greater variance in the second run
-        """)
+    print(f"""Plots show a greater variance in the second run. \n""")
 
     test_outcomes_by_task_order(data_trial_fix)
 
-    print(
-        f"""
-            Tendency for lower overall precision for those 
-            who started with the chin-rest, not for Holm 
-            correction
-        """)
+    print('Tendency for lower overall precision for those who '
+          'started with the chin-rest, not for Holm correction. \n')
 
 
 def plot_chinFirst_vs_outcomes(data_trial_fix):
@@ -51,17 +48,9 @@ def plot_chinFirst_vs_outcomes(data_trial_fix):
         sns.violinplot(ax=axes[1], x='chinFirst', y=outcome,
                        data=data_plot.loc[data_plot['chin'] == 1, :])
 
-        makedir('results', 'plots', 'fix_task',
-                'check_randomization')
-        plt.savefig(
-            os.path.join(
-                'results', 'plots', 'fix_task',
-                'check_randomization',
-                ('chinFirst_vs_' + outcome)))
+        save_plot(('chinFirst_vs_' + outcome),
+                  'results', 'plots', 'fix_task', 'check_randomization')
         plt.close()
-
-
-
 
 
 def plot_outcomes_by_task_order(data_trial_fix):
@@ -93,70 +82,6 @@ def plot_outcomes_by_task_order(data_trial_fix):
                      'fix_task', 'check_randomization',
                      'outcomes_by_task_order.png'))
     plt.close()
-
-
-def t_test_chinFirst_vs_outcomes(data_trial_fix):
-
-    data_plot = data_trial_fix \
-        .groupby(['run_id', 'chinFirst', 'chin'], as_index=False) \
-        [['offset', 'precision', 'fps']].mean()
-    data_plot.head(5)
-
-    outcomes_by_chin = data_plot \
-        .groupby(['run_id', 'chinFirst'], as_index=False) \
-        [['offset', 'precision', 'fps']].mean() \
-        .pivot(
-        index='run_id',
-        columns='chinFirst',
-        values=['offset', 'precision', 'fps'])
-
-    summary = outcomes_by_chin.mean() \
-        .reset_index() \
-        .rename(columns={'level_0': 'measure', 0: 'mean'}) \
-        .assign(SD=outcomes_by_chin.std().reset_index(drop=True)) \
-        .assign(n=outcomes_by_chin.count().reset_index(drop=True))
-
-    result_offset = t_test_ind('offset', outcomes_by_chin)
-    result_precision = t_test_ind('precision', outcomes_by_chin)
-    result_fps = t_test_ind('fps', outcomes_by_chin)
-
-    chin_test = pd.DataFrame({
-        'measure': ['offset', 'precision', 'fps'],
-        't': [
-            result_offset.statistic,
-            result_precision.statistic,
-            result_fps.statistic
-        ],
-        'p': [
-            result_offset.pvalue,
-            result_precision.pvalue,
-            result_fps.pvalue
-        ]
-    }
-    )
-    chin_test['t'] = (chin_test['t']).astype(float)
-    # Holm correction
-    chin_test['p'] = smt.multipletests(chin_test['p'], method='holm')[1].astype(float)
-
-    summary = summary.merge(
-        chin_test,
-        on='measure',
-        how='left')
-
-    print('summary')
-    print(f"""{summary} \n""")
-
-    write_csv(
-        summary,
-        't_test_chinFirst_vs_outcomes.csv',
-        'results', 'tables', 'fix_task', 'check_randomization')
-
-
-def t_test_ind(outcome_var, outcomes_by_chin):
-    return scipy.stats.ttest_ind(
-        outcomes_by_chin.loc[:, [(outcome_var, 0.0)]].dropna(),
-        outcomes_by_chin.loc[:, [(outcome_var, 1.0)]].dropna()
-    )
 
 
 def test_outcomes_by_task_order(data_trial_fix):
