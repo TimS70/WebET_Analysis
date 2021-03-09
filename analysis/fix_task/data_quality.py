@@ -19,6 +19,7 @@ import statsmodels.stats.multitest as smt
 from statsmodels.formula.api import ols
 import sys
 
+from analysis.fix_task.check_randomization import check_randomization
 from analysis.fix_task.positions import compare_positions
 from data_prep.add_variables.trial import add_position_index
 from utils.data_frames import merge_by_index
@@ -45,16 +46,18 @@ def data_quality_analysis():
     print('Datasets read from data/fix_task/added_var (fix trials): ')
     summarize_datasets(data_et_fix, data_trial_fix, data_subject)
 
-    check_gaze_saccade(data_et, data_trial)
-    compare_conditions_subject(
-        data_subject, data_trial_fix, 'offset')
-    data_trial_fix = grand_mean_offset(
-        data_et_fix, data_trial_fix)
+    # check_gaze_saccade(data_et, data_trial)
+    # compare_conditions_subject(
+    #     data_subject, data_trial_fix, 'offset')
+    # data_trial_fix = grand_mean_offset(
+    #     data_et_fix, data_trial_fix)
+    #
+    # outcome_over_trials(data_trial_fix, 'precision')
+    # compare_positions(data_trial_fix, 'precision')
+    # compare_conditions_subject(
+    #     data_subject, data_trial_fix, 'precision')
 
-    outcome_over_trials(data_trial_fix, 'precision')
-    compare_positions(data_trial_fix, 'precision')
-    compare_conditions_subject(
-        data_subject, data_trial_fix, 'precision')
+    check_randomization(data_trial_fix)
 
 
 def check_gaze_saccade(data_et, data_trial):

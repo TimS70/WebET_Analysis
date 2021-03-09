@@ -94,6 +94,7 @@ def how_many_runs_with_dropouts(data_trial):
     makedir('results', 'plots', 'dropouts')
     plt.savefig(
         os.path.join('results', 'plots', 'dropouts', 'dropouts.png'))
+    plt.close()
 
 
 def group_last_trial_for_each_run(data_trial):
