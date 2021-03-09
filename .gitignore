@@ -1,5 +1,7 @@
+archive/
 data/
 results/
 data_prep/clustering/source/
 .idea/
 **/__pycache__
+**/.ipynb_checkpoints
