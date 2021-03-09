@@ -1,18 +1,11 @@
-import os
-import scipy
-
-import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
+import scipy
 import statsmodels.stats.multitest as smt
-
 from scipy import stats
 
 from analysis.fix_task.sight import plot_sight_vs_outcomes, anova_outcomes_sight
-from utils.path import makedir
 from utils.plots import split_violin_plot, violin_plot
 from utils.tables import write_csv
-
 
 
 def main_effect(data_trial_fix, data_subject):
@@ -44,29 +37,47 @@ def main_effect(data_trial_fix, data_subject):
         data_subject['fps'] > data_subject['fps'].median(), 'run_id'].unique()
 
     data_subject_high_fps = data_subject.loc[
-        data_subject['run_id'].isin(run_high_fps), :]
+                            data_subject['run_id'].isin(run_high_fps), :]
 
     t_test_ind_outcomes_vs_factor(
         data_subject_high_fps, 'glasses_binary', 'high_fps',
         'results', 'tables', 'fix_task', 'main_effect')
 
     data_trial_fix_high_fps = data_trial_fix.loc[
-        data_trial_fix['run_id'].isin(run_high_fps), :]
+                              data_trial_fix['run_id'].isin(run_high_fps), :]
     t_test_dep_outcomes_vs_factor(
         data_trial_fix_high_fps, 'chin', 'high_fps')
 
 
+# noinspection DuplicatedCode,PyTypeChecker
 def t_test_dep_outcomes_vs_factor(data_trial_fix, factor, note=''):
     outcomes_by_factor = pivot_outcomes_by_factor(data_trial_fix, factor)
+
+    result_offset = t_test_rel('offset', outcomes_by_factor)
+    result_precision = t_test_rel('precision', outcomes_by_factor)
+    result_fps = t_test_rel('fps', outcomes_by_factor)
+
+    summary = summarize_t_test_results(
+        outcomes_by_factor,
+        result_offset, result_precision, result_fps, True)
+
+    if note != '':
+        note = '_' + note
+
+    write_csv(
+        summary,
+        ('t_test_' + factor + '_vs_outcomes' + str(note) + '.csv'),
+        'results', 'tables', 'fix_task', 'main_effect')
+
+
+def summarize_t_test_results(
+        outcomes_by_factor,
+        result_offset, result_precision, result_fps, dependent):
 
     summary = outcomes_by_factor.mean().reset_index() \
         .rename(columns={'level_0': 'measure', 0: 'mean'}) \
         .assign(SD=outcomes_by_factor.std().reset_index(drop=True)) \
         .assign(n=outcomes_by_factor.count().reset_index(drop=True))
-
-    result_offset = t_test_rel('offset', outcomes_by_factor)
-    result_precision = t_test_rel('precision', outcomes_by_factor)
-    result_fps = t_test_rel('fps', outcomes_by_factor)
 
     chin_test = pd.DataFrame({
         'measure': ['offset', 'precision', 'fps'],
@@ -92,17 +103,16 @@ def t_test_dep_outcomes_vs_factor(data_trial_fix, factor, note=''):
         on='measure',
         how='left')
 
+    if dependent:
+        dependent_str = 'dependent'
+    else:
+        dependent_str = 'independent'
+
     print(
-        f"""Summary from dependent t tests (holm-corrected): \n"""
+        f"""Summary from {dependent_str} t tests (holm-corrected): \n"""
         f"""{summary} \n""")
 
-    if note != '':
-        note = '_' + note
-
-    write_csv(
-        summary,
-        ('t_test_' + factor + '_vs_outcomes' + str(note) + '.csv'),
-        'results', 'tables', 'fix_task', 'main_effect')
+    return summary
 
 
 def pivot_outcomes_by_factor(data, factor):
@@ -111,8 +121,8 @@ def pivot_outcomes_by_factor(data, factor):
             ['run_id', factor],
             as_index=False)[['offset', 'precision', 'fps']].mean()
     else:
-        outcomes_by_factor = data.loc[:,
-            ['run_id', factor, 'offset', 'precision', 'fps']] \
+        outcomes_by_factor = data.loc[:, [
+            'run_id', factor, 'offset', 'precision', 'fps']] \
             .drop_duplicates()
 
     outcomes_by_factor = outcomes_by_factor.pivot(
@@ -130,46 +140,17 @@ def t_test_rel(outcome, data_outcome_by_factor):
     )
 
 
+# noinspection PyTypeChecker
 def t_test_ind_outcomes_vs_factor(data, factor, note='', *args):
     outcomes_by_factor = pivot_outcomes_by_factor(data, factor)
-
-    summary = outcomes_by_factor.mean() \
-        .reset_index() \
-        .rename(columns={'level_0': 'measure', 0: 'mean'}) \
-        .assign(SD=outcomes_by_factor.std().reset_index(drop=True)) \
-        .assign(n=outcomes_by_factor.count().reset_index(drop=True))
 
     result_offset = t_test_ind('offset', outcomes_by_factor)
     result_precision = t_test_ind('precision', outcomes_by_factor)
     result_fps = t_test_ind('fps', outcomes_by_factor)
 
-    chin_test = pd.DataFrame({
-        'measure': ['offset', 'precision', 'fps'],
-        't': [
-            result_offset.statistic,
-            result_precision.statistic,
-            result_fps.statistic
-        ],
-        'p': [
-            result_offset.pvalue,
-            result_precision.pvalue,
-            result_fps.pvalue
-        ]
-    })
-
-    chin_test['t'] = (chin_test['t']).astype(float)
-    # Holm correction
-    chin_test['p'] = smt.multipletests(
-        chin_test['p'], method='holm')[1].astype(float)
-
-    summary = summary.merge(
-        chin_test,
-        on='measure',
-        how='left')
-
-    print(
-        f"""Summary from independent t tests (holm-corrected): \n"""
-        f"""{summary} \n""")
+    summary = summarize_t_test_results(
+        outcomes_by_factor,
+        result_offset, result_precision, result_fps, False)
 
     if note != '':
         note = '_' + note

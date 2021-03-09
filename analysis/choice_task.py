@@ -1,24 +1,21 @@
 import os
 
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 import matplotlib.cm as cm
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-
-
 from scipy.ndimage.filters import gaussian_filter
 
 from data_prep.cleaning.corr_data import clean_corr_data
 from utils.data_frames import merge_by_index
 from utils.path import makedir
 from utils.plots import corr_plot, corr_matrix
-from utils.tables import summarize_datasets, write_csv
+from utils.tables import summarize_datasets
 
 
-def analyze_choice_task(use_adjusted_et_data = True):
-
+def analyze_choice_task(use_adjusted_et_data=True):
     data_et_uncorrected = pd.read_csv(
         os.path.join('data', 'choice_task', 'uncorrected', 'data_et.csv'))
 
@@ -92,6 +89,7 @@ def plot_categorical_confounders(data_subject):
                      'cat_variables.png'))
 
 
+# noinspection PyUnboundLocalVariable
 def plot_example_eye_movement(data_et, data_trial, data_subject, run):
     data_plot = data_et.loc[data_et['run_id'] == run, :]
 
@@ -108,8 +106,8 @@ def plot_example_eye_movement(data_et, data_trial, data_subject, run):
     print(data_subject.loc[data_subject['run_id'] == this_subject, 'fps'])
     for i in range(0, 9):
         df_this_trials = data_trial.loc[
-                       (data_trial['run_id'] == this_subject) &
-                       (data_trial['withinTaskIndex'] == 50 + i + 1), :]
+                         (data_trial['run_id'] == this_subject) &
+                         (data_trial['withinTaskIndex'] == 50 + i + 1), :]
 
         payne = df_this_trials['payneIndex'].values
 
@@ -138,11 +136,12 @@ def plot_example_eye_movement(data_et, data_trial, data_subject, run):
             ('example_' + str(run) + '.png')))
 
 
+# noinspection PyUnresolvedReferences
 def plot_choice_task_heatmap(data_et):
-
     x = data_et.loc[data_et['t_task'] > 1000, 'x']
     y = data_et.loc[data_et['t_task'] > 1000, 'y']
 
+    # noinspection PyUnresolvedReferences
     def myplot(x, y, s, bins=[1200, 675]):
         heatmap, xedges, yedges = np.histogram2d(x, y, bins=bins)
         heatmap = gaussian_filter(heatmap, sigma=s)
@@ -179,9 +178,9 @@ def plot_choice_task_heatmap(data_et):
 def corr_analysis_subject(data_subject):
     data_plot = clean_corr_data(
         data_subject.loc[:, [
-            'run_id', 'chinFirst', 'age', 'choseLL',
-            'attributeIndex', 'optionIndex', 'payneIndex',
-            'choice_rt']
+                                'run_id', 'chinFirst', 'age', 'choseLL',
+                                'attributeIndex', 'optionIndex', 'payneIndex',
+                                'choice_rt']
         ]
     )
 
@@ -208,21 +207,21 @@ def corr_analysis_subject(data_subject):
 def corr_analysis_trial(data_trial):
     data_plot = clean_corr_data(
         data_trial.loc[:, [
-            'run_id', 'chinFirst', 'choseLL', 'k',
-            'attributeIndex', 'optionIndex', 'payneIndex',
-            'trial_duration_exact']
+                              'run_id', 'chinFirst', 'choseLL', 'k',
+                              'attributeIndex', 'optionIndex', 'payneIndex',
+                              'trial_duration_exact']
         ])
 
     corr_columns = [
-        'chinFirst', 'choseLL', 'k', 'attributeIndex', 
+        'chinFirst', 'choseLL', 'k', 'attributeIndex',
         'optionIndex', 'payneIndex', 'trial_duration_exact']
-    
+
     corr_plot(data_plot, corr_columns,
-              'corr_vars_vs_chinFirst_trial.png', 'chinFirst', 
-              'results')    
+              'corr_vars_vs_chinFirst_trial.png', 'chinFirst',
+              'results')
 
     corr_columns = [
-        'chinFirst', 'choseLL', 'k', 'attributeIndex', 
+        'chinFirst', 'choseLL', 'k', 'attributeIndex',
         'optionIndex', 'payneIndex', 'trial_duration_exact']
 
     corr_matrix(data_plot, corr_columns,

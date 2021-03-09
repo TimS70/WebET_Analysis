@@ -2,7 +2,6 @@ import os
 
 import pandas as pd
 
-from analysis.dropouts import dropout_analysis
 from data_prep.cleaning.drop_na_eye_tracking import drop_na_data_et
 from data_prep.cleaning.filter_approved import filter_approved
 from data_prep.cleaning.invalid_runs import filter_invalid_runs, clean_runs
@@ -13,7 +12,6 @@ from utils.tables import summarize_datasets
 
 
 def global_cleaning():
-
     data_et = pd.read_csv(
         os.path.join('data', 'all_trials', 'added_var', 'data_et.csv'))
     data_trial = pd.read_csv(

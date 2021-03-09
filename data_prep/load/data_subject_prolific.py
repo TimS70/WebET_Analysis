@@ -22,9 +22,9 @@ def create_data_subject(data_raw):
 
     data_subject = data_subject \
         .merge(
-        survey_data,
-        on='run_id',
-        how='left') \
+            survey_data,
+            on='run_id',
+            how='left') \
         .rename(columns={'age': 'birthyear'})
 
     data_subject = add_data_from_prolific(data_subject)
@@ -48,11 +48,9 @@ def create_data_prolific(data_subject):
     )
 
     data_prolific = data_prolific.merge(
-        temp.loc[
-        :,
-        np.append(
-            ['prolificID'],
-            temp.columns.difference(data_prolific.columns))],
+        temp.loc[:, np.append(
+                ['prolificID'],
+                temp.columns.difference(data_prolific.columns))],
         on='prolificID',
         how='left')
 

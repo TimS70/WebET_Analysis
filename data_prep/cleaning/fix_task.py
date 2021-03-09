@@ -3,7 +3,6 @@ import os
 import pandas as pd
 
 from data_prep.cleaning.invalid_runs import clean_runs
-from utils.data_frames import merge_by_index
 from utils.path import makedir
 from utils.tables import summarize_datasets
 
@@ -26,7 +25,6 @@ def clean_fix_task_datasets():
     print('Datasets read from data/fix_task/raw (all trials): ')
     summarize_datasets(data_et, data_trial, data_subject)
 
-
     # Screening
     invalid_runs = screen_fix_task(data_trial_fix, data_subject)
 
@@ -36,10 +34,10 @@ def clean_fix_task_datasets():
     data_et_fix = clean_runs(data_et_fix, invalid_runs, 'data_et_fix')
     data_subject = clean_runs(data_subject, invalid_runs, 'data_subject')
 
-    data_trial = remove_high_tTask(data_trial, 'data_trial')
-    data_et = remove_high_tTask(data_et, 'data_et')
-    data_trial_fix = remove_high_tTask(data_trial_fix, 'data_trial_fix')
-    data_et_fix = remove_high_tTask(data_et_fix, 'data_et_fix')
+    data_trial = remove_high_t_task(data_trial, 'data_trial')
+    data_et = remove_high_t_task(data_et, 'data_et')
+    data_trial_fix = remove_high_t_task(data_trial_fix, 'data_trial_fix')
+    data_et_fix = remove_high_t_task(data_et_fix, 'data_et_fix')
 
     data_trial_fix = data_trial_fix.loc[
                      pd.notna(data_trial_fix['x_count']), :]
@@ -184,7 +182,7 @@ def missing_glasses(data_subject):
     return runs_na_glasses
 
 
-def remove_high_tTask(data, name):
+def remove_high_t_task(data, name):
     data_raw = data
 
     data = data_raw.loc[data_raw['trial_duration_exact'] <= 5500, :]

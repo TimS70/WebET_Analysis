@@ -2,6 +2,7 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
+# noinspection PyUnresolvedReferences
 import pingouin as pg
 import seaborn as sns
 import statsmodels.graphics.api as smg
@@ -41,7 +42,7 @@ def spaghetti_plot(data, x_var, y_var, highlighted_subject):
 
 def violin_plot(data_trial_fix, outcome, factor):
 
-    fig, axes = plt.subplots(1, 1, sharey=True, figsize=(15, 6))
+    fig, axes = plt.subplots(1, 1, sharey='none', figsize=(15, 6))
     fig.suptitle('Offset and precision')
 
     sns.violinplot(ax=axes,
@@ -55,15 +56,15 @@ def violin_plot(data_trial_fix, outcome, factor):
 
 
 def split_violin_plot(data_trial, outcome, factor, split_factor):
-    fig, axes = plt.subplots(1, 1, sharey=False, figsize=(6, 6))
+    fig, axes = plt.subplots(1, 1, sharey='none', figsize=(6, 6))
     fig.suptitle(outcome)
 
-    ax = sns.violinplot(ax=axes,
-                        x=factor,
-                        y=outcome,
-                        hue=split_factor,
-                        split=True,
-                        data=data_trial)
+    sns.violinplot(ax=axes,
+                   x=factor,
+                   y=outcome,
+                   hue=split_factor,
+                   split=True,
+                   data=data_trial)
     save_plot(('split_violin_' + factor + '_vs_' + outcome + '_vs_' +
                split_factor),
               'results', 'plots', 'fix_task', 'main_effect')
@@ -90,11 +91,11 @@ def get_box_plots(data_subject, outcome, predictors, file_name, *args):
         pos = range(len(nobs))
 
         max_value = data_subject[outcome].max()
-        yPos = max_value + max_value * 0.1
+        y_pos = max_value + max_value * 0.1
 
         for tick, label in zip(pos, ax[i].get_xticklabels()):
             ax[i].text(
-                pos[tick], yPos, nobs[tick],
+                pos[tick], y_pos, nobs[tick],
                 verticalalignment='top',
                 horizontalalignment='center', size=13, weight='normal')
 
@@ -125,7 +126,8 @@ def corr_plot(data_plot, correlation_columns,
 def corr_matrix(data_plot, corr_columns, option,
                 file_name, *args):
 
-    corr_matrix = np.corrcoef(data_plot.loc[:, corr_columns].T)
+    this_corr_matrix = np.corrcoef(
+        data_plot.loc[:, corr_columns].T)
 
     if option == 'table_p':
         corr_table_p = data_plot[corr_columns].rcorr()
@@ -142,7 +144,7 @@ def corr_matrix(data_plot, corr_columns, option,
             *args)
 
     if option == 'heatmap':
-        smg.plot_corr(corr_matrix, xnames=corr_columns)
+        smg.plot_corr(this_corr_matrix, xnames=corr_columns)
         makedir('results', 'plots', 'choice_task')
         save_plot(file_name, *args)
 

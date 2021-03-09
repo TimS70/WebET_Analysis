@@ -120,11 +120,10 @@ def identify_amount_left(data):
 def add_choice_options_num(data_trial):
     data_trial = data_trial \
         .rename(columns={
-        'option_topLeft': 'option_TL',
-        'option_bottomLeft': 'option_BL',
-        'option_topRight': 'option_TR',
-        'option_bottomRight': 'option_BR'
-    })
+            'option_topLeft': 'option_TL',
+            'option_bottomLeft': 'option_BL',
+            'option_topRight': 'option_TR',
+            'option_bottomRight': 'option_BR'})
 
     variables = [
         'option_TL',
@@ -209,9 +208,8 @@ def reformat_attributes(data):
             ["option_TL_num", "option_BL_num"]
         ].values.max(1)
 
-    data['LL_top'] = \
-        (data["option_TL_num"] > data["option_BL_num"]) \
-            .astype(int)
+    # noinspection PyUnresolvedReferences
+    data['LL_top'] = (data["option_TL_num"] > data["option_BL_num"]).astype(int)
 
     print('data_trial: Identified information attributes: ')
     print('aLL values: ' + str(np.sort(data['aLL'].unique())))
@@ -254,12 +252,11 @@ def choice_response_variables(data):
     data.loc[(data["choseTop"] == 1) & (data["LL_top"] == 1), "choseLL"] = 1
     data.loc[(data["choseTop"] == 0) & (data["LL_top"] == 0), "choseLL"] = 1
 
-    return (data)
+    return data
 
 
-def k(aLL, aSS, tLL):
-    k = ((aLL / aSS) - 1) / tLL
-    return k
+def k(a_ll, a_ss, t_ll):
+    return ((a_ll / a_ss) - 1) / t_ll
 
 
 def add_mean_choice_rt(data_subject, data_trial):
@@ -283,6 +280,7 @@ def run_et_cluster_correction():
     print('Run cluster correction for eyetracking data...')
     os.chdir(os.path.join('clustering'))
 
+    # noinspection SpellCheckingInspection
     run_matlab = 'matlab -nojvm -nosplash -nodesktop -r "init_clustering(14, 0.3, 0.3); exit"'
 
     subprocess.run(run_matlab, shell=True, check=True)

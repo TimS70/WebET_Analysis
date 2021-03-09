@@ -20,14 +20,13 @@ def filter_invalid_runs(data_trial, data_et, data_subject):
         data_subject)
     runs_full_but_not_enough_et = \
         filter_full_but_no_et_data(data_et, data_trial)
-    runs_lowFPS = filter_runs_low_fps(data_trial, data_et, 3)
+    runs_low_fps = filter_runs_low_fps(data_trial, data_et, 3)
     runs_cannot_see = filter_wrong_glasses(data_subject)
-
 
     invalid_runs = list(
         set(subjects_not_full_trial) |
         set(runs_not_follow_instructions) |
-        set(runs_lowFPS) |
+        set(runs_low_fps) |
         set(runs_cannot_see) |
         set(runs_full_but_not_enough_et)
     )
@@ -46,15 +45,15 @@ def filter_invalid_runs(data_trial, data_et, data_subject):
         'length': [
                     len(subjects_not_full_trial),
                     len(runs_not_follow_instructions),
-                    len(runs_lowFPS),
+                    len(runs_low_fps),
                     len(runs_cannot_see),
                     len(runs_full_but_not_enough_et),
                     len(invalid_runs)
                ],
-        'perc': [
+        'percent': [
                     len(subjects_not_full_trial)/n_runs,
                     len(runs_not_follow_instructions)/n_runs,
-                    len(runs_lowFPS)/n_runs,
+                    len(runs_low_fps)/n_runs,
                     len(runs_cannot_see)/len(data_subject),
                     len(runs_full_but_not_enough_et)/n_runs,
                     len(invalid_runs)/n_runs
@@ -95,8 +94,7 @@ def filter_runs_no_instruction(data_subject):
         f"""{len(runs_no_instruction)}"""
         f""" = {round(100 * rate_no_instruction, 2)}%""")
 
-    did_not_follow_instructions = data_subject \
-        .loc[
+    did_not_follow_instructions = data_subject.loc[
         data_subject['run_id'].isin(runs_no_instruction),
         ['run_id', 'prolificID', 'keptHead', 'triedChin']
     ] \
@@ -186,17 +184,15 @@ def filter_runs_low_fps(data_trial, data_et, min_fps):
         ['run_id'],
         as_index=False)['fps'].mean()
 
-    runs_lowFPS = grouped_runs \
-        .loc[grouped_runs['fps'] < min_fps,
-        'run_id']
+    runs_low_fps = grouped_runs.loc[grouped_runs['fps'] < min_fps, 'run_id']
 
     rate_low_fps = \
-        len(runs_lowFPS) / len(grouped_runs['run_id'].unique())
+        len(runs_low_fps) / len(grouped_runs['run_id'].unique())
     print(
-        f"""Subjects_low_fps: n={len(runs_lowFPS)}"""
+        f"""Subjects_low_fps: n={len(runs_low_fps)}"""
         f""" = {round(100 * rate_low_fps, 2)}% \n""")
 
-    return runs_lowFPS
+    return runs_low_fps
 
 
 def filter_wrong_glasses(data_subject):

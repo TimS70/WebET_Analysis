@@ -2,7 +2,6 @@ import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
 
 from utils.path import makedir
 
@@ -16,18 +15,18 @@ def show_demographics(data_subject):
 
 
 def frequency_tables(data_subject):
-    for col in [
-        'Current Country of Residence', 'Nationality',
-        'employment_status', 'webcam_fps', 'ethnic', 'gender']:
+    columns = ['Current Country of Residence', 'Nationality',
+               'employment_status', 'webcam_fps', 'ethnic',
+               'gender']
 
+    for col in columns:
         print(pd.crosstab(index=data_subject[col],
                           columns="count")
-             )
+              )
         print('\n')
 
 
 def plot_pie_charts(data_subject):
-
     fig, ax = plt.subplots(nrows=4, ncols=2, figsize=(10, 20))
     fig.suptitle('Pie charts', fontsize=20)
     ax = ax.ravel()

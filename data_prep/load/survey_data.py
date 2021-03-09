@@ -4,6 +4,7 @@ import sys
 import pandas as pd
 
 if sys.version_info[0] < 3:
+    # noinspection PyUnresolvedReferences
     from StringIO import StringIO
 else:
     from io import StringIO

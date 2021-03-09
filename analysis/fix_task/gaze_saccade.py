@@ -8,7 +8,6 @@ from tqdm import tqdm
 
 from utils.data_frames import merge_by_index
 from utils.path import makedir
-from utils.tables import write_csv
 
 
 def check_gaze_saccade(data_et, data_trial):
@@ -34,11 +33,10 @@ def check_gaze_saccade(data_et, data_trial):
 
     for subject in tqdm(
             data_et_cross_and_task['run_id'].unique(),
-            desc='Plotting fix task saccades: '):
+            desc='Plotting fix task saccade: '):
         plot_gaze_saccade(
             data_et_cross_and_task.loc[
-            data_et_cross_and_task['run_id'] == subject, :
-            ],
+                data_et_cross_and_task['run_id'] == subject, :],
             ('offset' + str(subject) + '_gaze_shift.png')
         )
 
@@ -46,11 +44,11 @@ def check_gaze_saccade(data_et, data_trial):
 def plot_gaze_saccade(data_et_cross_and_task, file_name):
     average_line_no_chin = create_median_line(
         data_et_cross_and_task.loc[
-        data_et_cross_and_task['chin'] == 0, :])
+            data_et_cross_and_task['chin'] == 0, :])
 
     average_line_chin = create_median_line(
         data_et_cross_and_task.loc[
-        data_et_cross_and_task['chin'] == 1, :])
+            data_et_cross_and_task['chin'] == 1, :])
 
     # noinspection PyTypeChecker
     fig, axes = plt.subplots(
@@ -109,7 +107,7 @@ def select_fix_cross_and_fix_task(data):
     return data_cross_and_task
 
 
-def select_fixTask_and_fixCross(data):
+def select_fix_dot_and_cross(data):
     return data.loc[
            (data['trial_type'] == 'eyetracking-fix-object') &
            ((data['task_nr'] == 1) |
@@ -147,7 +145,7 @@ def add_new_position(data_et):
 
 def create_new_pos_datasets(data_et_fix):
     data_trial = data_et_fix.loc[:, ['run_id', 'trial_index', 'trial_duration',
-                              'x_pos', 'y_pos', 'positionIndex']] \
+                                     'x_pos', 'y_pos', 'positionIndex']] \
         .reset_index() \
         .drop_duplicates()
 
@@ -163,7 +161,7 @@ def create_new_pos_datasets(data_et_fix):
         for i in df_subject.index[:-1]:
 
             cross_trial = (data_trial.loc[i, 'trial_duration'] == 1500) & \
-                (data_trial.loc[i+1, 'trial_duration'] == 5000)
+                          (data_trial.loc[i + 1, 'trial_duration'] == 5000)
 
             if cross_trial:
                 data_trial.loc[i, 'new_x_pos'] = data_trial.loc[i + 1, 'x_pos']
@@ -172,8 +170,8 @@ def create_new_pos_datasets(data_et_fix):
                     data_trial.loc[i + 1, 'positionIndex']
 
     data_trial = data_trial.loc[:, [
-        'run_id', 'trial_index',
-        'new_x_pos', 'new_y_pos', 'new_position_index']]
+                                       'run_id', 'trial_index',
+                                       'new_x_pos', 'new_y_pos', 'new_position_index']]
 
     return data_trial
 
@@ -186,10 +184,10 @@ def euclidean_distance(x, x_target, y, y_target):
 
 
 def create_median_line(data):
-    binArray = np.arange(-1500, 5000, 100)
-    bins = pd.cut(data['t_task'], binArray)
+    bin_array = np.arange(-1500, 5000, 100)
+    bins = pd.cut(data['t_task'], bin_array)
     output = data.groupby(bins) \
         .agg({"offset": "median"}).reset_index()
-    output['t_task'] = binArray[0:len(output)]
+    output['t_task'] = bin_array[0:len(output)]
 
     return output

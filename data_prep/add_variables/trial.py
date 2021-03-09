@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from utils.plots import spaghetti_plot
 from utils.path import makedir
+from utils.plots import spaghetti_plot
 
 
 def add_trial_variables(data_trial):
@@ -68,24 +68,25 @@ def exact_trial_duration(data):
     problematic_trials = check_time_deviation(
         data, 'rt', 'trial_duration_exact', 50)
 
-    if len(problematic_trials)>0:
+    if len(problematic_trials) > 0:
         print(data.loc[
-            problematic_trials,
-            ['run_id', 'trial_index', 'trial_type',
-             'rt', 'trial_duration', 'trial_duration_exact']])
+                  problematic_trials,
+                  ['run_id', 'trial_index', 'trial_type',
+                   'rt', 'trial_duration', 'trial_duration_exact']])
 
     problematic_trials = check_time_deviation(
         data, 'trial_duration', 'trial_duration_exact', 50)
 
-    if len(problematic_trials)>0:
+    if len(problematic_trials) > 0:
         print(data.loc[
-            problematic_trials,
-            ['run_id', 'trial_index', 'trial_type',
-             'rt', 'trial_duration', 'trial_duration_exact']])
+                  problematic_trials,
+                  ['run_id', 'trial_index', 'trial_type',
+                   'rt', 'trial_duration', 'trial_duration_exact']])
 
     return data
 
 
+# noinspection PyUnnecessaryBackslash,PyTypeChecker
 def check_time_deviation(data, column1, column2, max_time_diff_allowed):
     diff = data[column1] - data['trial_duration_exact']
     long_trials_run_id = data.loc[diff[diff > max_time_diff_allowed].index, 'run_id']
@@ -99,8 +100,8 @@ def check_time_deviation(data, column1, column2, max_time_diff_allowed):
     if sum(compare_run_ids['run_id'] == \
            compare_run_ids['previous_run_id']) > 0:
         problematic_trials = compare_run_ids.loc[
-            (compare_run_ids['run_id'] == \
-             compare_run_ids['previous_run_id']), :].index
+                             (compare_run_ids['run_id'] == \
+                              compare_run_ids['previous_run_id']), :].index
 
         print(
             f"""{column1}  and {column2} show a deviation of """
@@ -115,6 +116,7 @@ def check_time_deviation(data, column1, column2, max_time_diff_allowed):
             f"""Will use trial_duration_exact in the future. \n""")
 
     return problematic_trials
+
 
 def add_new_task_nr(data):
     data.loc[data['trial_index'] == 0, 'task_nr'] = 0
@@ -369,8 +371,8 @@ def add_within_task_index(data):
         how='left')
 
     example = data.loc[
-        (data['run_id']==data['run_id'].unique()[0]) &
-        (data['fixTask']==1),
+        (data['run_id'] == data['run_id'].unique()[0]) &
+        (data['fixTask'] == 1),
         ['run_id', 'trial_index', 'withinTaskIndex', 'trial_type']
     ].head(5)
 

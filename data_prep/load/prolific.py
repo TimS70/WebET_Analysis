@@ -7,6 +7,7 @@ import pandas as pd
 from data_prep.load.survey_data import create_survey_data
 
 if sys.version_info[0] < 3:
+    # noinspection PyUnresolvedReferences
     from StringIO import StringIO
 else:
     from io import StringIO

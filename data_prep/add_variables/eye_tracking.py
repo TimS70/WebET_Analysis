@@ -1,6 +1,3 @@
-from utils.path import makedir
-
-
 def add_et_variables(data_et):
     data_et = invert_y_axis(data_et)
 

@@ -86,24 +86,8 @@ def outcome_by_position_long(data_trial_fix, outcome_var):
 
 
 def outcome_by_position_wide(data_trial_fix, outcome_var):
-    output_long = data_trial_fix.groupby(
-        ['run_id', 'x_pos', 'y_pos'],
-        as_index=False)[outcome_var].median()
-    output_long['position'] = list(map(
-        lambda x, y: str(round(x * 100, 0)) + '%_' + str(round(y * 100, 0)) + '%',
-        output_long['x_pos'],
-        output_long['y_pos']
-    ))
-
-    output_long['position_nr'] = output_long['position'] \
-        .replace(
-        [
-            '20.0%_20.0%', '20.0%_50.0%', '20.0%_80.0%',
-            '50.0%_20.0%', '50.0%_50.0%', '50.0%_80.0%',
-            '80.0%_20.0%', '80.0%_50.0%', '80.0%_80.0%'
-        ],
-        np.arange(1, 10)
-    )
+    output_long = outcome_by_position_long(
+        data_trial_fix, outcome_var)
 
     output_wide = pd.pivot_table(
         output_long,
@@ -111,6 +95,7 @@ def outcome_by_position_wide(data_trial_fix, outcome_var):
         columns='position',
         values=outcome_var).reset_index()
 
+    # noinspection PyArgumentList
     null_data = output_wide.loc[output_wide.isnull().any(axis=1), :]
     if len(null_data) > 0:
         print(
@@ -263,7 +248,7 @@ def plot_top_vs_bottom_positions(data_trial_fix, outcome):
     outcome_by_y_pos = outcome_by_y_pos.loc[
                        outcome_by_y_pos['y_pos'] != 0.5, :]
 
-    fig, axes = plt.subplots(1, 1, sharey=True, figsize=(6, 6))
+    fig, axes = plt.subplots(1, 1, sharey='none', figsize=(6, 6))
     fig.suptitle((outcome + ' top vs. bottom '))
 
     sns.violinplot(ax=axes,

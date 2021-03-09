@@ -6,7 +6,6 @@ import pandas as pd
 from tqdm import tqdm
 
 from utils.data_frames import merge_by_subject
-from utils.path import makedir
 
 
 def add_subject_variables(data_subject, data_trial):

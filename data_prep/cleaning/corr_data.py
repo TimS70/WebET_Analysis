@@ -21,4 +21,3 @@ def clean_corr_data(data_plot):
     print(f"""Length of data clean: {len(data_plot_clean)} \n""")
 
     return data_plot_clean
-

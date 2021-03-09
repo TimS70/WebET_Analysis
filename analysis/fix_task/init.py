@@ -4,7 +4,7 @@ import pandas as pd
 
 from analysis.fix_task.calibration import analyze_calibration
 from analysis.fix_task.correlations import corr_analysis
-from analysis.fix_task.data_quality import compare_conditions_subject, grand_mean_offset, outcome_over_trials
+from analysis.fix_task.data_quality import grand_mean_offset, outcome_over_trials
 from analysis.fix_task.gaze_saccade import check_gaze_saccade
 from analysis.fix_task.main_effects import main_effect
 from analysis.fix_task.positions import compare_positions
@@ -15,7 +15,7 @@ from utils.plots import get_box_plots
 from utils.tables import summarize_datasets
 
 
-def data_quality_analysis():
+def analyze_fix_task():
     data_et = pd.read_csv(
         os.path.join('data', 'fix_task', 'added_var', 'data_et.csv'))
     data_et_fix = pd.read_csv(
@@ -60,11 +60,10 @@ def data_quality_analysis():
     analyze_calibration(data_et, data_trial)
     data_trial_fix = grand_mean_offset(data_et_fix, data_trial_fix)
 
-    ## Visualize_exemplary_run
+    # Visualize_exemplary_run
     data_plot = merge_by_index(data_et_fix, data_trial_fix, 'chin')
-    visualize_exemplary_run(
-        data_plot.loc[
+    visualize_exemplary_run(data_plot.loc[
         (data_plot['run_id'] == 43) & (data_plot['chin'] == 0), :])
 
-    ## Heatmap for all gaze points
+    # Heatmap for all gaze points
     fix_heatmap(data_et_fix)

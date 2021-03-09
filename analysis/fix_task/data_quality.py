@@ -4,26 +4,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from analysis.fix_task.calibration import analyze_calibration
-from analysis.fix_task.correlations import corr_analysis
-from analysis.fix_task.gaze_saccade import check_gaze_saccade
-from analysis.fix_task.main_effects import main_effect
-from analysis.fix_task.positions import compare_positions
-from analysis.fix_task.randomization import check_randomization
-from analysis.fix_task.visualize_gaze import fix_heatmap, visualize_exemplary_run
-from utils.data_frames import merge_by_index
 from utils.path import makedir
-from utils.plots import get_box_plots
-from utils.tables import write_csv, summarize_datasets
+from utils.tables import write_csv
 
 
 def outcome_over_trials(data_trial, outcome):
-    data_plot = group_chin_withinTaskIndex(
+    data_plot = group_chin_within_task_index(
         data_trial.loc[data_trial['fixTask'] == 1, :],
         outcome)
 
     plt.style.use('seaborn-whitegrid')
-    fig, ax = plt.subplots(1, 2, sharey=True, figsize=(15, 6))
+    fig, ax = plt.subplots(1, 2, sharey='none', figsize=(15, 6))
     fig.suptitle('chin==0 vs. chin==1')
 
     ax[0].set_ylim(0, 1)
@@ -45,31 +36,31 @@ def outcome_over_trials(data_trial, outcome):
     plt.close()
 
 
-def group_chin_withinTaskIndex(data, varName):
-    df_m = data.groupby(['chin', 'withinTaskIndex']) \
-        [varName].median() \
+def group_chin_within_task_index(data, var_name):
+    df_m = data.groupby(
+        ['chin', 'withinTaskIndex'])[var_name].median() \
         .reset_index() \
-        .rename(columns={varName: varName + '_median'}) \
+        .rename(columns={var_name: var_name + '_median'}) \
         .reset_index()
 
     data = data.merge(df_m, on=['chin', 'withinTaskIndex'], how='left')
-    data['above_median'] = data[varName] > data[varName + '_median']
+    data['above_median'] = data[var_name] > data[var_name + '_median']
 
     df_std_upper = data.loc[data['above_median'] == 1, :] \
-        .groupby(['chin', 'withinTaskIndex'])[varName].median() \
+        .groupby(['chin', 'withinTaskIndex'])[var_name].median() \
         .reset_index() \
-        .rename(columns={varName: varName + '_std_upper'}) \
+        .rename(columns={var_name: var_name + '_std_upper'}) \
         .reset_index()
     df_std_lower = data.loc[data['above_median'] == 0, :] \
-        .groupby(['chin', 'withinTaskIndex'])[varName].median() \
+        .groupby(['chin', 'withinTaskIndex'])[var_name].median() \
         .reset_index() \
-        .rename(columns={varName: varName + '_std_lower'}) \
+        .rename(columns={var_name: var_name + '_std_lower'}) \
         .reset_index()
 
     output = pd.concat([
         df_m,
-        df_std_upper[varName + '_std_upper'],
-        df_std_lower[varName + '_std_lower']
+        df_std_upper[var_name + '_std_upper'],
+        df_std_lower[var_name + '_std_lower']
     ], axis=1)
 
     return output
@@ -94,8 +85,9 @@ def grand_mean_offset(data_et_fix, data_trial_fix):
         data_trial_fix['x_mean'] * data_trial_fix['window_width']
     data_trial_fix['y_mean_px'] = \
         data_trial_fix['y_mean'] * data_trial_fix['window_height']
-    data_trial_fix.loc[:,
-    ['x_mean', 'x_mean_px', 'y_mean', 'y_mean_px']].describe()
+    data_trial_fix.loc[:, [
+        'x_mean', 'x_mean_px',
+        'y_mean', 'y_mean_px']].describe()
 
     data_trial_fix['grand_deviation'] = euclidean_distance(
         data_trial_fix['x_mean'], data_trial_fix['x_pos'],
@@ -147,9 +139,10 @@ def compare_conditions_subject(data_subject, data_trial_fix, outcome):
         'results', 'tables', 'fix_task')
 
 
-def separate_outcomes_by_condition(data, large_data, varName, varCondition):
-    var_cond_0 = varName + '_' + varCondition + '_0'
-    var_cond_1 = varName + '_' + varCondition + '_1'
+def separate_outcomes_by_condition(data, large_data,
+                                   var_name, var_condition):
+    var_cond_0 = var_name + '_' + var_condition + '_0'
+    var_cond_1 = var_name + '_' + var_condition + '_1'
 
     if var_cond_0 in data.columns:
         data = data.drop(columns=[var_cond_0])
@@ -157,11 +150,11 @@ def separate_outcomes_by_condition(data, large_data, varName, varCondition):
         data = data.drop(columns=[var_cond_1])
 
     grouped = large_data \
-        .groupby(['run_id', varCondition])[varName].mean() \
+        .groupby(['run_id', var_condition])[var_name].mean() \
         .reset_index() \
         .pivot(index='run_id',
-               columns=varCondition,
-               values=varName) \
+               columns=var_condition,
+               values=var_name) \
         .reset_index() \
         .rename(columns={0.0: var_cond_0, 1.0: var_cond_1})
     data = data.merge(

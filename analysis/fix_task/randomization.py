@@ -15,7 +15,7 @@ from utils.tables import write_csv
 
 
 def check_randomization(data_trial_fix):
-    plot_chinFirst_vs_outcomes(data_trial_fix)
+    plot_chin_first_vs_outcomes(data_trial_fix)
     t_test_ind_outcomes_vs_factor(data_trial_fix, 'chinFirst', '',
                                   'results', 'tables', 'fix_task',
                                   'check_randomization')
@@ -30,17 +30,18 @@ def check_randomization(data_trial_fix):
           'started with the chin-rest, not for Holm correction. \n')
 
 
-def plot_chinFirst_vs_outcomes(data_trial_fix):
-    data_plot = data_trial_fix \
-        .groupby(['run_id', 'chinFirst', 'chin'], as_index=False) \
-        [['offset', 'precision', 'fps']].mean()
+# noinspection PyTypeChecker
+def plot_chin_first_vs_outcomes(data_trial_fix):
+    data_plot = data_trial_fix.groupby(
+        ['run_id', 'chinFirst', 'chin'],
+        as_index=False)[['offset', 'precision', 'fps']].mean()
     data_plot.head(5)
 
     # %%
 
     for outcome in ['offset', 'precision']:
         fig, axes = plt.subplots(
-            1, 2, sharey=False, figsize=(15, 6))
+            1, 2, sharey='none', figsize=(15, 6))
         fig.suptitle((outcome + ' chinFirst==0 vs. chinFirst==1'))
 
         sns.violinplot(ax=axes[0], x='chinFirst', y=outcome,
@@ -56,14 +57,17 @@ def plot_chinFirst_vs_outcomes(data_trial_fix):
 def plot_outcomes_by_task_order(data_trial_fix):
     outcomes_by_fix_order = data_trial_fix \
         .rename(columns={'task_nr': 'fix_order'}) \
-        .groupby(['run_id', 'chin', 'fix_order'], as_index=False) \
-        [['offset', 'precision', 'fps']].mean()
+        .groupby(
+            ['run_id', 'chin', 'fix_order'],
+            as_index=False)[['offset', 'precision', 'fps']] \
+        .mean()
+
     outcomes_by_fix_order['fix_order'] = \
         outcomes_by_fix_order['fix_order'] \
         .replace({3.0: 2.0}) \
         .astype(int)
 
-    fig, axes = plt.subplots(1, 2, sharey=False, figsize=(15, 6))
+    fig, axes = plt.subplots(1, 2, sharey='none', figsize=(15, 6))
     fig.suptitle('Offset and precision')
 
     sns.violinplot(
@@ -84,21 +88,23 @@ def plot_outcomes_by_task_order(data_trial_fix):
     plt.close()
 
 
+# noinspection DuplicatedCode
 def test_outcomes_by_task_order(data_trial_fix):
     outcomes_by_fix_order = data_trial_fix \
         .rename(columns={'task_nr': 'fix_order'}) \
-        .groupby(['run_id', 'chin', 'fix_order'], as_index=False) \
-        [['offset', 'precision', 'fps']].mean()
+        .groupby(
+            ['run_id', 'chin', 'fix_order'],
+            as_index=False)[['offset', 'precision', 'fps']] \
+        .mean()
     outcomes_by_fix_order['fix_order'] = \
         outcomes_by_fix_order['fix_order'] \
             .replace({3.0: 2.0}) \
             .astype(int)
 
     outcomes_by_fix_order = outcomes_by_fix_order \
-        .pivot(
-        index='run_id',
-        columns='fix_order',
-        values=['offset', 'precision', 'fps'])
+        .pivot(index='run_id',
+               columns='fix_order',
+               values=['offset', 'precision', 'fps'])
 
     summary = outcomes_by_fix_order.mean() \
         .reset_index() \
@@ -140,6 +146,7 @@ def test_outcomes_by_task_order(data_trial_fix):
         summary,
         't_test_task_order_vs_outcomes.csv',
         'results', 'tables', 'fix_task', 'check_randomization')
+
 
 def t_test_rel(outcome_var, outcomes_by_fix_order):
     return scipy.stats.ttest_rel(

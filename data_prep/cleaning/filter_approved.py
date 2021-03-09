@@ -1,6 +1,3 @@
-import pandas as pd
-
-
 def filter_approved(data, data_subject):
     unapproved_runs = runs_not_approved(data_subject)
 
@@ -40,5 +37,3 @@ def runs_not_approved(data_subject):
         f"""{data_not_approved.head(5)} \n""")
 
     return unapproved_runs
-
-

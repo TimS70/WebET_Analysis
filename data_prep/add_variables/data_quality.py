@@ -145,9 +145,9 @@ def distance_from_xy_mean_square(data):
         ['x', 'y', 'x_pos', 'y_pos', 'distance_from_xy_mean_square']
     ]
 
-    summary = data.loc[:,
-              ['distance_from_xy_mean_square',
-               'distanceFromAVG_square_px']] \
+    summary = data.loc[:, [
+                              'distance_from_xy_mean_square',
+                              'distanceFromAVG_square_px']] \
         .describe()
 
     print(

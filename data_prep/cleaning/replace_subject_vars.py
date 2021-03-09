@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 
 def replace_subject_variables(data_subject):
@@ -32,7 +31,6 @@ def clean_degree(data_subject):
         'graduate': 'grad',
         'Grad': 'grad',
         'Graduate / PhD / Master': 'grad',
-        'masters degree': 'grad',
     })
     data_subject['degree'] = data_subject['degree'].astype('category')
     print(data_subject['degree'].unique())

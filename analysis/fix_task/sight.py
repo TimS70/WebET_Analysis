@@ -1,22 +1,13 @@
-import os
-import scipy
-
 import matplotlib.pyplot as plt
-import pandas as pd
 import seaborn as sns
-import statsmodels.api as sm 
-import statsmodels.stats.multitest as smt
-
-from scipy import stats
+import statsmodels.api as sm
 from statsmodels.formula.api import ols
 
-from utils.path import makedir
 from utils.plots import save_plot
 from utils.tables import write_csv
 
 
 def plot_sight_vs_outcomes(data_subject):
- 
     for outcome in ['offset', 'precision', 'fps']:
         fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(8, 8))
         fig.suptitle((outcome + 'vs sight'), fontsize=20)
@@ -46,7 +37,6 @@ def plot_sight_vs_outcomes(data_subject):
 
 
 def anova_outcomes_sight(data_subject):
-
     for var in ['offset', 'precision', 'fps']:
         sight_lm = ols((var + ' ~ sight'), data=data_subject).fit()
         outcome_table = sm.stats.anova_lm(sight_lm, typ=2)  # Type 2 ANOVA DataFrame

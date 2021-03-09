@@ -3,46 +3,35 @@ import pandas as pd
 
 
 def add_et_indices(data_trial, data_et):
-    data_trial['optionIndex'] = addOptionIndex(data_trial)
-    data_trial['attributeIndex'] = addAttributeIndex(data_trial)
+    data_trial['optionIndex'] = add_option_index(data_trial)
+    data_trial['attributeIndex'] = add_attribute_index(data_trial)
 
-    data_trial = addTransition_type(data_trial, data_et)
-    data_trial['payneIndex'] = addPayneIndex(data_trial)
+    data_trial = add_transition_type(data_trial, data_et)
+    data_trial['payneIndex'] = add_payne_index(data_trial)
 
     return data_trial
 
 
-def addOptionIndex(data):
-    gazePoints_immediate = \
+def add_option_index(data):
+    gaze_points_immediate = \
         require_min(data['aoi_aSS'], 3) + \
         require_min(data['aoi_tSS'], 3)
-    gazePoints_delay = \
+    gaze_points_delay = \
         require_min(data['aoi_aLL'], 3) + \
         require_min(data['aoi_tLL'], 3)
-    optionIndex = \
-        (gazePoints_immediate - gazePoints_delay) / \
-        (gazePoints_immediate + gazePoints_delay)
+    option_index = \
+        (gaze_points_immediate - gaze_points_delay) / \
+        (gaze_points_immediate + gaze_points_delay)
 
-    overview = pd.DataFrame(
-        [
-            [sum(pd.isna(optionIndex))],
-            [sum(optionIndex == 1)],
-            [sum(optionIndex == 0)],
-            [sum((optionIndex > 0) &
-                 (optionIndex < 1))],
-            [len(optionIndex)]
-        ],
-        index=['NAN', '1', '0', '0>optionIndex>1', 'total'],
-        columns=['n_trials']
-    )
+    overview = et_var_overview(option_index)
 
     print(
         f"""data_trial: Added Option Index: \n"""
-        f"""{optionIndex.describe()} \n"""
+        f"""{option_index.describe()} \n"""
         f"""{overview} \n"""
     )
 
-    return optionIndex
+    return option_index
 
 
 def require_min(data, min_required_count):
@@ -51,37 +40,27 @@ def require_min(data, min_required_count):
         np.repeat(0, min_required_count))
 
 
-def addAttributeIndex(data):
-    gazePoints_amount = \
+def add_attribute_index(data):
+    gaze_points_amount = \
         require_min(data['aoi_aLL'], 3) + \
         require_min(data['aoi_aSS'], 3)
-    gazePoints_time = \
+    gaze_points_time = \
         require_min(data['aoi_tLL'], 3) + \
         require_min(data['aoi_tSS'], 3)
 
-    attributeIndex = \
-        (gazePoints_amount - gazePoints_time) / \
-        (gazePoints_amount + gazePoints_time)
+    attribute_index = \
+        (gaze_points_amount - gaze_points_time) / \
+        (gaze_points_amount + gaze_points_time)
 
-    overview = pd.DataFrame(
-        [
-            [sum(pd.isna(attributeIndex))],
-            [sum(attributeIndex == 1)],
-            [sum(attributeIndex == 0)],
-            [sum((attributeIndex > 0) &
-                 (attributeIndex < 1))],
-            [len(attributeIndex)]
-        ], index=['NAN', '1', '0', '0>attributeIndex>1', 'total'],
-        columns=['n_trials']
-    )
+    overview = et_var_overview(attribute_index)
 
     print(
         f"""data_trial: Added Attribute Index: \n"""
-        f"""{attributeIndex.describe()} \n"""
+        f"""{attribute_index.describe()} \n"""
         f"""{overview} \n"""
     )
 
-    return attributeIndex
+    return attribute_index
 
 
 def et_data_transition_type(data):
@@ -104,7 +83,7 @@ def et_data_transition_type(data):
     return data.loc[:, ['run_id', 'trial_index', 't_task', 'transition_type']]
 
 
-def addTransition_type(data, data_et):
+def add_transition_type(data, data_et):
     data_et = et_data_transition_type(data_et)
     data_et.loc[:, 'transition_type'] = data_et.loc[:, 'transition_type']
 
@@ -116,15 +95,14 @@ def addTransition_type(data, data_et):
         fill_value=0) \
         .reset_index() \
         .rename(columns={
-        0: "trans_type_0",
-        1: "trans_type_aLLtLL",
-        2: "trans_type_tLLaSS",
-        3: "trans_type_aLLaSS",
-        4: "trans_type_aSStSS",
-        6: "trans_type_tLLtSS",
-        7: "trans_type_aLLtSS",
-        8: "trans_type_0_tSS",
-    })
+            0: "trans_type_0",
+            1: "trans_type_aLLtLL",
+            2: "trans_type_tLLaSS",
+            3: "trans_type_aLLaSS",
+            4: "trans_type_aSStSS",
+            6: "trans_type_tLLtSS",
+            7: "trans_type_aLLtSS",
+            8: "trans_type_0_tSS"})
 
     transition_columns = ["trans_type_0", "trans_type_aLLtLL",
                           "trans_type_tLLaSS", "trans_type_aLLaSS",
@@ -142,35 +120,39 @@ def addTransition_type(data, data_et):
     return data
 
 
-def addPayneIndex(data):
-    optionWise_transition = \
+def add_payne_index(data):
+    option_wise_transition = \
         data['trans_type_aLLtLL'] + \
         data['trans_type_aSStSS']
-    attributeWise_transition = \
+    attribute_wise_transition = \
         data['trans_type_aLLaSS'] + \
         data['trans_type_tLLtSS']
 
-    payneIndex = \
-        (optionWise_transition - attributeWise_transition) / \
-        (optionWise_transition + attributeWise_transition)
+    payne_index = \
+        (option_wise_transition - attribute_wise_transition) / \
+        (option_wise_transition + attribute_wise_transition)
 
-
-    overview = pd.DataFrame(
-        [
-            [sum(pd.isna(payneIndex))],
-            [sum(payneIndex == 1)],
-            [sum(payneIndex == 0)],
-            [sum((payneIndex > 0) &
-                 (payneIndex < 1))],
-            [len(payneIndex)]
-        ], index=['NAN', '1', '0', '0>attributeIndex>1', 'total'],
-        columns=['n_trials']
-    )
+    overview = et_var_overview(payne_index)
 
     print(
         f"""data_trial: Added option index: \n"""
-        f"""{payneIndex.describe()} \n"""
+        f"""{payne_index.describe()} \n"""
         f"""{overview} \n"""
     )
 
-    return payneIndex
+    return payne_index
+
+
+def et_var_overview(et_index):
+    overview = pd.DataFrame(
+        [
+            [sum(pd.isna(et_index))],
+            [sum(et_index == 1)],
+            [sum(et_index == 0)],
+            [sum((et_index > 0) &
+                 (et_index < 1))],
+            [len(et_index)]
+        ], index=['NAN', '1', '0', '0>ET-Index>1', 'total'],
+        columns=['n_trials'])
+
+    return overview

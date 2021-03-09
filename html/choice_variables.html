@@ -17398,7 +17398,7 @@ Name: fix_counter, Length: 1136, dtype: int64</pre>
         <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">min_required_count</span><span class="p">),</span> 
         <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">min_required_count</span><span class="p">))</span> 
 
-<span class="k">def</span> <span class="nf">addOptionIndex</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">add_option_index</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     
     <span class="n">gazePoints_immediate</span> <span class="o">=</span> \
         <span class="n">require_min</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;aoi_aSS&#39;</span><span class="p">],</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> \
@@ -17412,7 +17412,7 @@ Name: fix_counter, Length: 1136, dtype: int64</pre>
     
     <span class="k">return</span> <span class="n">optionIndex</span>
 
-<span class="n">data_trial_choice</span><span class="p">[</span><span class="s1">&#39;optionIndex&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">addOptionIndex</span><span class="p">(</span><span class="n">data_trial_choice</span><span class="p">)</span>
+<span class="n">data_trial_choice</span><span class="p">[</span><span class="s1">&#39;optionIndex&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">add_option_index</span><span class="p">(</span><span class="n">data_trial_choice</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">data_trial_choice</span><span class="p">[</span><span class="s1">&#39;optionIndex&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
 <span class="nb">print</span><span class="p">(</span>
     <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
@@ -17517,7 +17517,7 @@ total            19409
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[31]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">addAttributeIndex</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">add_attribute_index</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
 
     <span class="n">gazePoints_amount</span> <span class="o">=</span> \
         <span class="n">require_min</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;aoi_aLL&#39;</span><span class="p">],</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> \
@@ -17533,7 +17533,7 @@ total            19409
     <span class="k">return</span> <span class="n">attributeIndex</span>
 
 
-<span class="n">data_trial_choice</span><span class="p">[</span><span class="s1">&#39;attributeIndex&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">addAttributeIndex</span><span class="p">(</span><span class="n">data_trial_choice</span><span class="p">)</span>
+<span class="n">data_trial_choice</span><span class="p">[</span><span class="s1">&#39;attributeIndex&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">add_attribute_index</span><span class="p">(</span><span class="n">data_trial_choice</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">data_trial_choice</span><span class="p">[</span><span class="s1">&#39;attributeIndex&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
@@ -17661,7 +17661,7 @@ total               19409
 
     <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="s1">&#39;run_id&#39;</span><span class="p">,</span> <span class="s1">&#39;trial_index&#39;</span><span class="p">,</span> <span class="s1">&#39;t_task&#39;</span><span class="p">,</span> <span class="s1">&#39;transition_type&#39;</span><span class="p">]]</span>
 
-<span class="k">def</span> <span class="nf">addTransition_type</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">data_et</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">add_transition_type</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">data_et</span><span class="p">):</span>
     <span class="n">data_et</span> <span class="o">=</span> <span class="n">et_data_transition_type</span><span class="p">(</span><span class="n">data_et</span><span class="p">)</span>
     <span class="n">data_et</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;transition_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_et</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;transition_type&#39;</span><span class="p">]</span>
     
@@ -17696,7 +17696,7 @@ total               19409
         <span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">return</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-<span class="n">data_trial_choice</span> <span class="o">=</span> <span class="n">addTransition_type</span><span class="p">(</span><span class="n">data_trial_choice</span><span class="p">,</span> <span class="n">data_et_choice</span><span class="p">)</span>
+<span class="n">data_trial_choice</span> <span class="o">=</span> <span class="n">add_transition_type</span><span class="p">(</span><span class="n">data_trial_choice</span><span class="p">,</span> <span class="n">data_et_choice</span><span class="p">)</span>
 <span class="n">data_trial_choice</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
     <span class="p">:,</span> 
     <span class="p">[</span>
@@ -18014,7 +18014,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[33]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">addPayneIndex</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">add_payne_index</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     
     <span class="n">optionWise_transition</span> <span class="o">=</span> \
         <span class="n">data</span><span class="p">[</span><span class="s1">&#39;trans_type_aLLtLL&#39;</span><span class="p">]</span> <span class="o">+</span> \
@@ -18030,7 +18030,7 @@ See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stab
 
     <span class="k">return</span> <span class="n">payneIndex</span>
 
-<span class="n">data_trial_choice</span><span class="p">[</span><span class="s1">&#39;payneIndex&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">addPayneIndex</span><span class="p">(</span><span class="n">data_trial_choice</span><span class="p">)</span>
+<span class="n">data_trial_choice</span><span class="p">[</span><span class="s1">&#39;payneIndex&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">add_payne_index</span><span class="p">(</span><span class="n">data_trial_choice</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="n">data_trial_choice</span><span class="p">[</span><span class="s1">&#39;payneIndex&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>

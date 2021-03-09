@@ -6,10 +6,12 @@ from utils.plots import corr_plot, corr_matrix
 
 def corr_analysis(data_trial_fix, data_subject):
 
-    data_plot = data_trial_fix \
-                        .merge(data_subject.loc[:, ['run_id', 'age']], on='run_id', how='left') \
-                        .loc[:,
-                    ['run_id', 'chin', 'x_pos', 'y_pos', 'withinTaskIndex', 'age', 'fps', 'offset', 'precision']]
+    data_plot = data_trial_fix.merge(
+        data_subject.loc[:, ['run_id', 'age']], on='run_id', how='left') \
+        .loc[:, [
+            'run_id', 'chin', 'x_pos', 'y_pos',
+            'withinTaskIndex', 'age', 'fps',
+            'offset', 'precision']]
 
     data_plot = clean_corr_data(data_plot)
 

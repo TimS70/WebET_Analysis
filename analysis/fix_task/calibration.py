@@ -1,26 +1,17 @@
-import os
-import scipy
-
 import matplotlib.pyplot as plt
-import pandas as pd
-import seaborn as sns
-import statsmodels.stats.multitest as smt
 
-from scipy import stats
+from utils.plots import spaghetti_plot, save_plot
 
-from analysis.fix_task.sight import plot_sight_vs_outcomes, anova_outcomes_sight
-from utils.path import makedir
-from utils.plots import split_violin_plot, violin_plot, spaghetti_plot, save_plot
-from utils.tables import write_csv
 
-## Median offset across calibration trials
+# Median offset across calibration trials
 # Does data quality improve during calibration?
 
 
 def analyze_calibration(data_et, data_trial):
-    data_et_calibration = data_et.loc[data_et['trial_type'] == 'eyetracking-calibration', :]
+    data_et_calibration = data_et.loc[
+                          data_et['trial_type'] == 'eyetracking-calibration', :]
     data_trial_calibration = data_trial.loc[
-        data_trial['trial_type'] == 'eyetracking-calibration', :]
+                             data_trial['trial_type'] == 'eyetracking-calibration', :]
 
     # Add median offset
     grouped = data_et_calibration \
@@ -39,14 +30,12 @@ def analyze_calibration(data_et, data_trial):
 
 def plot_outcome_vs_trials(data_trial_calibration, outcome, run):
     spaghetti_plot(
-        data_trial_calibration.loc[
-        (
-                (data_trial_calibration['chinFirst'] == 0) &
-                (data_trial_calibration['chin'] == 0)
-        ) |
-        (
-                (data_trial_calibration['chinFirst'] == 1) &
-                (data_trial_calibration['chin'] == 1)
+        data_trial_calibration.loc[(
+            (data_trial_calibration['chinFirst'] == 0) &
+            (data_trial_calibration['chin'] == 0)
+        ) | (
+            (data_trial_calibration['chinFirst'] == 1) &
+            (data_trial_calibration['chin'] == 1)
         ), :],
         'withinTaskIndex', outcome, run)
 
