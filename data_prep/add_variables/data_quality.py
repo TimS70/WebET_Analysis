@@ -3,10 +3,11 @@ import os
 import numpy as np
 import pandas as pd
 
-from analysis.fix_task.fix_task import outcome_over_trials
+from analysis.fix_task.fix_task import outcome_over_trials, compare_conditions_subject, grand_mean_offset, \
+    check_gaze_saccade
 from analysis.fix_task.positions import compare_positions
 
-from utils.data_frames import merge_mean_by_index
+from utils.data_frames import merge_mean_by_index, merge_by_subject
 from utils.tables import summarize_datasets
 
 
@@ -29,7 +30,7 @@ def add_data_quality_var():
     print('Datasets read from data/fix_task/cleaned (fix trials): ')
     summarize_datasets(data_et_fix, data_trial_fix, data_subject)
 
-    # # Offset
+
     # Only for dev
     data_trial = data_trial.loc[data_trial['run_id'] < 50, :]
     data_trial_fix = data_trial_fix.loc[
@@ -38,30 +39,26 @@ def add_data_quality_var():
     data_et = data_et.loc[data_et['run_id'] < 50, :]
     data_et_fix = data_et_fix.loc[data_et_fix['run_id'] < 50, :]
 
-    data_et = add_offset(data_et)
-    data_et_fix = add_offset(data_et_fix)
+    # # Offset
 
+    # data_et = add_offset(data_et)
+    # data_et_fix = add_offset(data_et_fix)
     # check_gaze_saccade(data_et, data_trial)
-
-    data_trial = merge_mean_by_index(
-        data_trial, data_et,
-        'offset', 'offset_px')
-
-    data_trial_fix = merge_mean_by_index(
-        data_trial_fix, data_et_fix,
-        'offset', 'offset_px')
-
-    outcome_over_trials(data_trial_fix, 'offset')
-    compare_positions(data_trial_fix, 'offset')
-
+    #
+    # data_trial = merge_mean_by_index(
+    #     data_trial, data_et, 'offset', 'offset_px')
+    # data_trial_fix = merge_mean_by_index(
+    #     data_trial_fix, data_et_fix, 'offset', 'offset_px')
+    #
+    # outcome_over_trials(data_trial_fix, 'offset')
+    # compare_positions(data_trial_fix, 'offset')
+    #
     # data_subject = merge_by_subject(
     #     data_subject, data_trial_fix, 'offset', 'offset_px')
-
-    #
     #
     # compare_conditions_subject(data_subject, data_trial_fix, 'offset')
     # data_trial_fix = grand_mean_offset(data_et_fix, data_trial_fix)
-    #
+
     # # Precision
     # data_et = distanceFromAVG_square(data_et)
     # data_et_fix = distanceFromAVG_square(data_et_fix)

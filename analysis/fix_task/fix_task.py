@@ -337,9 +337,9 @@ def group_chin_withinTaskIndex(data, varName):
 
 
 def grand_mean_offset(data_et_fix, data_trial_fix):
-    grouped = data_et_fix.groupby(['run_id', 'trial_index']) \
-        ['x', 'y'].mean() \
-        .reset_index() \
+    grouped = data_et_fix.groupby(
+            ['run_id', 'trial_index'],
+            as_index=False)[['x', 'y']].mean() \
         .rename(columns={'x': 'x_mean', 'y': 'y_mean'})
 
     if 'x_mean' in data_trial_fix.columns:
@@ -351,11 +351,12 @@ def grand_mean_offset(data_et_fix, data_trial_fix):
         on=['run_id', 'trial_index'],
         how='left'
     )
-    data_trial_fix['x_mean_px'] = data_trial_fix['x_mean'] * data_trial_fix['window_width']
-    data_trial_fix['y_mean_px'] = data_trial_fix['y_mean'] * data_trial_fix['window_height']
-    data_trial_fix.loc[:, ['x_mean', 'x_mean_px', 'y_mean', 'y_mean_px']].describe()
-
-    # %%
+    data_trial_fix['x_mean_px'] = \
+        data_trial_fix['x_mean'] * data_trial_fix['window_width']
+    data_trial_fix['y_mean_px'] = \
+        data_trial_fix['y_mean'] * data_trial_fix['window_height']
+    data_trial_fix.loc[:,
+        ['x_mean', 'x_mean_px', 'y_mean', 'y_mean_px']].describe()
 
     data_trial_fix['grand_deviation'] = euclidean_distance(
         data_trial_fix['x_mean'], data_trial_fix['x_pos'],
@@ -363,6 +364,11 @@ def grand_mean_offset(data_et_fix, data_trial_fix):
     )
 
     summary = data_trial_fix['grand_deviation'].describe()
+
+    write_csv(
+        summary,
+        'offset_grand_deviation.csv',
+        'results', 'tables', 'fix_task')
 
     print(
         f"""Grand mean deviation: \n"""
@@ -382,7 +388,8 @@ def compare_conditions_subject(data_subject, data_trial_fix, outcome):
               :,
               [
                   outcome, (outcome + '_chin_0'),
-                  (outcome + '_chin_1'), (outcome + '_glasses_binary_0'),
+                  (outcome + '_chin_1'),
+                  (outcome + '_glasses_binary_0'),
                   (outcome + '_glasses_binary_1')
               ]
               ].describe()
@@ -405,8 +412,14 @@ def separate_outcomes_by_condition(data, large_data, varName, varCondition):
     grouped = large_data \
         .groupby(['run_id', varCondition])[varName].mean() \
         .reset_index() \
-        .pivot(index='run_id', columns=varCondition, values=varName) \
+        .pivot(index='run_id',
+               columns=varCondition,
+               values=varName) \
         .reset_index() \
         .rename(columns={0.0: var_cond_0, 1.0: var_cond_1})
-    data = data.merge(grouped.loc[:, ['run_id', var_cond_0, var_cond_1]], on='run_id', how='left')
+    data = data.merge(
+        grouped.loc[:, ['run_id', var_cond_0, var_cond_1]],
+        on='run_id',
+        how='left')
+
     return data
