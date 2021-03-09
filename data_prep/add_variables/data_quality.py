@@ -3,14 +3,13 @@ import os
 import numpy as np
 import pandas as pd
 
-from analysis.fix_task.fix_task import outcome_over_trials, compare_conditions_subject, grand_mean_offset, \
+from analysis.fix_task.data_quality import outcome_over_trials, compare_conditions_subject, grand_mean_offset, \
     check_gaze_saccade
 from analysis.fix_task.positions import compare_positions
 
 from utils.data_frames import merge_mean_by_index, merge_by_subject
+from utils.path import makedir
 from utils.tables import summarize_datasets
-
-
 
 
 def add_data_quality_var():
@@ -30,7 +29,6 @@ def add_data_quality_var():
     print('Datasets read from data/fix_task/cleaned (fix trials): ')
     summarize_datasets(data_et_fix, data_trial_fix, data_subject)
 
-
     # Only for dev
     data_trial = data_trial.loc[data_trial['run_id'] < 50, :]
     data_trial_fix = data_trial_fix.loc[
@@ -39,46 +37,70 @@ def add_data_quality_var():
     data_et = data_et.loc[data_et['run_id'] < 50, :]
     data_et_fix = data_et_fix.loc[data_et_fix['run_id'] < 50, :]
 
-    # # Offset
+    # Offset
 
-    # data_et = add_offset(data_et)
-    # data_et_fix = add_offset(data_et_fix)
-    # check_gaze_saccade(data_et, data_trial)
-    #
-    # data_trial = merge_mean_by_index(
-    #     data_trial, data_et, 'offset', 'offset_px')
-    # data_trial_fix = merge_mean_by_index(
-    #     data_trial_fix, data_et_fix, 'offset', 'offset_px')
-    #
-    # outcome_over_trials(data_trial_fix, 'offset')
-    # compare_positions(data_trial_fix, 'offset')
-    #
-    # data_subject = merge_by_subject(
-    #     data_subject, data_trial_fix, 'offset', 'offset_px')
-    #
-    # compare_conditions_subject(data_subject, data_trial_fix, 'offset')
-    # data_trial_fix = grand_mean_offset(data_et_fix, data_trial_fix)
+    data_et = add_offset(data_et)
+    data_et_fix = add_offset(data_et_fix)
 
-    # # Precision
-    # data_et = distanceFromAVG_square(data_et)
-    # data_et_fix = distanceFromAVG_square(data_et_fix)
-    #
-    # data_trial = aggregate_precision_from_et_data(data_trial, data_et)
-    # data_trial_fix = aggregate_precision_from_et_data(
-    #     data_trial_fix, data_et_fix)
-    # data_subject = merge_by_subject(
-    #     data_subject, data_trial_fix, 'precision', 'precision_px')
-    #
-    # outcome_over_trials(data_trial_fix, 'precision')
-    # compare_positions(data_trial_fix, 'precision')
-    # compare_conditions_subject(data_subject, data_trial_fix, 'precision')
+    data_trial = merge_mean_by_index(
+        data_trial, data_et, 'offset', 'offset_px')
+    data_trial_fix = merge_mean_by_index(
+        data_trial_fix, data_et_fix, 'offset', 'offset_px')
+
+    outcome_over_trials(data_trial_fix, 'offset')
+    compare_positions(data_trial_fix, 'offset')
+
+    data_subject = merge_by_subject(
+        data_subject, data_trial_fix, 'offset', 'offset_px')
+
+    # Precision
+    data_et = distance_from_xy_mean_square(data_et)
+    data_et_fix = distance_from_xy_mean_square(data_et_fix)
+
+    data_trial = aggregate_precision_from_et_data(
+      data_trial, data_et)
+    data_trial_fix = aggregate_precision_from_et_data(
+        data_trial_fix, data_et_fix)
+    data_subject = merge_by_subject(
+        data_subject, data_trial_fix, 'precision', 'precision_px')
+
+    makedir('data', 'fix_task', 'added_var')
+    data_et.to_csv(
+        os.path.join('data', 'fix_task', 'added_var',
+                     'data_et.csv'),
+        index=False, header=True)
+    data_et_fix.to_csv(
+        os.path.join('data', 'fix_task', 'added_var',
+                     'data_et_fix.csv'),
+        index=False, header=True)
+    data_trial_fix.to_csv(
+        os.path.join('data', 'fix_task', 'added_var',
+                     'data_trial_fix.csv'),
+        index=False, header=True)
+    data_trial.to_csv(
+        os.path.join('data', 'fix_task', 'added_var',
+                     'data_trial.csv'),
+        index=False, header=True)
+    data_subject.to_csv(
+        os.path.join('data', 'fix_task', 'added_var',
+                     'data_subject.csv'),
+        index=False, header=True)
+
+    print(
+        'Datasets written to data/fix_task/added_var (all trials): ')
+    summarize_datasets(data_et, data_trial, data_subject)
+
+    print(
+        'Datasets written to data/fix_task/added_var (fix trials): ')
+    summarize_datasets(data_et_fix, data_trial_fix, data_subject)
 
 
 def euclidean_distance(x, x_target, y, y_target):
     x_diff = x - x_target
     y_diff = y - y_target
-    euclideanDistance = np.sqrt(x_diff ** 2 + y_diff ** 2)
-    return euclideanDistance
+    output = np.sqrt(x_diff ** 2 + y_diff ** 2)
+
+    return output
 
 
 def add_offset(data_et):
@@ -101,7 +123,8 @@ def add_offset(data_et):
 
 
 def merge_xy_means(data):
-    grouped = data.groupby(['run_id', 'trial_index'])['x', 'y'].mean() \
+    grouped = data.groupby(
+        ['run_id', 'trial_index'])[['x', 'y']].mean() \
         .rename(columns={'x': 'x_mean', 'y': 'y_mean'})
 
     if 'x_mean' in data.columns:
@@ -109,12 +132,13 @@ def merge_xy_means(data):
     if 'y_mean' in data.columns:
         data = data.drop(columns=['y_mean'])
     data = data.merge(grouped, on=['run_id', 'trial_index'], how='left')
-    return (data)
+
+    return data
 
 
-def distanceFromAVG_square(data):
+def distance_from_xy_mean_square(data):
     data = merge_xy_means(data)
-    data['distanceFromAVG_square'] = np.power(
+    data['distance_from_xy_mean_square'] = np.power(
         euclidean_distance(data['x'], data['x_mean'], data['y'], data['y_mean']),
         2
     )
@@ -126,20 +150,26 @@ def distanceFromAVG_square(data):
     ), 2)
 
     missing_values = data.loc[
-        pd.isna(data['distanceFromAVG_square']),
-        ['x', 'y', 'x_pos', 'y_pos', 'distanceFromAVG_square']
+        pd.isna(data['distance_from_xy_mean_square']),
+        ['x', 'y', 'x_pos', 'y_pos', 'distance_from_xy_mean_square']
     ]
 
-    summary = data.loc[
-              :, ['distanceFromAVG_square', 'distanceFromAVG_square_px']] \
+    summary = data.loc[:,
+              ['distance_from_xy_mean_square',
+               'distanceFromAVG_square_px']] \
         .describe()
 
     print(
-        f"""Check for missing values: \n"""
-        f"""{missing_values} \n \n """
         f"""Squared distance from the average: \n"""
-        f"""{summary}"""
-    )
+        f"""{summary} \n""")
+
+    if len(missing_values) > 0:
+        print(
+            f"""! Attention: Missing values: \n"""
+            f"""{missing_values} \n \n """)
+
+    else:
+        print(" - No missing values found. \n")
 
     return data
 
@@ -147,8 +177,8 @@ def distanceFromAVG_square(data):
 def aggregate_precision_from_et_data(data_trial, data_et):
     data_trial = merge_mean_by_index(
         data_trial, data_et,
-        'distanceFromAVG_square', 'distanceFromAVG_square_px')
-    data_trial['precision'] = np.sqrt(data_trial['distanceFromAVG_square'])
+        'distance_from_xy_mean_square', 'distanceFromAVG_square_px')
+    data_trial['precision'] = np.sqrt(data_trial['distance_from_xy_mean_square'])
     data_trial['precision_px'] = np.sqrt(data_trial['distanceFromAVG_square_px'])
 
     missing_values = data_trial.loc[

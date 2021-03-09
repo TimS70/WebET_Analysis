@@ -10,7 +10,6 @@ from scipy import stats
 
 from utils.path import makedir
 
-
 # Correction
 # Robert Rosenthal. The hand-book of research synthesis, chapter
 # Parametric measures of effect size, pages 231–244.
@@ -21,11 +20,6 @@ from utils.tables import write_csv
 
 def compare_positions(data_trial_fix, outcome):
     position_tests = test_all_positions(data_trial_fix, outcome)
-    example = position_tests.loc[position_tests['Sig'] != 'np'].head(5)
-
-    print(
-        f"""t-Tests for positions: \n"""
-        f"""{example}""")
 
     test_top_vs_bottom = test_top_vs_bottom_positions(
         data_trial_fix, outcome)
@@ -37,7 +31,27 @@ def compare_positions(data_trial_fix, outcome):
         [position_tests, test_top_vs_bottom, test_left_vs_right],
         ignore_index=True)
 
-    print(position_tests.tail(5))
+    # Holm correction
+    position_tests['p'] = smt.multipletests(position_tests['p'],
+                                            method='holm')[1]
+
+    position_tests['Sig'] = 'np'
+    position_tests.loc[position_tests['p'] < 0.05, 'Sig'] = """*"""
+    position_tests.loc[position_tests['p'] < 0.01, 'Sig'] = """**"""
+    position_tests.loc[position_tests['p'] < 0.001, 'Sig'] = """***"""
+
+    significant_results = position_tests.loc[
+        position_tests['Sig'] != 'np',
+        ['position_1', 'position_2', 'd', 't', 'p']]
+
+    if len(significant_results) > 0:
+        print(
+            f"""Significant results for {outcome}: \n"""
+            f"""{significant_results}""")
+    else:
+        print(
+            f"""No significant results for {outcome}. \n"""
+        )
 
     write_csv(
         position_tests,
@@ -47,13 +61,14 @@ def compare_positions(data_trial_fix, outcome):
     plot_top_vs_bottom_positions(data_trial_fix, outcome)
 
 
-
 def outcome_by_position_long(data_trial_fix, outcome_var):
     output_long = data_trial_fix.groupby(
         ['run_id', 'x_pos', 'y_pos'],
         as_index=False)[outcome_var].median()
     output_long['position'] = list(map(
-        lambda x, y: str(x * 100) + '%_' + str(y * 100) + '%',
+        lambda x, y:
+            str(round(x * 100, 0)) + '%_' +
+            str(round(y * 100, 0)) + '%',
         output_long['x_pos'],
         output_long['y_pos']
     ))
@@ -98,10 +113,11 @@ def outcome_by_position_wide(data_trial_fix, outcome_var):
 
     null_data = output_wide.loc[output_wide.isnull().any(axis=1), :]
     if len(null_data) > 0:
-        print('! Attention ! Missing values')
-        print(null_data)
+        print(
+            f"""! Attention: Missing values: \n"""
+            f"""{null_data} \n""")
     else:
-        print('Success: No missing values found')
+        print('Success: No missing values found. \n')
 
     return output_wide
 
@@ -112,17 +128,23 @@ def pos_combinations():
         '50.0%_20.0%', '50.0%_50.0%', '50.0%_80.0%',
         '80.0%_20.0%', '80.0%_50.0%', '80.0%_80.0%'
     ]
-    combinations = np.array(np.meshgrid(cols, cols)).T.reshape((-1, 2))
+    combinations = np.array(
+        np.meshgrid(cols, cols)).T.reshape((-1, 2))
 
     for i in range(0, len(combinations)):
         combinations[i] = np.sort(combinations[i], axis=None)
 
-    combinations = pd.DataFrame(combinations, columns=['col1', 'col2'])
-    combinations = combinations \
-                       .loc[combinations['col1'] != combinations['col2'], :] \
+    combinations = pd.DataFrame(
+        combinations, columns=['col1', 'col2'])
+
+    combinations = combinations.loc[
+                   combinations['col1'] != combinations['col2'], :] \
         .drop_duplicates() \
         .reset_index(drop=True)
-    print(f"""N combinations: {len(combinations)}""")
+    print(
+        f"""There are k ={len(combinations)} """
+        f"""possible combinations of positions \n""")
+
     return combinations
 
 
@@ -154,14 +176,6 @@ def test_all_positions(data_trial_fix, outcome):
         columns=[
             'position_1', 'position_2', 'position_1_mean', 'position_2_mean',
             'd', 'n', 't', 'p'])
-
-    # Holm correction
-    position_tests['p'] = smt.multipletests(position_tests['p'], method='holm')[1]
-
-    position_tests['Sig'] = 'np'
-    position_tests.loc[position_tests['p'] < 0.05, 'Sig'] = """*"""
-    position_tests.loc[position_tests['p'] < 0.01, 'Sig'] = """**"""
-    position_tests.loc[position_tests['p'] < 0.001, 'Sig'] = """***"""
 
     return position_tests
 
@@ -256,6 +270,7 @@ def plot_top_vs_bottom_positions(data_trial_fix, outcome):
                    x='y_pos',
                    y=outcome,
                    data=outcome_by_y_pos)
+
     makedir('results', 'plots', 'fix_task')
     plt.savefig(
         os.path.join('results', 'plots', 'fix_task',

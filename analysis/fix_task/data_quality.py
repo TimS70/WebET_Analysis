@@ -19,10 +19,42 @@ import statsmodels.stats.multitest as smt
 from statsmodels.formula.api import ols
 import sys
 
+from analysis.fix_task.positions import compare_positions
 from data_prep.add_variables.trial import add_position_index
 from utils.data_frames import merge_by_index
 from utils.path import makedir
-from utils.tables import write_csv, view
+from utils.tables import write_csv, view, summarize_datasets
+
+
+def data_quality_analysis():
+
+    data_et = pd.read_csv(
+        os.path.join('data', 'fix_task', 'added_var', 'data_et.csv'))
+    data_et_fix = pd.read_csv(
+        os.path.join('data', 'fix_task', 'added_var', 'data_et_fix.csv'))
+    data_trial_fix = pd.read_csv(
+        os.path.join('data', 'fix_task', 'added_var', 'data_trial_fix.csv'))
+    data_trial = pd.read_csv(
+        os.path.join('data', 'fix_task', 'added_var', 'data_trial.csv'))
+    data_subject = pd.read_csv(
+        os.path.join('data', 'fix_task', 'added_var', 'data_subject.csv'))
+
+    print('Datasets read from data/fix_task/added_var (all trials): ')
+    summarize_datasets(data_et, data_trial, data_subject)
+
+    print('Datasets read from data/fix_task/added_var (fix trials): ')
+    summarize_datasets(data_et_fix, data_trial_fix, data_subject)
+
+    check_gaze_saccade(data_et, data_trial)
+    compare_conditions_subject(
+        data_subject, data_trial_fix, 'offset')
+    data_trial_fix = grand_mean_offset(
+        data_et_fix, data_trial_fix)
+
+    outcome_over_trials(data_trial_fix, 'precision')
+    compare_positions(data_trial_fix, 'precision')
+    compare_conditions_subject(
+        data_subject, data_trial_fix, 'precision')
 
 
 def check_gaze_saccade(data_et, data_trial):
@@ -61,11 +93,6 @@ def check_gaze_saccade(data_et, data_trial):
         'check_saccade.csv',
         'results', 'tables', 'fix_task')
 
-    print(
-        f"""Is the offset correct? \n"""
-        f"""{example.head(5)} \n"""
-    )
-
     for subject in tqdm(
             data_et_cross_and_task['run_id'].unique(),
             desc='Plotting fix task saccades: '):
@@ -81,7 +108,6 @@ def plot_gaze_saccade(data_et_cross_and_task, file_name):
     average_line_no_chin = create_median_line(
         data_et_cross_and_task.loc[
         data_et_cross_and_task['chin'] == 0, :])
-    print(average_line_no_chin)
 
     average_line_chin = create_median_line(
         data_et_cross_and_task.loc[
@@ -123,7 +149,7 @@ def plot_gaze_saccade(data_et_cross_and_task, file_name):
 
     makedir('results', 'plots', 'fix_task', 'saccade')
     plt.savefig(
-        os.path.join('results', 'plots', '', 'saccade',
+        os.path.join('results', 'plots', 'fix_task', 'saccade',
                      file_name))
     plt.close()
 
@@ -249,13 +275,12 @@ def new_position_index(data_et):
                 'positionIndex'] = position_index
 
     summary = data_et.groupby(
-        ['run_id', 'trial_index', 'fixTask', 'trial_duration'],
-        as_index=False)[[
-            'new_x_pos', 'new_y_pos', 'positionIndex']].mean()
+        ['new_x_pos', 'new_y_pos', 'trial_duration'],
+        as_index=False)['positionIndex'].mean()
 
     print(
         f"""Changed position index: \n"""
-        f"""{summary.head(10)} \n"""
+        f"""{summary.head(5)} \n"""
     )
 
     return data_et
@@ -273,7 +298,6 @@ def create_median_line(data):
     bins = pd.cut(data['t_task'], binArray)
     output = data.groupby(bins) \
         .agg({"offset": "median"}).reset_index()
-    print(output)
     output['t_task'] = binArray[0:len(output)]
 
     return output
@@ -295,13 +319,14 @@ def outcome_over_trials(data_trial, outcome):
         ax[i].errorbar(
             x=data['withinTaskIndex'],
             y=data[(outcome + '_median')],
-            yerr=[data['offset_std_lower'], data[(outcome + '_std_upper')]],
+            yerr=[data[(outcome + '_std_lower')],
+                  data[(outcome + '_std_upper')]],
             fmt='^k:',
             capsize=5
         )
     makedir('results', 'plots', 'fix_task')
     plt.savefig(
-        os.path.join('results', 'plots', '',
+        os.path.join('results', 'plots', 'fix_task',
                      (outcome + '_vs_trials.png')))
     plt.close()
 
@@ -372,7 +397,7 @@ def grand_mean_offset(data_et_fix, data_trial_fix):
 
     print(
         f"""Grand mean deviation: \n"""
-        f"""{summary}""")
+        f"""{summary} \n""")
 
     return data_trial_fix
 

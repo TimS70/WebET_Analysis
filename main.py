@@ -1,4 +1,5 @@
 from analysis.dropouts import dropout_analysis
+from analysis.fix_task.data_quality import data_quality_analysis
 from data_prep.add_variables.data_quality import add_data_quality_var
 from data_prep.add_variables.init import global_add_variables_to_datasets
 from data_prep.cleaning.choice import create_and_clean_choice_data
@@ -30,7 +31,8 @@ def main():
     # create_fix_tasks_datasets()
     # clean_fix_task_datasets()
 
-    add_data_quality_var()
+    # add_data_quality_var()
+    data_quality_analysis()
 
 
 if __name__ == '__main__':
