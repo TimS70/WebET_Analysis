@@ -3,8 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from analysis.fix_task.data_quality import outcome_over_trials, compare_conditions_subject, grand_mean_offset, \
-    check_gaze_saccade
+from analysis.fix_task.data_quality import outcome_over_trials
 from analysis.fix_task.positions import compare_positions
 
 from utils.data_frames import merge_mean_by_index, merge_by_subject
@@ -28,14 +27,6 @@ def add_data_quality_var():
 
     print('Datasets read from data/fix_task/cleaned (fix trials): ')
     summarize_datasets(data_et_fix, data_trial_fix, data_subject)
-
-    # Only for dev
-    data_trial = data_trial.loc[data_trial['run_id'] < 50, :]
-    data_trial_fix = data_trial_fix.loc[
-                     data_trial_fix['run_id'] < 50, :]
-
-    data_et = data_et.loc[data_et['run_id'] < 50, :]
-    data_et_fix = data_et_fix.loc[data_et_fix['run_id'] < 50, :]
 
     # Offset
 

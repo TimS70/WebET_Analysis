@@ -6,7 +6,7 @@ import pandas as pd
 
 from data_prep.cleaning.filter_approved import filter_approved
 from utils.path import makedir
-from utils.plots import save_table_as_plot
+from utils.plots import save_table_as_plot, save_plot
 from utils.tables import write_csv
 
 
@@ -91,9 +91,8 @@ def how_many_runs_with_dropouts(data_trial):
     for ax in fig.axes:
         ax.tick_params(labelrotation=90)
 
-    makedir('results', 'plots', 'dropouts')
-    plt.savefig(
-        os.path.join('results', 'plots', 'dropouts', 'dropouts.png'))
+    save_plot('dropouts.png', 'results', 'plots', 'dropouts')
+
     plt.close()
 
 

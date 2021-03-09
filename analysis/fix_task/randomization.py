@@ -115,7 +115,6 @@ def t_test_chinFirst_vs_outcomes(data_trial_fix):
         .rename(columns={'level_0': 'measure', 0: 'mean'}) \
         .assign(SD=outcomes_by_chin.std().reset_index(drop=True)) \
         .assign(n=outcomes_by_chin.count().reset_index(drop=True))
-    summary
 
     result_offset = t_test_ind('offset', outcomes_by_chin)
     result_precision = t_test_ind('precision', outcomes_by_chin)
