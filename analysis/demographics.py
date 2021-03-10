@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from utils.path import makedir
+from utils.plots import save_plot
+from utils.tables import write_csv
 
 
 def show_demographics():
@@ -15,11 +17,13 @@ def show_demographics():
     data_subject = pd.read_csv(
         os.path.join('data', 'all_trials', 'cleaned', 'data_subject.csv'))
 
-    makedir('plots', 'demographics')
     frequency_tables(data_subject)
     plot_pie_charts(data_subject)
     plt.hist(data_subject['birthyear'], bins=15)
-    plt.savefig(os.path.join('plots', 'demographics', 'age.png'))
+
+    save_plot('age.png',
+              'results', 'plots', 'demographics')
+    plt.close()
 
 
 def frequency_tables(data_subject):
@@ -28,10 +32,15 @@ def frequency_tables(data_subject):
                'gender']
 
     for col in columns:
-        print(pd.crosstab(index=data_subject[col],
-                          columns="count")
-              )
-        print('\n')
+
+        freq_table = pd.crosstab(
+            index=data_subject[col],
+            columns="count")
+
+        print(f"""{freq_table} \n""")
+
+        write_csv(freq_table, (col + '.csv'),
+                  'results', 'tables', 'demographics')
 
 
 def plot_pie_charts(data_subject):
@@ -48,8 +57,10 @@ def plot_pie_charts(data_subject):
         ax[i].pie(pie['count'], labels=pie[predictors[i]], autopct='%1.1f%%', startangle=90)
         ax[i].axis('equal')
         ax[i].set_title(predictors[i])
-    plt.savefig(os.path.join('plots', 'demographics', 'pie_charts.png'))
 
+    save_plot('pie_charts.png',
+              'results', 'plots', 'demographics')
+    plt.close()
 
 def cross_tab(col, data_subject):
     pie = pd.crosstab(

@@ -4,7 +4,7 @@ import subprocess
 import numpy as np
 import pandas as pd
 
-from analysis.test_clusters import test_transition_clusters
+from analysis.choice_task.test_clusters import test_transition_clusters
 from data_prep.add_variables.aoi import add_fixation_counter, count_fixations_on_trial_level, \
     add_aoi_counts_on_trial_level, add_aoi_et
 from data_prep.add_variables.et_indices import add_et_indices

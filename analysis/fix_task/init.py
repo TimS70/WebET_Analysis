@@ -47,6 +47,10 @@ def analyze_fix_task():
     # compare_conditions_subject(data_subject, data_trial_fix, 'precision')
 
     main_effect(data_trial_fix, data_subject)
+
+    outcome_over_trials(data_trial_fix, 'offset')
+    compare_positions(data_trial_fix, 'offset')
+
     outcome_over_trials(data_trial_fix, 'precision')
     compare_positions(data_trial_fix, 'precision')
 

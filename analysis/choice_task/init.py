@@ -22,27 +22,27 @@ def analyze_choice_task(use_adjusted_et_data=True):
           '################################### \n')
 
     data_et_uncorrected = pd.read_csv(
-        os.path.join('data', 'choice_task', 'uncorrected', 'data_et.csv'))
+        os.path.join('data', '', 'uncorrected', 'data_et.csv'))
 
     data_et_adjusted = pd.read_csv(
-        os.path.join('data', 'choice_task', 'adjusted', 'data_et.csv'))
+        os.path.join('data', '', 'adjusted', 'data_et.csv'))
 
     if use_adjusted_et_data:
 
         data_trial = pd.read_csv(
             os.path.join(
-                'data', 'choice_task', 'adjusted', 'data_trial.csv'))
+                'data', '', 'adjusted', 'data_trial.csv'))
         data_subject = pd.read_csv(
             os.path.join(
-                'data', 'choice_task', 'adjusted', 'data_subject.csv'))
+                'data', '', 'adjusted', 'data_subject.csv'))
 
     else:
         data_trial = pd.read_csv(
             os.path.join(
-                'data', 'choice_task', 'uncorrected', 'data_trial.csv'))
+                'data', '', 'uncorrected', 'data_trial.csv'))
         data_subject = pd.read_csv(
             os.path.join(
-                'data', 'choice_task', 'uncorrected', 'data_subject.csv'))
+                'data', '', 'uncorrected', 'data_subject.csv'))
 
     print('Imported from data/choice_task/ with data_et_adjusted: ')
     summarize_datasets(data_et_adjusted, data_trial, data_subject)
@@ -90,7 +90,7 @@ def plot_categorical_confounders(data_subject):
 
     makedir('results', 'plots', 'choice_task')
     plt.savefig(
-        os.path.join('results', 'plots', 'choice_task',
+        os.path.join('results', 'plots', '',
                      'cat_variables.png'))
 
 
@@ -137,7 +137,7 @@ def plot_example_eye_movement(data_et, data_trial, data_subject, run):
     makedir('results', 'plots', 'choice_task')
     plt.savefig(
         os.path.join(
-            'results', 'plots', 'choice_task',
+            'results', 'plots', '',
             ('example_' + str(run) + '.png')))
 
 
@@ -177,7 +177,7 @@ def plot_choice_task_heatmap(data_et):
     makedir('results', 'plots', 'choice_task')
     plt.savefig(
         os.path.join(
-            'results', 'plots', 'choice_task', 'choice_heatmap.png'))
+            'results', 'plots', '', 'choice_heatmap.png'))
 
 
 def corr_analysis_subject(data_subject):

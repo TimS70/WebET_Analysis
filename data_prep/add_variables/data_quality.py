@@ -43,9 +43,6 @@ def add_data_quality_var():
     data_trial_fix = merge_mean_by_index(
         data_trial_fix, data_et_fix, 'offset', 'offset_px')
 
-    outcome_over_trials(data_trial_fix, 'offset')
-    compare_positions(data_trial_fix, 'offset')
-
     data_subject = merge_by_subject(
         data_subject, data_trial_fix, 'offset', 'offset_px')
 
@@ -59,6 +56,10 @@ def add_data_quality_var():
         data_trial_fix, data_et_fix)
     data_subject = merge_by_subject(
         data_subject, data_trial_fix, 'precision', 'precision_px')
+
+    print(
+        f"""Saving data to: """
+        f"""{os.path.join('data', 'fix_task', 'added_var')}""")
 
     makedir('data', 'fix_task', 'added_var')
     data_et.to_csv(

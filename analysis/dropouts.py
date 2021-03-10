@@ -90,8 +90,9 @@ def how_many_runs_with_dropouts(data_trial):
     ax.bar(data['trial_type_new'], data['n'])
 
     for ax in fig.axes:
-        ax.tick_params(labelrotation=90)
+        ax.tick_params(labelrotation=45)
 
+    plt.tight_layout()
     save_plot('dropouts.png', 'results', 'plots', 'dropouts')
 
     plt.close()
