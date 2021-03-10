@@ -25,27 +25,28 @@ def create_and_clean_choice_data():
     print('Imported from data/all_trials/cleaned: ')
     summarize_datasets(data_et, data_trial, data_subject)
 
-    data_trial = select_choice_columns(data_trial)
-    data_et = filter_et_choice(data_et, data_trial)
+    data_trial = init_choice_data_trial(data_trial)
+    data_et = init_choice_data_et(data_et, data_trial)
 
     # Screening
     show_slow_reaction_times(data_trial)
     invalid_runs = invalid_choice_runs(data_trial, data_et)
 
-    data_subject = data_subject.loc[
-                   ~data_subject['run_id'].isin(invalid_runs), :]
+    # Remove invalid runs
+    data_subject = remove_invalid_runs(data_subject, 'data_subject', invalid_runs)
+    data_trial = remove_invalid_runs(data_trial, 'data_subject', invalid_runs)
+    data_et = remove_invalid_runs(data_et, 'data_subject', invalid_runs)
 
-    print('Cleaning trials: \n')
-    data_trial = clean_choice_trial_data(
-        data_trial, 'data_trial', invalid_runs)
-    data_et = merge_by_index(
-        data_et, data_trial, 'trial_duration_exact')
-    data_et = clean_choice_trial_data(
-        data_et, 'data_et', invalid_runs)
+    # Remove Long trials
+    data_trial = remove_long_trials(data_trial, 'data_trial', invalid_runs)
+
+    data_et = merge_by_index(data_et, data_trial, 'trial_duration_exact')
+    data_et = remove_long_trials(data_et, 'data_et', invalid_runs)
     data_et = data_et.drop(columns='trial_duration_exact')
 
-    data_et = clean_et_choice_data(
-        data_et, invalid_runs)
+    print('Data saved to ' +
+          os.path.join('data', 'choice_task', 'cleaned') +
+          ':')
 
     makedir('data', 'choice_task', 'cleaned')
     data_et.to_csv(
@@ -62,7 +63,7 @@ def create_and_clean_choice_data():
     check_unequal_trial_numbers(data_et, data_trial)
 
 
-def select_choice_columns(data_trial):
+def init_choice_data_trial(data_trial):
     data_trial = data_trial.loc[
         data_trial['trial_type'] == 'eyetracking-choice',
         [
@@ -81,7 +82,7 @@ def select_choice_columns(data_trial):
     return data_trial
 
 
-def filter_et_choice(data_et, data_trial):
+def init_choice_data_et(data_et, data_trial):
     data_et = merge_by_index(data_et, data_trial, 'trial_type')
     data_et = merge_by_index(data_et, data_trial, 'withinTaskIndex')
 
@@ -153,13 +154,9 @@ def invalid_choice_runs(data_trial, data_et):
     return invalid_runs
 
 
-def clean_choice_trial_data(data, name, invalid_runs):
+def remove_invalid_runs(data_raw, name, invalid_runs):
 
-    data_raw = data
-    data = data_raw.loc[
-           ~(data_raw['run_id'].isin(invalid_runs)) &
-           (data_raw['trial_duration_exact'] < 10000),
-           :]
+    data = data_raw.loc[~(data_raw['run_id'].isin(invalid_runs)),:]
 
     print(
         f"""{name}: Removing invalid runs and long trials (>10s) \n"""
@@ -169,20 +166,14 @@ def clean_choice_trial_data(data, name, invalid_runs):
     return data
 
 
-def clean_et_choice_data(data, invalid_runs):
+def remove_long_trials(data_raw, name, invalid_runs):
 
-    data_raw = data
-    data = data_raw.loc[
-           (data_raw['x'] > 0) & (data_raw['x'] < 1) &
-           (data_raw['y'] > 0) & (data_raw['y'] < 1) &
-           ~(data_raw['run_id'].isin(invalid_runs)),
-           :]
+    data = data_raw.loc[data_raw['trial_duration_exact'] < 10000, :]
 
     print(
-        f"""data_et: Filter gaze points on the screen: \n"""
+        f"""{name}: Removing long trials (>10s) \n"""
         f"""Raw: {len(data_raw)} \n"""
         f"""Cleaned: {len(data)} \n""")
-
 
     return data
 

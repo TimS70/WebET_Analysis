@@ -6,7 +6,8 @@ import pandas as pd
 
 from analysis.choice_task.test_clusters import test_transition_clusters
 from data_prep.add_variables.aoi import add_fixation_counter, count_fixations_on_trial_level, \
-    add_aoi_counts_on_trial_level, add_aoi_et
+    add_aoi_counts_on_trial_level, add_aoi_et, report_excluded_data_aoi, match_remaining_et_trials, \
+    match_remaining_et_runs
 from data_prep.add_variables.et_indices import add_et_indices
 from utils.data_frames import merge_by_index, merge_by_subject
 from utils.path import makedir
@@ -20,10 +21,10 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
           '################################### \n')
 
     if use_adjusted_et_data:
-        print('Using adjusted et data. \n')
+        print('Using adjusted et data (data_et from' +
+              os.path.join('data', 'choice_task', 'adjusted') + '\n')
         data_et = pd.read_csv(
-            os.path.join(
-                'data', 'choice_task', 'adjusted', 'data_et.csv'))
+            os.path.join('data', 'choice_task', 'adjusted', 'data_et.csv'))
 
     else:
         data_et = pd.read_csv(
@@ -37,30 +38,35 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
         os.path.join(
             'data', 'choice_task', 'cleaned', 'data_subject.csv'))
 
-    print('Imported from data/choice_task/cleaned: ')
+    print('Imported data from ' +
+          os.path.join('data', 'choice_task', 'cleaned') + ':')
     summarize_datasets(data_et, data_trial, data_subject)
 
-    # Information attributes
-    data_trial = identify_amount_left(data_trial)
-    data_trial = add_choice_options_num(data_trial)
-    data_trial = reformat_attributes(data_trial)
-    data_trial = top_bottom_attributes(data_trial)
-    data_trial['k'] = k(
-        data_trial['aLL'], data_trial['aSS'], data_trial['tLL'])
-
-    data_et = merge_by_index(
-        data_et, data_trial,
-        'amountLeft', 'LL_top')
-
-    # Behavioral responses
-    data_trial = choice_response_variables(data_trial)
-    data_subject = add_mean_choice_rt(data_subject, data_trial)
-    data_subject = merge_by_subject(
-        data_subject, data_trial,
-        'choseLL', 'choseTop', 'LL_top')
+    # # Information attributes
+    # data_trial = identify_amount_left(data_trial)
+    # data_trial = add_choice_options_num(data_trial)
+    # data_trial = reformat_attributes(data_trial)
+    # data_trial = top_bottom_attributes(data_trial)
+    # data_trial['k'] = k(
+    #     data_trial['aLL'], data_trial['aSS'], data_trial['tLL'])
+    #
+    # data_et = merge_by_index(
+    #     data_et, data_trial, 'amountLeft', 'LL_top')
+    #
+    # # Behavioral responses
+    # data_trial = choice_response_variables(data_trial)
+    # data_subject = add_mean_choice_rt(data_subject, data_trial)
+    # data_subject = merge_by_subject(
+    #     data_subject, data_trial,
+    #     'choseLL', 'choseTop', 'LL_top')
 
     # AOIs
     data_et = add_aoi_et(data_et, use_adjusted_et_data)
+    report_excluded_data_aoi(data_et)
+
+    data_trial = match_remaining_et_trials(data_trial, data_et)
+    data_subject = match_remaining_et_runs(data_subject, data_et)
+
     data_et = add_fixation_counter(data_et)
 
     data_trial = count_fixations_on_trial_level(data_trial, data_et)

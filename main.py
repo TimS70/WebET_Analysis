@@ -13,7 +13,7 @@ from data_prep.cleaning.fix_task import clean_fix_task_datasets
 
 def main(new_data=False, cluster_correction=False):
     create_data(new_data=new_data)
-    init_analysis(cluster_correction=cluster_correction)
+    # init_analysis(cluster_correction=cluster_correction)
 
 
 def create_data(new_data=False):

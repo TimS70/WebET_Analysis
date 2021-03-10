@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+from utils.data_frames import merge_by_index, merge_by_subject
 from utils.path import makedir
 from utils.tables import write_csv
 
@@ -52,6 +53,93 @@ def add_aoi(data, aoi_width, aoi_height):
             (data['y'] < (aoi_centers.loc[aoi, 'y'] + aoi_height / 2)),
             'aoi'] = aoi
     return data
+
+
+def report_excluded_data_aoi(data_et_new):
+    grouped_new = data_et_new.groupby(
+            ['run_id', 'withinTaskIndex'],
+            as_index=False)['x'].count() \
+        .rename(columns={'x': 'n'})
+
+    data_et_old = pd.read_csv(
+        os.path.join('data', 'choice_task', 'cleaned', 'data_et.csv'))
+
+
+    grouped_old = data_et_old.groupby(
+            ['run_id', 'withinTaskIndex'],
+            as_index=False)['x'].count() \
+        .rename(columns={'x': 'n'})
+
+    summary_difference = pd.concat([grouped_new, grouped_old]) \
+        .drop_duplicates(subset=['run_id', 'withinTaskIndex'], keep=False)
+
+    removed_subjects = np.setdiff1d(
+        data_et_old['run_id'].unique(),
+        data_et_new['run_id'].unique()
+    )
+
+    print(
+        f"""Because several gaze points did not fit into the AOIs, """
+        f"""{summary_difference['n'].sum()} gaze points of """
+        f"""{len(summary_difference)} trials and """
+        f"""{summary_difference['run_id'].nunique()} runs were excluded. \n"""
+        f"""See the following: \n"""
+        f"""{summary_difference} \n"""
+        f"""Moreover n={len(removed_subjects)} runs """
+        f"""({removed_subjects}) """ 
+        f"""were removed because no eye-tracking data matched the AOIs. \n""")
+
+
+def match_remaining_et_trials(data_trial, data_et):
+
+    grouped = data_et.groupby(
+            ['run_id', 'trial_index'],
+            as_index=False)[['x', 'y']].mean() \
+        .rename(columns={'x': 'x_mean', 'y': 'y_mean'})
+
+    data_trial = merge_by_index(data_trial, grouped, 'x_mean', 'y_mean')
+    missing_values = data_trial.loc[
+                     data_trial[['x_mean', 'y_mean']].isna().all(1), :] \
+        .groupby(['run_id'], as_index=False)['trial_index'].count() \
+        .rename(columns={'trial_index': 'n'})
+
+    data_trial = data_trial.loc[
+                 ~data_trial[['x_mean', 'y_mean']].isna().all(1), :]
+
+    print(
+        f"""Removing trials with missing eye-tracking data: \n"""
+        f"""{sum(missing_values['n'])} trials of """
+        f"""{missing_values['run_id'].nunique()} runs. \n"""
+    )
+
+    return data_trial
+
+
+def match_remaining_et_runs(data_subject, data_et):
+
+    grouped = data_et.groupby(
+            ['run_id', 'trial_index'],
+            as_index=False)[['x', 'y']].mean() \
+        .rename(columns={'x': 'x_mean', 'y': 'y_mean'}) \
+        .groupby(
+            ['run_id'],
+            as_index=False)[['x_mean', 'y_mean']].mean()
+
+    data_subject = merge_by_subject(data_subject, grouped, 'x_mean', 'y_mean')
+
+    missing_runs = data_subject.loc[
+        data_subject[['x_mean', 'y_mean']].isna().all(1),
+        'run_id']
+
+    data_subject = data_subject.loc[
+                 ~data_subject[['x_mean', 'y_mean']].isna().all(1), :]
+
+    print(
+        f"""Removing runs with completely missing eye-tracking data: """
+        f"""n={len(missing_runs)} ({missing_runs.values[0]}). \n"""
+    )
+
+    return data_subject
 
 
 def plot_aoi_scatter(data_et):

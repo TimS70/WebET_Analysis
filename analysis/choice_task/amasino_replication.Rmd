@@ -9,14 +9,9 @@ output:
 # Setup
 ```{r}
 setwd("C:/Users/User/GitHub/WebET_Analysis")
-getPackages <- function(pkg){
-  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
-  if (length(new.pkg)) 
-    install.packages(new.pkg, dependencies = TRUE)
-  sapply(pkg, require, character.only = TRUE)
-}
 
-getPackages(c('plyr',
+
+get_packages(c('plyr',
               'dplyr', 
               
               "effsize",
@@ -33,16 +28,19 @@ getPackages(c('plyr',
             )
 
 
-source("functions_r/geom_split_violin.R")
-source("functions_r/merge_mean_by_subject.R")
+source("utils/r/geom_split_violin.R")
+source("utils/r/merge_mean_by_subject.R")
+source('utils/r/summarize_datasets.R')
+source('utils/r/get_packages.R')
 ```
 
 
 # Adjusted or uncorrected et data?
 ```{r}
-use_adjusted_et_data = FALSE
+use_adjusted_et_data = TRUE
 if (use_adjusted_et_data) {
-    print('Using adjusted et_data. As a consequence there is no et data beyond the corrected aoi clusters')
+    print('Using adjusted et_data. As a consequence there is no et data 
+          beyond the corrected aoi clusters')
 }
 ```
 
@@ -52,49 +50,27 @@ if (use_adjusted_et_data) {
 if (use_adjusted_et_data) {
     
     data_subject = read.csv(
-        'data_jupyter/choice_task/adjusted/data_subject.csv')
+        'data/choice_task/adjusted/data_subject.csv')
     
     data_trial = read.csv(
-        'data_jupyter/choice_task/adjusted/data_trial.csv')
+        'data/choice_task/adjusted/data_trial.csv')
     
     data_et = read.csv(
-        'data_jupyter/choice_task/adjusted/data_et.csv') 
+        'data/choice_task/adjusted/data_et.csv') 
 
 } else {
 
     data_subject = read.csv(
-        'data_jupyter/choice_task/uncorrected/data_subject.csv')
+        'data/choice_task/uncorrected/data_subject.csv')
     
     data_trial = read.csv(
-        'data_jupyter/choice_task/uncorrected/data_trial.csv')
+        'data/choice_task/uncorrected/data_trial.csv')
     
     data_et = read.csv(
-        'data_jupyter/choice_task/uncorrected/data_et.csv')
+        'data/choice_task/uncorrected/data_et.csv')
 }
 
-et_trials = data_et %>%
-    dplyr::select(run_id, trial_index) %>%
-    distinct()
-
-summary = data.frame(
-    name = c(
-       'data_et',
-       'data_trial',
-       'data_subject'
-    ),
-    runs = c( 
-        length(unique(data_et$run_id)),
-        length(unique(data_trial$run_id)),
-        length(unique(data_subject$run_id))
-    ),
-    n_trials = c(
-        nrow(data_trial),
-        nrow(et_trials), 
-        '-'
-    )
-) 
-
-summary
+summarize_datasets(data_et, data_trial, data_subject)
 ```
 
 ```{r}
