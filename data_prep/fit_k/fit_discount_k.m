@@ -11,10 +11,19 @@ function fit_discount_k()
 %     khoi 06.26.09 simplified
 %     schneegans 08.01.2021 simplified 
 
-cd('C:\Users\User\GitHub\WebET_Analysis\fitK')
-data = readtable('..\data_jupyter\choice_task\data_trial.csv');
+
+root = 'C:\Users\User\GitHub\WebET_Analysis';
+
+cd(fullfile(root, 'data_prep', 'fit_k'));
+
+f = waitbar(0,'Reading data');
+
+data = readtable(fullfile(root, ...
+    'data', 'choice_task', 'uncorrected', 'data_trial.csv'));
+
 data = data(:, {'run_id', 'aSS', 'aLL', 'tSS', 'tLL', ...
     'choseLL', 'trial_duration_exact', 'LL_top', 'choseTop'});
+
 output=[];
 
 subject = unique(data.run_id);
@@ -26,7 +35,7 @@ for i = 1:length(subject)  %loop over all subjects
         data_thisSubject.aSS, ...
         0, ...
         data_thisSubject.aLL, ...
-        data_thisSubject.tLL)
+        data_thisSubject.tLL);
     
     noise = info.b(1);
     k = info.b(2);
@@ -38,12 +47,23 @@ for i = 1:length(subject)  %loop over all subjects
     else %Fit within typical range, keep fit
         output=[output; subject(i), log(k), noise]; %Save log(k) as output
     end
+    
+    waitbar(i/length(subject),f,'Looping over subjects');
+        
 end
+
+waitbar(1,f,'Writing data');
 
 output = array2table(output);
 output.Properties.VariableNames(1:3) = {
     'run_id', 'logK', 'noise'};
+
+cd(fullfile(root, 'data', 'choice_task'));
 writetable(output, 'logK.csv');
+cd(root);
+
+close(f)
+
 end
 
 
