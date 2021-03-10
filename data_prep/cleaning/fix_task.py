@@ -139,10 +139,13 @@ def runs_with_incomplete_fix_tasks(data_trial_fix):
     summary = n_trials_by_run.loc[
               n_trials_by_run['run_id'].isin(runs_incomplete_fix_task),
               :]
-    print(
-        f"""Incomplete runs with number of trials: \n"""
-        f"""{summary} \n"""
-    )
+
+    if len(summary) > 0:
+        print(
+            f"""Incomplete runs with number of trials: \n"""
+            f"""{summary} \n""")
+    else:
+        print(f""" - No incomplete runs found. \n""")
 
     return runs_incomplete_fix_task
 
@@ -179,10 +182,15 @@ def missing_glasses(data_subject):
         pd.isna(data_subject['glasses_binary']),
         'run_id']
 
-    print(
-        f"""n={len(runs_na_glasses)} """
-        f"""participants were excluded because we did not provide """
-        f"""information about their sight. \n""")
+    if len(runs_na_glasses) > 0:
+        print(
+            f"""n={len(runs_na_glasses)} """
+            f"""participants were excluded because we did not provide """
+            f"""information about their sight. \n""")
+    else:
+        print(' - checked sight-information of subjects and found no '
+              'missing data. \n')
+
 
     return runs_na_glasses
 

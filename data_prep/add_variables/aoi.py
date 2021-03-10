@@ -134,10 +134,11 @@ def match_remaining_et_runs(data_subject, data_et):
     data_subject = data_subject.loc[
                  ~data_subject[['x_mean', 'y_mean']].isna().all(1), :]
 
-    print(
-        f"""Removing runs with completely missing eye-tracking data: """
-        f"""n={len(missing_runs)} ({missing_runs.values[0]}). \n"""
-    )
+    if len(missing_runs) > 0:
+        print(
+            f"""Removing runs with completely missing eye-tracking data: """
+            f"""n={len(missing_runs)} ({missing_runs.values[0]}). \n"""
+        )
 
     return data_subject
 

@@ -48,6 +48,8 @@ def global_cleaning():
 
     summarize_datasets(data_et, data_trial, data_subject)
 
+    print(f"""Datasets written to """
+          f"""{os.path.join('data', 'all_trials', 'cleaned')}""")
     makedir('data', 'all_trials', 'cleaned')
     data_et.to_csv(
         os.path.join('data', 'all_trials', 'cleaned',

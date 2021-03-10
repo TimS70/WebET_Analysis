@@ -43,22 +43,22 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
     summarize_datasets(data_et, data_trial, data_subject)
 
     # # Information attributes
-    # data_trial = identify_amount_left(data_trial)
-    # data_trial = add_choice_options_num(data_trial)
-    # data_trial = reformat_attributes(data_trial)
-    # data_trial = top_bottom_attributes(data_trial)
-    # data_trial['k'] = k(
-    #     data_trial['aLL'], data_trial['aSS'], data_trial['tLL'])
-    #
-    # data_et = merge_by_index(
-    #     data_et, data_trial, 'amountLeft', 'LL_top')
-    #
-    # # Behavioral responses
-    # data_trial = choice_response_variables(data_trial)
-    # data_subject = add_mean_choice_rt(data_subject, data_trial)
-    # data_subject = merge_by_subject(
-    #     data_subject, data_trial,
-    #     'choseLL', 'choseTop', 'LL_top')
+    data_trial = identify_amount_left(data_trial)
+    data_trial = add_choice_options_num(data_trial)
+    data_trial = reformat_attributes(data_trial)
+    data_trial = top_bottom_attributes(data_trial)
+    data_trial['k'] = k(
+        data_trial['aLL'], data_trial['aSS'], data_trial['tLL'])
+
+    data_et = merge_by_index(
+        data_et, data_trial, 'amountLeft', 'LL_top')
+
+    # Behavioral responses
+    data_trial = choice_response_variables(data_trial)
+    data_subject = add_mean_choice_rt(data_subject, data_trial)
+    data_subject = merge_by_subject(
+        data_subject, data_trial,
+        'choseLL', 'choseTop', 'LL_top')
 
     # AOIs
     data_et = add_aoi_et(data_et, use_adjusted_et_data)

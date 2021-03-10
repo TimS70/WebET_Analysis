@@ -35,11 +35,8 @@ def add_data_quality_var():
 
     # Offset
 
-    data_et = add_offset(data_et)
     data_et_fix = add_offset(data_et_fix)
 
-    data_trial = merge_mean_by_index(
-        data_trial, data_et, 'offset', 'offset_px')
     data_trial_fix = merge_mean_by_index(
         data_trial_fix, data_et_fix, 'offset', 'offset_px')
 
@@ -47,11 +44,7 @@ def add_data_quality_var():
         data_subject, data_trial_fix, 'offset', 'offset_px')
 
     # Precision
-    data_et = distance_from_xy_mean_square(data_et)
     data_et_fix = distance_from_xy_mean_square(data_et_fix)
-
-    data_trial = aggregate_precision_from_et_data(
-      data_trial, data_et)
     data_trial_fix = aggregate_precision_from_et_data(
         data_trial_fix, data_et_fix)
     data_subject = merge_by_subject(
@@ -63,24 +56,19 @@ def add_data_quality_var():
 
     makedir('data', 'fix_task', 'added_var')
     data_et.to_csv(
-        os.path.join('data', 'fix_task', 'added_var',
-                     'data_et.csv'),
+        os.path.join('data', 'fix_task', 'added_var', 'data_et.csv'),
         index=False, header=True)
     data_et_fix.to_csv(
-        os.path.join('data', 'fix_task', 'added_var',
-                     'data_et_fix.csv'),
+        os.path.join('data', 'fix_task', 'added_var', 'data_et_fix.csv'),
         index=False, header=True)
     data_trial_fix.to_csv(
-        os.path.join('data', 'fix_task', 'added_var',
-                     'data_trial_fix.csv'),
+        os.path.join('data', 'fix_task', 'added_var', 'data_trial_fix.csv'),
         index=False, header=True)
     data_trial.to_csv(
-        os.path.join('data', 'fix_task', 'added_var',
-                     'data_trial.csv'),
+        os.path.join('data', 'fix_task', 'added_var', 'data_trial.csv'),
         index=False, header=True)
     data_subject.to_csv(
-        os.path.join('data', 'fix_task', 'added_var',
-                     'data_subject.csv'),
+        os.path.join('data', 'fix_task', 'added_var', 'data_subject.csv'),
         index=False, header=True)
 
     print(
@@ -152,8 +140,7 @@ def distance_from_xy_mean_square(data):
     ]
 
     summary = data.loc[:, [
-                              'distance_from_xy_mean_square',
-                              'distanceFromAVG_square_px']] \
+        'distance_from_xy_mean_square', 'distanceFromAVG_square_px']] \
         .describe()
 
     print(

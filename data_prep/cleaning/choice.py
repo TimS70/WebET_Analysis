@@ -196,6 +196,6 @@ def check_unequal_trial_numbers(data_et, data_trial):
         f"""empty (et-related) trial. \n"""
         f"""That is where the difference of """
         f"""{grouped_missing_et['trial_index'].sum()} trials """
-        f"""is coming from."""
+        f"""is coming from: \n"""
+        f"""{grouped_missing_et} \n"""
     )
-    print(grouped_missing_et)

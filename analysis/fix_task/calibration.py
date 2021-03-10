@@ -1,5 +1,8 @@
 import matplotlib.pyplot as plt
 
+from data_prep.add_variables.data_quality import add_offset, distance_from_xy_mean_square, \
+    aggregate_precision_from_et_data
+from utils.data_frames import merge_mean_by_index
 from utils.plots import spaghetti_plot, save_plot
 
 
@@ -8,6 +11,21 @@ from utils.plots import spaghetti_plot, save_plot
 
 
 def analyze_calibration(data_et, data_trial):
+
+    print(
+        """
+            ###############################
+            Analyze calibration
+            ###############################
+        """
+    )
+    data_et = add_offset(data_et)
+    data_trial = merge_mean_by_index(
+        data_trial, data_et, 'offset', 'offset_px')
+    data_et = distance_from_xy_mean_square(data_et)
+    data_trial = aggregate_precision_from_et_data(data_trial, data_et)
+
+
     data_et_calibration = data_et.loc[
                           data_et['trial_type'] == 'eyetracking-calibration', :]
     data_trial_calibration = data_trial.loc[
