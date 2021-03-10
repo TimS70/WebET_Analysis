@@ -8,12 +8,22 @@ output:
 
 # Setup
 ```{r}
-setwd("C:/Users/User/GitHub/WebET_Analysis")
+root = "C:/Users/User/GitHub/WebET_Analysis"
+path_results = file.path(root, 'results', 'plots', 'choice_task')
 
+knitr::opts_knit$set(root.dir = normalizePath(file.path('..', '..')))
+
+knitr::opts_knit$get("root.dir")
+
+
+source(file.path(root, 'utils', 'r', 'geom_split_violin.R'))
+source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
+source(file.path(root, 'utils', 'r', 'summarize_datasets.R'))
+source(file.path(root, 'utils', 'r', 'get_packages.R'))
+source(file.path(root, 'utils', 'r', 'remove_runs.R'))
 
 get_packages(c('plyr',
               'dplyr', 
-              
               "effsize",
               'e1071',
               "ggplot2",
@@ -27,47 +37,44 @@ get_packages(c('plyr',
               'tidyr')
             )
 
-
-source("utils/r/geom_split_violin.R")
-source("utils/r/merge_mean_by_subject.R")
-source('utils/r/summarize_datasets.R')
-source('utils/r/get_packages.R')
-```
-
-
-# Adjusted or uncorrected et data?
-```{r}
-use_adjusted_et_data = TRUE
-if (use_adjusted_et_data) {
-    print('Using adjusted et_data. As a consequence there is no et data 
-          beyond the corrected aoi clusters')
-}
+print(getwd())
 ```
 
 
 # Read and create datasets
 ```{r}
+use_adjusted_et_data = FALSE
+if (use_adjusted_et_data) {
+    print('Using adjusted et_data. As a consequence there is no et data beyond the corrected aoi clusters')
+}
+
 if (use_adjusted_et_data) {
     
     data_subject = read.csv(
-        'data/choice_task/adjusted/data_subject.csv')
+        file.path(root, 'data', 'choice_task', 'adjusted', 
+                  'data_subject.csv'))
     
     data_trial = read.csv(
-        'data/choice_task/adjusted/data_trial.csv')
+        file.path(root, 'data', 'choice_task', 'adjusted', 
+                  'data_trial.csv'))
     
     data_et = read.csv(
-        'data/choice_task/adjusted/data_et.csv') 
+        file.path(root, 'data', 'choice_task', 'adjusted', 
+                  'data_et.csv'))
 
 } else {
 
     data_subject = read.csv(
-        'data/choice_task/uncorrected/data_subject.csv')
+        file.path(root, 'data', 'choice_task', 'uncorrected', 
+                  'data_subject.csv'))
     
     data_trial = read.csv(
-        'data/choice_task/uncorrected/data_trial.csv')
+        file.path(root, 'data', 'choice_task', 'uncorrected', 
+                  'data_trial.csv'))
     
     data_et = read.csv(
-        'data/choice_task/uncorrected/data_et.csv')
+        file.path(root, 'data', 'choice_task', 'uncorrected', 
+                  'data_et.csv'))
 }
 
 summarize_datasets(data_et, data_trial, data_subject)
@@ -90,10 +97,11 @@ data_et
 ## k-values
 K values and noise
 ```{r}
-run_matlab_script('fitK/fit_discount_k.m')
+# run_matlab_script(file.path(root, 'data_prep', 'fit_k', 'fit_discount_k.m'))
 
 add_logK = function(data) {
-    logK <- read.table('fitK/logK.csv', header=TRUE, sep=',')
+    logK <- read.table(file.path(root, 'data', 'choice_task', 'logK.csv'), 
+                                 header=TRUE, sep=',')
     if ('logK' %in% names(data)) {
         data = data %>% dplyr::select(!'logK')
     }
@@ -143,13 +151,11 @@ ggplot(data_subject, aes(x=logK))+
     geom_histogram(binwidth=.5, alpha=.5, position="identity")+
     scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
     theme_bw()+theme(text=element_text(size=40))
-    ggsave("plots/logk_hist.pdf", width=5.5, height=5)
     
 ggplot(data_subject, aes(x=noise))+
     geom_histogram(binwidth=5, alpha=.5, position="identity")+
     scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
     theme_bw()+theme(text=element_text(size=40))
-    ggsave("plots/logk_hist.pdf", width=5.5, height=5)
     
 ggplot(data_subject, aes(x=logK, y=noise)) +
     geom_point(size=2.5, aes(alpha=.5))+
@@ -172,41 +178,41 @@ ggplot(data_subject %>% filter(noise < 500), aes(x=logK, y=noise)) +
 
 ## Biased choices
 ````{r}
-subjects_biasedChoices = data_subject %>%
+runs_biasedChoices = data_subject %>%
     filter(
         choseLL>0.98 | choseLL<0.02 |
         choseTop>0.98 | choseTop<0.02     
           ) %>%
     arrange(run_id) %>%
     dplyr::pull(run_id)
-subjects_biasedChoices
+runs_biasedChoices
 ```
 
 ## Missing LogK
 ```{r}
-subjects_missingLogK = data_subject %>%
+runs_missingLogK = data_subject %>%
     filter(is.na(logK)) %>%
     arrange(run_id) %>%
     dplyr::pull(run_id)
-subjects_missingLogK
+runs_missingLogK
 ```
 
 ## High noise
 ```{r}
-subjects_noisy_logK = data_subject %>%
+runs_noisy_logK = data_subject %>%
     filter(noise>40) %>%
     arrange(run_id) %>%
     dplyr::pull(run_id)
-subjects_noisy_logK
+runs_noisy_logK
 ```
 
 ## Positive logK 
 ```{r}
-subjects_pos_logK = data_subject %>%
+runs_pos_logK = data_subject %>%
     filter(logK>0) %>%
     arrange(run_id) %>%
     dplyr::pull(run_id)
-subjects_pos_logK
+runs_pos_logK
 ```
 
 ## Trials with too much missing data for Option Index
@@ -221,15 +227,15 @@ grouped_NA_ET = data_trial %>%
     arrange(n_NA_OI, n_NA_AI, n_NA_PI)
 grouped_NA_ET
 
-subjects_NA_OI = grouped_NA_ET %>%
+runs_NA_OI = grouped_NA_ET %>%
     filter(n_NA_OI>40) %>%
     dplyr::pull(run_id)
 
-subjects_NA_AI = grouped_NA_ET %>%
+runs_NA_AI = grouped_NA_ET %>%
     filter(n_NA_AI>40) %>%
     dplyr::pull(run_id)
 
-subjects_NA_PI = grouped_NA_ET %>%
+runs_NA_PI = grouped_NA_ET %>%
     filter(n_NA_PI>40) %>%
     dplyr::pull(run_id)
 ```
@@ -237,11 +243,11 @@ subjects_NA_PI = grouped_NA_ET %>%
 
 # Cleaning
 ```{r}
-excludeSubjects = c(
-    subjects_biasedChoices,
-    subjects_pos_logK,
-    subjects_noisy_logK,
-    subjects_missingLogK) %>%
+exclude_runs = c(
+    runs_biasedChoices,
+    runs_pos_logK,
+    runs_noisy_logK,
+    runs_missingLogK) %>%
     unique()
 
 summary = data.frame(
@@ -253,28 +259,20 @@ summary = data.frame(
         'total'
     ),
     n = c(
-        length(subjects_biasedChoices),
-        length(subjects_pos_logK),
-        length(subjects_noisy_logK),
-        length(subjects_missingLogK),
-        length(excludeSubjects)
+        length(runs_biasedChoices),
+        length(runs_pos_logK),
+        length(runs_noisy_logK),
+        length(runs_missingLogK),
+        length(exclude_runs)
     )
 )
 summary
 ```
 
 ```{r}
-generalCleaninng = function(data) {
-    data = data %>%
-        filter(
-            run_id < 1000 & 
-            !(run_id %in% excludeSubjects)
-                )
-}
-
-data_subject = generalCleaninng(data_subject)
-data_trial = generalCleaninng(data_trial)
-data_et = generalCleaninng(data_et)
+data_subject = remove_runs(data_subject)
+data_trial = remove_runs(data_trial)
+data_et = remove_runs(data_et)
 
 print(paste(
     'Number of remaining participants: n =', 
@@ -284,11 +282,12 @@ print(paste(
 
 # Histogram of left/right and top/bottom choice distribution
 ```{r}
-#Replication sample
+dir.create(file.path(path_results, 'behavior'))
 ggplot(data_subject, aes(x=choseTop))+
   geom_histogram(bins=15)+theme_bw()+xlab("Proportion Top Choices")+
   theme(text=element_text(size=20))+xlim(0,1)
-ggsave("plots/choiceSide.pdf",width=5.5, height=5)
+ggsave(file.path(path_results, 'behavior', 'choice_vs_side.pdf'),
+			 width=5.5, height=5)
 ```
 
 
@@ -299,7 +298,8 @@ ggplot(data_subject, aes(x=logK))+
   geom_histogram(binwidth=.5, alpha=.5, position="identity")+
   scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
   theme_bw()+theme(text=element_text(size=40))
-  ggsave("plots/logk_hist.pdf", width=5.5, height=5)
+  ggsave(file.path(path_results, 'behavior', 'log_k_hist.pdf'), 
+  			 width=5.5, height=5)
 ```
 
 
@@ -330,15 +330,26 @@ data_trial %>%
 
 ## ChoseTop by dSV bins
 ```{r}
-data_trial$dSV_bin = 
-    cut(data_trial$dSV_TB,
-    breaks = seq(-5, 5, 1),
-    labels = seq(-4.5, 4.5, 1),
+add_et_count = function(data_trial, data_et) {
+		grouped = data_et %>% group_by(run_id, trial_index) %>%
+				summarise(x_count = n(), .groups='keep') %>%
+		dplyr::select(run_id, trial_index, x_count)
+	
+		data_trial = merge(data_trial, grouped, by=c('run_id', 'trial_index'))
+		
+		return(data_trial)
+}
+
+data_trial$dSV_bin = cut(
+				data_trial$dSV_TB,
+		    breaks = seq(-5, 5, 1),
+		    labels = seq(-4.5, 4.5, 1),
     include.lowest=TRUE) %>%
     paste() %>%
     as.numeric()
 
 SV_bins = data_trial %>%
+		add_et_count(data_et) %>%
     dplyr::group_by(run_id, dSV_bin) %>%
     dplyr::summarise(
         n=n(),
@@ -363,6 +374,8 @@ print(
     )
 )
 
+dir.create(file.path(path_results, 'SV'))
+
 ggplot(data=SV_bins, aes(x=dSV_bin, y=choseTop)) + 
     theme_bw() +
     geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
@@ -371,7 +384,7 @@ ggplot(data=SV_bins, aes(x=dSV_bin, y=choseTop)) +
     stat_summary(fun.data=mean_se, geom="errorbar", width=.8)+
     xlab("SV top - SV bottom")+ylab("Proportion top choices")+
     theme(text=element_text(size=20))+ylim(0,1)
-ggsave("plots/SV_choseTop.pdf", width=5.5, height=5)
+ggsave(file.path(path_results, 'SV', 'choseTop.pdf'), width=5.5, height=5)
 
 ggplot(data=SV_bins, aes(x=dSV_bin, y=rt)) +
     theme_bw() +
@@ -382,7 +395,7 @@ ggplot(data=SV_bins, aes(x=dSV_bin, y=rt)) +
     xlab("SV top - SV bottom") + 
     ylab("Response Time (s)") +
     theme(text=element_text(size=20))
-ggsave("plots/SV_RT.pdf",width=5.5, height=5)
+ggsave(file.path(path_results, 'SV', 'rt.pdf'),width=5.5, height=5)
 
 ggplot(data=SV_bins, aes(x=dSV_bin, y=n_fixations)) +
     theme_bw() +
@@ -393,147 +406,150 @@ ggplot(data=SV_bins, aes(x=dSV_bin, y=n_fixations)) +
     xlab("SV top - SV bottom") + 
     ylab("Number of Fixations") +
     theme(text=element_text(size=20))
-ggsave("plots/SV_Count.pdf",width=5.5, height=5)
+ggsave(file.path(path_results, 'SV', 'count.pdf'),width=5.5, height=5)
 ```
 
 # Eye tracking indices
 ## Correlation of Eye tracking indices and discount rate
 ```{r}
-ggplot(data_subject %>% filter(!run_id %in% subjects_NA_OI), 
+dir.create(file.path(path_results, 'et'))
+ggplot(data_subject %>% filter(!run_id %in% runs_NA_OI), 
        aes(x=optionIndex, y=logK)) +
-  geom_point(size=2.5, aes(alpha=.5)) +
-  guides(alpha=FALSE,color=FALSE, shape=FALSE) +
-  theme_bw() + 
-  xlim(-1,1) +
-  theme(text=element_text(size=20))+
-  xlab("Option index") +
-  ylab("log(k)") + 
-  scale_colour_grey()
-ggsave('plots/logK_OI.pdf',width=5.7, height=5)
+		geom_point(size=2.5, aes(alpha=.5)) +
+		guides(alpha=FALSE,color=FALSE, shape=FALSE) +
+		theme_bw() + 
+		xlim(-1,1) +
+		theme(text=element_text(size=20))+
+		xlab("Option index") +
+		ylab("log(k)") + 
+		scale_colour_grey()
+ggsave(file.path(path_results, 'et', 'logK_oi.pdf'), width=5.7, height=5)
 
-data_test = data_subject %>% filter(!run_id %in% subjects_NA_OI)
+data_test = data_subject %>% filter(!run_id %in% runs_NA_OI)
 cor.test(data_test$optionIndex, data_test$logK) 
 
-ggplot(data_subject %>% filter(!run_id %in% subjects_NA_AI), 
+ggplot(data_subject %>% filter(!run_id %in% runs_NA_AI), 
        aes(x=attributeIndex, y=logK)) +
-  geom_point(size=2.5, aes(alpha=.5))+
-  guides(alpha=FALSE,color=FALSE, shape=FALSE)+
-  theme_bw() + 
-  xlim(-1,1) +
-  scale_colour_grey()
-  theme(text=element_text(size=20))+
-  xlab("Attribute index") + ylab("log(k)") 
-ggsave("plots/logk_AI.pdf",width=5.7, height=5)
+		geom_point(size=2.5, aes(alpha=.5)) +
+		guides(alpha=FALSE,color=FALSE, shape=FALSE) +
+		theme_bw() + 
+		xlim(-1,1) +
+		scale_colour_grey()
+		theme(text=element_text(size=20)) +
+		xlab("Attribute index") + ylab("log(k)") 
+ggsave(file.path(path_results, 'et', 'logK_ai.pdf'),width=5.7, height=5)
 
-data_test = data_subject %>% filter(!run_id %in% subjects_NA_AI)
+data_test = data_subject %>% filter(!run_id %in% runs_NA_AI)
 cor.test(data_test$attributeIndex, data_test$logK) 
 
 #Plot correlation between Payne index and discount rate
 #Replication sample
-ggplot(data_subject %>% filter(!run_id %in% subjects_NA_AI), 
+ggplot(data_subject %>% filter(!run_id %in% runs_NA_AI), 
        aes(x=payneIndex, y=logK)) +
-  geom_point(size=2.5, aes(alpha=.5))+
-  guides(alpha=FALSE,color=FALSE, shape=FALSE)+
-  theme_bw() + 
-  xlim(-1,1) + 
-  scale_colour_grey() + 
-  theme(text=element_text(size=20))+
-  xlab("Payne index") +
-  ylab("log(k)") 
-ggsave("plots/logk_PI.pdf",width=5.7, height=5)
+		geom_point(size=2.5, aes(alpha=.5))+
+		guides(alpha=FALSE,color=FALSE, shape=FALSE)+
+		theme_bw() + 
+		xlim(-1,1) + 
+		scale_colour_grey() + 
+		theme(text=element_text(size=20))+
+		xlab("Payne index") +
+		ylab("log(k)") 
+ggsave(file.path(path_results, 'et', 'logK_pi.pdf'),width=5.7, height=5)
 
-data_test = data_subject %>% filter(!run_id %in% subjects_NA_PI)
+data_test = data_subject %>% filter(!run_id %in% runs_NA_PI)
 cor.test(data_test$payneIndex, data_test$logK) 
 ```
 
 ## Correlation of Eye tracking indices among each other
 ```{r}
 ggplot(data_subject %>% 
-           filter(!run_id %in% c(subjects_NA_OI, subjects_NA_AI)), 
+           filter(!run_id %in% c(runs_NA_OI, runs_NA_AI)), 
        aes(x=optionIndex, y=attributeIndex)) +
-  geom_point(size=2.5, aes(alpha=.5)) +
-  guides(alpha=FALSE,color=FALSE, shape=FALSE) +
-  theme_bw() + 
-  xlim(-1,1) +
-  theme(text=element_text(size=20))+
-  xlab("Option index") +
-  ylab("Attribute Index") + 
-  scale_colour_grey()
-ggsave('plots/ET_indices_OI_AI.pdf',width=5.7, height=5)
+		geom_point(size=2.5, aes(alpha=.5)) +
+		guides(alpha=FALSE,color=FALSE, shape=FALSE) +
+		theme_bw() + 
+		xlim(-1,1) +
+		theme(text=element_text(size=20))+
+		xlab("Option index") +
+		ylab("Attribute Index") + 
+		scale_colour_grey()
+ggsave(file.path(path_results, 'et', 'oi_ai.pdf'),width=5.7, height=5)
 
 data_test = data_subject %>% 
-    filter(!run_id %in% c(subjects_NA_OI, subjects_NA_AI))
+    filter(!run_id %in% c(runs_NA_OI, runs_NA_AI))
 cor.test(data_test$optionIndex, data_test$attributeIndex) 
 
 ggplot(data_subject %>% 
-           filter(!run_id %in% c(subjects_NA_OI, subjects_NA_PI)), 
+           filter(!run_id %in% c(runs_NA_OI, runs_NA_PI)), 
        aes(x=optionIndex, y=payneIndex)) +
-  geom_point(size=2.5, aes(alpha=.5))+
-  guides(alpha=FALSE,color=FALSE, shape=FALSE)+
-  theme_bw() + 
-  xlim(-1,1) +
-  scale_colour_grey()
-  theme(text=element_text(size=20))+
-  xlab("Option Index") + ylab("Payne Index") 
-ggsave("plots/ET_indices_OI_PI.pdf",width=5.7, height=5)
+		geom_point(size=2.5, aes(alpha=.5))+
+		guides(alpha=FALSE,color=FALSE, shape=FALSE) +
+		theme_bw() + 
+		xlim(-1,1) +
+		scale_colour_grey()
+		theme(text=element_text(size=20)) +
+		xlab("Option Index") + ylab("Payne Index") 
+ggsave(file.path(path_results, 'et', 'oi_pi.pdf'), width=5.7, height=5)
 
 data_test = data_subject %>% 
-    filter(!run_id %in% c(subjects_NA_OI, subjects_NA_PI))
+    filter(!run_id %in% c(runs_NA_OI, runs_NA_PI))
 cor.test(data_test$optionIndex, data_test$payneIndex) 
 
 #Plot correlation between Payne index and discount rate
 #Replication sample
 ggplot(data_subject %>% 
-    filter(!run_id %in% c(subjects_NA_PI, subjects_NA_AI)), 
+    filter(!run_id %in% c(runs_NA_PI, runs_NA_AI)), 
        aes(x=attributeIndex, y=payneIndex)) +
-  geom_point(size=2.5, aes(alpha=.5))+
-  guides(alpha=FALSE,color=FALSE, shape=FALSE)+
-  theme_bw() + 
-  xlim(-1,1) + 
-  scale_colour_grey() + 
-  theme(text=element_text(size=20))+
-  xlab("Attribute index") +
-  ylab("Payne Index") 
-ggsave("plots/ET_indices_AI_PI.pdf",width=5.7, height=5)
+		geom_point(size=2.5, aes(alpha=.5))+
+		guides(alpha=FALSE,color=FALSE, shape=FALSE) +
+		theme_bw() + 
+		xlim(-1,1) + 
+		scale_colour_grey() + 
+		theme(text=element_text(size=20)) +
+		xlab("Attribute index") +
+		ylab("Payne Index") 
+ggsave(file.path(path_results, 'et', 'ai_pi.pdf'), width=5.7, height=5)
 
 data_test = data_subject %>% 
-    filter(!run_id %in% c(subjects_NA_PI, subjects_NA_AI))
+    filter(!run_id %in% c(runs_NA_PI, runs_NA_AI))
 cor.test(data_test$attributeIndex, data_test$payneIndex) 
 ```
 
 ### Trial bins
 Little variance across the trials but this could also be due to the lower sample size
 ```{r}
-plot_trial_bins = function(data, nBins, title) {
-    data = data %>%
-        mutate(trial_bin = cut(withinTaskIndex, nBins, include.lowest=TRUE, labels=c(1:nBins)))
-    
-    grouped_choseLL = data %>% 
-        group_by(run_id, trial_bin) %>%
-        summarise(choseLL = mean(choseLL))
-    
-    grouped_trialMeans = data %>%
-        group_by(trial_bin) %>%
-        summarise(trialMeans = mean(withinTaskIndex))
-    
-    trial_bins = merge(grouped_choseLL, grouped_trialMeans, by='trial_bin')
-    trial_bins
-    
-    ggplot(
-        data=trial_bins, 
-        aes(x=trialMeans, y=choseLL)) + 
-        theme_bw() +
-        geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
-        xlim(0, 80) +
-        geom_line(stat="summary", fun="mean", size=.5)+
-        stat_summary(fun.data=mean_se, geom="errorbar", width=.8)+
-        xlab("Trial_index") + 
-        ylab("Proportion LL choices") + 
-        ggtitle(title) +
-        theme(text=element_text(size=20))+ylim(0,1)
-}
+data = data_trial
+nBins = 8
 
-plot_trial_bins(data_trial, 8, "ChoseLL across trials")
+data = data %>%
+    mutate(trial_bin = cut(
+    		withinTaskIndex, nBins, include.lowest=TRUE, labels=c(1:nBins)))
+    
+grouped_choseLL = data %>% 
+    group_by(run_id, trial_bin) %>%
+    summarise(choseLL = mean(choseLL))
+
+grouped_trialMeans = data %>%
+    group_by(trial_bin) %>%
+    summarise(trialMeans = mean(withinTaskIndex))
+
+trial_bins = merge(grouped_choseLL, grouped_trialMeans, by='trial_bin')
+trial_bins
+
+ggplot(
+    data=trial_bins, 
+    aes(x=trialMeans, y=choseLL)) + 
+    theme_bw() +
+    geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
+    xlim(0, 80) +
+    geom_line(stat="summary", fun="mean", size=.5)+
+    stat_summary(fun.data=mean_se, geom="errorbar", width=.8)+
+    xlab("Trial_index") + 
+    ylab("Proportion LL choices") + 
+    ggtitle("ChoseLL across trials") +
+    theme(text=element_text(size=20))+ylim(0,1)
+ggsave(file.path(path_results, 'behavior', 'chose_ll_vs_trials.pdf'), 
+			 width=5.7, height=5)
 ```
 
 
@@ -651,7 +667,8 @@ ggplot(timeBins_choseTB_long,
     annotate("segment",x=4.7, xend=5.3, y=1.02, yend=1.02) +
     ylab("Proportion looking top") +
     xlab("Time bins")
-ggsave("plots/et_bins_tb.pdf",width=5.5, height=5)
+ggsave(file.path(path_results, 'et', 'bins_top_vs_bottom.pdf'), 
+			 width=5.5, height=5)
 ```
 
 
@@ -695,7 +712,7 @@ create_eyeTracking_Bins = function(data, nBins) {
 data_et = create_eyeTracking_Bins(data_et, 5)
 data_et %>%
     group_by(run_id, withinTaskIndex, et_bin) %>%
-    summarise(n=n())
+    summarise(n=n(), .groups = 'keep')
 
 data_et %>%
     dplyr::select(run_id, withinTaskIndex, et_bin, t_task) %>%
@@ -778,6 +795,8 @@ ggplot(et_bins_choseTB_long,
         labels=c("Chose Top", "Chose Bottom")) +
     ylab("Proportion looking top") +
     xlab("ET bins")
+ggsave(file.path(path_results, 'et', 'point_bins_top.pdf'), 
+			 width=5.5, height=5)
 
 ggplot(et_bins_choseTB_long, 
        aes(
@@ -805,6 +824,8 @@ ggplot(et_bins_choseTB_long,
         labels=c("Chose Top", "Chose Bottom")) +
     ylab("Proportion looking bottom") +
     xlab("ET bins")
+ggsave(file.path(path_results, 'et', 'point_bins_bottom.pdf'), 
+			 width=5.5, height=5)
 
 if (!use_adjusted_et_data) {
     
@@ -834,6 +855,8 @@ if (!use_adjusted_et_data) {
             labels=c("Chose Top", "Chose Bottom")) +
         ylab("Proportion no AOI") +
         xlab("ET bins")
+	ggsave(file.path(path_results, 'et', 'point_bins_null.pdf'), 
+			 width=5.5, height=5)
 }
 
 et_bins_choseTB_long
@@ -907,7 +930,8 @@ ggplot(lastGaze_long, aes(x=lastGazeTop, y=choseTop)) +
     ylab("Proportion top choices") +
     xlab("last Fixation on Top AOIs") + 
     theme(text=element_text(size=20))
-ggsave("plots/lastGaze_vs_choice.pdf",width=5.5, height=5)
+ggsave(file.path(path_results, 'et', 'last_gaze_vs_choice.pdf'), 
+			 width=5.5, height=5)
 ```
 
 
@@ -916,8 +940,7 @@ ggsave("plots/lastGaze_vs_choice.pdf",width=5.5, height=5)
 add_lastGazeLL = function(data_trial, data_et) {
     grouped_lastCoordinate = data_et %>%
         dplyr::group_by(run_id, trial_index) %>%
-        dplyr::summarise(
-            t_task = max(t_task)) %>%
+        dplyr::summarise(t_task = max(t_task), .groups = 'keep') %>%
         merge(data_et %>% 
                   dplyr::select(run_id, trial_index, t_task, aoi, LL_top) %>%
                   filter(aoi!="0"), 
@@ -926,10 +949,8 @@ add_lastGazeLL = function(data_trial, data_et) {
             (aoi %in% c('TL', 'TR') & LL_top==1) |
             (aoi %in% c('BL', 'BR') & LL_top==0)), 
         ) 
-    
-    print(grouped_lastCoordinate)
-    
-    if ('lastGazeTop' %in% names(data_trial)) {
+   
+    if ('lastGazeLL' %in% names(data_trial)) {
         data_trial = data_trial %>% dplyr::select(!lastGazeLL)}
     data_trial = data_trial %>% 
         merge(
@@ -946,8 +967,7 @@ data_trial = add_lastGazeLL(data_trial, data_et)
 ```{r}
 grouped_lastCoordinate = data_et %>%
     dplyr::group_by(run_id, trial_index) %>%
-    dplyr::summarise(
-        t_task = max(t_task)) %>%
+    dplyr::summarise(t_task = max(t_task), .groups='keep') %>%
     merge(data_et %>% 
               dplyr::select(run_id, trial_index, t_task, aoi, LL_top) %>%
               filter(aoi!="0"), 
@@ -1000,6 +1020,8 @@ ggplot(lastGaze_long,
     ylab("Proportion LL choices") +
     xlab("last Fixation on LL AOIs") + 
     theme(text=element_text(size=20))
+ggsave(file.path(path_results, 'et', 'last_fix_ll_vs_choice_ll.pdf'), 
+			 width=5.5, height=5)
 ```
 
 
@@ -1083,8 +1105,7 @@ data_trial = matchTrials(data_trial)
 
 data_trial %>% 
 #    filter(errorTrial==1) %>%
-    dplyr::select(errorTrial, patientError, 
-                  impatientError, matched_trial)
+    dplyr::select(errorTrial, patientError, impatientError, matched_trial)
 
 ````
 
@@ -1152,17 +1173,17 @@ t.test(rt ~ errorTrial,
 
 t.test(optionIndex ~ errorTrial,
        data=grouped %>% filter(
-           LLexpected==1 & !run_id %in% subjects_NA_OI),
+           LLexpected==1 & !run_id %in% runs_NA_OI),
        paired=TRUE, na.action=na.pass)
 
 t.test(attributeIndex ~ errorTrial,
        data=grouped %>% filter(
-           LLexpected==1 & !run_id %in% subjects_NA_AI),
+           LLexpected==1 & !run_id %in% runs_NA_AI),
        paired=TRUE, na.action=na.pass)
 
 t.test(payneIndex ~ errorTrial,
        data=grouped %>% filter(
-           LLexpected==1 & !run_id %in% subjects_NA_PI),
+           LLexpected==1 & !run_id %in% runs_NA_PI),
        paired=TRUE, na.action=na.pass)
 ````
 
@@ -1177,17 +1198,17 @@ t.test(rt ~ errorTrial,
 
 t.test(optionIndex ~ errorTrial,
        data=grouped %>% filter(
-           LLexpected==0 & !run_id %in% subjects_NA_OI),
+           LLexpected==0 & !run_id %in% runs_NA_OI),
        paired=TRUE, na.action=na.pass)
 
 t.test(attributeIndex ~ errorTrial,
        data=grouped %>% filter(
-           LLexpected==0 & !run_id %in% subjects_NA_AI),
+           LLexpected==0 & !run_id %in% runs_NA_AI),
        paired=TRUE, na.action=na.pass)
 
 t.test(payneIndex ~ errorTrial,
        data=grouped %>% filter(
-           LLexpected==0 & !run_id %in% subjects_NA_PI),
+           LLexpected==0 & !run_id %in% runs_NA_PI),
        paired=TRUE, na.action=na.pass)
 ```
 
@@ -1225,13 +1246,14 @@ ggplot(data_plot, aes(x=LLexpected, y=rt, fill=errorTrial)) +
   labs(fill="",color="")+
   guides(size="none") + 
   scale_colour_grey() + scale_fill_grey()
-ggsave("plots/error_responseTime.pdf",width=6.5, height=5)
+ggsave(file.path(path_results, 'behavior', 'error_trials_vs_rt.pdf'), 
+			 width=5.5, height=5)
 ```
 
 ```{r}
 ggplot(
     data_plot %>% filter(
-        !run_id %in% subjects_NA_OI), 
+        !run_id %in% runs_NA_OI), 
        aes(x=LLexpected, y=optionIndex, fill=errorTrial)) +
   geom_split_violin(alpha=.6, size=0, position=position_dodge(0)) +
   stat_summary(
@@ -1254,5 +1276,6 @@ ggplot(
   labs(fill="",color="")+
   guides(size="none") + 
   scale_colour_grey() + scale_fill_grey()
-ggsave("plots/error_optionIndex.pdf",width=6.5, height=5)
+ggsave(file.path(path_results, 'et', 'error_trials_vs_oi.pdf'), 
+			 width=5.5, height=5)
 ```

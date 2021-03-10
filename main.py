@@ -42,6 +42,5 @@ def init_analysis(cluster_correction=False):
     analyze_choice_task(use_adjusted_et_data=cluster_correction)
     analyze_fix_task()
 
-
 if __name__ == '__main__':
     main(new_data=False, cluster_correction=False)

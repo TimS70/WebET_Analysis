@@ -11,7 +11,7 @@ from scipy.ndimage.filters import gaussian_filter
 from data_prep.cleaning.corr_data import clean_corr_data
 from utils.data_frames import merge_by_index
 from utils.path import makedir
-from utils.plots import corr_matrix, corr_plot_split
+from utils.plots import corr_matrix, corr_plot_split, save_plot
 from utils.tables import summarize_datasets
 
 
@@ -88,10 +88,8 @@ def plot_categorical_confounders(data_subject):
                 verticalalignment='top',
                 horizontalalignment='center', size=13, weight='normal')
 
-    makedir('results', 'plots', 'choice_task')
-    plt.savefig(
-        os.path.join('results', 'plots', '',
-                     'cat_variables.png'))
+    plt.tight_layout()
+    save_plot('cat_variables.png', 'results', 'plots', 'choice_task')
 
 
 # noinspection PyUnboundLocalVariable
@@ -195,17 +193,17 @@ def corr_analysis_subject(data_subject):
 
     corr_plot_split(data_plot, corr_columns,
                     'corr_vars_vs_chinFirst_trial.png', 'chinFirst',
-                    'results', 'plots', 'choice_task')
+                    'results', 'plots', 'choice_task', 'correlations')
 
     corr_matrix(data_plot, corr_columns,
                 'table_p', 'subject_corr_p.csv',
-                'results', 'tables', 'choice_task')
+                'results', 'tables', 'choice_task', 'correlations')
     corr_matrix(data_plot, corr_columns,
                 'table_n', 'subject_corr_n.csv',
-                'results', 'tables', 'choice_task')
+                'results', 'tables', 'choice_task', 'correlations')
     corr_matrix(data_plot, corr_columns,
                 'heatmap', 'subject_corr_heatmap.png',
-                'results', 'plots', 'choice_task')
+                'results', 'plots', 'choice_task', 'correlations')
 
 
 def corr_analysis_trial(data_trial):
@@ -221,7 +219,7 @@ def corr_analysis_trial(data_trial):
 
     corr_plot_split(data_plot, corr_columns,
                     'corr_vars_vs_chinFirst_trial.png', 'chinFirst',
-                    'results', 'plots', 'choice_task')
+                    'results', 'plots', 'choice_task', 'correlations')
 
     corr_columns = [
         'chinFirst', 'choseLL', 'k', 'attributeIndex',
@@ -229,10 +227,10 @@ def corr_analysis_trial(data_trial):
 
     corr_matrix(data_plot, corr_columns,
                 'table_p', 'trial_corr_p.csv',
-                'results', 'tables', 'choice_task')
+                'results', 'tables', 'choice_task', 'correlations')
     corr_matrix(data_plot, corr_columns,
                 'table_n', 'trial_corr_n.csv',
-                'results', 'tables', 'choice_task')
+                'results', 'tables', 'choice_task', 'correlations')
     corr_matrix(data_plot, corr_columns,
                 'heatmap', 'trial_corr_heatmap.png',
-                'results', 'plots', 'choice_task')
+                'results', 'plots', 'choice_task', 'correlations')
