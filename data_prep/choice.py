@@ -15,7 +15,9 @@ from utils.tables import summarize_datasets
 
 def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
 
-    print('Adding variables to choice_task... \n')
+    print('################################### \n'
+          'Calculate variables for choice data \n'
+          '################################### \n')
 
     if use_adjusted_et_data:
         print('Using adjusted et data. \n')
@@ -277,12 +279,14 @@ def add_mean_choice_rt(data_subject, data_trial):
 
 
 def run_et_cluster_correction():
-    print('Run cluster correction for eyetracking data...')
-    os.chdir(os.path.join('clustering'))
+    print('Run cluster correction for eyetracking data. \n')
+    os.chdir(os.path.join('data_prep', 'clustering'))
 
     # noinspection SpellCheckingInspection
-    run_matlab = 'matlab -nojvm -nosplash -nodesktop -r "init_clustering(14, 0.3, 0.3); exit"'
+    run_matlab = \
+        'matlab -wait -nojvm -nosplash -nodesktop -r ' \
+        '"init_clustering(14, 0.3, 0.3); exit"'
 
     subprocess.run(run_matlab, shell=True, check=True)
 
-    os.chdir(os.path.join(''))
+    os.chdir(os.path.join('..', '..'))

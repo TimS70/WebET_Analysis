@@ -104,20 +104,26 @@ def get_box_plots(data_subject, outcome, predictors, file_name, *args):
 
 
 def corr_plot(data_plot, correlation_columns,
-              file_name, factor=None, *args):
+              file_name, factor='none', *args):
     sns.set()
 
-    if factor is None:
-        sns.pairplot(
-            data_plot.loc[:, correlation_columns],
-            kind='reg',
-            corner=True)
-    else:
-        sns.pairplot(
-            data_plot.loc[:, np.append(correlation_columns, [factor])],
-            hue=factor,
-            kind='reg',
-            corner=True)
+    sns.pairplot(
+        data_plot.loc[:, correlation_columns],
+        kind='reg',
+        corner=True)
+
+    save_plot(file_name, *args)
+    plt.close()
+
+
+def corr_plot_split(data_plot, correlation_columns, file_name, factor, *args):
+
+    sns.set()
+    sns.pairplot(
+        data_plot.loc[:, np.append(correlation_columns, [factor])],
+        hue=factor,
+        kind='reg',
+        corner=True)
 
     save_plot(file_name, *args)
     plt.close()

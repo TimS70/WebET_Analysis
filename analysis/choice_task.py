@@ -11,11 +11,16 @@ from scipy.ndimage.filters import gaussian_filter
 from data_prep.cleaning.corr_data import clean_corr_data
 from utils.data_frames import merge_by_index
 from utils.path import makedir
-from utils.plots import corr_plot, corr_matrix
+from utils.plots import corr_matrix, corr_plot_split
 from utils.tables import summarize_datasets
 
 
 def analyze_choice_task(use_adjusted_et_data=True):
+
+    print('################################### \n'
+          'Analyze choice data \n'
+          '################################### \n')
+
     data_et_uncorrected = pd.read_csv(
         os.path.join('data', 'choice_task', 'uncorrected', 'data_et.csv'))
 
@@ -141,18 +146,18 @@ def plot_choice_task_heatmap(data_et):
     x = data_et.loc[data_et['t_task'] > 1000, 'x']
     y = data_et.loc[data_et['t_task'] > 1000, 'y']
 
-    # noinspection PyUnresolvedReferences
-    def myplot(x, y, s, bins=[1200, 675]):
-        heatmap, xedges, yedges = np.histogram2d(x, y, bins=bins)
+    # noinspection PyUnresolvedReferences,PyShadowingNames
+    def my_plot(x, y, s, bins=[1200, 675]):
+        heatmap, x_edges, y_edges = np.histogram2d(x, y, bins=bins)
         heatmap = gaussian_filter(heatmap, sigma=s)
-        extent = [xedges[0], xedges[-1], yedges[-1], yedges[0]]
+        extent = [x_edges[0], x_edges[-1], y_edges[-1], y_edges[0]]
         return heatmap.T, extent
 
     # Create figure and axes
     fig, ax = plt.subplots(figsize=(7, 7))
 
     s = 34
-    img, extent = myplot(x, y, s=s)
+    img, extent = my_plot(x, y, s=s)
     ax.imshow(img, extent=extent, origin='upper', cmap=cm.Greens, aspect=(9 / 16))
 
     rect = patches.Rectangle((0.05, 0.05), 0.9, 0.4, linewidth=1, edgecolor='black', facecolor='none')
@@ -163,7 +168,7 @@ def plot_choice_task_heatmap(data_et):
     x_pos = [0.25, 0.75, 0.25, 0.75]
     y_pos = [0.25, 0.25, 0.75, 0.75]
     for i in range(0, len(x_pos)):
-        plt.text(x_pos[i], y_pos[i], '[atribute]', size=12, ha="center")
+        plt.text(x_pos[i], y_pos[i], '[attribute]', size=12, ha="center")
 
     ax.set_title("Distribution of fixations after 1 second, $\sigma$ = %d" % s)
 
@@ -180,18 +185,17 @@ def corr_analysis_subject(data_subject):
         data_subject.loc[:, [
                                 'run_id', 'chinFirst', 'age', 'choseLL',
                                 'attributeIndex', 'optionIndex', 'payneIndex',
-                                'choice_rt']
-        ]
-    )
+                                'choice_rt']])
 
     corr_columns = [
-        'chinFirst', 'age', 'choseLL',
+        'age', 'choseLL',
         'attributeIndex', 'optionIndex', 'payneIndex',
         'choice_rt'
     ]
-    corr_plot(data_plot, corr_columns,
-              'corr_vars_vs_chinFirst_trial.png', 'chinFirst',
-              'results')
+
+    corr_plot_split(data_plot, corr_columns,
+                    'corr_vars_vs_chinFirst_trial.png', 'chinFirst',
+                    'results', 'plots', 'choice_task')
 
     corr_matrix(data_plot, corr_columns,
                 'table_p', 'subject_corr_p.csv',
@@ -209,16 +213,15 @@ def corr_analysis_trial(data_trial):
         data_trial.loc[:, [
                               'run_id', 'chinFirst', 'choseLL', 'k',
                               'attributeIndex', 'optionIndex', 'payneIndex',
-                              'trial_duration_exact']
-        ])
+                              'trial_duration_exact']])
 
     corr_columns = [
-        'chinFirst', 'choseLL', 'k', 'attributeIndex',
+        'choseLL', 'k', 'attributeIndex',
         'optionIndex', 'payneIndex', 'trial_duration_exact']
 
-    corr_plot(data_plot, corr_columns,
-              'corr_vars_vs_chinFirst_trial.png', 'chinFirst',
-              'results')
+    corr_plot_split(data_plot, corr_columns,
+                    'corr_vars_vs_chinFirst_trial.png', 'chinFirst',
+                    'results', 'plots', 'choice_task')
 
     corr_columns = [
         'chinFirst', 'choseLL', 'k', 'attributeIndex',

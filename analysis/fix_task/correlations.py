@@ -1,7 +1,7 @@
 import numpy as np
 
 from data_prep.cleaning.corr_data import clean_corr_data
-from utils.plots import corr_plot, corr_matrix
+from utils.plots import corr_matrix, corr_plot_split
 
 
 def corr_analysis(data_trial_fix, data_subject):
@@ -16,7 +16,7 @@ def corr_analysis(data_trial_fix, data_subject):
     data_plot = clean_corr_data(data_plot)
 
     corr_columns = ['withinTaskIndex', 'age', 'fps', 'offset', 'precision']
-    corr_plot(data_plot, corr_columns,
+    corr_plot_split(data_plot, corr_columns,
               'corr_var_vs_chin', 'chin',
               'results', 'plots', 'fix_task')
 

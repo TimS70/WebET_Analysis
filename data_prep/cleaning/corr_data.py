@@ -3,8 +3,7 @@ def clean_corr_data(data_plot):
     null_data = data_plot.loc[data_plot.isnull().any(axis=1), :]
 
     summary = null_data.groupby(
-        ['run_id'], as_index=False)['chin'].count() \
-        .rename(columns={'chin': 'n'})
+        ['run_id'], as_index=False).count()
 
     if len(null_data) > 0:
         print('! Attention ! Missing values')

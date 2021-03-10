@@ -47,7 +47,7 @@ def compare_positions(data_trial_fix, outcome):
     if len(significant_results) > 0:
         print(
             f"""Significant results for {outcome}: \n"""
-            f"""{significant_results}""")
+            f"""{significant_results} \n""")
     else:
         print(
             f"""No significant results for {outcome}. \n"""

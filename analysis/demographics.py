@@ -6,7 +6,15 @@ import pandas as pd
 from utils.path import makedir
 
 
-def show_demographics(data_subject):
+def show_demographics():
+
+    print('################################### \n'
+          'Analyze demographics \n'
+          '################################### \n')
+
+    data_subject = pd.read_csv(
+        os.path.join('data', 'all_trials', 'cleaned', 'data_subject.csv'))
+
     makedir('plots', 'demographics')
     frequency_tables(data_subject)
     plot_pie_charts(data_subject)

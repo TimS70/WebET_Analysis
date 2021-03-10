@@ -8,6 +8,11 @@ from utils.tables import summarize_datasets
 
 
 def clean_fix_task_datasets():
+
+    print('################################### \n'
+          'Clean fix task datasets \n'
+          '################################### \n')
+
     data_et = pd.read_csv(
         os.path.join('data', 'fix_task', 'raw', 'data_et.csv'))
     data_et_fix = pd.read_csv(

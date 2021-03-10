@@ -12,6 +12,11 @@ from utils.tables import summarize_datasets
 
 
 def global_cleaning():
+
+    print('################################### \n'
+          'Clean global datasets \n'
+          '################################### \n')
+
     data_et = pd.read_csv(
         os.path.join('data', 'all_trials', 'added_var', 'data_et.csv'))
     data_trial = pd.read_csv(

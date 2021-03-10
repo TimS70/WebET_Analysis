@@ -9,7 +9,7 @@ def filter_invalid_runs(data_trial, data_et, data_subject):
     subjects_full_trial = data_trial \
         .loc[data_trial['trial_type_new'] == 'end', 'run_id'] \
         .unique()
-    print(f'N subjects_full_trial {len(subjects_full_trial)}')
+    print(f'Runs with full trials: n = {len(subjects_full_trial)}')
 
     subjects_not_full_trial = np.setdiff1d(
         data_trial['run_id'].unique(),
@@ -91,8 +91,8 @@ def filter_runs_no_instruction(data_subject):
 
     print(
         f"""N Runs, where instruction was not followed: n="""
-        f"""{len(runs_no_instruction)}"""
-        f""" = {round(100 * rate_no_instruction, 2)}%""")
+        f"""{len(runs_no_instruction)} """
+        f"""({round(100 * rate_no_instruction, 2)}%) \n""")
 
     did_not_follow_instructions = data_subject.loc[
         data_subject['run_id'].isin(runs_no_instruction),
@@ -101,10 +101,9 @@ def filter_runs_no_instruction(data_subject):
         .drop_duplicates()
 
     print(
-        f"""N unique prolific IDs: {len(did_not_follow_instructions['prolificID'].unique())} \n"""
-        f"""Length of sub dataset: {len(did_not_follow_instructions)}"""
-
-    )
+        f"""Unique prolific IDs: n="""
+        f"""{len(did_not_follow_instructions['prolificID'].unique())} \n"""
+        f"""Length of sub dataset: n={len(did_not_follow_instructions)} \n""")
 
     return did_not_follow_instructions
 
@@ -117,7 +116,7 @@ def filter_full_but_no_et_data(data_et, data_trial):
     ].unique()
 
     print(
-        f"""Full runs without et_data: {len(runs_no_et_data)}"""
+        f"""Full runs without et_data: N={len(runs_no_et_data)} \n"""
     )
 
     runs_full = data_trial.loc[
@@ -151,8 +150,8 @@ def filter_full_but_no_et_data(data_et, data_trial):
 
     print(
         f"""Of those runs, who have et_data, """
-        f"""{len(runs_full_but_few_et)} runs have >10 trials """
-        f"""with no et data""")
+        f"""n={len(runs_full_but_few_et)} runs have >10 trials """
+        f"""with no et data. \n""")
 
     runs_full_but_not_enough_et = list(
         set(runs_no_et_data) |
@@ -161,7 +160,7 @@ def filter_full_but_no_et_data(data_et, data_trial):
 
     print(
         f"""In total, that is n="""
-        f"""{len(runs_full_but_not_enough_et)}""")
+        f"""{len(runs_full_but_not_enough_et)} \n""")
 
     return runs_full_but_not_enough_et
 
@@ -189,8 +188,8 @@ def filter_runs_low_fps(data_trial, data_et, min_fps):
     rate_low_fps = \
         len(runs_low_fps) / len(grouped_runs['run_id'].unique())
     print(
-        f"""Subjects_low_fps: n={len(runs_low_fps)}"""
-        f""" = {round(100 * rate_low_fps, 2)}% \n""")
+        f"""Runs with low fps: n={len(runs_low_fps)} """
+        f"""({round(100 * rate_low_fps, 2)}%) \n""")
 
     return runs_low_fps
 
@@ -202,8 +201,8 @@ def filter_wrong_glasses(data_subject):
         'run_id']
 
     print(
-        f"""N runs that are longSighted but do not wear """
-        f"""visual aids: {len(runs_cannot_see)} \n""")
+        f"""N runs that are long sighted but do not wear """
+        f"""visual aids: n={len(runs_cannot_see)} \n""")
 
     return runs_cannot_see
 

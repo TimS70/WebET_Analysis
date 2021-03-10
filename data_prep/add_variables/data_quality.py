@@ -12,6 +12,11 @@ from utils.tables import summarize_datasets
 
 
 def add_data_quality_var():
+
+    print('################################### \n'
+          'Calculate data quality variables \n'
+          '################################### \n')
+
     data_et = pd.read_csv(
         os.path.join('data', 'fix_task', 'cleaned', 'data_et.csv'))
     data_et_fix = pd.read_csv(
@@ -169,10 +174,13 @@ def aggregate_precision_from_et_data(data_trial, data_et):
     data_trial = merge_mean_by_index(
         data_trial, data_et,
         'distance_from_xy_mean_square', 'distanceFromAVG_square_px')
-    data_trial['precision'] = np.sqrt(data_trial['distance_from_xy_mean_square'])
-    data_trial['precision_px'] = np.sqrt(data_trial['distanceFromAVG_square_px'])
+    data_trial['precision'] = np.sqrt(
+        data_trial['distance_from_xy_mean_square'])
+    data_trial['precision_px'] = np.sqrt(
+        data_trial['distanceFromAVG_square_px'])
 
     missing_values = data_trial.loc[
+        pd.notna(data_trial['x_pos']) &
         pd.isna(data_trial['precision']),
         ['run_id', 'trial_index', 'x_pos', 'y_pos', 'precision']
     ]
@@ -183,7 +191,7 @@ def aggregate_precision_from_et_data(data_trial, data_et):
 
     if len(missing_values) > 0:
         print(
-            f"""Missing values: \n"""
+            f"""! Attention: Missing values: \n"""
             f"""{missing_values} \n"""
         )
 

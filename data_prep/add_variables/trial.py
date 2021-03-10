@@ -4,7 +4,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from utils.path import makedir
-from utils.plots import spaghetti_plot
+from utils.plots import spaghetti_plot, save_plot
 
 
 def add_trial_variables(data_trial):
@@ -438,8 +438,6 @@ def add_fps_trial_level(data_trial, data_et):
 
     plot_fps_over_trials(data_trial)
 
-    print('data_trial: Added fps: See plots/fps/ \n')
-
     return data_trial
 
 
@@ -472,8 +470,7 @@ def plot_fps_over_trials(data_trial):
     plt.vlines(269, 45, 50, colors='k', linestyles='solid')
     plt.text(269 + 1, 50, s='choice Task')
 
-    makedir('results', 'plots', 'fps')
-    plt.savefig('results/plots/fps/chin_first_0.png')
+    save_plot('results', 'plots', 'fps', 'chin_first_0.png')
 
     spaghetti_plot(
         data_trial.loc[(data_trial['chinFirst'] == 1) & pd.notna(data_trial['fps']), :],
@@ -491,4 +488,6 @@ def plot_fps_over_trials(data_trial):
     plt.text(394 + 1, 50, s='Calibration')
     plt.vlines(482, 45, 50, colors='k', linestyles='solid')
     plt.text(482 + 1, 50, s='fix Task')
-    plt.savefig('plots/fps/chin_first_1.png')
+
+    save_plot('results', 'plots', 'fps', 'chin_first_1.png')
+

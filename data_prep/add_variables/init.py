@@ -11,6 +11,10 @@ from utils.tables import summarize_datasets
 
 def global_add_variables_to_datasets():
 
+    print('################################### \n'
+          'Create global variables \n'
+          '################################### \n')
+
     data_et = pd.read_csv(
         os.path.join('data', 'all_trials', 'combined', 'data_et.csv'))
     data_trial = pd.read_csv(

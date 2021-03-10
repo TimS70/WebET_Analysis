@@ -34,11 +34,14 @@ function init_clustering(n_clusters, aoi_width, aoi_height)
 ET_adj=[]; % All corrected eye-tracking data
 
 %Load data
-cd('C:\Users\User\GitHub\WebET_Analysis\clustering')
+cd('C:\Users\User\GitHub\WebET_Analysis\data_prep\clustering')
 
 f = waitbar(0,'Reading data');
 
-data = readtable('..\data\choice_task\cleaned\data_et.csv');
+data = readtable(fullfile(...
+    'C:\Users\User\GitHub\WebET_Analysis', ...
+    '\data\choice_task\cleaned\data_et.csv'));
+
 data = data(:, {'run_id', 'trial_index', 'withinTaskIndex', ...
     'x', 'y', 't_task'});
 
@@ -63,10 +66,6 @@ for i = 1:length(subject)
 end
 
 separate_clustering_overview
-path = fullfile('..', 'results', 'tables', 'clustering')
-mkdir(path);
-writetable(separate_clustering_overview, ...
-    fullfile(path, 'separate_clustering.csv'));
 
 n_subj_sep = sum(separate_clustering_overview(:, 2));
 n_subj_sep_prop = n_subj_sep/length(separate_clustering_overview);
@@ -76,7 +75,15 @@ strcat(...
     {' ('}, sprintf('%.2f', n_subj_sep_prop), {'%) '}, ...
     {' runs required separate clustering. '})
 
-      
+sep_clust_output = array2table(separate_clustering_overview);
+sep_clust_output.Properties.VariableNames(1:2) = {...
+    'run_id', 'separate_clustering'};
+path = fullfile(...
+    'C:\Users\User\GitHub\WebET_Analysis', ...
+    'results', 'tables', 'clustering')
+mkdir(path);
+writetable(sep_clust_output, fullfile(path, 'separate_clustering.csv'));
+ 
 waitbar(1,f,'Writing data');
 
 ET_adj(ET_adj(:,1)==0,:)=[]; %Get rid of points not in AOI
@@ -87,9 +94,13 @@ output.Properties.VariableNames(1:7) = {...
     'run_id', 'trial_index', 'withinTaskIndex', ...
     'x', 'y', 't_task', 'aoi'};
 
-mkdir(fullfile('..', 'data', 'choice_task', 'adjusted'));
-writetable(output, ...
-    fullfile('..', 'data', 'choice_task', 'adjusted', 'data_et.csv'));
+mkdir(fullfile(...
+    'C:\Users\User\GitHub\WebET_Analysis', ...
+    'data', 'choice_task', 'adjusted'));
+
+writetable(output, fullfile(...
+    'C:\Users\User\GitHub\WebET_Analysis', ...
+    'data', 'choice_task', 'adjusted', 'data_et.csv'));
 
 close(f)
 end

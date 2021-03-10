@@ -11,7 +11,11 @@ from utils.tables import summarize_datasets
 
 
 def create_and_clean_choice_data():
-    print('Cleaning choice data... \n')
+
+    print('################################### \n'
+          'Create and clean choice data \n'
+          '################################### \n')
+
     data_et = pd.read_csv(
         os.path.join('data', 'all_trials', 'cleaned', 'data_et.csv'))
     data_trial = pd.read_csv(

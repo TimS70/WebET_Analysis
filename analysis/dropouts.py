@@ -10,6 +10,11 @@ from utils.tables import write_csv
 
 
 def dropout_analysis():
+
+    print('################################### \n'
+          'Analyze dropouts \n'
+          '################################### \n')
+
     data_trial = pd.read_csv(
         os.path.join('data', 'all_trials', 'added_var', 'data_trial.csv'))
     data_subject = pd.read_csv(

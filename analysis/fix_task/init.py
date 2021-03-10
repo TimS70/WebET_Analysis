@@ -16,6 +16,11 @@ from utils.tables import summarize_datasets
 
 
 def analyze_fix_task():
+
+    print('################################### \n'
+          'Analyze fix task data \n'
+          '################################### \n')
+
     data_et = pd.read_csv(
         os.path.join('data', 'fix_task', 'added_var', 'data_et.csv'))
     data_et_fix = pd.read_csv(
