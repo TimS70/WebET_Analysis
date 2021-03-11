@@ -1,3 +1,5 @@
+import subprocess
+
 from analysis.choice_task.init import analyze_choice_task
 from analysis.demographics import show_demographics
 from analysis.dropouts import dropout_analysis
@@ -16,7 +18,7 @@ def main(new_data=False, cluster_correction=False):
     if new_data:
         create_datasets_from_cognition()
 
-    prep_datasets(cluster_correction=cluster_correction)
+    # prep_datasets(cluster_correction=cluster_correction)
     init_analysis(cluster_correction=cluster_correction)
 
 
@@ -41,6 +43,10 @@ def init_analysis(cluster_correction=False):
     show_demographics()
     analyze_choice_task(use_adjusted_et_data=cluster_correction)
     analyze_fix_task()
+
+    subprocess.call(['Rscript', '--vanilla', 'analysis/'
+                     'run_r_markdowns.R'], shell=True)
+
 
 if __name__ == '__main__':
     main(new_data=False, cluster_correction=False)

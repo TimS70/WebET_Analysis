@@ -1,6 +1,5 @@
 ---
-title: 'Supplement: Amount and time exert independent influences on intertermporal
-  choice'
+title: 'Replication from Amasino et al. (2019)'
 output:
   html_document:
     df_print: paged
@@ -21,6 +20,7 @@ source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
 source(file.path(root, 'utils', 'r', 'summarize_datasets.R'))
 source(file.path(root, 'utils', 'r', 'get_packages.R'))
 source(file.path(root, 'utils', 'r', 'remove_runs.R'))
+source(file.path(root, 'utils', 'r', 'add_x_count.R'))
 
 get_packages(c('plyr',
               'dplyr', 
@@ -86,11 +86,12 @@ grouped = data_trial %>%
       dplyr::summarise(
           choseTop = mean(choseTop),
           .groups = 'keep')
-grouped
+
+grouped %>% head(5)
+
 if ('choseTop' %in% names(data_et))
     {data_et = data_et %>% select(!choseTop)}
 data_et = merge(data_et, grouped, by=c('run_id', 'trial_index'))
-data_et
 ```
 
 
@@ -116,12 +117,12 @@ add_logK = function(data) {
 data_subject = add_logK(data_subject)
 data_trial = add_logK(data_trial)
 
-data_subject %>%
-    dplyr::select(run_id, logK, noise)
-
 data_trial %>%
     dplyr::group_by(run_id) %>%
-    dplyr::summarise(logK, noise, .groups='keep')
+    dplyr::summarise(
+    	logK, noise, 
+    	.groups='keep') %>%
+	head(5)
 ```
 
 ## fixations
@@ -130,14 +131,12 @@ grouped_fixations = data_et %>%
     group_by(run_id, withinTaskIndex) %>%
     dplyr::summarise(
         n_fixations = length(unique(fix_counter)),
-        .groups='keep'
-    )
+        .groups='keep')
 
 data_trial = merge(
     data_trial,
     grouped_fixations,
-    by=c('run_id', 'withinTaskIndex')
-)
+    by=c('run_id', 'withinTaskIndex'))
 
 summary(data_trial$n_fixations)
 ```
@@ -220,12 +219,15 @@ runs_pos_logK
 grouped_NA_ET = data_trial %>%
     filter(!is.na(fps)) %>%
     group_by(run_id) %>%
-    dplyr::summarise(fps = mean(fps),
-              n_NA_OI = sum(is.na(optionIndex)),
-              n_NA_AI = sum(is.na(attributeIndex)),
-              n_NA_PI = sum(is.na(payneIndex))) %>%
+    dplyr::summarise(
+    	fps = mean(fps),
+		n_NA_OI = sum(is.na(optionIndex)),
+		n_NA_AI = sum(is.na(attributeIndex)),
+		n_NA_PI = sum(is.na(payneIndex)),
+		.groups = 'keep') %>%
     arrange(n_NA_OI, n_NA_AI, n_NA_PI)
-grouped_NA_ET
+
+grouped_NA_ET %>% head(5)
 
 runs_NA_OI = grouped_NA_ET %>%
     filter(n_NA_OI>40) %>%
@@ -324,22 +326,12 @@ data_trial = subjectiveValues(data_trial)
 data_trial %>%
     dplyr::select(run_id, aT, tT, svT, aB, tB, svB, dSV_TB, choseTop) %>%
     mutate(across(c('svT', 'svB', 'dSV_TB'), round, 2)) %>%
-    arrange(dSV_TB)
-
+    arrange(dSV_TB) %>%
+	head(5)
 ```
 
 ## ChoseTop by dSV bins
 ```{r}
-add_et_count = function(data_trial, data_et) {
-		grouped = data_et %>% group_by(run_id, trial_index) %>%
-				summarise(x_count = n(), .groups='keep') %>%
-		dplyr::select(run_id, trial_index, x_count)
-	
-		data_trial = merge(data_trial, grouped, by=c('run_id', 'trial_index'))
-		
-		return(data_trial)
-}
-
 data_trial$dSV_bin = cut(
 				data_trial$dSV_TB,
 		    breaks = seq(-5, 5, 1),
@@ -349,7 +341,7 @@ data_trial$dSV_bin = cut(
     as.numeric()
 
 SV_bins = data_trial %>%
-		add_et_count(data_et) %>%
+		add_x_count(data_et) %>%
     dplyr::group_by(run_id, dSV_bin) %>%
     dplyr::summarise(
         n=n(),
@@ -362,7 +354,8 @@ SV_bins = data_trial %>%
         .groups = 'keep') %>%
     filter(n>1) %>%
     arrange(dSV_bin)
-SV_bins
+
+SV_bins %>% head(5)
 
 print(
     paste(
@@ -370,9 +363,7 @@ print(
         SV_bins %>% 
             dplyr::pull(run_id) %>%
             unique() %>%
-            length()
-    )
-)
+            length()))
 
 dir.create(file.path(path_results, 'SV'))
 
@@ -527,14 +518,19 @@ data = data %>%
     
 grouped_choseLL = data %>% 
     group_by(run_id, trial_bin) %>%
-    summarise(choseLL = mean(choseLL))
+    dplyr::summarise(
+    	choseLL = mean(choseLL),
+    	.groups='keep')
 
 grouped_trialMeans = data %>%
     group_by(trial_bin) %>%
-    summarise(trialMeans = mean(withinTaskIndex))
+    dplyr::summarise(
+    	trialMeans = mean(withinTaskIndex),
+    	.groups = 'keep')
 
 trial_bins = merge(grouped_choseLL, grouped_trialMeans, by='trial_bin')
-trial_bins
+
+trial_bins %>% head(5)
 
 ggplot(
     data=trial_bins, 
@@ -590,7 +586,8 @@ data_et = createTimeBins(data_et, 5)
 
 data_et %>%
     dplyr::select(run_id, withinTaskIndex, timeBin, t_task, aoi) %>%
-    arrange(run_id, withinTaskIndex, timeBin, t_task)
+    arrange(run_id, withinTaskIndex, timeBin, t_task) %>% 
+	head(5)
 ```
 
 ## Plot without null AOI
@@ -612,25 +609,33 @@ timeBins_choseTB_long <- data_et %>%
         n_lookTop = sum(lookTop),
         n_lookBottom = sum(lookBottom),    
         p_lookTop = sum(lookTop)/n,
-        p_lookBottom = sum(lookBottom)/n) %>%
+        p_lookBottom = sum(lookBottom)/n,
+        .groups = 'keep') %>%
     arrange(choseTop)
-timeBins_choseTB_long 
+
+timeBins_choseTB_long %>% head(5)
 
 timeBins_choseTB_long %>%
     group_by(run_id, choseTop) %>%
-    summarise(n=length(unique(timeBin))) %>%
+    dplyr::summarise(
+    	n=length(unique(timeBin)),
+    	.groups = 'keep') %>%
     filter(n<5)
 
 subjects_not_enough_bins = timeBins_choseTB_long %>%
     group_by(run_id, choseTop) %>%
-    summarise(n=length(unique(timeBin))) %>%
+    dplyr::summarise(
+    	n=length(unique(timeBin)),
+    	.groups = 'keep') %>%
     filter(n<5) %>%
     dplyr::pull(run_id)
 
 timeBins_choseTB_long %>%
     filter(timeBin %in% c(4, 5)) %>%
     dplyr::group_by(timeBin, choseTop) %>%
-    dplyr::summarise(p_lookTop = mean(p_lookTop))
+    dplyr::summarise(
+    	p_lookTop = mean(p_lookTop),
+    	.groups = 'keep')
 #Violin plot of time bins
 
 timeBins_choseTB_long$choseTop = as.factor(timeBins_choseTB_long$choseTop)
@@ -712,11 +717,15 @@ create_eyeTracking_Bins = function(data, nBins) {
 data_et = create_eyeTracking_Bins(data_et, 5)
 data_et %>%
     group_by(run_id, withinTaskIndex, et_bin) %>%
-    summarise(n=n(), .groups = 'keep')
+    dplyr::summarise(
+    	n=n(), 
+    	.groups = 'keep') %>% 
+	head(5)
 
 data_et %>%
     dplyr::select(run_id, withinTaskIndex, et_bin, t_task) %>%
-    arrange(run_id, withinTaskIndex, et_bin, t_task)
+    arrange(run_id, withinTaskIndex, et_bin, t_task) %>% 
+	head(5)
 ```
 
 
@@ -740,13 +749,17 @@ et_bins_choseTB_long = data_et %>%
         n_null_aoi = sum(null_aoi),
         p_lookTop = sum(lookTop)/n,
         p_lookBottom = sum(lookBottom)/n,
-        p_null_aoi = sum(null_aoi)/n) %>%
+        p_null_aoi = sum(null_aoi)/n,
+        .groups = 'keep') %>%
     arrange(choseTop)
-et_bins_choseTB_long 
+
+et_bins_choseTB_long %>% head(5)
 
 subjects_not_enough_bins = et_bins_choseTB_long %>%
     group_by(run_id, choseTop) %>%
-    summarise(n=length(unique(et_bin))) %>%
+    dplyr::summarise(
+    	n=length(unique(et_bin)),
+    	.groups = 'keep') %>%
     filter(n<5) %>%
     dplyr::pull(run_id)
 
@@ -756,7 +769,10 @@ et_bins_choseTB_long = et_bins_choseTB_long %>%
 et_bins_choseTB_long %>%
     filter(et_bin %in% c(4, 5)) %>%
     dplyr::group_by(et_bin, choseTop) %>%
-    dplyr::summarise(p_lookTop = mean(p_lookTop))
+    dplyr::summarise(
+    	p_lookTop = mean(p_lookTop),
+    	.groups = 'keep') %>% 
+	head(5)
 #Violin plot of time bins
 
 
@@ -859,7 +875,7 @@ if (!use_adjusted_et_data) {
 			 width=5.5, height=5)
 }
 
-et_bins_choseTB_long
+et_bins_choseTB_long %>% head(5)
 ```
 
 
@@ -871,7 +887,8 @@ add_lastGazeTop = function(data_trial, data_et) {
     grouped_lastCoordinate = data_et %>%
         dplyr::group_by(run_id, trial_index) %>%
         dplyr::summarise(
-            t_task = max(t_task)) %>%
+            t_task = max(t_task),
+            .groups = 'keep') %>%
         merge(data_et %>% 
                   dplyr::select(run_id, trial_index, t_task, aoi), 
               by=c('run_id', 'trial_index', 't_task')) %>%
@@ -890,20 +907,24 @@ add_lastGazeTop = function(data_trial, data_et) {
 
 data_trial = add_lastGazeTop(data_trial, data_et)
 data_trial %>%
-    dplyr::select(run_id, trial_index, choseTop, lastGazeTop)
+    dplyr::select(run_id, trial_index, choseTop, lastGazeTop) %>% 
+	head(5)
 ```
 
 ```{r}
 lastGaze_long <- data_trial %>%
     dplyr::select(run_id, withinTaskIndex, lastGazeTop, choseTop) %>%
     dplyr::group_by(run_id, lastGazeTop, withinTaskIndex) %>%
-    dplyr::summarise(choseTop=mean(choseTop)) %>%
+    dplyr::summarise(
+    	choseTop=mean(choseTop),
+    	.groups = 'keep') %>%
     dplyr::group_by(run_id, lastGazeTop) %>%
     dplyr::summarise(
         n=n(),
-    choseTop=mean(choseTop)) 
+    	choseTop=mean(choseTop),
+        .groups = 'keep') 
 
-lastGaze_long
+lastGaze_long %>% head(5)
 
 subjects_noGaze = 
     lastGaze_long %>% 
@@ -940,7 +961,9 @@ ggsave(file.path(path_results, 'et', 'last_gaze_vs_choice.pdf'),
 add_lastGazeLL = function(data_trial, data_et) {
     grouped_lastCoordinate = data_et %>%
         dplyr::group_by(run_id, trial_index) %>%
-        dplyr::summarise(t_task = max(t_task), .groups = 'keep') %>%
+        dplyr::summarise(
+        	t_task = max(t_task), 
+        	.groups = 'keep') %>%
         merge(data_et %>% 
                   dplyr::select(run_id, trial_index, t_task, aoi, LL_top) %>%
                   filter(aoi!="0"), 
@@ -967,7 +990,9 @@ data_trial = add_lastGazeLL(data_trial, data_et)
 ```{r}
 grouped_lastCoordinate = data_et %>%
     dplyr::group_by(run_id, trial_index) %>%
-    dplyr::summarise(t_task = max(t_task), .groups='keep') %>%
+    dplyr::summarise(
+    	t_task = max(t_task), 
+    	.groups='keep') %>%
     merge(data_et %>% 
               dplyr::select(run_id, trial_index, t_task, aoi, LL_top) %>%
               filter(aoi!="0"), 
@@ -983,23 +1008,30 @@ grouped_lastCoordinate = data_et %>%
           by=c('run_id', 'trial_index'))
 
 grouped_lastCoordinate %>%
-    filter(lastGazeLL==0)
+    filter(lastGazeLL==0) %>% 
+	head(5)
 ```
 
 ```{r}
 lastGaze_long <- data_trial %>% 
     dplyr::select(run_id, withinTaskIndex, lastGazeLL, choseLL) %>%
     dplyr::group_by(run_id, lastGazeLL, withinTaskIndex) %>%
-    dplyr::summarise(choseLL=mean(choseLL)) %>%
+    dplyr::summarise(
+    	choseLL=mean(choseLL),
+    	.groups = 'keep') %>%
     dplyr::group_by(run_id, lastGazeLL) %>%
     dplyr::summarise(
-        n=n(),
-        choseLL=mean(choseLL)) 
-lastGaze_long
+        n = n(),
+        choseLL = mean(choseLL),
+        .groups = 'keep') 
+
+lastGaze_long %>% head(5)
 
 subjects_noGaze = lastGaze_long %>% 
     group_by(run_id) %>%
-    dplyr::summarise(n_subj = n()) %>%
+    dplyr::summarise(
+    	n_subj = n(), 
+    	.groups = 'keep') %>%
     filter(n_subj<2) %>%
     arrange(run_id) %>%
     dplyr::pull(run_id)
@@ -1043,11 +1075,16 @@ data_trial = identify_error_trials(data_trial)
 
 data_trial %>% 
     dplyr::select(svLL, svSS, predictLL, choseLL, 
-                  errorTrial, patientError, impatientError)
+                  errorTrial, patientError, impatientError) %>% 
+	head(5)
    
 data_trial %>%
     dplyr::group_by(run_id) %>%
-    dplyr::summarise(choseLL = mean(choseLL), errorTrial=sum(errorTrial))
+    dplyr::summarise(
+    	choseLL = mean(choseLL), 
+    	errorTrial=sum(errorTrial),
+    	.groups = 'keep') %>% 
+	head(5)
 ```
 
 
@@ -1105,7 +1142,9 @@ data_trial = matchTrials(data_trial)
 
 data_trial %>% 
 #    filter(errorTrial==1) %>%
-    dplyr::select(errorTrial, patientError, impatientError, matched_trial)
+    dplyr::select(errorTrial, patientError, 
+    			  impatientError, matched_trial) %>% 
+	head(5)
 
 ````
 
@@ -1116,8 +1155,10 @@ Do subjects behave differently when they correctly choose LL (as expected) than 
 ```{r}
 data_trial = data_trial %>%
     mutate(LLexpected = as.numeric(svLL > svSS))
+
 data_trial %>%
-    dplyr:: select(svLL, svSS, LLexpected)
+    dplyr:: select(svLL, svSS, LLexpected) %>% 
+	head(5)
 ```
 
 
@@ -1126,19 +1167,25 @@ data_trial %>%
 subjects_LLcorrect = data_trial %>%
     filter(LLexpected==1) %>%
     dplyr::group_by(run_id) %>%
-    dplyr::summarise(n_unique_matched = length(unique(matched_trial))) %>%
+    dplyr::summarise(
+    	n_unique_matched = length(unique(matched_trial)),
+    	.groups = 'keep') %>%
     filter(n_unique_matched>2) %>%
     dplyr::pull(run_id)
 subjects_LLcorrect
+
 length(subjects_LLcorrect)
 
 subjects_SScorrect = data_trial %>%
     filter(LLexpected==0) %>%
     dplyr::group_by(run_id) %>%
-    dplyr::summarise(n_unique_matched = length(unique(matched_trial))) %>%
+    dplyr::summarise(
+    	n_unique_matched = length(unique(matched_trial)),
+    	.groups = 'keep') %>%
     filter(n_unique_matched>2) %>%
     dplyr::pull(run_id)
 subjects_SScorrect
+
 length(subjects_SScorrect)
 ```
 
@@ -1152,15 +1199,18 @@ grouped = data_trial %>%
         (LLexpected==1 & run_id %in% subjects_LLcorrect) |
         (LLexpected==0 & run_id %in% subjects_SScorrect)) %>%
     dplyr::group_by(LLexpected, run_id, errorTrial) %>%
-    dplyr::summarise(n = n(), 
-              rt = mean(trial_duration_exact), 
-              optionIndex = mean(optionIndex), 
-              attributeIndex = mean(attributeIndex),
-              payneIndex = mean(payneIndex)) %>%
+    dplyr::summarise(
+    	n = n(), 
+		rt = mean(trial_duration_exact), 
+		optionIndex = mean(optionIndex), 
+		attributeIndex = mean(attributeIndex),
+		payneIndex = mean(payneIndex),
+		.groups = 'keep') %>%
     mutate(
         errorTrial = factor(errorTrial),
         rt = rt/1000)
-grouped  
+
+grouped %>% head(5)
 ```
 
 ## t-test LL expected 
@@ -1222,7 +1272,6 @@ data_plot = grouped %>%
             to = c("Correct", "Error")),
         LLexpected = factor(LLexpected)
         )
-
 
 ggplot(data_plot, aes(x=LLexpected, y=rt, fill=errorTrial)) +
   geom_split_violin(alpha=.6, size=0, position=position_dodge(0)) +

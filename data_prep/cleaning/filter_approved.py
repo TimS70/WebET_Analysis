@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 def filter_approved(data, data_subject):
     unapproved_runs = runs_not_approved(data_subject)
 
@@ -27,13 +30,9 @@ def runs_not_approved(data_subject):
         len(data_subject['run_id'].unique())
 
     print(
-        f"""N Subjects that are not approved: """
-        f"""{len(unapproved_runs)} """
-        f"""= {round(100 * rate_unapproved, 2)}% \n"""
+        f"""n = {len(unapproved_runs)} """
+        f"""({round(100 * rate_unapproved, 2)}%) runs were not approved: \n"""
+        f"""{pd.crosstab(index=data_not_approved['status'], columns="n")} \n"""
     )
-
-    print(
-        f"""data_not_approved: """
-        f"""{data_not_approved.head(5)} \n""")
 
     return unapproved_runs

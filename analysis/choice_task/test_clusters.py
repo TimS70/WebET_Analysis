@@ -18,8 +18,9 @@ def test_transition_clusters(data_trial):
 
     data_cluster.loc[:, [
                             'trans_type_0',
-                            'trans_type_aLLtLL', 'trans_type_tLLaSS', 'trans_type_aLLaSS',
-                            'trans_type_aSStSS', 'trans_type_tLLtSS']].isnull().any()
+                            'trans_type_aLLtLL', 'trans_type_tLLaSS',
+                            'trans_type_aLLaSS', 'trans_type_aSStSS',
+                            'trans_type_tLLtSS']].isnull().any()
 
     scaler = StandardScaler()
     scaled_features = scaler.fit_transform(
@@ -44,6 +45,8 @@ def test_transition_clusters(data_trial):
         log_reg = sm.Logit(y, x_).fit()
         output.append([n_cluster, log_reg.bic, log_reg.aic])
 
+    print(data_cluster.columns)
+    print(data_cluster.head(5))
     output = pd.DataFrame(output, columns=['n_clusters', 'BIC', 'AIC']) \
         .set_index('n_clusters')
 
@@ -53,12 +56,18 @@ def test_transition_clusters(data_trial):
         f"""{output} \n"""
     )
 
-    makedir('results', 'tables', 'transitions')
     write_csv(
         output,
         'transition_clusters.csv',
         'results', 'tables', 'transitions')
 
+    data_trial = data_trial.merge(
+        data_cluster.loc[:, ['run_id', 'trial_index',
+                             'cluster2', 'cluster3', 'cluster4']],
+        on=['run_id', 'trial_index'],
+        how='left')
+
+    return data_trial
 
 def clusters(n_clusters, scaled_features):
     k_means = KMeans(

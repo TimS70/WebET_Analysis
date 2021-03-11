@@ -78,7 +78,7 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
         data_subject, data_trial,
         'attributeIndex', 'optionIndex', 'payneIndex')
 
-    test_transition_clusters(data_trial)
+    data_trial = test_transition_clusters(data_trial)
 
     if use_adjusted_et_data:
         data_et.to_csv(
