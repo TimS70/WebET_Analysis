@@ -9,9 +9,9 @@ def drop_na_data_et(data_et):
         :]
 
     if len(na_data)<1:
-        print(f'No missing data in data_et!')
+        print(f'No gaze points with missing eye-tracking data were found. \n')
     else:
-        print(f'{len(na_data)} empty gaze points were excluded.')
+        print(f'{len(na_data)} empty gaze points were excluded. \n')
 
     data_et = data_et.loc[
               pd.notna(data_et['x']) |

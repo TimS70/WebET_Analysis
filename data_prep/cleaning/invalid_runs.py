@@ -2,19 +2,24 @@ import numpy as np
 import pandas as pd
 
 from utils.data_frames import merge_by_index
+from utils.tables import write_csv
 
 
 def filter_invalid_runs(data_trial, data_et, data_subject):
+
+    print(
+        f"""\n"""
+        f"""Clean runs that are otherwise not valid: """)
+
     # Not enough trials
     subjects_full_trial = data_trial \
         .loc[data_trial['trial_type_new'] == 'end', 'run_id'] \
         .unique()
-    print(f'Runs with full trials: n = {len(subjects_full_trial)}')
+    print(f'n={len(subjects_full_trial)} runs with full trials. ')
 
     subjects_not_full_trial = np.setdiff1d(
         data_trial['run_id'].unique(),
-        subjects_full_trial
-    )
+        subjects_full_trial)
 
     runs_not_follow_instructions = filter_runs_no_instruction(
         data_subject)
@@ -61,20 +66,14 @@ def filter_invalid_runs(data_trial, data_et, data_subject):
        }
     )
 
-    print(f'Total number of runs: n={n_runs}')
-
-    n_invalid_runs = len(
-        data_trial.loc[
-            data_trial['run_id'].isin(invalid_runs),
-            'prolificID'].unique())
-
     print(
-        f"""Number of subjects with invalid runs: """
-        f"""n={n_invalid_runs} \n"""
-    )
+        f"""\n n={n_runs} runs in total. Invalid_runs: \n"""
+        f"""{round(summary, 2)}""")
 
-    print('Invalid_runs: ')
-    round(summary, 2)
+    write_csv(
+        summary,
+        'global_invalid_runs.csv',
+        'results', 'tables')
 
     return invalid_runs
 
@@ -89,23 +88,20 @@ def filter_runs_no_instruction(data_subject):
     rate_no_instruction = \
         len(runs_no_instruction) / len(data_subject)
 
-    print(
-        f"""N Runs, where instruction was not followed: n="""
-        f"""{len(runs_no_instruction)} """
-        f"""({round(100 * rate_no_instruction, 2)}%) \n""")
-
-    did_not_follow_instructions = data_subject.loc[
+    no_instruct = data_subject.loc[
         data_subject['run_id'].isin(runs_no_instruction),
         ['run_id', 'prolificID', 'keptHead', 'triedChin']
     ] \
         .drop_duplicates()
 
     print(
-        f"""Unique prolific IDs: n="""
-        f"""{len(did_not_follow_instructions['prolificID'].unique())} \n"""
-        f"""Length of sub dataset: n={len(did_not_follow_instructions)} \n""")
+        f"""n={len(no_instruct)} """
+        f"""({len(no_instruct['prolificID'].unique())} """
+        f"""unique Prolific IDs, {round(100 * rate_no_instruction, 2)}%) """
+        f"""runs either did not kept their head still or try the """
+        f"""chin rest at all. """)
 
-    return did_not_follow_instructions
+    return no_instruct
 
 
 def filter_full_but_no_et_data(data_et, data_trial):
@@ -116,42 +112,28 @@ def filter_full_but_no_et_data(data_et, data_trial):
     ].unique()
 
     print(
-        f"""Full runs without et_data: N={len(runs_no_et_data)} \n"""
-    )
+        f"""n={len(runs_no_et_data)} are complete but have no et data. """)
 
     runs_full = data_trial.loc[
-        data_trial['trial_type_new'] == 'end',
-        'run_id'
-    ].unique()
+        data_trial['trial_type_new'] == 'end', 'run_id'].unique()
 
     et_trials = data_trial.loc[
         data_trial['trial_type'].isin([
             'eyetracking-calibration',
             'eyetracking-fix-object',
-            'eyetracking-choice'
-        ]),
+            'eyetracking-choice']),
         ['run_id', 'trial_index', 'x_count']
     ]
 
-    na_et_by_run = et_trials.loc[
-                   pd.isna(et_trials['x_count']),
-                   :
+    na_et_by_run = et_trials.loc[pd.isna(et_trials['x_count']), :
                    ].groupby(['run_id'], as_index=False).count()
 
     runs_not_enough_et_data = na_et_by_run.loc[
-        na_et_by_run['trial_index'] > 10,
-        'run_id'
-    ]
+        na_et_by_run['trial_index'] > 10, 'run_id']
 
     runs_full_but_few_et = np.intersect1d(
         runs_not_enough_et_data,
-        runs_full
-    )
-
-    print(
-        f"""Of those runs, who have et_data, """
-        f"""n={len(runs_full_but_few_et)} runs have >10 trials """
-        f"""with no et data. \n""")
+        runs_full)
 
     runs_full_but_not_enough_et = list(
         set(runs_no_et_data) |
@@ -159,8 +141,8 @@ def filter_full_but_no_et_data(data_et, data_trial):
     )
 
     print(
-        f"""In total, that is n="""
-        f"""{len(runs_full_but_not_enough_et)} \n""")
+        f"""n={len(runs_full_but_few_et)} runs have >10 trials """
+        f"""with no et data. """)
 
     return runs_full_but_not_enough_et
 
@@ -188,8 +170,8 @@ def filter_runs_low_fps(data_trial, data_et, min_fps):
     rate_low_fps = \
         len(runs_low_fps) / len(grouped_runs['run_id'].unique())
     print(
-        f"""Runs with low fps: n={len(runs_low_fps)} """
-        f"""({round(100 * rate_low_fps, 2)}%) \n""")
+        f"""n={len(runs_low_fps)} ({round(100 * rate_low_fps, 2)}%) """
+        f"""runs with low fps (<{min_fps}). """)
 
     return runs_low_fps
 
@@ -201,8 +183,8 @@ def filter_wrong_glasses(data_subject):
         'run_id']
 
     print(
-        f"""N runs that are long sighted but do not wear """
-        f"""visual aids: n={len(runs_cannot_see)} \n""")
+        f"""n={len(runs_cannot_see)} runs that are long sighted """
+        f"""but do not wear visual aids. """)
 
     return runs_cannot_see
 
@@ -215,7 +197,7 @@ def clean_runs(data, excluded_runs, name):
 
     print(
         f"""Removing invalid runs from {name}: \n"""
-        f"""Raw: {len(data_raw['run_id'].unique())} \n"""
-        f"""Cleaned: {len(data['run_id'].unique())} \n""")
+        f"""   Raw: {len(data_raw['run_id'].unique())} \n"""
+        f"""   Cleaned: {len(data['run_id'].unique())} \n""")
 
     return data

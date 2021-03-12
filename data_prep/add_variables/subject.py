@@ -58,14 +58,15 @@ def add_glasses_binary(data_subject):
                   'perfectSight': 0}
                  )
 
+    n_missing = len(data_subject.loc[
+                    pd.isna(data_subject['glasses_binary']), :])
+
     example = pd.crosstab(
         index=data_subject['glasses_binary'],
         columns="count")
 
-    n_missing = len(data_subject.loc[
-        pd.isna(data_subject['glasses_binary']), :])
-
     print(
+        f"""\n"""
         f"""data_subject: Added glasses_binary: \n"""
         f"""N Missing values: {n_missing} \n \n"""
         f"""{example} \n""")

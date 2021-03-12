@@ -76,7 +76,8 @@ def read_prolific_data():
 def add_data_from_prolific(data_subject):
     data_prolific = read_prolific_data()
 
-    data_subject = data_subject.merge(data_prolific, on='prolificID', how='left')
+    data_subject = data_subject.merge(
+        data_prolific, on='prolificID', how='left')
     data_subject['status'] = data_subject['status'].fillna('NOTPROLIFIC')
     data_subject.loc[:, ['run_id', 'prolificID']].head(5)
 

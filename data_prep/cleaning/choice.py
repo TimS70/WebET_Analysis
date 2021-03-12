@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from data_prep.cleaning.invalid_runs \
-    import filter_runs_low_fps
+    import filter_runs_low_fps, clean_runs
 from utils.data_frames import merge_by_index
 from utils.path import makedir
 from utils.tables import summarize_datasets
@@ -33,15 +33,15 @@ def create_and_clean_choice_data():
     invalid_runs = invalid_choice_runs(data_trial, data_et)
 
     # Remove invalid runs
-    data_subject = remove_invalid_runs(data_subject, 'data_subject', invalid_runs)
-    data_trial = remove_invalid_runs(data_trial, 'data_subject', invalid_runs)
-    data_et = remove_invalid_runs(data_et, 'data_subject', invalid_runs)
+    data_subject = clean_runs(data_subject, invalid_runs, 'data_subject')
+    data_trial = clean_runs(data_trial, invalid_runs, 'data_trial')
+    data_et = clean_runs(data_et, invalid_runs, 'data_et')
 
     # Remove Long trials
-    data_trial = remove_long_trials(data_trial, 'data_trial', invalid_runs)
+    data_trial = remove_long_trials(data_trial, 10000, 'data_trial')
 
     data_et = merge_by_index(data_et, data_trial, 'trial_duration_exact')
-    data_et = remove_long_trials(data_et, 'data_et', invalid_runs)
+    data_et = remove_long_trials(data_et, 10000, 'data_et')
     data_et = data_et.drop(columns='trial_duration_exact')
 
     print('Data saved to ' +
@@ -134,48 +134,33 @@ def invalid_choice_runs(data_trial, data_et):
         set(runs_additional_flaws)
     )
 
+    n_runs = len(data_trial['run_id'].unique())
+
     summary_output = pd.DataFrame(
         {'name': [
             'subjects_lowFPS',
             'additional_flaws',
             'total',
         ],
-            'length': [
-                len(runs_low_fps),
-                len(runs_additional_flaws),
-                len(invalid_runs)
-            ]}
+        'length': [
+            len(runs_low_fps),
+            len(runs_additional_flaws),
+            len(invalid_runs)
+        ],
+        'percent': [
+            len(runs_low_fps) / n_runs,
+            len(runs_additional_flaws) / n_runs,
+            len(invalid_runs) / n_runs
+        ]
+        }
     )
 
     print(
-        f"""Invalid runs for choice task: \n"""
-        f"""{summary_output} \n""")
+        f"""\n"""
+        f"""n={n_runs} runs in total. Invalid runs for choice task: \n"""
+        f"""{round(summary_output, 2)} \n""")
 
     return invalid_runs
-
-
-def remove_invalid_runs(data_raw, name, invalid_runs):
-
-    data = data_raw.loc[~(data_raw['run_id'].isin(invalid_runs)),:]
-
-    print(
-        f"""{name}: Removing invalid runs and long trials (>10s) \n"""
-        f"""Raw: {len(data_raw)} \n"""
-        f"""Cleaned: {len(data)} \n""")
-
-    return data
-
-
-def remove_long_trials(data_raw, name, invalid_runs):
-
-    data = data_raw.loc[data_raw['trial_duration_exact'] < 10000, :]
-
-    print(
-        f"""{name}: Removing long trials (>10s) \n"""
-        f"""Raw: {len(data_raw)} \n"""
-        f"""Cleaned: {len(data)} \n""")
-
-    return data
 
 
 def check_unequal_trial_numbers(data_et, data_trial):
@@ -199,3 +184,15 @@ def check_unequal_trial_numbers(data_et, data_trial):
         f"""is coming from: \n"""
         f"""{grouped_missing_et} \n"""
     )
+
+
+def remove_long_trials(data_raw, max_duration, name):
+
+    data = data_raw.loc[data_raw['trial_duration_exact'] < max_duration, :]
+
+    print(
+        f"""Removing long trials (>10s) from {name}: \n"""
+        f"""   Raw: {len(data_raw)} \n"""
+        f"""   Cleaned: {len(data)} \n""")
+
+    return data

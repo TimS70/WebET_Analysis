@@ -17,7 +17,7 @@ from utils.tables import summarize_datasets
 def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
 
     print('################################### \n'
-          'Calculate variables for choice data \n'
+          'Add variables for choice data \n'
           '################################### \n')
 
     if use_adjusted_et_data:
@@ -77,6 +77,12 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
     data_subject = merge_by_subject(
         data_subject, data_trial,
         'attributeIndex', 'optionIndex', 'payneIndex')
+
+    print(
+        f"""On subject level: \n"""
+        f"""{data_subject[['attributeIndex', 'optionIndex', 
+                           'payneIndex']].describe()} \n"""
+    )
 
     data_trial = test_transition_clusters(data_trial)
 
@@ -156,9 +162,7 @@ def add_choice_options_num(data_trial):
         ]
         ].head(5)
 
-    print(
-        f"""data_trial: Add choice_options_num: \n"""
-        f"""{example} \n""")
+    print(f"""data_trial: Add choice_options_num. \n""")
 
     return data_trial
 
@@ -244,7 +248,7 @@ def top_bottom_attributes(data):
     ].sort_values(by='LL_top').head(5)
 
     print(
-        f"""data_trial: Added top and bottom attributes: """
+        f"""data_trial: Added top and bottom attributes: \n"""
         f"""{example} \n"""
     )
 

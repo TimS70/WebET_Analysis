@@ -51,7 +51,7 @@ def add_data_quality_var():
         data_subject, data_trial_fix, 'precision', 'precision_px')
 
     print(
-        f"""Saving data to: """
+        f"""Saving data to """
         f"""{os.path.join('data', 'fix_task', 'added_var')}""")
 
     makedir('data', 'fix_task', 'added_var')
@@ -102,7 +102,7 @@ def add_offset(data_et):
 
     print(
         f"""Offset: \n"""
-        f"""{data_et[['offset', 'offset_px']].describe()} \n""")
+        f"""{round(data_et[['offset', 'offset_px']].describe(), 2)} \n""")
 
     return data_et
 
@@ -127,7 +127,7 @@ def distance_from_xy_mean_square(data):
         euclidean_distance(data['x'], data['x_mean'], data['y'], data['y_mean']),
         2
     )
-    data['distanceFromAVG_square_px'] = np.power(euclidean_distance(
+    data['distance_from_xy_mean_square_px'] = np.power(euclidean_distance(
         (data['x'] * data['window_width']),
         (data['x_mean'] * data['window_width']),
         (data['y'] * data['window_height']),
@@ -140,12 +140,12 @@ def distance_from_xy_mean_square(data):
     ]
 
     summary = data.loc[:, [
-        'distance_from_xy_mean_square', 'distanceFromAVG_square_px']] \
+        'distance_from_xy_mean_square', 'distance_from_xy_mean_square_px']] \
         .describe()
 
     print(
         f"""Squared distance from the average: \n"""
-        f"""{summary} \n""")
+        f"""{round(summary, 2)} \n""")
 
     if len(missing_values) > 0:
         print(
@@ -161,11 +161,11 @@ def distance_from_xy_mean_square(data):
 def aggregate_precision_from_et_data(data_trial, data_et):
     data_trial = merge_mean_by_index(
         data_trial, data_et,
-        'distance_from_xy_mean_square', 'distanceFromAVG_square_px')
+        'distance_from_xy_mean_square', 'distance_from_xy_mean_square_px')
     data_trial['precision'] = np.sqrt(
         data_trial['distance_from_xy_mean_square'])
     data_trial['precision_px'] = np.sqrt(
-        data_trial['distanceFromAVG_square_px'])
+        data_trial['distance_from_xy_mean_square_px'])
 
     missing_values = data_trial.loc[
         pd.notna(data_trial['x_pos']) &
@@ -174,8 +174,7 @@ def aggregate_precision_from_et_data(data_trial, data_et):
     ]
     print(
         f"""Precision: \n"""
-        f"""{data_trial['precision'].describe()} \n \n"""
-        f"""{data_trial['precision_px'].describe()} \n""")
+        f"""{round(data_trial[['precision','precision_px']].describe(), 2)} \n""")
 
     if len(missing_values) > 0:
         print(

@@ -104,8 +104,8 @@ def check_time_deviation(data, column1, column2, max_time_diff_allowed):
                               compare_run_ids['previous_run_id']), :].index
 
         print(
-            f"""{column1}  and {column2} show a deviation of """
-            f"""> {max_time_diff_allowed}  ms. """
+            f"""{column1} and {column2} show a deviation of """
+            f"""> {max_time_diff_allowed}  ms for some trials. """
             f"""Please check on the following indices: \n"""
             f"""{problematic_trials} \n""")
 
@@ -373,7 +373,8 @@ def add_within_task_index(data):
     example = data.loc[
         (data['run_id'] == data['run_id'].unique()[0]) &
         (data['fixTask'] == 1),
-        ['run_id', 'trial_index', 'withinTaskIndex', 'trial_type']
+        ['trial_index', 'withinTaskIndex', 'trial_type',
+         'trial_duration']
     ].head(5)
 
     print(
@@ -429,8 +430,7 @@ def add_position_index(data):
     return data
 
 
-def add_fps_trial_level(data_trial, data_et):
-    data_trial = merge_count_by_index(data_trial, data_et, 'x')
+def add_fps_trial_level(data_trial):
 
     data_trial['fps'] = \
         1000 * data_trial['x_count'] / \

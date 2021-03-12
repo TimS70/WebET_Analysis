@@ -517,7 +517,7 @@ m_cluster_1 = glmer(
     nAGQ = 10) 
 
 m_cluster_2 = glmer(
-    choseLL ~ withinTaskIndex + rt_c + attributeIndex + cluster_2 + 
+    choseLL ~ withinTaskIndex + rt_c + attributeIndex + cluster2 + 
     	(1 | run_id), 
     data = data_trial, 
     family = binomial, 
@@ -525,7 +525,7 @@ m_cluster_2 = glmer(
     nAGQ = 10)
 
 m_cluster_3 = glmer(
-    choseLL ~ withinTaskIndex + rt_c + attributeIndex + cluster_3 + 
+    choseLL ~ withinTaskIndex + rt_c + attributeIndex + cluster3 + 
     	(1 | run_id), 
     data = data_trial, 
     family = binomial, 
@@ -533,7 +533,7 @@ m_cluster_3 = glmer(
     nAGQ = 10)
 
 m_cluster_4 = glmer(
-    choseLL ~ withinTaskIndex + rt_c + attributeIndex + cluster_4 + 
+    choseLL ~ withinTaskIndex + rt_c + attributeIndex + cluster4 + 
     	(1 | run_id), 
     data = data_trial, 
     family = binomial, 

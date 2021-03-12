@@ -26,15 +26,18 @@ def prep_datasets(cluster_correction=False):
     global_add_variables_to_datasets()
     global_cleaning()
 
+    # Create and clean sub data
     create_and_clean_choice_data()
+    create_fix_tasks_datasets()
+    clean_fix_task_datasets()
+
+    # Add variables
     if cluster_correction:
         run_et_cluster_correction()
 
     add_variables_to_choice_task_datasets(
         use_adjusted_et_data=cluster_correction)
 
-    create_fix_tasks_datasets()
-    clean_fix_task_datasets()
     add_data_quality_var()
 
 
@@ -44,9 +47,11 @@ def init_analysis(cluster_correction=False):
     analyze_choice_task(use_adjusted_et_data=cluster_correction)
     analyze_fix_task()
 
+    # Render R markdowns
     subprocess.call(['Rscript', '--vanilla', 'analysis/'
                      'run_r_markdowns.R'], shell=True)
 
 
 if __name__ == '__main__':
-    main(new_data=False, cluster_correction=False)
+    dropout_analysis()
+#    main(new_data=False, cluster_correction=False)

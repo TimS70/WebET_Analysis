@@ -2,7 +2,8 @@ import os
 
 import pandas as pd
 
-from utils.data_frames import merge_by_index
+from data_prep.add_variables.trial import merge_count_by_index
+from utils.data_frames import merge_by_index, merge_by_subject
 from utils.path import makedir
 from utils.tables import summarize_datasets
 
@@ -26,14 +27,10 @@ def create_fix_tasks_datasets():
                                  'task_nr', 'chin', 'chinFirst', 'trial_type',
                                  'trial_duration', 'trial_duration_exact', 'x_pos', 'y_pos',
                                  'window_width', 'window_height')
+    data_trial = merge_count_by_index(data_trial, data_et, 'x')
+    data_trial = merge_by_subject(data_trial, data_subject, 'glasses_binary')
 
-    if 'glasses_binary' in data_trial.columns:
-        data_trial = data_trial.drop(columns=['glasses_binary'])
-    data_trial = data_trial.merge(
-        data_subject.loc[:, ['run_id', 'glasses_binary']],
-        on='run_id',
-        how='left')
-
+    print('for the fixation task, gaze points after 1000ms were selected. \n')
     data_et_fix = data_et.loc[
                   (data_et['trial_type'] == 'eyetracking-fix-object') &
                   (data_et['trial_duration'] == 5000) &

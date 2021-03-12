@@ -33,8 +33,11 @@ def clean_degree(data_subject):
         'Graduate / PhD / Master': 'grad',
     })
     data_subject['degree'] = data_subject['degree'].astype('category')
-    print(data_subject['degree'].unique())
     data_subject['degree'].cat.reorder_categories(
         ['middle', 'high', 'college', 'grad'], inplace=True)
+
+    print(
+        f"""Replacing education data. New values: \n """
+        f"""{data_subject['degree'].unique()} \n""")
 
     return data_subject

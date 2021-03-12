@@ -22,9 +22,13 @@ def add_aoi_et(data_et, use_adjusted_et_data):
             ['TL', 'TR', 'BL', 'BR']
         )
 
+    freq_table = pd.crosstab(
+        index=data_et['aoi'],
+        columns="count")
+
     print(
         f"""AOI will be calculated. No cluster correction. \n """
-        f"""Unique AOIs: {data_et['aoi'].unique()} \n""")
+        f"""{freq_table} \n""")
     plot_aoi_scatter(data_et)
 
     data_et = create_aoi_columns(data_et)
@@ -78,16 +82,20 @@ def report_excluded_data_aoi(data_et_new):
         data_et_new['run_id'].unique()
     )
 
-    print(
-        f"""Because several gaze points did not fit into the AOIs, """
-        f"""{summary_difference['n'].sum()} gaze points of """
-        f"""{len(summary_difference)} trials and """
-        f"""{summary_difference['run_id'].nunique()} runs were excluded. \n"""
-        f"""See the following: \n"""
-        f"""{summary_difference} \n"""
-        f"""Moreover n={len(removed_subjects)} runs """
-        f"""({removed_subjects}) """ 
-        f"""were removed because no eye-tracking data matched the AOIs. \n""")
+    if len(summary_difference) > 0:
+        print(
+            f"""data_et: Because several gaze points did not fit into the AOIs, """
+            f"""{len(summary_difference)} trials """
+            f"""({summary_difference['n'].sum()} gaze points) and """
+            f"""{summary_difference['run_id'].nunique()} runs were excluded. """
+            f"""See the following: \n"""
+            f"""{summary_difference} \n"""
+            f"""Moreover n={len(removed_subjects)} runs """
+            f"""({removed_subjects}) """
+            f"""were removed because no eye-tracking data matched the AOIs. \n""")
+    else:
+        print(f"""No trials were removed from data_et because they contained """
+              f"""gaze points within AOIs.""")
 
 
 def match_remaining_et_trials(data_trial, data_et):
@@ -107,8 +115,8 @@ def match_remaining_et_trials(data_trial, data_et):
                  ~data_trial[['x_mean', 'y_mean']].isna().all(1), :]
 
     print(
-        f"""Removing trials with missing eye-tracking data: \n"""
-        f"""{sum(missing_values['n'])} trials of """
+        f"""data_trial: Removing trials with missing eye-tracking data: \n"""
+        f"""k={sum(missing_values['n'])} trials of """
         f"""{missing_values['run_id'].nunique()} runs. \n"""
     )
 

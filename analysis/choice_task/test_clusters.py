@@ -45,8 +45,6 @@ def test_transition_clusters(data_trial):
         log_reg = sm.Logit(y, x_).fit()
         output.append([n_cluster, log_reg.bic, log_reg.aic])
 
-    print(data_cluster.columns)
-    print(data_cluster.head(5))
     output = pd.DataFrame(output, columns=['n_clusters', 'BIC', 'AIC']) \
         .set_index('n_clusters')
 

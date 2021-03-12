@@ -1,19 +1,12 @@
 import pandas as pd
 
 
-def clean_prolific_ids(data_subject):
-    data_subject = drop_duplicate_ids(data_subject)
-    data_subject = drop_missing_prolific_ids(data_subject)
-
-    return data_subject
-
-
 def drop_duplicate_ids(data_subject):
     n_duplicated = data_subject \
         .duplicated(subset=['prolificID']) \
         .sum()
 
-    print(f'Number of duplicate prolific IDs: {n_duplicated} \n')
+    print(f'n={n_duplicated} runs with duplicate Prolific IDs. ')
 
     data_subject = data_subject \
         .sort_values(by=['prolificID', 'max_trial']) \
@@ -22,24 +15,13 @@ def drop_duplicate_ids(data_subject):
     return data_subject
 
 
-def drop_missing_prolific_ids(data):
-    print(data.loc[
-              pd.isna(data['prolificID']),
-              ['run_id', 'prolificID', 'browser', 'recorded_date']
-          ])
-    data = data.loc[pd.notna(data['prolificID']), :]
-
-    return data
-
-
 def match_ids_with_subjects(data, data_subject, data_name):
 
     data = data.loc[
            data['run_id'].isin(data_subject['run_id']), :]
 
     print(
-        f"""overlapping subjects between data_subject """
-        f"""and {data_name}: n = """
-        f"""{len(data.loc[:, 'run_id'].unique())} \n""")
+        f"""n={len(data.loc[:, 'run_id'].unique())} overlapping """
+        f"""runs between data_subject and {data_name}. """)
 
     return data

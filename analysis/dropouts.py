@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from data_prep.cleaning.filter_approved import filter_approved
+from data_prep.cleaning.filter_approved import runs_not_approved
+from data_prep.cleaning.invalid_runs import clean_runs
 from utils.plots import save_plot
 from utils.tables import write_csv
 
@@ -20,7 +21,19 @@ def dropout_analysis():
     data_subject = pd.read_csv(
         os.path.join('data', 'all_trials', 'added_var', 'data_subject.csv'))
 
-    data_trial = filter_approved(data_trial, data_subject)
+    # Filter Prolific data
+    runs_not_prolific = data_subject.loc[
+        data_subject['status'] == 'NOTPROLIFIC', 'run_id']
+
+    print(
+        f""" \n"""
+        f"""Filtering Prolific Data: \n"""
+        f"""n={len(runs_not_prolific)} were not from Prolific """
+        f"""(e.g. from task development instead) and will be removed: \n""")
+
+    data_trial = clean_runs(data_trial, runs_not_prolific, 'data_trial')
+    data_subject = clean_runs(data_subject, runs_not_prolific, 'data_subject')
+    runs_not_approved(data_subject)
 
     dropout_by_task_nr(data_trial)
     how_many_runs_with_dropouts(data_trial)
@@ -31,18 +44,25 @@ def dropout_analysis():
 
 
 def dropout_by_task_nr(data):
-    grouped_trial_type_new = data.loc[
-                             :, ['run_id', 'trial_index', 'task_nr_new']] \
+    grouped_trial_type_new = data.loc[:, [
+                                             'run_id',
+                                             'trial_index',
+                                             'task_nr_new']] \
         .drop_duplicates()
 
-    last_trial_for_each_subject = data.groupby(['run_id'])['trial_index'].max() \
-                                      .reset_index() \
-                                      .merge(grouped_trial_type_new, on=['run_id', 'trial_index'], how='left') \
-                                      .loc[:, ['run_id', 'task_nr_new']]
+    last_trial_for_each_subject = data.groupby(
+            ['run_id'],
+            as_index=False)['trial_index'].max() \
+        .merge(
+            grouped_trial_type_new,
+            on=['run_id', 'trial_index'],
+            how='left') \
+        .loc[:, ['run_id', 'task_nr_new']]
 
     output = last_trial_for_each_subject \
-        .groupby(['task_nr_new'])['run_id'].count() \
-        .reset_index() \
+        .groupby(
+            ['task_nr_new'],
+            as_index=False)['run_id'].count() \
         .rename(columns={'run_id': 'n_run_id'}) \
         .sort_values(by='n_run_id')
 
@@ -381,8 +401,8 @@ def multi_participation_by_trial_type(data_trial):
                               'trial_type', 'trial_type_nr', 'trial_type_new']],
         on=['run_id', 'trial_index'],
         how='left')
-    runs_max_trial = runs_max_trial \
-                         .loc[runs_max_trial['trial_type_new'] != 'end', :]
+    runs_max_trial = runs_max_trial.loc[
+                     runs_max_trial['trial_type_new'] != 'end', :]
 
     runs_max_trial = add_next_trial(runs_max_trial, data_trial)
 
@@ -390,7 +410,9 @@ def multi_participation_by_trial_type(data_trial):
         .groupby(['next_trial_type_new']).nunique()['prolificID'] \
         .reset_index() \
         .sort_values(by='prolificID')
-    print(f"""{output} \n""")
+    print(
+        f"""Those with multiple attempts previously dropped out at: \n"""
+        f"""{output} \n""")
 
     write_csv(
         output,
