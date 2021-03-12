@@ -133,26 +133,20 @@ def group_last_trial_for_each_run(data_trial):
 
     last_trial_for_each_run = add_next_trial(
         last_trial_for_each_run, data_trial)
+
     return last_trial_for_each_run
 
 
 def group_dropout_by_type(data_trial):
-    """
-        Most runs drop out at the beginning (8.8% chinFirst +7.2% no chinFirst),
-        in detail, during the initialization of Webgazer (4.4%+3.2%), during the
-        calibration instruction (0.6%+2.5%) and the calibration itself (1.2+0.3%).
-        Moreover, some dropouts during the tasks (0.6+1.8%).
 
-    :param data_trial:
-    :return:
-    """
     last_trial_for_each_run = group_last_trial_for_each_run(data_trial)
-    dropout_by_type = last_trial_for_each_run \
-                          .groupby(['trial_type_new', 'next_trial_type_new', 'next_trial_type']).count() \
-                          .reset_index() \
-                          .rename(columns={'run_id': 'n_run_id'}) \
-                          .loc[:, ['trial_type_new', 'next_trial_type_new',
-                                   'next_trial_type', 'n_run_id']] \
+    dropout_by_type = last_trial_for_each_run.groupby(
+            ['trial_type_new', 'next_trial_type_new',
+             'next_trial_type'],
+            as_index=False).count() \
+        .rename(columns={'run_id': 'n_run_id'}) \
+        .loc[:, ['trial_type_new', 'next_trial_type_new',
+               'next_trial_type', 'n_run_id']] \
         .sort_values(by='n_run_id')
 
     dropout_by_type['percent'] = round(
@@ -165,62 +159,6 @@ def group_dropout_by_type(data_trial):
     write_csv(
         dropout_by_type,
         'dropout_by_type.csv',
-        'results', 'tables', 'dropouts')
-
-    summary = pd.DataFrame([
-        [
-            'beginning',
-            sum(
-                dropout_by_type.loc[
-                    dropout_by_type['next_trial_type_new'].isin([
-                        'pre_et_init',
-                        'et_init',
-                        'et_adjustment',
-                        'calibration_1_briefing',
-                        'calibration_1',
-                    ]),
-                    'n_run_id']),
-            sum(dropout_by_type.loc[
-                    dropout_by_type['next_trial_type_new'].isin([
-                        'pre_et_init',
-                        'et_init',
-                        'et_adjustment',
-                        'calibration_1_briefing',
-                        'calibration_1',
-                    ]),
-                    'percent'])
-        ],
-        [
-            'et_tasks',
-            sum(dropout_by_type.loc[
-                    dropout_by_type['next_trial_type_new'].isin([
-                        'fixation_1',
-                        'fixation_2',
-                        'calibration_2',
-                        'choice',
-                    ]),
-                    'n_run_id']),
-            sum(dropout_by_type.loc[
-                    dropout_by_type['next_trial_type_new'].isin([
-                        'fixation_1',
-                        'fixation_2',
-                        'calibration_2',
-                        'choice',
-                    ]),
-                    'percent'])
-        ],
-        [
-            'total',
-            sum(dropout_by_type['n_run_id']),
-            sum(dropout_by_type['percent'])
-        ]
-    ], columns=['type', 'sum', 'percent'])
-
-    print(f"""Dropouts by type: \n {summary} \n""")
-
-    write_csv(
-        summary,
-        'dropout_by_type_2.csv',
         'results', 'tables', 'dropouts')
 
     return dropout_by_type
