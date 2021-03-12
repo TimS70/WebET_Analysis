@@ -6,7 +6,7 @@ import pandas as pd
 
 from analysis.choice_task.test_clusters import test_transition_clusters
 from data_prep.add_variables.aoi import add_fixation_counter, count_fixations_on_trial_level, \
-    add_aoi_counts_on_trial_level, add_aoi_et, report_excluded_data_aoi, match_remaining_et_trials, \
+    add_aoi_counts_on_trial_level, add_aoi_et, match_remaining_et_trials, \
     match_remaining_et_runs
 from data_prep.add_variables.et_indices import add_et_indices
 from utils.data_frames import merge_by_index, merge_by_subject
@@ -21,7 +21,7 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
           '################################### \n')
 
     if use_adjusted_et_data:
-        print('Using adjusted et data (data_et from' +
+        print('Using adjusted data_et from' +
               os.path.join('data', 'choice_task', 'adjusted') + '\n')
         data_et = pd.read_csv(
             os.path.join('data', 'choice_task', 'adjusted', 'data_et.csv'))
@@ -40,6 +40,9 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
 
     print('Imported data from ' +
           os.path.join('data', 'choice_task', 'cleaned') + ':')
+    if use_adjusted_et_data:
+        print('and ' + os.path.join('data', 'choice_task', 'adjusted'))
+
     summarize_datasets(data_et, data_trial, data_subject)
 
     # # Information attributes
@@ -60,16 +63,18 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
         data_subject, data_trial,
         'choseLL', 'choseTop', 'LL_top')
 
+
+
     # AOIs
     data_et = add_aoi_et(data_et, use_adjusted_et_data)
-    report_excluded_data_aoi(data_et)
-
     data_trial = match_remaining_et_trials(data_trial, data_et)
-    data_subject = match_remaining_et_runs(data_subject, data_et)
 
-    data_et = add_fixation_counter(data_et)
+    if use_adjusted_et_data:
+        data_trial = match_remaining_et_runs(
+            data_trial, data_et, 'data_trial')
+        data_subject = match_remaining_et_runs(
+            data_subject, data_et, 'data_subject')
 
-    data_trial = count_fixations_on_trial_level(data_trial, data_et)
     data_trial = add_aoi_counts_on_trial_level(data_trial, data_et)
 
     data_trial = add_et_indices(data_trial, data_et)
@@ -79,14 +84,20 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
         'attributeIndex', 'optionIndex', 'payneIndex')
 
     print(
-        f"""On subject level: \n"""
+        f"""ET indices on subject level: \n"""
         f"""{data_subject[['attributeIndex', 'optionIndex', 
                            'payneIndex']].describe()} \n"""
     )
 
+    data_et = add_fixation_counter(data_et)
+    data_trial = count_fixations_on_trial_level(data_trial, data_et)
+
     data_trial = test_transition_clusters(data_trial)
 
     if use_adjusted_et_data:
+        print(
+            f"""Datasets saved to """
+            f"""{os.path.join('data', 'choice_task', 'adjusted')} \n""")
         data_et.to_csv(
             os.path.join(
                 'data', 'choice_task', 'adjusted', 'data_et.csv'),
@@ -101,6 +112,9 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
             index=False, header=True)
     else:
         makedir('data', 'choice_task', 'uncorrected')
+        print(
+            f"""Datasets saved to """
+            f"""{os.path.join('data', 'choice_task', 'uncorrected')} \n""")
         data_et.to_csv(
             os.path.join(
                 'data', 'choice_task', 'uncorrected', 'data_et.csv'),
@@ -113,6 +127,7 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
             os.path.join(
                 'data', 'choice_task', 'uncorrected', 'data_subject.csv'),
             index=False, header=True)
+
     summarize_datasets(data_et, data_trial, data_subject)
 
 
@@ -147,20 +162,6 @@ def add_choice_options_num(data_trial):
     ]
     for var in variables:
         data_trial = choice_options_to_numeric(data_trial, var)
-
-    example = data_trial.loc[
-        :,
-        [
-            'option_TL',
-            'option_BL',
-            'option_TR',
-            'option_BR',
-            'option_TL_num',
-            'option_BL_num',
-            'option_TR_num',
-            'option_BR_num'
-        ]
-        ].head(5)
 
     print(f"""data_trial: Add choice_options_num. \n""")
 

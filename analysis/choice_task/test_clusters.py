@@ -67,6 +67,7 @@ def test_transition_clusters(data_trial):
 
     return data_trial
 
+
 def clusters(n_clusters, scaled_features):
     k_means = KMeans(
         init="random",

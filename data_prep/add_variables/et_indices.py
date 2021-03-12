@@ -3,8 +3,12 @@ import pandas as pd
 
 
 def add_et_indices(data_trial, data_et):
-    data_trial['optionIndex'] = add_option_index(data_trial)
-    data_trial['attributeIndex'] = add_attribute_index(data_trial)
+    min_n_points = 3
+
+    data_trial['optionIndex'] = add_option_index(data_trial,
+                                                 min_n_points)
+    data_trial['attributeIndex'] = add_attribute_index(data_trial,
+                                                       min_n_points)
 
     data_trial = add_transition_type(data_trial, data_et)
     data_trial['payneIndex'] = add_payne_index(data_trial)
@@ -12,13 +16,14 @@ def add_et_indices(data_trial, data_et):
     return data_trial
 
 
-def add_option_index(data):
+def add_option_index(data, min_n_points):
     gaze_points_immediate = \
-        require_min(data['aoi_aSS'], 3) + \
-        require_min(data['aoi_tSS'], 3)
+        require_min(data['aoi_aSS'], min_n_points) + \
+        require_min(data['aoi_tSS'], min_n_points)
+
     gaze_points_delay = \
-        require_min(data['aoi_aLL'], 3) + \
-        require_min(data['aoi_tLL'], 3)
+        require_min(data['aoi_aLL'], min_n_points) + \
+        require_min(data['aoi_tLL'], min_n_points)
     option_index = \
         (gaze_points_immediate - gaze_points_delay) / \
         (gaze_points_immediate + gaze_points_delay)
@@ -26,7 +31,8 @@ def add_option_index(data):
     overview = et_var_overview(option_index)
 
     print(
-        f"""data_trial: Added Option Index: \n"""
+        f"""data_trial: Added Option Index with a minimum """
+        f"""required number of {min_n_points} gaze points in an AOI: \n"""
         f"""{option_index.describe()} \n"""
         f"""{overview} \n"""
     )
@@ -40,13 +46,13 @@ def require_min(data, min_required_count):
         np.repeat(0, min_required_count))
 
 
-def add_attribute_index(data):
+def add_attribute_index(data, min_n_points):
     gaze_points_amount = \
-        require_min(data['aoi_aLL'], 3) + \
-        require_min(data['aoi_aSS'], 3)
+        require_min(data['aoi_aLL'], min_n_points) + \
+        require_min(data['aoi_aSS'], min_n_points)
     gaze_points_time = \
-        require_min(data['aoi_tLL'], 3) + \
-        require_min(data['aoi_tSS'], 3)
+        require_min(data['aoi_tLL'], min_n_points) + \
+        require_min(data['aoi_tSS'], min_n_points)
 
     attribute_index = \
         (gaze_points_amount - gaze_points_time) / \
@@ -55,7 +61,8 @@ def add_attribute_index(data):
     overview = et_var_overview(attribute_index)
 
     print(
-        f"""data_trial: Added Attribute Index: \n"""
+        f"""data_trial: Added Attribute Index with a minimum """
+        f"""required number of {min_n_points} gaze points in an AOI: \n"""
         f"""{attribute_index.describe()} \n"""
         f"""{overview} \n"""
     )

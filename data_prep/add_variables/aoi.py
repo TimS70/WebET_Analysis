@@ -12,22 +12,21 @@ from utils.tables import write_csv
 
 def add_aoi_et(data_et, use_adjusted_et_data):
     # If not already done in Matlab
-    if np.invert(use_adjusted_et_data):
-
-        data_et = add_aoi(data_et, 0.3, 0.3)
-
-    else:
+    if use_adjusted_et_data:
         data_et['aoi'] = data_et['aoi'].replace(
             [1, 2, 3, 4],
-            ['TL', 'TR', 'BL', 'BR']
-        )
+            ['TL', 'TR', 'BL', 'BR'])
+
+    else:
+        print(f"""AOI will be calculated. No cluster correction.""")
+        data_et = add_aoi(data_et, 0.3, 0.3)
 
     freq_table = pd.crosstab(
         index=data_et['aoi'],
         columns="count")
 
     print(
-        f"""AOI will be calculated. No cluster correction. \n """
+        f"""Gaze points across AOIs: \n"""
         f"""{freq_table} \n""")
     plot_aoi_scatter(data_et)
 
@@ -59,45 +58,6 @@ def add_aoi(data, aoi_width, aoi_height):
     return data
 
 
-def report_excluded_data_aoi(data_et_new):
-    grouped_new = data_et_new.groupby(
-            ['run_id', 'withinTaskIndex'],
-            as_index=False)['x'].count() \
-        .rename(columns={'x': 'n'})
-
-    data_et_old = pd.read_csv(
-        os.path.join('data', 'choice_task', 'cleaned', 'data_et.csv'))
-
-
-    grouped_old = data_et_old.groupby(
-            ['run_id', 'withinTaskIndex'],
-            as_index=False)['x'].count() \
-        .rename(columns={'x': 'n'})
-
-    summary_difference = pd.concat([grouped_new, grouped_old]) \
-        .drop_duplicates(subset=['run_id', 'withinTaskIndex'], keep=False)
-
-    removed_subjects = np.setdiff1d(
-        data_et_old['run_id'].unique(),
-        data_et_new['run_id'].unique()
-    )
-
-    if len(summary_difference) > 0:
-        print(
-            f"""data_et: Because several gaze points did not fit into the AOIs, """
-            f"""{len(summary_difference)} trials """
-            f"""({summary_difference['n'].sum()} gaze points) and """
-            f"""{summary_difference['run_id'].nunique()} runs were excluded. """
-            f"""See the following: \n"""
-            f"""{summary_difference} \n"""
-            f"""Moreover n={len(removed_subjects)} runs """
-            f"""({removed_subjects}) """
-            f"""were removed because no eye-tracking data matched the AOIs. \n""")
-    else:
-        print(f"""No trials were removed from data_et because they contained """
-              f"""gaze points within AOIs.""")
-
-
 def match_remaining_et_trials(data_trial, data_et):
 
     grouped = data_et.groupby(
@@ -123,32 +83,21 @@ def match_remaining_et_trials(data_trial, data_et):
     return data_trial
 
 
-def match_remaining_et_runs(data_subject, data_et):
+def match_remaining_et_runs(data, data_et, data_name):
 
-    grouped = data_et.groupby(
-            ['run_id', 'trial_index'],
-            as_index=False)[['x', 'y']].mean() \
-        .rename(columns={'x': 'x_mean', 'y': 'y_mean'}) \
-        .groupby(
-            ['run_id'],
-            as_index=False)[['x_mean', 'y_mean']].mean()
+    run_et_but_not_data = data.loc[
+        ~data['run_id'].isin(data_et['run_id'].unique()), 'run_id'] \
+        .unique()
 
-    data_subject = merge_by_subject(data_subject, grouped, 'x_mean', 'y_mean')
-
-    missing_runs = data_subject.loc[
-        data_subject[['x_mean', 'y_mean']].isna().all(1),
-        'run_id']
-
-    data_subject = data_subject.loc[
-                 ~data_subject[['x_mean', 'y_mean']].isna().all(1), :]
-
-    if len(missing_runs) > 0:
+    if len(run_et_but_not_data) > 0:
         print(
-            f"""Removing runs with completely missing eye-tracking data: """
-            f"""n={len(missing_runs)} ({missing_runs.values[0]}). \n"""
+            f"""n={len(run_et_but_not_data)} ({run_et_but_not_data}) """
+            f"""runs were in data_et but not in {data_name}. \n"""
         )
 
-    return data_subject
+    data = data.loc[data['run_id'].isin(data_et['run_id'].unique()), :]
+
+    return data
 
 
 def plot_aoi_scatter(data_et):
@@ -272,11 +221,19 @@ def add_fixation_counter(data):
                 (data['withinTaskIndex'] == trial),
                 'fix_counter'] = fix_counter(temp_aoi)
 
-    example = data.groupby(
-        ['run_id', 'aoi'])['fix_counter'].count().head(5)
+    grouped_n_fix_by_aoi = data \
+        .loc[data['aoi'].isin(['BL', 'BR', 'TL', 'TR']), :] \
+        .groupby(
+            ['aoi', 'run_id', 'trial_index'],
+            as_index=False)['fix_counter'].nunique() \
+        .rename(columns={'fix_counter': 'n'}) \
+        .groupby(
+            ['aoi'],
+            as_index=False)['n'].sum()
+
     print(
         f"""data_et: Added fixation counter: \n"""
-        f"""{example}"""
+        f"""{grouped_n_fix_by_aoi}"""
     )
 
     return data

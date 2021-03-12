@@ -43,40 +43,6 @@ def dropout_analysis():
     check_multi_participation(data_trial)
 
 
-def dropout_by_task_nr(data):
-    grouped_trial_type_new = data.loc[:, [
-                                             'run_id',
-                                             'trial_index',
-                                             'task_nr_new']] \
-        .drop_duplicates()
-
-    last_trial_for_each_subject = data.groupby(
-            ['run_id'],
-            as_index=False)['trial_index'].max() \
-        .merge(
-            grouped_trial_type_new,
-            on=['run_id', 'trial_index'],
-            how='left') \
-        .loc[:, ['run_id', 'task_nr_new']]
-
-    output = last_trial_for_each_subject \
-        .groupby(
-            ['task_nr_new'],
-            as_index=False)['run_id'].count() \
-        .rename(columns={'run_id': 'n_run_id'}) \
-        .sort_values(by='n_run_id')
-
-    print(
-        f"""Dropout by task nr: \n"""
-        f"""{output} \n"""
-    )
-
-    write_csv(
-        output,
-        'dropout_by_task_nr.csv',
-        'results', 'tables', 'dropouts')
-
-
 def how_many_runs_with_dropouts(data_trial):
     grouped_last_trial = data_trial.groupby(['run_id'])['trial_index'].max() \
         .reset_index() \
@@ -109,13 +75,51 @@ def how_many_runs_with_dropouts(data_trial):
     fig, ax = plt.subplots()
     ax.bar(data['trial_type_new'], data['n'])
 
-    for ax in fig.axes:
-        ax.tick_params(labelrotation=45)
+    max_y = round(data['n'].max()/10)*10
+    ax.set_ylabel('Frequency')
+    ax.yaxis.set_ticks(np.arange(0, max_y, 5))
+    ax.set_title('Dropouts by trial type')
+
+    fig.autofmt_xdate(rotation=45)
 
     plt.tight_layout()
     save_plot('dropouts.png', 'results', 'plots', 'dropouts')
 
     plt.close()
+
+
+def dropout_by_task_nr(data):
+    grouped_trial_type_new = data.loc[:, [
+                                             'run_id',
+                                             'trial_index',
+                                             'task_nr_new']] \
+        .drop_duplicates()
+
+    last_trial_for_each_subject = data.groupby(
+            ['run_id'],
+            as_index=False)['trial_index'].max() \
+        .merge(
+            grouped_trial_type_new,
+            on=['run_id', 'trial_index'],
+            how='left') \
+        .loc[:, ['run_id', 'task_nr_new']]
+
+    output = last_trial_for_each_subject \
+        .groupby(
+            ['task_nr_new'],
+            as_index=False)['run_id'].count() \
+        .rename(columns={'run_id': 'n_run_id'}) \
+        .sort_values(by='n_run_id')
+
+    print(
+        f"""Dropout by task nr: \n"""
+        f"""{output} \n"""
+    )
+
+    write_csv(
+        output,
+        'dropout_by_task_nr.csv',
+        'results', 'tables', 'dropouts')
 
 
 def group_last_trial_for_each_run(data_trial):
@@ -257,6 +261,7 @@ def check_multi_participation(data_trial):
         calibration briefing (n=7) and the initialization (n=11) multiple times
     """
 
+    print('Multiple participation: ')
     multi_participation_by_run(data_trial)
     multi_participation_by_trial_type(data_trial)
 
@@ -291,12 +296,10 @@ def multi_participation_by_run(data_trial):
 
     for ID in grouped_last_trial_dropout.loc[
         pd.notna(grouped_last_trial_dropout['prolificID']),
-        'prolificID'
-    ].unique():
+        'prolificID'].unique():
         previous_attempt = grouped_last_trial_full.loc[
                            grouped_last_trial_full['prolificID'] == ID,
-                           :
-                           ]
+                           :]
         if len(previous_attempt) > 0:
             subjects_multiple_attempts = np.append(
                 subjects_multiple_attempts, ID)
@@ -309,11 +312,12 @@ def multi_participation_by_run(data_trial):
     actual_dropout_rate = len(subjects_actual_dropouts) / len(prolific_ids)
 
     print(
-        f"""Of those subjects where the ID is known: n={len(prolific_ids)} \n"""
-        f"""Subjects_multiple_attempts: n={len(subjects_multiple_attempts)}"""
-        f""" = {round(100 * multi_attempts_rate, 2)}% \n"""
-        f"""subjects_actual_dropouts: n={len(subjects_actual_dropouts)}"""
-        f""" = {round(100 * actual_dropout_rate, 2)}% \n"""
+        f"""Of n={len(prolific_ids)} Prolific participants """
+        f"""n={len(subjects_multiple_attempts)} participants """
+        f"""({round(100 * multi_attempts_rate, 2)}%) tried again and """
+        f"""n={len(subjects_actual_dropouts)} """
+        f"""({round(100 * actual_dropout_rate, 2)}%) only tried once and """
+        f"""then dropped out. \n"""
     )
 
 

@@ -1,14 +1,14 @@
+import math
 import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from utils.path import makedir
 from utils.plots import save_plot
 from utils.tables import write_csv
 
 
-def show_demographics():
+def analyze_demographics():
 
     print('################################### \n'
           'Analyze demographics \n'
@@ -16,26 +16,43 @@ def show_demographics():
 
     data_subject = pd.read_csv(
         os.path.join('data', 'all_trials', 'cleaned', 'data_subject.csv'))
+    data_subject['kind_of_correction'] = data_subject['glasses']
 
-    frequency_tables(data_subject)
-    plot_pie_charts(data_subject)
-    plt.hist(data_subject['birthyear'], bins=15)
+    predictors = [
+        'Current Country of Residence', 'Nationality',
+        'employment_status', 'Student Status', 'degree',
+        'kind_of_correction', 'sight', 'vertPosition', 'webcam_fps',
+        'ethnic', 'gender']
 
-    save_plot('age.png',
+    frequency_tables(data_subject, predictors)
+    plot_pie_charts(data_subject, predictors)
+
+    n_bins = 10
+    plt.hist(data_subject['birthyear'], bins=n_bins)
+    plt.title('Birthyear histogram (bins=' + str(n_bins) + ')')
+    plt.xlabel('Birthyear')
+    plt.ylabel('Frequency')
+
+
+    age = 2021 - data_subject['birthyear']
+    print(
+        f"""Describe age: \n"""
+        f"""{age.describe()}""")
+
+    save_plot('birthyear.png',
               'results', 'plots', 'demographics')
     plt.close()
 
 
-def frequency_tables(data_subject):
-    columns = ['Current Country of Residence', 'Nationality',
-               'employment_status', 'webcam_fps', 'ethnic',
-               'gender']
+def frequency_tables(data_subject, predictors):
 
-    for col in columns:
+    for col in predictors:
 
         freq_table = pd.crosstab(
-            index=data_subject[col],
-            columns="count")
+                index=data_subject[col],
+                columns="count")
+        freq_table.reset_index()
+        freq_table['percent'] = freq_table['count'] / sum(freq_table['count'])
 
         print(f"""{freq_table} \n""")
 
@@ -43,24 +60,26 @@ def frequency_tables(data_subject):
                   'results', 'tables', 'demographics')
 
 
-def plot_pie_charts(data_subject):
-    fig, ax = plt.subplots(nrows=4, ncols=2, figsize=(10, 20))
+def plot_pie_charts(data_subject, predictors):
+
+    n_cols = 4
+    n_row = math.ceil(len(predictors)/n_cols)
+
+    fig, ax = plt.subplots(nrows=n_row, ncols=n_cols,
+                           figsize=((5*n_cols), (5*n_row)))
     fig.suptitle('Pie charts', fontsize=20)
     ax = ax.ravel()
 
-    predictors = [
-        'ethnic', 'employment_status', 'vertPosition', 'degree',
-        'glasses', 'sight', 'Student Status'
-    ]
     for i in range(0, len(predictors)):
         pie = cross_tab(predictors[i], data_subject)
         ax[i].pie(pie['count'], labels=pie[predictors[i]], autopct='%1.1f%%', startangle=90)
         ax[i].axis('equal')
-        ax[i].set_title(predictors[i])
+        ax[i].set_title(predictors[i], pad=20)
 
     save_plot('pie_charts.png',
               'results', 'plots', 'demographics')
     plt.close()
+
 
 def cross_tab(col, data_subject):
     pie = pd.crosstab(

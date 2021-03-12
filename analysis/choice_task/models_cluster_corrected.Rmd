@@ -90,11 +90,13 @@ data_subject = add_log_k(data_subject, FALSE)
 data_trial = add_log_k(data_trial, FALSE)
 
 data_subject %>%
-    dplyr::select(run_id, logK, noise)
+    dplyr::select(run_id, logK, noise) %>%
+	head(5)
 
 data_trial %>%
     dplyr::group_by(run_id) %>%
-    dplyr::summarise(logK, noise, .groups='keep')
+    dplyr::summarise(logK, noise, .groups='keep') %>%
+	head(5)
 ```
 
 
@@ -130,7 +132,6 @@ temp = data_trial %>%
 
 table(temp$birthyear, temp$choseLL)
 table(temp$gender, temp$choseLL)
-
 ```
 
 ## Enough data points for the ET indices?
@@ -206,7 +207,8 @@ print(paste(
 runs_na_et
 
 grouped_n_ET %>%
-    filter(run_id %in% runs_na_et)
+    filter(run_id %in% runs_na_et) %>%
+	head(5)
 ```
 
 ## Visualize choice variance 
@@ -232,7 +234,7 @@ ggsave(file.path(path_results, 'MLA', 'runs_vs_choice.pdf'),
 
 
 # Cleaning
-```{r}
+```{r, cleaning}
 # Data on subject level
 
 exclude_runs = c(
@@ -259,7 +261,7 @@ grouped = data.frame(
         length(exclude_runs)
     )
 )
-grouped
+grouped %>% head(5)
 
 data_subject = remove_runs(data_subject)
 data_trial = remove_runs(data_trial)
@@ -271,24 +273,21 @@ data_trial = remove_na_et_indices(data_trial)
 # Correlative Analysis
 
 ## Scatter matrix
-```{r}
+```{r, scatter_plot}
 dir.create(file.path(path_results, 'correlations'))
 ggpairs(
     data_subject %>% dplyr::select(
-        choseLL,
-        attributeIndex, optionIndex, payneIndex, fps),     
+        choseLL, attributeIndex, optionIndex, payneIndex, fps),     
     progress = F) 
 
 ggpairs(
     data_subject %>% dplyr::select(
-        choseLL, birthyear, gender, degree,
-        LL_top, choice_rt, logK),
+        choseLL, birthyear, gender, degree, LL_top, choice_rt, logK),
     progress = F) 
 
 ggpairs(
     data_trial %>% dplyr::select(
-        choseLL,
-        withinTaskIndex, trial_duration_exact,
+        choseLL, withinTaskIndex, trial_duration_exact,
         attributeIndex, optionIndex, payneIndex),     
     progress = F) 
 ```
@@ -312,8 +311,7 @@ Sommet, 2017
  - A positive Attribute Index indicates more fixations on the amount attributes
  - A negative Option Index indicates more fixations on the delayed option
  - A negative Payne Index indicates more transitions within attributes 
- 
-```{r results=FALSE, echo=FALSE, message=FALSE}
+```{r, logistic, results=FALSE, echo=FALSE, message=FALSE}
 m_null = glm(choseLL ~ 1,
          data = data_subject, 
          family = binomial(link = "logit"))
@@ -329,13 +327,13 @@ anova(m_null, m1)
 # MLA
 When I do not look at the summarized scores but on every trial, I need to account for the lack of interdependence and use a MLA.
 
-## Intercept Only
+## Step 1) empty model (Intercept Only)
 https://stats.idre.ucla.edu/r/dae/mixed-effects-logistic-regression/
  - Odds for LL choice is exp(0.74) = 2.1 (Feb 02). Bias towards choseLL. The average chance for choseLL is exp(0.74)/(1+exp(0.74)) = 0.7. 
  - Once we control for the inter-subject variance, the choice shifts more towards SS (choseLL reduces from 65% to around 50%)
  - Mean log-odds for choice_LL vary across subjects. SD=0.4418, Odds could increase by factor exp(1.145)=3.14.
  - ICC=0.27, i.e. 27% of the variance are explained by between subject differences
-````{r}
+````{r, glmer0_io}
 glmer0_io = glmer(
     choseLL ~ 1 + (1 | run_id), 
     data = data_trial, 
@@ -350,7 +348,7 @@ icc
 ```
 
 ## Random Intercept (Constrained intermediate model)
-```{r}
+```{r, glmer1_ri}
 data_trial$rt_c = scale(data_trial$trial_duration_exact)
 
 glmer1_ri = glmer(
@@ -366,7 +364,7 @@ anova(glmer0_io, glmer1_ri)
 
 ### Random Intercept Random Slope (Augmented intermediate model)
 Check if random slopes make sense.
-```{r}
+```{r, glmer2_rirs}
 glmer2_rirs = glmer(
     choseLL ~ withinTaskIndex + rt_c + 
     	attributeIndex + optionIndex + 
@@ -380,7 +378,7 @@ anova(glmer1_ri, glmer2_rirs)
 ```
 
 ### Within-Subject centering
-```{r}
+```{r, within_subject_centering}
 grouped = data.frame(
     data_subject$run_id,
     data_subject$attributeIndex,
@@ -440,7 +438,7 @@ Predictors: attributeIndex + optionIndex + payneIndex
  - Effect of the Payne Index: Odds for choseLL increase by the factor exp(-0.17)=0.84. The more transitions within options (positive payne), the lower the odd for chose LL
  - Did not try to get the procentual reduction of L1 and L2 variance because the logistic regression does not have error terms
 
-```{r}
+```{r, glmer_final}
 glmer_final = glmer(
     choseLL ~ withinTaskIndex + rt_c + 
     	attributeIndex + optionIndex + (1 | run_id), 
@@ -456,7 +454,7 @@ confint(glmer_final, method="boot", n=50) # CI with Bootstrap
 
 
 ## Simple Slopes
-```{r}
+```{r, simple slopes}
 # SD
 sd_ai = sd(data_trial$attributeIndex, na.rm = TRUE)
 
@@ -484,7 +482,7 @@ summary(glmer_final_sd_2)
  - The effect of "payneIndex_cmc" is not significant, payneIndex_cmc OR = 0.83, 95% CI [0.67, 1] (has to be beyond 1 to be significant). Imagine it to be signficant: with an increase of the Payne Index of 1 (e.g. if they switch from neutral to only within option transitions), results in 0.67 times the chance (a lower chance) of choosing the delayed reward. 
  - Same for the ones with low (-1 SD) and high (+1 SD) Payne Index (If you have random slope, compare the different levels. 
 
-```{r}
+```{r, effects}
 OR <- exp(fixef(glmer_final))
 CI <- exp(confint(glmer_final, parm="beta_")) # it can be slow (~ a few minutes). As alternative, the much faster but less precise Wald's method can be used: CI <- exp(confint(FM,parm="beta_",method="Wald")) 
 
@@ -508,7 +506,7 @@ OR_CI
 
 # Clusters
 No clusters can improve the prediction of choices
-```{r}
+```{r, clusters}
 m_cluster_1 = glmer(
     choseLL ~ withinTaskIndex + rt_c + attributeIndex + (1 | run_id), 
     data = data_trial, 
@@ -552,7 +550,7 @@ anova(m_cluster_1, m_cluster_2, m_cluster_3, m_cluster_4)
 
 ## Linear relationship between predicted log(choseLL) and the predictors
 Looks quite linear. If not check out: http://www.sthda.com/english/articles/36-classification-methods-essentials/148-logistic-regression-assumptions-and-diagnostics-in-r/
-```{r}
+```{r, linearity}
 predictors <- c('attributeIndex', 'optionIndex', 'payneIndex')
 
 data_plot = data_trial %>%
@@ -575,7 +573,7 @@ ggsave(file.path(path_results, 'MLA', 'assumptions', 'linearity.pdf'),
 
 ## Multicollinearity
 compute variance inflation factor. " As a rule of thumb, a VIF value that exceeds 5 or 10 indicates a problematic amount of collinearity"
-```{r}
+```{r, multicollinearity}
 car::vif(glmer_final)
 ```
 
