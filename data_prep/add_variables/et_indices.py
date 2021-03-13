@@ -18,12 +18,12 @@ def add_et_indices(data_trial, data_et):
 
 def add_option_index(data, min_n_points):
     gaze_points_immediate = \
-        require_min(data['aoi_aSS'], min_n_points) + \
-        require_min(data['aoi_tSS'], min_n_points)
+        require_min_gaze_points(data['aoi_aSS'], min_n_points) + \
+        require_min_gaze_points(data['aoi_tSS'], min_n_points)
 
     gaze_points_delay = \
-        require_min(data['aoi_aLL'], min_n_points) + \
-        require_min(data['aoi_tLL'], min_n_points)
+        require_min_gaze_points(data['aoi_aLL'], min_n_points) + \
+        require_min_gaze_points(data['aoi_tLL'], min_n_points)
     option_index = \
         (gaze_points_immediate - gaze_points_delay) / \
         (gaze_points_immediate + gaze_points_delay)
@@ -40,7 +40,7 @@ def add_option_index(data, min_n_points):
     return option_index
 
 
-def require_min(data, min_required_count):
+def require_min_gaze_points(data, min_required_count):
     return data.replace(
         np.arange(min_required_count),
         np.repeat(0, min_required_count))
@@ -48,11 +48,11 @@ def require_min(data, min_required_count):
 
 def add_attribute_index(data, min_n_points):
     gaze_points_amount = \
-        require_min(data['aoi_aLL'], min_n_points) + \
-        require_min(data['aoi_aSS'], min_n_points)
+        require_min_gaze_points(data['aoi_aLL'], min_n_points) + \
+        require_min_gaze_points(data['aoi_aSS'], min_n_points)
     gaze_points_time = \
-        require_min(data['aoi_tLL'], min_n_points) + \
-        require_min(data['aoi_tSS'], min_n_points)
+        require_min_gaze_points(data['aoi_tLL'], min_n_points) + \
+        require_min_gaze_points(data['aoi_tSS'], min_n_points)
 
     attribute_index = \
         (gaze_points_amount - gaze_points_time) / \

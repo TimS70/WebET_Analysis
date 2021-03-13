@@ -14,6 +14,7 @@ def create_data_subject(data_raw):
                        'run_id', 'chinFirst', 'choiceTask_amountLeftFirst',
                        'browser', 'browser_version', 'device',
                        'platform', 'platform_version', 'user_agent',
+                       'chosenAmount', 'chosenDelay',
                        'webcam_label', 'webcam_fps', 'webcam_height', 'webcam_width'
                    ]
                    ].drop_duplicates()
@@ -29,9 +30,9 @@ def create_data_subject(data_raw):
 
     data_subject = add_data_from_prolific(data_subject)
 
-    makedir('data', 'combined')
+    makedir('data', 'all_trials', 'combined')
     data_subject.to_csv(
-        "data/combined/data_subject.csv",
+        os.path.join('data', 'all_trials', 'combined', 'data_subject.csv'),
         index=False, header=True)
     print('data_subject saved!')
 
@@ -54,8 +55,10 @@ def create_data_prolific(data_subject):
         on='prolificID',
         how='left')
 
-    makedir('data', 'combined')
-    data_prolific.to_csv("data/combined/data_prolific.csv", index=False, header=True)
+    makedir('data', 'prolific')
+    data_prolific.to_csv(
+        os.path.join('data', 'prolific', 'data_prolific.csv'),
+                     index=False, header=True)
     print('data_prolific saved!')
 
 

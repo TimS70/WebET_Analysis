@@ -80,6 +80,8 @@ if (use_adjusted_et_data) {
 summarize_datasets(data_et, data_trial, data_subject)
 ```
 
+
+## choseTop
 ```{r}
 grouped = data_trial %>% 
       dplyr::group_by(run_id, trial_index) %>% 
@@ -98,31 +100,7 @@ data_et = merge(data_et, grouped, by=c('run_id', 'trial_index'))
 ## k-values
 K values and noise
 ```{r}
-# run_matlab_script(file.path(root, 'data_prep', 'fit_k', 'fit_discount_k.m'))
-
-add_logK = function(data) {
-    logK <- read.table(file.path(root, 'data', 'choice_task', 'logK.csv'), 
-                                 header=TRUE, sep=',')
-    if ('logK' %in% names(data)) {
-        data = data %>% dplyr::select(!'logK')
-    }
-    if ('noise' %in% names(data)) {
-        data = data %>% dplyr::select(!'noise')
-    } 
-    
-    data = merge(data, logK, by='run_id')
-    return(data)
-}
-
-data_subject = add_logK(data_subject)
-data_trial = add_logK(data_trial)
-
-data_trial %>%
-    dplyr::group_by(run_id) %>%
-    dplyr::summarise(
-    	logK, noise, 
-    	.groups='keep') %>%
-	head(5)
+data_trial = merge_by_subject(data_trial, data_subject, 'logK', 'noise')
 ```
 
 ## fixations
@@ -142,7 +120,6 @@ summary(data_trial$n_fixations)
 ```
 
 # Screening & Cleaning
-See Jupyter notebooks
 
 ## Distribution of k-values
 ````{r}
@@ -174,112 +151,6 @@ ggplot(data_subject %>% filter(noise < 500), aes(x=logK, y=noise)) +
     xlab("logK") + ylab("noise") +
     ggtitle('logK vs. noise') 
 ````
-
-## Biased choices
-````{r}
-runs_biasedChoices = data_subject %>%
-    filter(
-        choseLL>0.98 | choseLL<0.02 |
-        choseTop>0.98 | choseTop<0.02     
-          ) %>%
-    arrange(run_id) %>%
-    dplyr::pull(run_id)
-runs_biasedChoices
-```
-
-## Missing LogK
-```{r}
-runs_missingLogK = data_subject %>%
-    filter(is.na(logK)) %>%
-    arrange(run_id) %>%
-    dplyr::pull(run_id)
-runs_missingLogK
-```
-
-## High noise
-```{r}
-runs_noisy_logK = data_subject %>%
-    filter(noise>40) %>%
-    arrange(run_id) %>%
-    dplyr::pull(run_id)
-runs_noisy_logK
-```
-
-## Positive logK 
-```{r}
-runs_pos_logK = data_subject %>%
-    filter(logK>0) %>%
-    arrange(run_id) %>%
-    dplyr::pull(run_id)
-runs_pos_logK
-```
-
-## Trials with too much missing data for Option Index
-```{r}
-grouped_NA_ET = data_trial %>%
-    filter(!is.na(fps)) %>%
-    group_by(run_id) %>%
-    dplyr::summarise(
-    	fps = mean(fps),
-		n_NA_OI = sum(is.na(optionIndex)),
-		n_NA_AI = sum(is.na(attributeIndex)),
-		n_NA_PI = sum(is.na(payneIndex)),
-		.groups = 'keep') %>%
-    arrange(n_NA_OI, n_NA_AI, n_NA_PI)
-
-grouped_NA_ET %>% head(5)
-
-runs_NA_OI = grouped_NA_ET %>%
-    filter(n_NA_OI>40) %>%
-    dplyr::pull(run_id)
-
-runs_NA_AI = grouped_NA_ET %>%
-    filter(n_NA_AI>40) %>%
-    dplyr::pull(run_id)
-
-runs_NA_PI = grouped_NA_ET %>%
-    filter(n_NA_PI>40) %>%
-    dplyr::pull(run_id)
-```
-
-
-# Cleaning
-```{r}
-exclude_runs = c(
-    runs_biasedChoices,
-    runs_pos_logK,
-    runs_noisy_logK,
-    runs_missingLogK) %>%
-    unique()
-
-summary = data.frame(
-    names = c(
-        'biasedChoices',
-        'pos_logK',
-        'noisy_logK',
-        'missingLogK', 
-        'total'
-    ),
-    n = c(
-        length(runs_biasedChoices),
-        length(runs_pos_logK),
-        length(runs_noisy_logK),
-        length(runs_missingLogK),
-        length(exclude_runs)
-    )
-)
-summary
-```
-
-```{r}
-data_subject = remove_runs(data_subject)
-data_trial = remove_runs(data_trial)
-data_et = remove_runs(data_et)
-
-print(paste(
-    'Number of remaining participants: n =', 
-    length(unique(data_trial$run_id))))
-```
 
 
 # Histogram of left/right and top/bottom choice distribution

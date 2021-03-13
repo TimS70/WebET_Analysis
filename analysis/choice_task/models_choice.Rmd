@@ -6,7 +6,7 @@ output: html_document
 ---
 
 # Setup
-```{r}
+```{r, message=FALSE, warning=FALSE}
 root = "C:/Users/User/GitHub/WebET_Analysis"
 path_results = file.path(root, 'results', 'plots', 'choice_task')
 
@@ -23,6 +23,7 @@ source(file.path(root, 'utils', 'r', 'remove_runs.R'))
 source(file.path(root, 'utils', 'r', 'add_log_k.R'))
 source(file.path(root, 'utils', 'r', 'remove_na_et_indices.R'))
 source(file.path(root, 'utils', 'r', 'add_x_count.R'))
+source(file.path(root, 'utils', 'r', 'identify_bad_choice_runs.R'))
 
 get_packages(c('broom',
               'car', 
@@ -33,6 +34,7 @@ get_packages(c('broom',
               'GGally',
               "ggplot2",
               "ggsignif",
+			  'Hmisc',
               'lme4',
               'matlabr',
               'QuantPsyc',
@@ -83,138 +85,16 @@ summarize_datasets(data_et, data_trial, data_subject)
 ```
 
 
-## k-values
-K values and noise
+# Visualize choice variance 
 ```{r}
-data_subject = add_log_k(data_subject, FALSE)
-data_trial = add_log_k(data_trial, FALSE)
+grouped = data_trial %>%
+	group_by(run_id, choseLL) %>%
+	dplyr::summarise(
+		n = n(),
+		.groups = 'keep') %>%
+	mutate(choice_perc = n / 80)
 
-data_subject %>%
-    dplyr::select(run_id, logK, noise)
-
-data_trial %>%
-    dplyr::group_by(run_id) %>%
-    dplyr::summarise(logK, noise, .groups='keep') %>%
-	head(5)
-```
-
-
-# Screening
-## Biased choices
-```{r}
-runs_biasedChoices = data_subject %>%
-    filter(
-        choseLL>0.98 | choseLL<0.02 |
-        choseTop>0.98 | choseTop<0.02     
-          ) %>%
-    arrange(run_id) %>%
-    dplyr::pull(run_id)
-runs_biasedChoices
-```
-
-
-## Criteria distribution.
-We need a sufficient ratio between the categories. Otherwise everything gets significant that happens in the larger category. 
-```{r}
-summary(factor(data_trial$choseLL))
-
-summary(factor(data_trial$choseLL))[1] / 
-    summary(factor(data_trial$choseLL))[2]
-```
-
-
-## Enough data points for the categorical predictors?
-```{r}
-table(data_trial$LL_top, data_trial$choseLL)
-    
-temp = data_trial %>% 
-    merge_by_subject(data_subject, 'birthyear') %>% 
-    merge_by_subject(data_subject, 'gender')
-
-table(temp$birthyear, temp$choseLL)
-table(temp$gender, temp$choseLL)
-
-```
-
-## Enough data points for the ET indices?
-We need two more requirements to our data:
-1) at least three trials with a valid option index
-2) 40% of the trials have valid ET indices
-```{r}
-data_trial = add_x_count(data_trial, data_et)
-	
-grouped_n_ET = data_trial %>% 
-    group_by(run_id, choseLL) %>%
-    dplyr::summarise(
-        n = n(),
-        choice_perc = n/80,
-        x_count = mean(x_count),
-        n_OI = sum(!is.na(optionIndex)),
-        OI = mean(optionIndex, na.rm=TRUE), 
-        n_AI = sum(!is.na(attributeIndex)),
-        AI = mean(attributeIndex, na.rm=TRUE),
-        n_PI = sum(!is.na(payneIndex)),
-        PI = mean(payneIndex, na.rm=TRUE),
-        .groups='keep') %>%
-    arrange(run_id, choseLL)
-
-runs_biased_choices = grouped_n_ET %>%
-    filter(n<4) %>% 
-    arrange(run_id) %>%
-    dplyr::pull(run_id)
-print(paste('Subjects with less than 3 trials in one category: ', 
-            length(runs_biased_choices)))
-runs_biased_choices
-
-
-min_percentage = 0
-
-runs_na_oi = grouped_n_ET %>%
-    filter(n_OI<3 | n_OI/n<min_percentage) %>%
-    dplyr::pull(run_id) %>%
-    unique()
-
-print(paste('OI - length: ', 
-            length(runs_na_oi))
-)
-runs_na_oi
-
-runs_na_ai = grouped_n_ET %>%
-    filter(n_AI<3 | n_AI/n<min_percentage) %>%
-    dplyr::pull(run_id) %>%
-    unique()
-
-print(paste('AI - length: ', 
-      length(runs_na_ai))
-)
-runs_na_ai
-
-runs_na_pi = grouped_n_ET %>%
-    filter(n_PI<3 | n_PI/n<min_percentage) %>%
-    dplyr::pull(run_id) %>%
-    unique()
-print(paste('PI - length: ', 
-      length(runs_na_pi))
-)
-runs_na_pi
-
-runs_na_et = unique(
-    c(runs_na_oi, runs_na_ai, runs_na_pi)
-)
-
-print(paste(
-    'Subjects without enough data for ET indices within one choice option: ',
-    length(runs_na_et))
-)
-runs_na_et
-
-grouped_n_ET %>%
-    filter(run_id %in% runs_na_et)
-```
-
-## Visualize choice variance 
-```{r}
-data_plot = grouped_n_ET %>%
+data_plot = grouped %>%
     filter(choseLL==1) %>%
     mutate(SE = sqrt(choice_perc * (1-choice_perc)/n))
 
@@ -228,93 +108,83 @@ ggplot(data_plot, aes(factor(run_id), choice_perc)) +
         ) +
     coord_cartesian(ylim=c(0, 1))
 
-dir.create(file.path(path_results, 'MLA'))
+dir.create(file.path(path_results, 'MLA'),  showWarnings = FALSE)
 ggsave(file.path(path_results, 'MLA', 'runs_vs_choice.pdf'), 
 	   width=5.5, height=5)
 ```
 
-
-# Cleaning
+# Check distribution over categorical variables
+Enough data points for the categorical predictors? We need a sufficient ratio between the categories. Otherwise everything gets significant that happens in the larger category. 
 ```{r}
-# Data on subject level
+cat(paste('Mean choseLL:', mean(data_trial$choseLL), '\n'))
 
-exclude_runs = c(
-    # exclude_runs,
-    runs_biasedChoices,
-    runs_na_oi,
-    runs_na_ai,
-    runs_na_pi) %>% 
-    sort() %>%
-    unique()
+cat('\nLL_top vs. choseLL')
+table(data_trial$LL_top, data_trial$choseLL)
+    
+temp = data_trial %>% 
+    merge_by_subject(data_subject, 'birthyear') %>% 
+    merge_by_subject(data_subject, 'gender')
 
-grouped = data.frame(
-    source =     c(    
-        'runs_biasedChoices',
-        'runs_na_oi',
-        'runs_na_ai',
-        'runs_na_pi', 
-        'total'),
-    n = c(
-        length(runs_biasedChoices),
-        length(runs_na_oi),
-        length(runs_na_ai),
-        length(runs_na_pi), 
-        length(exclude_runs)
-    )
-)
-grouped
+cat('\nbirthyear vs. choseLL')
+temp$birthyear_bin = cut(
+                temp$birthyear, 
+                breaks = c(0, 1950, 1960, 1970, 1980, 1990, 2000, 2010),
+                labels = c(1950, 1960, 1970, 1980, 1990, 2000, 2010),
+                include.lowest=TRUE)
+table(temp$birthyear_bin, temp$choseLL)
 
-data_subject = remove_runs(data_subject)
-data_trial = remove_runs(data_trial)
+cat('\ngender vs. choseLL')
+table(temp$gender, temp$choseLL)
 
-data_subject = remove_na_et_indices(data_subject)
-data_trial = remove_na_et_indices(data_trial)
 ```
 
 # Correlative Analysis
 
 ## Scatter matrix
-```{r, scatter_plot}
+```{r, scatter_plot, warning=FALSE}
 dir.create(file.path(path_results, 'correlations'))
-ggpairs(
-    data_subject %>% dplyr::select(
-        choseLL,
-        attributeIndex, optionIndex, payneIndex, fps),     
-    progress = F) 
-ggsave(file.path(path_results, 'correlations', 'corr_plot_1.pdf'), 
-	   width=5.5, height=5)
+
+sapply(
+	data_subject %>%
+		dplyr::select(
+			'choseLL', 'attributeIndex', 'optionIndex', 'payneIndex', 
+	    	'fps', 'birthyear', 'LL_top', 'choice_rt', 'logK'),
+	function(x) sum(!is.na(x))
+)
 
 ggpairs(
-    data_subject %>% dplyr::select(
-        choseLL, birthyear, gender, degree,
-        LL_top, choice_rt, logK),
-    progress = F) 
-ggsave(file.path(path_results, 'correlations', 'corr_plot_2.pdf'), 
+    data_subject,
+    columns = c('choseLL', 'attributeIndex', 'optionIndex', 'payneIndex', 
+    			'fps', 'birthyear', 'LL_top', 'choice_rt', 'logK'), 
+    upper = list(continuous = wrap("cor", size = 2)),
+    lower = list(continuous = wrap("smooth", alpha = 0.3, size=0.1)),
+    progress = F) + 
+	theme_bw(base_size = 8)
+ggsave(file.path(path_results, 'correlations', 'corr_plot_subject.pdf'), 
 	   width=5.5, height=5)
 
+
 ggpairs(
-    data_trial %>% dplyr::select(
-        choseLL,
-        withinTaskIndex, trial_duration_exact,
-        attributeIndex, optionIndex, payneIndex),     
-    progress = F) 
+    data_trial,
+    columns = c('choseLL', 'withinTaskIndex', 'trial_duration_exact',
+    			'attributeIndex', 'optionIndex', 'payneIndex'), 
+    upper = list(continuous = wrap("cor", size = 4)),
+    lower = list(continuous = wrap("smooth", alpha = 0.3, size=0.1)),
+    progress = F) +
+	theme_bw()
 ggsave(file.path(path_results, 'correlations', 'corr_plot_trial.pdf'),
 	   width=5.5, height=5)
 ```
 
-## Check withinTaskIndex and trial_duration_exact
+## ANOVA
 ```{r}
-ggplot(data_trial, aes(x=factor(choseLL), y=withinTaskIndex)) + 
-    geom_violin(trim=FALSE) +
-    stat_summary(fun=mean, size=1)
-
-ggplot(data_trial, aes(x=factor(choseLL), y=trial_duration_exact)) + 
-    geom_violin(trim=FALSE) +
-    stat_summary(fun=mean, size=1)
+summary(aov(data_subject$choseLL ~ data_subject$gender))
+summary(aov(data_subject$choseLL ~ data_subject$degree))
 ```
 
+
 # Logistic Regression on subject-level
-Sommet, 2017
+ - See Sommet, 2017
  - choseLL is more likely than choseSS. 
  - Logisitic regression does not have residuals because it predicts probabilities not concrete values.
  - Predict log-odds (exp(beta)). Odds increase by the factor exp(beta), when the predictor changes in one unit. beta=0 means odds=1. 
@@ -322,14 +192,16 @@ Sommet, 2017
  - A negative Option Index indicates more fixations on the delayed option
  - A negative Payne Index indicates more transitions within attributes 
  
-```{r, logistic_regression, results=FALSE, echo=FALSE, message=FALSE}
+```{r, logistic_regression}
 m_null = glm(choseLL ~ 1,
-         data = data_subject, 
+         data = data_subject %>%
+		 	filter(!is.na(attributeIndex) & !is.na(payneIndex)), 
          family = binomial(link = "logit"))
 summary(m_null)
 
-m1 = glm(choseLL ~ 1 + attributeIndex,
-         data = data_subject, 
+m1 = glm(choseLL ~ 1 + choice_rt + attributeIndex + payneIndex,
+         data = data_subject %>%
+		 	filter(!is.na(attributeIndex) & !is.na(payneIndex)), 
          family = binomial(link = "logit"))
 summary(m1)
 anova(m_null, m1)
@@ -338,16 +210,17 @@ anova(m_null, m1)
 # MLA
 When I do not look at the summarized scores but on every trial, I need to account for the lack of interdependence and use a MLA.
 
-## Intercept Only
+## Step 1: Empty model (Intercept Only)
 https://stats.idre.ucla.edu/r/dae/mixed-effects-logistic-regression/
- - Odds for LL choice is exp(0.74) = 2.1 (Feb 02). Bias towards choseLL. The average chance for choseLL is exp(0.74)/(1+exp(0.74)) = 0.7. 
+ - Odds for LL choice is exp(beta_0). Bias towards choseLL. The average chance for choseLL is exp(beta_0)/(1+exp(beta_0)). 
  - Once we control for the inter-subject variance, the choice shifts more towards SS (choseLL reduces from 65% to around 50%)
  - Mean log-odds for choice_LL vary across subjects. SD=0.4418, Odds could increase by factor exp(1.145)=3.14.
  - ICC=0.27, i.e. 27% of the variance are explained by between subject differences
 ```{r, MLA}
 glmer0_io = glmer(
     choseLL ~ 1 + (1 | run_id), 
-    data = data_trial, 
+    data = data_trial %>%
+		 	filter(!is.na(attributeIndex) & !is.na(payneIndex)), 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"),
     nAGQ = 1)
@@ -358,14 +231,17 @@ icc <- glmer0_io@theta[1]^2/ (glmer0_io@theta[1]^2 + (3.14159^2/3))
 icc
 ```
 
-## Random Intercept (Constrained intermediate model)
+## Step 2: Intermediate model
+
+### Random Intercept
 ```{r, random_intercept}
 data_trial$rt_c = scale(data_trial$trial_duration_exact)
 
 glmer1_ri = glmer(
     choseLL ~ withinTaskIndex + rt_c + 
     	attributeIndex + payneIndex + (1 | run_id), 
-    data = data_trial, 
+    data = data_trial %>%
+		 	filter(!is.na(attributeIndex) & !is.na(payneIndex)), 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"),
     nAGQ = 1)
@@ -373,20 +249,23 @@ summary(glmer1_ri)
 anova(glmer0_io, glmer1_ri)
 ```
 
-### Random Intercept Random Slope (Augmented intermediate model)
-Check if random slopes make sense.
+
+### Random Slope (Augmented intermediate model)
+Random effects model does not fit better.
 ```{r, ri_rs}
 glmer2_rirs = glmer(
     choseLL ~ withinTaskIndex + rt_c + 
-    	attributeIndex + payneIndex + 
-    	(attributeIndex + payneIndex | run_id), 
-    data = data_trial, 
+    	attributeIndex + payneIndex  + 
+    	(attributeIndex + payneIndex  | run_id), 
+    data = data_trial %>%
+		 	filter(!is.na(attributeIndex) & !is.na(payneIndex)), 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"),
     nAGQ = 1)
 summary(glmer2_rirs)
 anova(glmer1_ri, glmer2_rirs)
 ```
+
 
 ### Within-Subject centering
 ```{r}
@@ -421,11 +300,20 @@ data_trial$optionIndex_cmc = data_trial$optionIndex -
 data_trial$payneIndex_cmc = data_trial$payneIndex - 
     data_trial$cluster_mean_PI
 
+glmer0_io = glmer(
+    choseLL ~ 1 + withinTaskIndex + rt_c + (1 | run_id), 
+    data = data_trial %>%
+		 	filter(!is.na(attributeIndex_cmc) & !is.na(payneIndex_cmc)), 
+    family = binomial, 
+    control = glmerControl(optimizer = "bobyqa"),
+    nAGQ = 1)
+
 glmer3_ri = glmer(
     choseLL ~ 
-        withinTaskIndex + rt_c + attributeIndex_cmc +
-        payneIndex_cmc + (1 | run_id), 
-    data = data_trial, 
+        withinTaskIndex + rt_c + attributeIndex_cmc + payneIndex_cmc + 
+    	(1 | run_id), 
+    data = data_trial %>%
+		 	filter(!is.na(attributeIndex_cmc) & !is.na(payneIndex_cmc)), 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"),
     nAGQ = 1)
@@ -433,14 +321,15 @@ summary(glmer3_ri)
 anova(glmer0_io, glmer3_ri)
 
 glmer4_rirs = glmer(
-    choseLL ~  withinTaskIndex + rt_c + attributeIndex_cmc +
-        payneIndex_cmc + (attributeIndex_cmc + payneIndex_cmc | run_id), 
-    data = data_trial, 
+    choseLL ~  withinTaskIndex + rt_c + attributeIndex_cmc + payneIndex_cmc + 
+    	(attributeIndex_cmc + payneIndex_cmc | run_id), 
+    data = data_trial %>%
+		 	filter(!is.na(attributeIndex_cmc) & !is.na(payneIndex_cmc)), 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"),
     nAGQ = 1)
 summary(glmer4_rirs)
-anova(glmer3_ri, glmer4_rirs)
+anova(glmer0_io, glmer4_rirs)
 ```
 
 ## Fial model: RIRS
@@ -454,8 +343,8 @@ Predictors: attributeIndex + optionIndex + payneIndex
 data_trial$rt_c = scale(data_trial$trial_duration_exact)
 
 glmer_final = glmer(
-    choseLL ~ withinTaskIndex + rt_c + 
-    	attributeIndex + (1 | run_id), 
+    choseLL ~ withinTaskIndex + rt_c + attributeIndex + payneIndex_cmc + 
+    	(1 | run_id), 
     data = data_trial, 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"),
@@ -468,6 +357,7 @@ summary(glmer_final)
 
 
 ## Simple Slopes
+Should you include Payne Index? 
 ```{r}
 # SD
 sd_ai = sd(data_trial$attributeIndex, na.rm = TRUE)
@@ -492,6 +382,7 @@ glmer_final_sd_2 = glmer(
 summary(glmer_final_sd_2)
 ```
 
+
 ## Odds Ratios 
  - The effect of "payneIndex_cmc" is not significant, payneIndex_cmc OR = 0.83, 95% CI [0.67, 1] (has to be beyond 1 to be significant). Imagine it to be signficant: with an increase of the Payne Index of 1 (e.g. if they switch from neutral to only within option transitions), results in 0.67 times the chance (a lower chance) of choosing the delayed reward. 
  - Same for the ones with low (-1 SD) and high (+1 SD) Payne Index (If you have random slope, compare the different levels. 
@@ -513,8 +404,8 @@ OR_CI<-rbind(
 
 rownames(OR_CI) = c(
     rownames(cbind(OR,CI)), 
-    "payne_cmc_sd1", 
-    "payne_cmc_sd0")
+    "attributeIndex_cmc_sd1", 
+    "attributeIndex_cmc_sd2")
 OR_CI
 ```
 

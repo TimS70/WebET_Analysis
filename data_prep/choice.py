@@ -29,17 +29,17 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
     else:
         data_et = pd.read_csv(
             os.path.join(
-                'data', 'choice_task', 'cleaned', 'data_et.csv'))
+                'data', 'choice_task', 'raw', 'data_et.csv'))
 
     data_trial = pd.read_csv(
         os.path.join(
-            'data', 'choice_task', 'cleaned', 'data_trial.csv'))
+            'data', 'choice_task', 'raw', 'data_trial.csv'))
     data_subject = pd.read_csv(
         os.path.join(
-            'data', 'choice_task', 'cleaned', 'data_subject.csv'))
+            'data', 'choice_task', 'raw', 'data_subject.csv'))
 
     print('Imported data from ' +
-          os.path.join('data', 'choice_task', 'cleaned') + ':')
+          os.path.join('data', 'choice_task', 'raw') + ':')
     if use_adjusted_et_data:
         print('and ' + os.path.join('data', 'choice_task', 'adjusted'))
 
@@ -53,6 +53,8 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
     data_trial['k'] = k(
         data_trial['aLL'], data_trial['aSS'], data_trial['tLL'])
 
+    data_subject = add_log_k(data_subject)
+
     data_et = merge_by_index(
         data_et, data_trial, 'amountLeft', 'LL_top')
 
@@ -63,7 +65,7 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
         data_subject, data_trial,
         'choseLL', 'choseTop', 'LL_top')
 
-
+    data_subject = add_log_k(data_subject)
 
     # AOIs
     data_et = add_aoi_et(data_et, use_adjusted_et_data)
@@ -78,16 +80,8 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
     data_trial = add_aoi_counts_on_trial_level(data_trial, data_et)
 
     data_trial = add_et_indices(data_trial, data_et)
-
-    data_subject = merge_by_subject(
-        data_subject, data_trial,
-        'attributeIndex', 'optionIndex', 'payneIndex')
-
-    print(
-        f"""ET indices on subject level: \n"""
-        f"""{data_subject[['attributeIndex', 'optionIndex', 
-                           'payneIndex']].describe()} \n"""
-    )
+    data_subject = add_et_indices_subject(data_subject, data_trial,
+                                          5)
 
     data_et = add_fixation_counter(data_et)
     data_trial = count_fixations_on_trial_level(data_trial, data_et)
@@ -285,6 +279,70 @@ def add_mean_choice_rt(data_subject, data_trial):
         f"""Added choice_rt: \n"""
         f"""{data_subject['choice_rt'].describe()}\n"""
     )
+
+    return data_subject
+
+
+def add_et_indices_subject(data_subject, data_trial,
+                           min_required_count):
+
+    grouped = data_trial.groupby(
+        ['run_id'],
+        as_index=False).agg(
+        attributeIndex=('attributeIndex', 'mean'),
+        attributeIndex_n=('attributeIndex', 'count'),
+
+        optionIndex=('optionIndex', 'mean'),
+        optionIndex_n=('optionIndex', 'count'),
+
+        payneIndex=('payneIndex', 'mean'),
+        payneIndex_n=('payneIndex', 'count'),
+    )
+
+    print(
+        f"""Aggregate ET indices on subject level. \n"""
+        f"""Require >= {min_required_count} valid trials to aggregate """
+        f"""on subject level. \n""")
+
+    grouped.loc[
+        grouped['attributeIndex_n'] < min_required_count,
+        'attributeIndex'] = np.nan
+    grouped.loc[
+        grouped['optionIndex_n'] < min_required_count,
+        'optionIndex'] = np.nan
+    grouped.loc[
+        grouped['payneIndex_n'] < min_required_count,
+        'payneIndex'] = np.nan
+
+    data_subject = merge_by_subject(
+        data_subject, grouped,
+        'attributeIndex', 'optionIndex', 'payneIndex')
+
+    print(
+        f"""ET indices on subject level: \n"""
+        f"""{data_subject[['attributeIndex', 'optionIndex', 
+                           'payneIndex']].describe()} \n"""
+    )
+
+    return data_subject
+
+
+def add_log_k(data_subject):
+    print('Fitting log(k) in Matlab. \n')
+    os.chdir(os.path.join('data_prep', 'fit_k'))
+
+    # noinspection SpellCheckingInspection
+    run_matlab = \
+        'matlab -wait -nojvm -nosplash -nodesktop -r "fit_discount_k(); exit"'
+
+    subprocess.run(run_matlab, shell=True, check=True)
+
+    os.chdir(os.path.join('..', '..'))
+
+    root = "C:/Users/User/GitHub/WebET_Analysis"
+    log_k = pd.read_csv(os.path.join(root, 'data', 'choice_task', 'logK.csv'))
+
+    data_subject = merge_by_subject(data_subject, log_k, 'logK', 'noise')
 
     return data_subject
 

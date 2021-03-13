@@ -85,7 +85,11 @@ def global_cleaning():
     data_trial = clean_runs(data_trial, excluded_runs, 'data_trial')
     data_subject = clean_runs(data_subject, excluded_runs, 'data_subject')
 
+
     makedir('data', 'all_trials', 'cleaned')
+    print(f"""Writing datasets to """
+          f"""{os.path.join('data', 'all_trials', 'cleaned')}""")
+
     data_et.to_csv(
         os.path.join('data', 'all_trials', 'cleaned',
                      'data_et.csv'),
@@ -99,7 +103,6 @@ def global_cleaning():
                      'data_subject.csv'),
         index=False, header=True)
 
-    print(f"""Datasets written to """
-          f"""{os.path.join('data', 'all_trials', 'cleaned')}""")
+
 
     summarize_datasets(data_et, data_trial, data_subject)

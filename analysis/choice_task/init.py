@@ -51,7 +51,8 @@ def analyze_choice_task(use_adjusted_et_data=True):
 
     plot_categorical_confounders(data_subject)
     plot_example_eye_movement(
-        data_et_uncorrected, data_trial, data_subject, run=128)
+        data_et_uncorrected, data_trial, data_subject,
+        run=data_subject['run_id'].unique()[0])
     plot_choice_task_heatmap(data_et_uncorrected)
     corr_analysis_subject(data_subject)
     corr_analysis_trial(data_trial)
@@ -68,7 +69,8 @@ def plot_categorical_confounders(data_subject):
     ax = ax.ravel()
 
     for i in range(0, 4):
-        sns.boxplot(ax=ax[i], x=predictors[i], y=outcome, data=data_subject)
+        sns.boxplot(ax=ax[i], x=predictors[i], y=outcome,
+                    data=data_subject)
 
         ax[i].tick_params(labelrotation=45, labelsize=13)
         ax[i].tick_params(axis='y', labelrotation=None)
@@ -80,7 +82,7 @@ def plot_categorical_confounders(data_subject):
         pos = range(len(nobs))
 
         max_value = data_subject[outcome].max()
-        y_pos = max_value + max_value * 0.1
+        y_pos = max_value + max_value * 0.15
 
         for tick, label in zip(pos, ax[i].get_xticklabels()):
             ax[i].text(
@@ -106,7 +108,6 @@ def plot_example_eye_movement(data_et, data_trial, data_subject, run):
     axes = axes.ravel()
 
     this_subject = data_plot['run_id'].unique()[0]
-    print(data_subject.loc[data_subject['run_id'] == this_subject, 'fps'])
     for i in range(0, 9):
         df_this_trials = data_trial.loc[
                          (data_trial['run_id'] == this_subject) &
@@ -179,11 +180,14 @@ def plot_choice_task_heatmap(data_et):
 
 
 def corr_analysis_subject(data_subject):
+
     data_plot = clean_corr_data(
         data_subject.loc[:, [
-                                'run_id', 'chinFirst', 'age', 'choseLL',
-                                'attributeIndex', 'optionIndex', 'payneIndex',
-                                'choice_rt']])
+                                'run_id',
+                                'choseLL', 'choice_rt',
+                                'chinFirst', 'LL_top', 'logK',
+                                'attributeIndex', 'optionIndex', 'payneIndex', 'fps',
+                                'gender', 'degree', 'age']])
 
     corr_columns = [
         'age', 'choseLL',
@@ -194,6 +198,11 @@ def corr_analysis_subject(data_subject):
     corr_plot_split(data_plot, corr_columns,
                     'corr_vars_vs_chinFirst_trial.png', 'chinFirst',
                     'results', 'plots', 'choice_task', 'correlations')
+
+    corr_columns = [
+        'choseLL', 'choice_rt',
+        'chinFirst', 'LL_top', 'logK',
+        'attributeIndex', 'optionIndex', 'payneIndex', 'fps', 'age']
 
     corr_matrix(data_plot, corr_columns,
                 'table_p', 'subject_corr_p.csv',
@@ -209,7 +218,7 @@ def corr_analysis_subject(data_subject):
 def corr_analysis_trial(data_trial):
     data_plot = clean_corr_data(
         data_trial.loc[:, [
-                              'run_id', 'chinFirst', 'choseLL', 'k',
+                              'run_id', 'chinFirst', 'withinTaskIndex', 'choseLL', 'k',
                               'attributeIndex', 'optionIndex', 'payneIndex',
                               'trial_duration_exact']])
 
@@ -222,7 +231,7 @@ def corr_analysis_trial(data_trial):
                     'results', 'plots', 'choice_task', 'correlations')
 
     corr_columns = [
-        'chinFirst', 'choseLL', 'k', 'attributeIndex',
+        'chinFirst', 'withinTaskIndex', 'choseLL', 'k', 'attributeIndex',
         'optionIndex', 'payneIndex', 'trial_duration_exact']
 
     corr_matrix(data_plot, corr_columns,

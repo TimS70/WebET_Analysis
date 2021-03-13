@@ -3,9 +3,6 @@ import pandas as pd
 import os
 
 
-calculate_bonus_payments()
-
-
 def calculate_bonus_payments():
     data_prolific = load_data()
     data_pay = filter_data(data_prolific)
@@ -18,6 +15,7 @@ def calculate_bonus_payments():
 
 
 def load_data():
+    os.chdir(r'C:\Users\User\GitHub\WebET_Analysis')
     data_prolific_int = pd.read_csv(
         os.path.join('data', 'prolific', 'prolific_export_int.csv')) \
         .rename(columns={'participant_id': 'prolificID'})
@@ -27,7 +25,7 @@ def load_data():
         .rename(columns={'participant_id': 'prolificID'})
 
     data_subject = pd.read_csv(
-        os.path.join('data', 'combined', 'ata_subject.csv')) \
+        os.path.join('data', 'all_trials', 'added_var', 'data_subject.csv')) \
         .loc[
                    :,
                    ['run_id', 'prolificID', 'recorded_date',
@@ -125,24 +123,21 @@ def add_variable_due_on(data):
             x['completed_date_time'], '%Y-%m-%d %H:%M:%S.%f').date(),
         axis=1)
 
+    data = data.loc[pd.notna(data['bonus_delay']), :]
+
     data['due_on'] = data['completed_date'] + data['bonus_delay'].map(datetime.timedelta)
     return data
 
 
 def save_data_bonus_due_on(data):
-    data \
-        .loc[
-            :,
-            [
+    data.loc[:, [
                 'prolificID', 'run_id',
                 'Nationality', 'Current Country of Residence', 'Sex',
                 'bonus_USD', 'bonus_GBP', 'bonus_EUR',
-                'completed_date', 'bonus_delay', 'due_on'
-            ]
-            ] \
+                'completed_date', 'bonus_delay', 'due_on']] \
         .sort_values(by='due_on') \
         .to_csv(
-            'bonus_due/all.csv',
+            os.path.join('data', 'payment', 'bonus_due', 'all.csv'),
             index=False,
             header=False
         )
@@ -158,11 +153,11 @@ def save_data_bonus_due_today(data):
 
     bonus_due_today['bonus_GBP'] = bonus_due_today['bonus_GBP'].round(2)
 
-    if not os.path.exists(r'../data/payment/bonus_due'):
-        os.mkdir(r'../data/payment/bonus_due')
+    path = os.path.join('data', 'payment')
+    os.makedirs(path, exist_ok=True)
 
     bonus_due_today.to_csv(
-        'bonus_due/today.csv',
+        os.path.join(path, 'bonus_due', 'today.csv'),
         index=False,
         header=False
     )
@@ -171,7 +166,7 @@ def save_data_bonus_due_today(data):
         bonus_due_today['run_id'] <= 130,
         ['prolificID', 'bonus_GBP']] \
         .to_csv(
-        'bonus_due/today_int.csv',
+            os.path.join(path, 'bonus_due', 'today_int.csv'),
         index=False,
         header=False
     )
@@ -179,8 +174,7 @@ def save_data_bonus_due_today(data):
     bonus_due_today.loc[
         bonus_due_today['run_id'] > 130,
         ['prolificID', 'bonus_GBP']] \
-        .to_csv(
-        'bonus_due/today_us.csv',
+        .to_csv(os.path.join(path, 'bonus_due', 'today_us.csv'),
         index=False,
         header=False
     )
@@ -190,8 +184,10 @@ def save_data_bonus_due_today(data):
               f'Check out the following: {bonus_due_today}')
     else:
         print('No subject awaits any bonus payment today')
-
     next_due_date = data.loc[
         (data['due_on'] > datetime.datetime.now().date()),
         'due_on'].min()
     print(f'Next due date: {next_due_date}')
+
+
+calculate_bonus_payments()

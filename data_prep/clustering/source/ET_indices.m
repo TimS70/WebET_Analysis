@@ -43,6 +43,7 @@ for i = 1:length(subj)
     sub = find(data(:,1)==subj(i)); %Find subject-specific data points
     %LL and SS switch sides trial to trial, so account for this in AOIs 
     % Make LLamt=1, LLtime=2, SSamt=4, SStime=8 in a 7th column
+    
     for j=1:trials;
         row=j+(subj(i)-1)*nTrials; %account for continuous rows in beh data
         row2=j+(i-1)*nTrials;

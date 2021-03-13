@@ -348,6 +348,7 @@ def order_trial_types(data_trial):
 
 
 def identify_fix_task(data_trial):
+    print('data_trial: Add fixation task. \n')
     data_trial['fixTask'] = 0
 
     data_trial.loc[
@@ -355,8 +356,6 @@ def identify_fix_task(data_trial):
         (data_trial['trial_duration'] == 5000),
         'fixTask'
     ] = 1
-
-    print('data_trial: Added fixation task. \n')
 
     return data_trial
 

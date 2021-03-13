@@ -23,6 +23,7 @@ source(file.path(root, 'utils', 'r', 'remove_runs.R'))
 source(file.path(root, 'utils', 'r', 'add_log_k.R'))
 source(file.path(root, 'utils', 'r', 'remove_na_et_indices.R'))
 source(file.path(root, 'utils', 'r', 'add_x_count.R'))
+source(file.path(root, 'utils', 'r', 'identify_bad_choice_runs.R'))
 
 get_packages(c('broom',
               'car', 
@@ -83,213 +84,30 @@ summarize_datasets(data_et, data_trial, data_subject)
 ```
 
 
-## k-values
-K values and noise
-```{r}
-data_subject = add_log_k(data_subject, FALSE)
-data_trial = add_log_k(data_trial, FALSE)
-
-data_subject %>%
-    dplyr::select(run_id, logK, noise) %>%
-	head(5)
-
-data_trial %>%
-    dplyr::group_by(run_id) %>%
-    dplyr::summarise(logK, noise, .groups='keep') %>%
-	head(5)
-```
-
-
-# Screening
-## Biased choices
-```{r}
-runs_biasedChoices = data_subject %>%
-    filter(
-        choseLL>0.98 | choseLL<0.02 |
-        choseTop>0.98 | choseTop<0.02     
-          ) %>%
-    arrange(run_id) %>%
-    dplyr::pull(run_id)
-runs_biasedChoices
-```
-
-## Criteria distribution.
-We need a sufficient ratio between the categories. Otherwise everything gets significant that happens in the larger category. 
-```{r}
-summary(factor(data_trial$choseLL))
-
-summary(factor(data_trial$choseLL))[1] / 
-    summary(factor(data_trial$choseLL))[2]
-```
-
-## Enough data points for the categorical predictors?
-```{r}
-table(data_trial$LL_top, data_trial$choseLL)
-    
-temp = data_trial %>% 
-    merge_by_subject(data_subject, 'birthyear') %>% 
-    merge_by_subject(data_subject, 'gender')
-
-table(temp$birthyear, temp$choseLL)
-table(temp$gender, temp$choseLL)
-```
-
-## Enough data points for the ET indices?
-We need two more requirements to our data:
-1) at least three trials with a valid option index
-2) 40% of the trials have valid ET indices
-```{r}
-data_trial = add_x_count(data_trial, data_et)
-	
-grouped_n_ET = data_trial %>% 
-    group_by(run_id, choseLL) %>%
-    dplyr::summarise(
-        n = n(),
-        choice_perc = n/80,
-        x_count = mean(x_count),
-        n_OI = sum(!is.na(optionIndex)),
-        OI = mean(optionIndex, na.rm=TRUE), 
-        n_AI = sum(!is.na(attributeIndex)),
-        AI = mean(attributeIndex, na.rm=TRUE),
-        n_PI = sum(!is.na(payneIndex)),
-        PI = mean(payneIndex, na.rm=TRUE),
-        .groups='keep') %>%
-    arrange(run_id, choseLL)
-
-runs_biased_choices = grouped_n_ET %>%
-    filter(n<4) %>% 
-    arrange(run_id) %>%
-    dplyr::pull(run_id)
-print(paste('Subjects with less than 3 trials in one category: ', 
-            length(runs_biased_choices)))
-runs_biased_choices
-
-
-min_percentage = 0
-
-runs_na_oi = grouped_n_ET %>%
-    filter(n_OI<3 | n_OI/n<min_percentage) %>%
-    dplyr::pull(run_id) %>%
-    unique()
-
-print(paste('OI - length: ', 
-            length(runs_na_oi))
-)
-runs_na_oi
-
-runs_na_ai = grouped_n_ET %>%
-    filter(n_AI<3 | n_AI/n<min_percentage) %>%
-    dplyr::pull(run_id) %>%
-    unique()
-
-print(paste('AI - length: ', 
-      length(runs_na_ai))
-)
-runs_na_ai
-
-runs_na_pi = grouped_n_ET %>%
-    filter(n_PI<3 | n_PI/n<min_percentage) %>%
-    dplyr::pull(run_id) %>%
-    unique()
-print(paste('PI - length: ', 
-      length(runs_na_pi))
-)
-runs_na_pi
-
-runs_na_et = unique(
-    c(runs_na_oi, runs_na_ai, runs_na_pi)
-)
-
-print(paste(
-    'Subjects without enough data for ET indices within one choice option: ',
-    length(runs_na_et))
-)
-runs_na_et
-
-grouped_n_ET %>%
-    filter(run_id %in% runs_na_et) %>%
-	head(5)
-```
-
-## Visualize choice variance 
-```{r}
-data_plot = grouped_n_ET %>%
-    filter(choseLL==1) %>%
-    mutate(SE = sqrt(choice_perc * (1-choice_perc)/n))
-
-ggplot(data_plot, aes(factor(run_id), choice_perc)) + 
-    geom_pointrange(aes(ymin=choice_perc-1.96*SE, 
-                        ymax=choice_perc+1.96*SE)) +
-    xlab('run_id') +
-    ylab('Percent of choseLL') + 
-    theme(
-        axis.text.x = element_blank(),
-        ) +
-    coord_cartesian(ylim=c(0, 1))
-
-dir.create(file.path(path_results, 'MLA'))
-ggsave(file.path(path_results, 'MLA', 'runs_vs_choice.pdf'), 
-	   width=5.5, height=5)
-```
-
-
-# Cleaning
-```{r, cleaning}
-# Data on subject level
-
-exclude_runs = c(
-    # exclude_runs,
-    runs_biasedChoices,
-    runs_na_oi,
-    runs_na_ai,
-    runs_na_pi) %>% 
-    sort() %>%
-    unique()
-
-grouped = data.frame(
-    source =     c(    
-        'runs_biasedChoices',
-        'runs_na_oi',
-        'runs_na_ai',
-        'runs_na_pi', 
-        'total'),
-    n = c(
-        length(runs_biasedChoices),
-        length(runs_na_oi),
-        length(runs_na_ai),
-        length(runs_na_pi), 
-        length(exclude_runs)
-    )
-)
-grouped %>% head(5)
-
-data_subject = remove_runs(data_subject)
-data_trial = remove_runs(data_trial)
-
-data_subject = remove_na_et_indices(data_subject)
-data_trial = remove_na_et_indices(data_trial)
-```
-
 # Correlative Analysis
 
 ## Scatter matrix
 ```{r, scatter_plot}
 dir.create(file.path(path_results, 'correlations'))
 ggpairs(
-    data_subject %>% dplyr::select(
-        choseLL, attributeIndex, optionIndex, payneIndex, fps),     
+    data_subject,
+    columns = c('choseLL', 'attributeIndex', 'optionIndex', 'payneIndex', 
+    			'fps', 'birthyear', 'LL_top', 'choice_rt', 'logK'), 
+    upper = list(continuous = wrap("cor", size = 3)),
     progress = F) 
+ggsave(file.path(path_results, 'correlations', 'corr_plot_subject_clustered.pdf'), 
+	   width=5.5, height=5)
+
 
 ggpairs(
-    data_subject %>% dplyr::select(
-        choseLL, birthyear, gender, degree, LL_top, choice_rt, logK),
+    data_trial,
+    columns = c('choseLL', 'withinTaskIndex', 'trial_duration_exact',
+    			'attributeIndex', 'optionIndex', 'payneIndex'), 
+    colour = "cyl", 
+    upper = list(continuous = wrap("cor", size = 4)),
     progress = F) 
-
-ggpairs(
-    data_trial %>% dplyr::select(
-        choseLL, withinTaskIndex, trial_duration_exact,
-        attributeIndex, optionIndex, payneIndex),     
-    progress = F) 
+ggsave(file.path(path_results, 'correlations', 'corr_plot_trial_clustered.pdf'),
+	   width=5.5, height=5)
 ```
 
 ## Check withinTaskIndex and trial_duration_exact

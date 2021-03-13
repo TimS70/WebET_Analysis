@@ -16,12 +16,6 @@ def test_transition_clusters(data_trial):
             'trans_type_aSStSS', 'trans_type_tLLtSS'],
         how='all')
 
-    data_cluster.loc[:, [
-                            'trans_type_0',
-                            'trans_type_aLLtLL', 'trans_type_tLLaSS',
-                            'trans_type_aLLaSS', 'trans_type_aSStSS',
-                            'trans_type_tLLtSS']].isnull().any()
-
     scaler = StandardScaler()
     scaled_features = scaler.fit_transform(
         data_cluster.loc[:, [

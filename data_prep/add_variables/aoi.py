@@ -109,7 +109,8 @@ def plot_aoi_scatter(data_et):
     plt.xlim(0, 1)
     makedir('results', 'plots', 'choice_task')
     plt.savefig(
-        os.path.join('results', 'plots', 'choice_task', 'aoi_scatter.png'))
+        os.path.join('results', 'plots', 'choice_task',
+                      'aoi_scatter.png'))
     plt.close()
 
 
