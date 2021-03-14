@@ -17,6 +17,7 @@ knitr::opts_knit$get("root.dir")
 
 source(file.path(root, 'utils', 'r', 'geom_split_violin.R'))
 source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
+source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
 source(file.path(root, 'utils', 'r', 'summarize_datasets.R'))
 source(file.path(root, 'utils', 'r', 'get_packages.R'))
 source(file.path(root, 'utils', 'r', 'remove_runs.R'))
@@ -100,7 +101,8 @@ data_et = merge(data_et, grouped, by=c('run_id', 'trial_index'))
 ## k-values
 K values and noise
 ```{r}
-data_trial = merge_by_subject(data_trial, data_subject, 'logK', 'noise')
+data_trial = merge_by_subject(data_trial, data_subject, 'logK')
+data_trial = merge_by_subject(data_trial, data_subject, 'noise')
 ```
 
 ## fixations
@@ -129,7 +131,7 @@ ggplot(data_subject, aes(x=logK))+
     theme_bw()+theme(text=element_text(size=40))
     
 ggplot(data_subject, aes(x=noise))+
-    geom_histogram(binwidth=5, alpha=.5, position="identity")+
+    geom_histogram(binwidth=1, alpha=.5, position="identity")+
     scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
     theme_bw()+theme(text=element_text(size=40))
     
@@ -155,7 +157,7 @@ ggplot(data_subject %>% filter(noise < 500), aes(x=logK, y=noise)) +
 
 # Histogram of left/right and top/bottom choice distribution
 ```{r}
-dir.create(file.path(path_results, 'behavior'))
+dir.create(file.path(path_results, 'behavior'),  showWarnings = FALSE)
 ggplot(data_subject, aes(x=choseTop))+
   geom_histogram(bins=15)+theme_bw()+xlab("Proportion Top Choices")+
   theme(text=element_text(size=20))+xlim(0,1)
@@ -236,7 +238,7 @@ print(
             unique() %>%
             length()))
 
-dir.create(file.path(path_results, 'SV'))
+dir.create(file.path(path_results, 'SV'),  showWarnings = FALSE)
 
 ggplot(data=SV_bins, aes(x=dSV_bin, y=choseTop)) + 
     theme_bw() +
@@ -274,7 +276,7 @@ ggsave(file.path(path_results, 'SV', 'count.pdf'),width=5.5, height=5)
 # Eye tracking indices
 ## Correlation of Eye tracking indices and discount rate
 ```{r}
-dir.create(file.path(path_results, 'et'))
+dir.create(file.path(path_results, 'et'),  showWarnings = FALSE)
 ggplot(data_subject %>% filter(!run_id %in% runs_NA_OI), 
        aes(x=optionIndex, y=logK)) +
 		geom_point(size=2.5, aes(alpha=.5)) +

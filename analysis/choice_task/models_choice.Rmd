@@ -108,7 +108,8 @@ ggplot(data_plot, aes(factor(run_id), choice_perc)) +
         ) +
     coord_cartesian(ylim=c(0, 1))
 
-dir.create(file.path(path_results, 'MLA'),  showWarnings = FALSE)
+dir.create(file.path(path_results, 'MLA'), 
+		   showWarnings = FALSE)
 ggsave(file.path(path_results, 'MLA', 'runs_vs_choice.pdf'), 
 	   width=5.5, height=5)
 ```
@@ -142,7 +143,8 @@ table(temp$gender, temp$choseLL)
 
 ## Scatter matrix
 ```{r, scatter_plot, warning=FALSE}
-dir.create(file.path(path_results, 'correlations'))
+dir.create(file.path(path_results, 'correlations'),  
+		   showWarnings = FALSE)
 
 sapply(
 	data_subject %>%
@@ -472,7 +474,8 @@ ggplot(data_plot, aes(logit, predictor_value)) +
     geom_smooth(method = "loess") + 
     theme_bw() + 
     facet_wrap(~predictors, scales = "free_y")
-dir.create(file.path(path_results, 'MLA', 'assumptions'))
+dir.create(file.path(path_results, 'MLA', 'assumptions'),  
+		   showWarnings = FALSE)
 ggsave(file.path(path_results, 'MLA', 'assumptions', 'linearity.pdf'), 
 	   width=5.5, height=5)
 ```
