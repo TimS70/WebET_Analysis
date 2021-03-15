@@ -4,14 +4,14 @@ import pandas as pd
 
 from analysis.fix_task.calibration import analyze_calibration
 from analysis.fix_task.correlations import corr_analysis
-from analysis.fix_task.data_quality import grand_mean_offset, outcome_over_trials
+from analysis.fix_task.data_quality import grand_mean_offset, outcome_over_trials, hist_plots_quality
 from analysis.fix_task.gaze_saccade import check_gaze_saccade
 from analysis.fix_task.main_effects import main_effect
 from analysis.fix_task.positions import compare_positions
 from analysis.fix_task.randomization import check_randomization
 from analysis.fix_task.visualize_gaze import visualize_exemplary_run, fix_heatmap
 from utils.data_frames import merge_by_index
-from utils.plots import get_box_plots
+from utils.plots import get_box_plots, save_plot
 from utils.tables import summarize_datasets
 
 
@@ -37,6 +37,9 @@ def analyze_fix_task():
 
     print('Datasets read from data/fix_task/added_var (fix trials): ')
     summarize_datasets(data_et_fix, data_trial_fix, data_subject)
+
+
+    hist_plots_quality(data_subject)
 
     # Design checks
     check_randomization(data_trial_fix)

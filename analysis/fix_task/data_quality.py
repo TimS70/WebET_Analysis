@@ -5,7 +5,22 @@ import numpy as np
 import pandas as pd
 
 from utils.path import makedir
+from utils.plots import save_plot
 from utils.tables import write_csv
+
+
+def hist_plots_quality(data_subject):
+    plt.hist(data_subject['offset'], bins=20)
+    save_plot('offset_participants.png', 'results', 'plots', 'fix_task')
+    plt.close()
+
+    plt.hist(data_subject['precision'], bins=20)
+    save_plot('precision_participants.png', 'results', 'plots', 'fix_task')
+    plt.close()
+
+    plt.hist(data_subject['fps'], bins=20)
+    save_plot('fps_participants_cleaned.png', 'results', 'plots', 'fps')
+    plt.close()
 
 
 def outcome_over_trials(data_trial, outcome):
