@@ -111,6 +111,7 @@ ggsave(file.path(path_results, 'correlations', 'corr_plot_subject_clustered.pdf'
 ggpairs(
     data_trial,
     columns = c('choseLL', 'withinTaskIndex', 'trial_duration_exact',
+    			'fps',
     			'attributeIndex', 'optionIndex', 'payneIndex'), 
     colour = "cyl", 
     upper = list(continuous = wrap("cor", size = 4)),
@@ -120,41 +121,41 @@ ggsave(file.path(path_results, 'correlations', 'corr_plot_trial_clustered.pdf'),
 ```
 
 # Logistic Regression on subject-level
-Sommet, 2017
- - choseLL is more likely than choseSS. 
- - Logisitic regression does not have residuals because it predicts probabilities not concrete values.
- - Predict log-odds (exp(beta)). Odds increase by the factor exp(beta), when the predictor changes in one unit. beta=0 means odds=1. 
- - A positive Attribute Index indicates more fixations on the amount attributes
- - A negative Option Index indicates more fixations on the delayed option
- - A negative Payne Index indicates more transitions within attributes 
+ - No significant findings
 ```{r, logistic, results=FALSE, echo=FALSE, message=FALSE}
 m_null = glm(choseLL ~ 1,
-         data = data_subject, 
+         data = data_subject %>%
+		 	filter(!is.na(attributeIndex) & !is.na(payneIndex)), 
          family = binomial(link = "logit"))
 summary(m_null)
 
-m1 = glm(choseLL ~ 1 + attributeIndex,
-         data = data_subject, 
+data_subject$fps_c = scale(data_subject$fps)
+data_subject$choice_rt_c = scale(data_subject$choice_rt)
+
+m1 = glm(choseLL ~ 1 + choice_rt + fps_c,
+         data = data_subject %>%
+		 	filter(!is.na(attributeIndex) & !is.na(payneIndex)), 
          family = binomial(link = "logit"))
 summary(m1)
-anova(m_null, m1)
+
+m2 = glm(choseLL ~ 1 + choice_rt + fps_c + attributeIndex + payneIndex,
+         data = data_subject %>%
+		 	filter(!is.na(attributeIndex) & !is.na(payneIndex)), 
+         family = binomial(link = "logit"))
+summary(m2)
+
+anova(m_null, m1, m2)
 ```
 
 # MLA
 When I do not look at the summarized scores but on every trial, I need to account for the lack of interdependence and use a MLA.
 
 ## Step 1) empty model (Intercept Only)
-https://stats.idre.ucla.edu/r/dae/mixed-effects-logistic-regression/
- - Odds for LL choice is exp(0.74) = 2.1 (Feb 02). Bias towards choseLL. The average chance for choseLL is exp(0.74)/(1+exp(0.74)) = 0.7. 
- - Once we control for the inter-subject variance, the choice shifts more towards SS (choseLL reduces from 65% to around 50%)
- - Mean log-odds for choice_LL vary across subjects. SD=0.4418, Odds could increase by factor exp(1.145)=3.14.
- - ICC=0.27, i.e. 27% of the variance are explained by between subject differences
 ````{r, glmer0_io}
 glmer0_io = glmer(
     choseLL ~ 1 + (1 | run_id), 
     data = data_trial %>%
-    	filter(!is.na(attributeIndex) & !is.na(optionIndex) & 
-    		   !is.na(payneIndex)), 
+    	filter(!is.na(attributeIndex) & !is.na(optionIndex)), 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"),
     nAGQ = 1)
@@ -162,7 +163,7 @@ summary(glmer0_io)
 
 # take pi^2 / 3 instead of the level-1 residual
 icc <- glmer0_io@theta[1]^2/ (glmer0_io@theta[1]^2 + (3.14159^2/3))
-icc
+print(paste('icc:', icc))
 ```
 
 ## Random Intercept (Constrained intermediate model)

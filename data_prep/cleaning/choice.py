@@ -195,7 +195,7 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
     runs_not_us = data_subject.loc[
         data_subject['residence'] != 'United States', 'run_id']
 
-    runs_low_fps = filter_runs_low_fps(data_trial, data_et, 10)
+    runs_low_fps = filter_runs_low_fps(data_trial, data_et, 5)
     # Run 144 was found to barely have any variation in
     # gaze transitions
     runs_additional_flaws = np.array([144])

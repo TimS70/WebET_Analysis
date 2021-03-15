@@ -169,6 +169,7 @@ ggsave(file.path(path_results, 'correlations', 'corr_plot_subject.pdf'),
 ggpairs(
     data_trial,
     columns = c('choseLL', 'withinTaskIndex', 'trial_duration_exact',
+    			'fps',
     			'attributeIndex', 'optionIndex', 'payneIndex'), 
     upper = list(continuous = wrap("cor", size = 4)),
     lower = list(continuous = wrap("smooth", alpha = 0.3, size=0.1)),

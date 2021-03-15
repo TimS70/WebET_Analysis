@@ -62,5 +62,4 @@ def prep_and_analyze_fix_task():
 
 
 if __name__ == '__main__':
-    global_add_variables_to_datasets()
-    # main()
+    main()
