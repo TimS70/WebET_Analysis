@@ -5,10 +5,13 @@ import pandas as pd
 def add_et_indices(data_trial, data_et):
     min_n_points = 3
 
-    data_trial['optionIndex'] = add_option_index(data_trial,
-                                                 min_n_points)
-    data_trial['attributeIndex'] = add_attribute_index(data_trial,
-                                                       min_n_points)
+    data_trial['optionIndex'] = add_option_index(data_trial, min_n_points)
+    data_trial['attributeIndex'] = add_attribute_index(data_trial, min_n_points)
+
+    print(data_trial.loc[:, [
+                                'aoi_aLL', 'aoi_tLL', 'aoi_aSS', 'aoi_tSS',
+                                'attributeIndex', 'optionIndex'
+                            ]].head(10))
 
     data_trial = add_transition_type(data_trial, data_et)
     data_trial['payneIndex'] = add_payne_index(data_trial)

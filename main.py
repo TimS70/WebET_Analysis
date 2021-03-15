@@ -1,7 +1,4 @@
-import os
 import subprocess
-import pandas as pd
-import numpy as np
 
 from analysis.choice_task.init import analyze_choice_task
 from analysis.demographics import analyze_demographics
@@ -9,17 +6,15 @@ from analysis.dropouts import dropout_analysis
 from analysis.fix_task.init import analyze_fix_task
 from data_prep.add_variables.data_quality import add_data_quality_var
 from data_prep.add_variables.init import global_add_variables_to_datasets
-from data_prep.choice import run_et_cluster_correction, add_variables_to_choice_task_datasets, add_log_k
+from data_prep.choice import run_et_cluster_correction, add_variables_to_choice_task_datasets
 from data_prep.cleaning.choice import create_choice_data, clean_choice_data
 from data_prep.cleaning.init import global_cleaning
 from data_prep.fix_task import create_fix_tasks_datasets
 from data_prep.cleaning.fix_task import clean_fix_task_datasets
-from data_prep.load.data_subject_prolific import create_data_subject
 from data_prep.load.init import create_datasets_from_cognition
-from data_prep.load.prolific import combine_cognition_data
 
 
-def main(new_data=False, cluster_correction=False):
+def main(new_data=False, cluster_correction=True):
     if new_data:
         create_datasets_from_cognition()
 
@@ -65,10 +60,6 @@ def prep_and_analyze_fix_task():
 
     analyze_fix_task()
 
+
 if __name__ == '__main__':
-    data_combined = combine_cognition_data()
-    data_subject = create_data_subject(data_combined)
-    prep_global_datasets()
-    # main()
-
-
+    main()

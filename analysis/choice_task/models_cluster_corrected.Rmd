@@ -87,8 +87,17 @@ summarize_datasets(data_et, data_trial, data_subject)
 # Correlative Analysis
 
 ## Scatter matrix
-```{r, scatter_plot}
+```{r, scatter_plot, warning=FALSE}
+sapply(
+	data_subject %>%
+		dplyr::select(
+			'choseLL', 'attributeIndex', 'optionIndex', 'payneIndex', 
+	    	'fps', 'birthyear', 'LL_top', 'choice_rt', 'logK'),
+	function(x) sum(!is.na(x))
+)
+
 dir.create(file.path(path_results, 'correlations'))
+
 ggpairs(
     data_subject,
     columns = c('choseLL', 'attributeIndex', 'optionIndex', 'payneIndex', 
@@ -108,17 +117,6 @@ ggpairs(
     progress = F) 
 ggsave(file.path(path_results, 'correlations', 'corr_plot_trial_clustered.pdf'),
 	   width=5.5, height=5)
-```
-
-## Check withinTaskIndex and trial_duration_exact
-```{r}
-ggplot(data_trial, aes(x=factor(choseLL), y=withinTaskIndex)) + 
-    geom_violin(trim=FALSE) +
-    stat_summary(fun=mean, size=1)
-
-ggplot(data_trial, aes(x=factor(choseLL), y=trial_duration_exact)) + 
-    geom_violin(trim=FALSE) +
-    stat_summary(fun=mean, size=1)
 ```
 
 # Logistic Regression on subject-level
@@ -154,7 +152,9 @@ https://stats.idre.ucla.edu/r/dae/mixed-effects-logistic-regression/
 ````{r, glmer0_io}
 glmer0_io = glmer(
     choseLL ~ 1 + (1 | run_id), 
-    data = data_trial, 
+    data = data_trial %>%
+    	filter(!is.na(attributeIndex) & !is.na(optionIndex) & 
+    		   !is.na(payneIndex)), 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"),
     nAGQ = 1)
@@ -172,7 +172,8 @@ data_trial$rt_c = scale(data_trial$trial_duration_exact)
 glmer1_ri = glmer(
     choseLL ~ withinTaskIndex + rt_c + 
     	attributeIndex + optionIndex + (1 | run_id), 
-    data = data_trial, 
+    data = data_trial %>%
+    	filter(!is.na(attributeIndex) & !is.na(optionIndex)), 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"),
     nAGQ = 1)
