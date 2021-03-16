@@ -5,6 +5,7 @@ import os
 
 def calculate_bonus_payments():
     data_prolific = load_data()
+    data_prolific = drop_duplicate_ids(data_prolific)
     data_pay = filter_data(data_prolific)
     data_pay = reformat_payments(data_pay)
     data_pay = insert_missing_values(data_pay)
@@ -30,7 +31,7 @@ def load_data():
                    :,
                    ['run_id', 'prolificID', 'recorded_date',
                     'birthyear', 'webcam_fps', 'webcam_label',
-                    'chosenAmount', 'chosenDelay']] \
+                    'chosenAmount', 'chosenDelay', 'max_trial']] \
         .drop_duplicates() \
         .rename(columns={'chosenAmount': 'bonus_USD',
                          'chosenDelay': 'bonus_delay'})
@@ -43,6 +44,20 @@ def load_data():
                how='left')
     print(f'Number of datasets: {len(data)}')
     return data
+
+
+def drop_duplicate_ids(data_subject):
+    n_duplicated = data_subject \
+        .duplicated(subset=['prolificID']) \
+        .sum()
+
+    print(f'n={n_duplicated} runs with duplicate Prolific IDs. ')
+
+    data_subject = data_subject \
+        .sort_values(by=['prolificID', 'max_trial']) \
+        .drop_duplicates(subset=['prolificID'], keep='last')
+
+    return data_subject
 
 
 def filter_data(data):

@@ -169,9 +169,10 @@ print(paste('icc:', icc))
 ## Random Intercept (Constrained intermediate model)
 ```{r, glmer1_ri}
 data_trial$rt_c = scale(data_trial$trial_duration_exact)
+data_trial$fps_c = scale(data_trial$fps)
 
 glmer1_ri = glmer(
-    choseLL ~ withinTaskIndex + rt_c + 
+    choseLL ~ withinTaskIndex + rt_c + fps_c + 
     	attributeIndex + optionIndex + (1 | run_id), 
     data = data_trial %>%
     	filter(!is.na(attributeIndex) & !is.na(optionIndex)), 
@@ -179,22 +180,20 @@ glmer1_ri = glmer(
     control = glmerControl(optimizer = "bobyqa"),
     nAGQ = 1)
 summary(glmer1_ri)
-anova(glmer0_io, glmer1_ri)
-```
 
 ### Random Intercept Random Slope (Augmented intermediate model)
-Check if random slopes make sense.
-```{r, glmer2_rirs}
 glmer2_rirs = glmer(
-    choseLL ~ withinTaskIndex + rt_c + 
+    choseLL ~ withinTaskIndex + rt_c + fps_c +
     	attributeIndex + optionIndex + 
     	(attributeIndex + optionIndex | run_id), 
-    data = data_trial, 
+    data = data_trial %>%
+    	filter(!is.na(attributeIndex) & !is.na(optionIndex)), 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"),
     nAGQ = 1)
 summary(glmer2_rirs)
-anova(glmer1_ri, glmer2_rirs)
+
+anova(glmer0_io, glmer1_ri, glmer2_rirs)
 ```
 
 ### Within-Subject centering
@@ -231,24 +230,25 @@ data_trial$payneIndex_cmc = data_trial$payneIndex -
 
 glmer3_ri = glmer(
     choseLL ~ 
-        withinTaskIndex + rt_c + attributeIndex_cmc +
+        withinTaskIndex + rt_c + fps_c + attributeIndex_cmc +
         optionIndex_cmc + (1 | run_id), 
-    data = data_trial, 
+    data = data_trial %>%
+    	filter(!is.na(attributeIndex) & !is.na(optionIndex)), 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"),
     nAGQ = 1)
 summary(glmer3_ri)
-anova(glmer0_io, glmer3_ri)
 
 glmer4_rirs = glmer(
-    choseLL ~  withinTaskIndex + rt_c + attributeIndex_cmc +
+    choseLL ~  withinTaskIndex + rt_c + fps_c + attributeIndex_cmc +
         optionIndex_cmc + (attributeIndex_cmc + optionIndex_cmc | run_id), 
-    data = data_trial, 
+    data = data_trial %>%
+    	filter(!is.na(attributeIndex) & !is.na(optionIndex)), 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"),
     nAGQ = 1)
 summary(glmer4_rirs)
-anova(glmer3_ri, glmer4_rirs)
+anova(glmer0_io, glmer3_ri, glmer4_rirs)
 ```
 
 ## Fial model: RIRS
@@ -260,7 +260,7 @@ Predictors: attributeIndex + optionIndex + payneIndex
 
 ```{r, glmer_final}
 glmer_final = glmer(
-    choseLL ~ withinTaskIndex + rt_c + 
+    choseLL ~ withinTaskIndex + rt_c + fps_c +
     	attributeIndex + optionIndex + (1 | run_id), 
     data = data_trial, 
     family = binomial, 
@@ -276,22 +276,24 @@ confint(glmer_final, method="boot", n=50) # CI with Bootstrap
 ## Simple Slopes
 ```{r, simple slopes}
 # SD
-sd_ai = sd(data_trial$attributeIndex, na.rm = TRUE)
+sd_oi = sd(data_trial$optionIndex, na.rm = TRUE)
 
 # Simple Slope 1
-data_trial$ai_sd_1 = data_trial$attributeIndex + sd_ai
+data_trial$oi_sd_1 = data_trial$optionIndex + sd_ai
 # Simple Slope -1
-data_trial$ai_sd_2 = data_trial$attributeIndex - sd_ai
+data_trial$oi_sd_2 = data_trial$optionIndex - sd_ai
 
 glmer_final_sd_1 = glmer(
-    choseLL ~ withinTaskIndex + rt_c + ai_sd_1 + optionIndex + (1 | run_id), 
+    choseLL ~ withinTaskIndex + rt_c + fps_c + 
+    	oi_sd_1 + attributeIndex + (1 | run_id), 
     data = data_trial, 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"))
 summary(glmer_final_sd_1)
 
 glmer_final_sd_2 = glmer(
-    choseLL ~ withinTaskIndex + rt_c + ai_sd_2 + optionIndex + (1 | run_id), 
+    choseLL ~ withinTaskIndex + rt_c + fps_c + 
+    	oi_sd_2 + attributeIndex + (1 | run_id), 
     data = data_trial, 
     family = binomial, 
     control = glmerControl(optimizer = "bobyqa"))
