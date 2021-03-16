@@ -6,7 +6,7 @@ output: html_document
 ---
 
 # Setup
-```{r}
+```{r, setup, warning=FALSE}
 root = "C:/Users/User/GitHub/WebET_Analysis"
 path_results = file.path(root, 'results', 'plots', 'fix_task')
 
@@ -135,28 +135,32 @@ ggsave(file.path(path_results, 'MLA', 'runs_vs_offset.pdf'),
 # Correlative Analysis
 
 ## Scatter matrix
-```{r}
-dir.create(file.path(path_results, 'correlations'))
-ggpairs(data_trial %>% 
-	merge_by_subject(data_subject, 'age') %>%
-	dplyr::select(
-	    'withinTaskIndex', 'window_diagonal', 'age', 'fps', 
-	    'precision', 'offset'
-	    ), progress=F)
-ggsave(file.path(path_results, 'correlations', 'corr_plot_1.pdf'), 
+```{r, warning=FALSE}
+dir.create(file.path(path_results, 'correlations'),
+		   showWarnings = FALSE)
+
+ggpairs(
+    data_trial,
+    columns = c('withinTaskIndex', 'window_diagonal', 'age', 'fps', 
+    			'x_pos', 'y_pos', 'glasses_binary', 'chin', 
+    			'precision', 'offset'), 
+    upper = list(continuous = wrap("cor", size = 2)),
+    lower = list(continuous = wrap("smooth", alpha = 0.3, size=0.1)),
+    progress = F) +
+	theme_bw()
+
+ggsave(file.path(path_results, 'correlations', 'corr_plot.pdf'), 
 	   width=5.5, height=5)
 
-ggpairs(data_trial %>% dplyr::select(
-	'x_pos', 'y_pos', 'glasses_binary', 'chin', 'precision', 'offset'),
-    progress = F) 
-ggsave(file.path(path_results, 'correlations', 'corr_plot_2.pdf'), 
-	   width=5.5, height=5)
 
 grouped = data_trial %>%
 	group_by(run_id) %>%
 	dplyr::summarise(
 		window_diagonal = mean(window_diagonal_max),
 		.groups = 'keep')
+
+
+
 if ('window_diagonal' %in% names(data_subject)) {
         data_subject = data_subject %>% dplyr::select(!'window_diagonal')
     }
@@ -172,16 +176,20 @@ ggsave(file.path(path_results, 'correlations', 'corr_plot_subject.pdf'),
 ```
 
 
+## ANOVA
+```{r, anova}
+summary(aov(data_subject$offset ~ data_subject$gender))
+summary(aov(data_subject$offset ~ data_subject$degree))
+summary(aov(data_subject$offset ~ data_subject$ethnic))
+```
+
+
 # Linear model (Fixed Effects, no MLA)
 Average offset=0.17 = 17%
 ```{r}
 lm_null = lm(offset ~ 1, data = data_trial %>% filter(!is.na(offset)))
 summary(lm_null)
-```
 
-
-## LM on subject level
-```{r}
 lm_sub_0_control = lm(offset ~ window_diagonal + fps + age + ethnic, 
 					  data = data_subject)
 
@@ -225,14 +233,14 @@ lmer1_control = lmer(
     	(1 | run_id), 
     data=data_trial,
     REML=FALSE)
+summary(lmer1_control)
 
 lmer2_control = lmer(
-    offset ~ withinTaskIndex + 
+    offset ~  withinTaskIndex
     	(1 | run_id), 
     data=data_trial,
     REML=FALSE)
 
-summary(lmer2_control)
 anova(lmer0_io, lmer1_control, lmer2_control)
 ```
 
@@ -246,14 +254,9 @@ lmer3_experimental = lmer(
     REML=FALSE)
 summary(lmer3_experimental)
 confint(lmer3_experimental, method="boot", n=50) # CI with Bootstrap
-anova(lmer2_control, lmer3_experimental)
-```
 
 ### Random slopes
- - Random effects for chin rest and glasses are large. Participants vary a lot around the average score. Probably another variable. 
- - (Unfortunately), the RS-model is better, so the effect of chin-rest largely varies.
- - Do not forget to look at the correlations among the random effects
-```{r}
+# Do not forget to look at the correlations among the random effects
 lmer4_rs = lmer(
     offset ~ withinTaskIndex + chin + glasses_binary + 
     	(chin + glasses_binary | run_id), 
@@ -261,7 +264,7 @@ lmer4_rs = lmer(
     REML=FALSE)
 summary(lmer4_rs)
 # ranef(lmer4_rs)
-anova(lmer3_experimental, lmer4_rs)
+anova(lmer2_control, lmer3_experimental, lmer4_rs)
 ```
 
 

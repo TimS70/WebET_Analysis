@@ -14,7 +14,7 @@ from data_prep.cleaning.fix_task import clean_fix_task_datasets
 from data_prep.load.init import create_datasets_from_cognition
 
 
-def main(new_data=False, cluster_correction=True):
+def main(new_data=False, cluster_correction=False):
     if new_data:
         create_datasets_from_cognition()
 
@@ -62,4 +62,5 @@ def prep_and_analyze_fix_task():
 
 
 if __name__ == '__main__':
-    main()
+    analyze_fix_task()
+    # main()

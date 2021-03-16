@@ -279,9 +279,9 @@ confint(glmer_final, method="boot", n=50) # CI with Bootstrap
 sd_oi = sd(data_trial$optionIndex, na.rm = TRUE)
 
 # Simple Slope 1
-data_trial$oi_sd_1 = data_trial$optionIndex + sd_ai
+data_trial$oi_sd_1 = data_trial$optionIndex + sd_oi
 # Simple Slope -1
-data_trial$oi_sd_2 = data_trial$optionIndex - sd_ai
+data_trial$oi_sd_2 = data_trial$optionIndex - sd_oi
 
 glmer_final_sd_1 = glmer(
     choseLL ~ withinTaskIndex + rt_c + fps_c + 
@@ -376,6 +376,7 @@ Looks quite linear. If not check out: http://www.sthda.com/english/articles/36-c
 predictors <- c('attributeIndex', 'optionIndex', 'payneIndex')
 
 data_plot = data_trial %>%
+	filter(!is.na(attributeIndex)) %>%
     mutate(predict_choseLL_prob = 
         predict(glmer_final, type = "response"),
         logit = log(predict_choseLL_prob/(1-predict_choseLL_prob))) %>%

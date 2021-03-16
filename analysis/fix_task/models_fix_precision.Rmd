@@ -128,39 +128,13 @@ ggsave(file.path(path_results, 'MLA', 'runs_vs_precision.pdf'),
 	   width=5.5, height=5)
 ```
 
-# Correlative Analysis
 
-## Scatter matrix
-### data_trial
-```{r}
-dir.create(file.path(path_results, 'correlations'))
-ggpairs(data_trial %>% 
-	merge_by_subject(data_subject, 'age') %>%
-	dplyr::select('withinTaskIndex', 'window_diagonal', 'age', 'fps', 
-				  'precision', 'offset'), 
-	progress=F)
-ggsave(file.path(path_results, 'correlations', 'corr_plot_1.pdf'), 
-	   width=5.5, height=5)
-
-ggpairs(data_trial %>% dplyr::select(
-	'x_pos', 'y_pos', 'glasses_binary', 'chin', 'precision', 'offset'),
-    progress = F) 
-ggsave(file.path(path_results, 'correlations', 'corr_plot_2.pdf'), 
-	   width=5.5, height=5)
+## ANOVA
+```{r, anova}
+summary(aov(data_subject$precision ~ data_subject$gender))
+summary(aov(data_subject$precision ~ data_subject$degree))
+summary(aov(data_subject$precision ~ data_subject$ethnic))
 ```
-
-
-### data_subject
-```{r}
-ggpairs(data_subject %>% dplyr::select(
-    	glasses_binary, window_diagonal, fps, 
-    	age, ethnic, 
-    	offset, precision),
-    progress = F) 
-ggsave(file.path(path_results, 'correlations', 'corr_plot_subject.pdf'),
-	   width=5.5, height=5)
-```
-
 
 # Linear model (Fixed Effects, no MLA)
 Average precision=0.07 = 7%. No effect of glasses
@@ -222,7 +196,6 @@ lmer2_control = lmer(
     data=data_trial,
     REML=FALSE)
 
-summary(lmer2_control)
 anova(lmer0_io, lmer2_control)
 ```
 

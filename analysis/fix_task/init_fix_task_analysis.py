@@ -38,6 +38,10 @@ def analyze_fix_task():
     print('Datasets read from data/fix_task/added_var (fix trials): ')
     summarize_datasets(data_et_fix, data_trial_fix, data_subject)
 
+    describe_data_quality = data_subject.loc[:,
+                            ['fps', 'offset', 'offset_px', 'precision',
+                             'precision_px']].describe()
+    print(f"""FPS: \n{describe_data_quality}""")
 
     hist_plots_quality(data_subject)
 
