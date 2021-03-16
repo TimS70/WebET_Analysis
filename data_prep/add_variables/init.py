@@ -24,6 +24,17 @@ def global_add_variables_to_datasets():
     print('Imported from data/all_trials/combined:')
     summarize_datasets(data_et, data_trial, data_subject)
 
+    n_approved_unique = len(data_subject.loc[
+                                data_subject['status'] == 'APPROVED',
+                                'prolificID'].unique())
+
+    n_approved = len(data_subject.loc[
+                     data_subject['status'] == 'APPROVED', :])
+
+    print(f"""Number of approved runs: """
+          f"""n={n_approved_unique} unique participants """
+          f"""({n_approved} approved IDs, incl. duplicates). \n""")
+
     data_et = add_et_variables(data_et)
     data_trial = add_trial_variables(data_trial)
     data_trial = merge_count_by_index(data_trial, data_et, 'x')

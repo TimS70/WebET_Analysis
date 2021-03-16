@@ -154,7 +154,7 @@ def save_data_bonus_due_on(data):
         .to_csv(
             os.path.join('data', 'payment', 'bonus_due', 'all.csv'),
             index=False,
-            header=False
+            header=True
         )
 
 

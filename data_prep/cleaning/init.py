@@ -26,6 +26,9 @@ def global_cleaning():
     print('Imported from data/all_trials/added_var:')
     summarize_datasets(data_et, data_trial, data_subject)
 
+    print(len(data_subject.loc[data_subject['status'] == 'APPROVED',
+        'prolificID'].unique()))
+
     data_et = drop_na_data_et(data_et)
     data_subject = replace_subject_variables(data_subject)
 
@@ -61,22 +64,23 @@ def global_cleaning():
         data_subject = clean_runs(data_subject, runs_without_prolific_id,
                                   'data_subject')
 
-    # Filter approved
-    print(
-        f""" \n"""
-        f"""Filter approved runs: """)
-    unapproved_runs = runs_not_approved(data_subject)
-
-    data_et = clean_runs(data_et, unapproved_runs, 'data_et')
-    data_trial = clean_runs(data_trial, unapproved_runs, 'data_trial')
-    data_subject = clean_runs(data_subject, unapproved_runs, 'data_subject')
-
+    # Clean multi-attempts
     print('Clean for multiple attempts: ')
     data_subject = drop_duplicate_ids(data_subject)
+
+    print(data_subject.loc[data_subject['status']=='APPROVED', :])
+
     data_trial = match_ids_with_subjects(
         data_trial, data_subject, 'data_trial')
     data_et = match_ids_with_subjects(
         data_et, data_subject, 'data_et')
+
+    # Filter approved
+    print(f"""\nFilter approved runs: """)
+    unapproved_runs = runs_not_approved(data_subject)
+    data_et = clean_runs(data_et, unapproved_runs, 'data_et')
+    data_trial = clean_runs(data_trial, unapproved_runs, 'data_trial')
+    data_subject = clean_runs(data_subject, unapproved_runs, 'data_subject')
 
     excluded_runs = filter_invalid_runs(
         data_trial, data_et, data_subject)

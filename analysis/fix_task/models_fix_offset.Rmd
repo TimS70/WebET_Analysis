@@ -236,7 +236,7 @@ lmer1_control = lmer(
 summary(lmer1_control)
 
 lmer2_control = lmer(
-    offset ~  withinTaskIndex
+    offset ~  withinTaskIndex +
     	(1 | run_id), 
     data=data_trial,
     REML=FALSE)

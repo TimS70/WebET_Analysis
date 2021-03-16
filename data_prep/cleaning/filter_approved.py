@@ -4,9 +4,7 @@ import pandas as pd
 def runs_not_approved(data_subject):
 
     unapproved_runs = data_subject.loc[
-        ~data_subject['status'].isin(['APPROVED']),
-        'run_id'
-    ].unique()
+        ~data_subject['status'].isin(['APPROVED']), 'run_id'].unique()
 
     data_not_approved = data_subject.loc[
         data_subject['run_id'].isin(

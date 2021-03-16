@@ -1,5 +1,9 @@
 import subprocess
 
+import numpy as np
+import pandas as pd
+import os
+
 from analysis.choice_task.init import analyze_choice_task
 from analysis.demographics import analyze_demographics
 from analysis.dropouts import dropout_analysis
@@ -9,9 +13,12 @@ from data_prep.add_variables.init import global_add_variables_to_datasets
 from data_prep.choice import run_et_cluster_correction, add_variables_to_choice_task_datasets
 from data_prep.cleaning.choice import create_choice_data, clean_choice_data
 from data_prep.cleaning.init import global_cleaning
+from data_prep.cleaning.prolific_ids import drop_duplicate_ids
 from data_prep.fix_task import create_fix_tasks_datasets
 from data_prep.cleaning.fix_task import clean_fix_task_datasets
+from data_prep.load.data_subject_prolific import read_prolific_data, create_data_subject
 from data_prep.load.init import create_datasets_from_cognition
+from data_prep.load.prolific import find_prolific_id_in_raw, combine_cognition_data
 
 
 def main(new_data=False, cluster_correction=False):
@@ -62,5 +69,10 @@ def prep_and_analyze_fix_task():
 
 
 if __name__ == '__main__':
-    analyze_fix_task()
+
+    data_combined = pd.read_csv(
+        r'C:\Users\User\Desktop\data_combined.csv')
+    data_subject = create_data_subject(data_combined)
+
     # main()
+

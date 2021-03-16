@@ -44,6 +44,7 @@ def create_survey_data(data, show_notes=False):
 
     survey_data = survey_data.rename(columns={'age': 'birthyear'})
     survey_data = clean_binary_survey_data(survey_data)
+    survey_data['prolificID'] = survey_data['prolificID'].str.strip()
 
     if show_notes:
         show_optional_notes(survey_data)

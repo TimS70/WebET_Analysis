@@ -19,6 +19,7 @@ def combine_cognition_data(n_files='all'):
     data_raw = concat_csv_files(n_files)
     data_raw['chinFirst'] = data_raw['chinFirst'] \
         .replace({'no': 0, 'yes': 1})
+
     data_raw = add_survey_data(data_raw, 'prolificID')
 
     return data_raw
@@ -34,7 +35,7 @@ def concat_csv_files(n_files):
     all_subjects = []
 
     for i in tqdm(range(0, n_files),
-                  desc="Combining Prolific data"):
+                  desc="Combining data from cognition.run: "):
         this_csv = open(
             path + "/" + subject_files[i]).read()
         this_csv = clean_html(this_csv)
@@ -99,9 +100,9 @@ def find_prolific_id_in_raw(this_id):
     """
         Search for specific subjects
     """
-    path = 'data_prolific'
+    path = os.path.join('data', 'all_trials', 'cognition_run')
     subject_files = os.listdir(path)
     for i in range(0, len(subject_files)):
         this_subject_txt = open(path + "/" + subject_files[i]).read()
         if this_subject_txt.find(this_id) > (-1):
-            print(f'ID {this_id} is in {subject_files[i]}')
+            print(f'ID {this_id} is in {subject_files[i]} \n')
