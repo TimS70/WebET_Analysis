@@ -64,7 +64,7 @@ def dropout_analysis():
         ]]
 
     print(
-        f"""not approved participants who started the trial: \n"""
+        f"""Not approved participants who actually participated in the study: \n"""
         f"""total: {len(data_not_approved['prolificID'].unique())} of """
         f"""{len(data_subject['prolificID'].unique())} """
         f"""participants \n"""
@@ -99,8 +99,8 @@ def how_many_runs_with_dropouts(data_trial):
 
     dropout_rate = len(runs_dropout) / len(data_trial['run_id'].unique())
     print(
-        f"""N Runs with dropout: n={len(runs_dropout)}"""
-        f""" = {round(100 * dropout_rate, 2)}% \n""")
+        f"""N Runs with dropout: n={len(runs_dropout)} """
+        f"""({round(100 * dropout_rate, 2)}%) \n""")
 
     data = grouped_last_trial_dropout \
         .groupby(
