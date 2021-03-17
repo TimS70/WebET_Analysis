@@ -8,7 +8,7 @@ from data_prep.cleaning.invalid_runs \
     import filter_runs_low_fps, clean_runs
 from utils.data_frames import merge_by_index
 from utils.path import makedir
-from utils.tables import summarize_datasets
+from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets_to
 
 
 def create_choice_data():
@@ -45,38 +45,15 @@ def create_choice_data():
     summarize_datasets(data_et, data_trial, data_subject)
 
 
-def clean_choice_data(use_adjusted_et_data=False):
+def clean_choice_data():
     print('################################### \n'
           'Clean choice data \n'
           '################################### \n')
 
-    if use_adjusted_et_data:
-        print('Using adjusted data_et from' +
-              os.path.join('data', 'choice_task', 'adjusted') + '\n')
-        data_et = pd.read_csv(
-            os.path.join('data', 'choice_task', 'adjusted', 'data_et.csv'))
-        data_trial = pd.read_csv(
-            os.path.join(
-                'data', 'choice_task', 'adjusted', 'data_trial.csv'))
-        data_subject = pd.read_csv(
-            os.path.join(
-                'data', 'choice_task', 'adjusted', 'data_subject.csv'))
-    else:
-        data_et = pd.read_csv(
-            os.path.join('data', 'choice_task', 'uncorrected', 'data_et.csv'))
-        data_trial = pd.read_csv(
-            os.path.join(
-                'data', 'choice_task', 'uncorrected', 'data_trial.csv'))
-        data_subject = pd.read_csv(
-            os.path.join(
-                'data', 'choice_task', 'uncorrected', 'data_subject.csv'))
+    data_et, data_trial, data_subject = load_all_three_datasets(
+        os.path.join('data', 'choice_task', 'added_var')
+    )
 
-    print('Imported data from ' +
-          os.path.join('data', 'choice_task', 'raw') + ':')
-    if use_adjusted_et_data:
-        print('and ' + os.path.join('data', 'choice_task', 'adjusted'))
-
-    summarize_datasets(data_et, data_trial, data_subject)
     # Screening
     show_slow_reaction_times(data_trial)
     invalid_runs = invalid_choice_runs(data_trial, data_et, data_subject)
@@ -93,40 +70,8 @@ def clean_choice_data(use_adjusted_et_data=False):
     data_et = remove_long_trials(data_et, 10000, 'data_et')
     data_et = data_et.drop(columns='trial_duration_exact')
 
-    if use_adjusted_et_data:
-        print('Data saved to ' +
-              os.path.join('data', 'choice_task', 'adjusted', 'cleaned') +
-              ':')
-
-        makedir('data', 'choice_task', 'adjusted')
-
-        data_et.to_csv(
-            os.path.join('data', 'choice_task', 'adjusted', 'data_et.csv'),
-            index=False, header=True)
-        data_trial.to_csv(
-            os.path.join('data', 'choice_task', 'adjusted', 'data_trial.csv'),
-            index=False, header=True)
-        data_subject.to_csv(
-            os.path.join('data', 'choice_task', 'adjusted', 'data_subject.csv'),
-            index=False, header=True)
-
-    else:
-        print('Data saved to ' +
-              os.path.join('data', 'choice_task', 'uncorrected') +
-              ':')
-
-        makedir('data', 'choice_task', 'uncorrected')
-
-        data_et.to_csv(
-            os.path.join('data', 'choice_task', 'uncorrected', 'data_et.csv'),
-            index=False, header=True)
-        data_trial.to_csv(
-            os.path.join('data', 'choice_task', 'uncorrected', 'data_trial.csv'),
-            index=False, header=True)
-        data_subject.to_csv(
-            os.path.join('data', 'choice_task', 'uncorrected', 'data_subject.csv'),
-            index=False, header=True)
-    summarize_datasets(data_et, data_trial, data_subject)
+    save_all_three_datasets_to(data_et, data_trial, data_subject,
+        os.path.join('data', 'choice_task', 'cleaned'))
 
     check_unequal_trial_numbers(data_et, data_trial)
 
@@ -192,8 +137,43 @@ def show_slow_reaction_times(data_trial):
 
 def invalid_choice_runs(data_trial, data_et, data_subject):
     data_subject['residence'] = data_subject['Current Country of Residence']
+
     runs_not_us = data_subject.loc[
         data_subject['residence'] != 'United States', 'run_id']
+
+    data_subject['us_residence'] = 1
+    data_subject.loc[
+        data_subject['run_id'].isin(runs_not_us),
+        'us_residence'] = 0
+
+    grouped_us = data_subject.groupby(
+        ['us_residence'],
+        as_index=False).agg(
+            n=('run_id', 'count'),
+            attributeIndex=('attributeIndex', 'mean'),
+            attributeIndex_std=('attributeIndex', 'std'),
+            optionIndex=('optionIndex', 'mean'),
+            optionIndex_std=('optionIndex', 'std'),
+            payneIndex=('payneIndex', 'mean'),
+            payneIndex_std=('payneIndex', 'std'),
+            choseLL=('choseLL', 'mean'),
+            choseLL_std=('choseLL', 'std'),
+            choseTop=('choseTop', 'mean'),
+            choseTop_std=('choseTop', 'std'),
+            logK=('logK', 'mean'),
+            logK_std=('logK', 'std'),
+            fps=('fps', 'mean'),
+            fps_std=('fps', 'std'),
+            choice_rt=('choice_rt', 'mean'),
+            choice_rt_std=('choice_rt', 'std'),
+    ).T
+
+    print(
+        f"""{len(runs_not_us)} runs do not reside inside the us. """
+        f"""However, since their behavior does not differ much, """
+        f"""we will keep them for now. \n \n"""
+        f"""grouped_us.transpose: \n"""
+        f"""{grouped_us} \n""")
 
     runs_low_fps = filter_runs_low_fps(data_trial, data_et, 5)
     # Run 144 was found to barely have any variation in
@@ -202,10 +182,21 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
 
     runs_biasedChoices = data_subject.loc[
         (data_subject['choseLL'] > 0.98) |
-        (data_subject['choseLL'] < 0.02) |
-        (data_subject['choseTop'] > 0.98) |
-        (data_subject['choseTop'] < 0.02),
+        (data_subject['choseLL'] < 0.02),
         'run_id']
+
+    grouped_trials_biased = data_trial.loc[
+        data_trial['run_id'].isin(runs_biasedChoices), :] \
+        .groupby(
+            ['run_id', 'choseLL'],
+            as_index=False).agg(
+            n=('trial_index', 'count')
+        )
+
+    print(
+        f"""grouped_trials_biased \n"""
+        f"""{grouped_trials_biased}"""
+    )
 
     runs_missingLogK = data_subject.loc[
         pd.isna(data_subject['logK']), 'run_id']
@@ -218,11 +209,9 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
     runs_pos_logK = data_subject.loc[
         data_subject['logK'] > 0, 'run_id']
 
-
     invalid_runs = list(
         set(runs_low_fps) |
         set(runs_additional_flaws) |
-        set(runs_not_us) |
         set(runs_biasedChoices) |
         set(runs_missingLogK) |
         set(runs_noisy_logK) |
@@ -234,8 +223,7 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
         {
             'name': [
                 'subjects_lowFPS',
-                'additional_flaws',
-                'runs_not_us',
+                'run nr. 144',
                 'runs_biasedChoices',
                 'runs_missingLogK',
                 'runs_noisy_logK',
@@ -245,7 +233,6 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
             'length': [
                 len(runs_low_fps),
                 len(runs_additional_flaws),
-                len(runs_not_us),
                 len(runs_biasedChoices),
                 len(runs_missingLogK),
                 len(runs_noisy_logK),
@@ -255,7 +242,6 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
             'percent': [
                 len(runs_low_fps) / n_runs,
                 len(runs_additional_flaws) / n_runs,
-                len(runs_not_us) / n_runs,
                 len(runs_biasedChoices) / n_runs,
                 len(runs_missingLogK) / n_runs,
                 len(runs_noisy_logK) / n_runs,

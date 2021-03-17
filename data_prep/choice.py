@@ -14,34 +14,22 @@ from utils.path import makedir
 from utils.tables import summarize_datasets
 
 
-def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
+def add_variables_to_choice_task_datasets():
 
     print('################################### \n'
           'Add variables for choice data \n'
           '################################### \n')
 
-    if use_adjusted_et_data:
-        print('Using adjusted data_et from' +
-              os.path.join('data', 'choice_task', 'adjusted') + '\n')
-        data_et = pd.read_csv(
-            os.path.join('data', 'choice_task', 'adjusted', 'data_et.csv'))
-
-    else:
-        data_et = pd.read_csv(
-            os.path.join(
-                'data', 'choice_task', 'raw', 'data_et.csv'))
+    data_et = pd.read_csv(
+        os.path.join('data', 'choice_task', 'raw', 'data_et.csv'))
 
     data_trial = pd.read_csv(
-        os.path.join(
-            'data', 'choice_task', 'raw', 'data_trial.csv'))
+        os.path.join('data', 'choice_task', 'raw', 'data_trial.csv'))
     data_subject = pd.read_csv(
-        os.path.join(
-            'data', 'choice_task', 'raw', 'data_subject.csv'))
+        os.path.join('data', 'choice_task', 'raw', 'data_subject.csv'))
 
     print('Imported data from ' +
           os.path.join('data', 'choice_task', 'raw') + ':')
-    if use_adjusted_et_data:
-        print('and ' + os.path.join('data', 'choice_task', 'adjusted'))
 
     summarize_datasets(data_et, data_trial, data_subject)
 
@@ -90,39 +78,22 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
 
     data_trial = test_transition_clusters(data_trial)
 
-    if use_adjusted_et_data:
-        print(
-            f"""Datasets saved to """
-            f"""{os.path.join('data', 'choice_task', 'adjusted')} \n""")
-        data_et.to_csv(
-            os.path.join(
-                'data', 'choice_task', 'adjusted', 'data_et.csv'),
-            index=False, header=True)
-        data_trial.to_csv(
-            os.path.join(
-                'data', 'choice_task', 'adjusted', 'data_trial.csv'),
-            index=False, header=True)
-        data_subject.to_csv(
-            os.path.join(
-                'data', 'choice_task', 'adjusted', 'data_subject.csv'),
-            index=False, header=True)
-    else:
-        makedir('data', 'choice_task', 'uncorrected')
-        print(
-            f"""Datasets saved to """
-            f"""{os.path.join('data', 'choice_task', 'uncorrected')} \n""")
-        data_et.to_csv(
-            os.path.join(
-                'data', 'choice_task', 'uncorrected', 'data_et.csv'),
-            index=False, header=True)
-        data_trial.to_csv(
-            os.path.join(
-                'data', 'choice_task', 'uncorrected', 'data_trial.csv'),
-            index=False, header=True)
-        data_subject.to_csv(
-            os.path.join(
-                'data', 'choice_task', 'uncorrected', 'data_subject.csv'),
-            index=False, header=True)
+    makedir('data', 'choice_task', 'added_var')
+    print(
+        f"""Datasets saved to """
+        f"""{os.path.join('data', 'choice_task', 'added_var')} \n""")
+    data_et.to_csv(
+        os.path.join(
+            'data', 'choice_task', 'added_var', 'data_et.csv'),
+        index=False, header=True)
+    data_trial.to_csv(
+        os.path.join(
+            'data', 'choice_task', 'added_var', 'data_trial.csv'),
+        index=False, header=True)
+    data_subject.to_csv(
+        os.path.join(
+            'data', 'choice_task', 'added_var', 'data_subject.csv'),
+        index=False, header=True)
 
     summarize_datasets(data_et, data_trial, data_subject)
 

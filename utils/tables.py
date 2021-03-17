@@ -22,6 +22,40 @@ def view(df):
     return (HTML(s + css))
 
 
+def load_all_three_datasets(path):
+    data_et = pd.read_csv(
+        os.path.join(path, 'data_et.csv'))
+    data_trial = pd.read_csv(
+        os.path.join(path, 'data_trial.csv'))
+    data_subject = pd.read_csv(
+        os.path.join(path, 'data_subject.csv'))
+
+    print('Imported data from ' + path + ':')
+
+    summarize_datasets(data_et, data_trial, data_subject)
+
+    return data_et, data_trial, data_subject
+
+
+def save_all_three_datasets_to(data_et, data_trial, data_subject, path):
+
+    print('Data saved to ' + path + ':')
+
+    makedir(path)
+
+    data_et.to_csv(
+        os.path.join(path, 'data_et.csv'),
+        index=False, header=True)
+    data_trial.to_csv(
+        os.path.join(path, 'data_trial.csv'),
+        index=False, header=True)
+    data_subject.to_csv(
+        os.path.join(path, 'data_subject.csv'),
+        index=False, header=True)
+
+    summarize_datasets(data_et, data_trial, data_subject)
+
+
 def summarize_datasets(data_et, data_trial, data_subject):
     et_trial_count = data_et.groupby(
         ['run_id', 'trial_index'], as_index=False)['x'].count() \

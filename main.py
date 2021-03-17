@@ -54,11 +54,9 @@ def prep_and_analyze_choice_task(cluster_correction=False):
     if cluster_correction:
         run_et_cluster_correction()
 
-    add_variables_to_choice_task_datasets(
-        use_adjusted_et_data=cluster_correction)
+    add_variables_to_choice_task_datasets()
 
-    clean_choice_data(
-        use_adjusted_et_data=cluster_correction)
+    clean_choice_data()
 
     analyze_choice_task(use_adjusted_et_data=cluster_correction)
 
@@ -73,4 +71,5 @@ def prep_and_analyze_fix_task():
 
 
 if __name__ == '__main__':
-    main()
+    clean_choice_data()
+    # main()
