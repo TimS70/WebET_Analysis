@@ -24,12 +24,18 @@ def hist_plots_quality(data_subject):
 
 
 def outcome_over_trials(data_trial, outcome):
-    data_plot = data_trial.groupby(
-        ['run_id', 'withinTaskIndex', 'task_nr'],
-        as_index=False)[outcome].mean()
+    data_plot = data_trial.copy()
 
+    print(data_trial.loc[
+              pd.notna(data_trial[outcome]),
+              'task_nr'].unique())
     data_plot['task_nr'] = data_plot['task_nr'] \
         .replace([1, 2, 3], [0, 1, 1])
+
+    data_plot = group_within_task_index(
+        data_plot.loc[data_plot['fixTask'] == 1, :],
+        'task_nr',
+        outcome)
 
     plt.style.use('seaborn-whitegrid')
     fig, ax = plt.subplots(1, 2, sharey=True, figsize=(15, 6))
@@ -38,7 +44,7 @@ def outcome_over_trials(data_trial, outcome):
     ax[0].set_ylim(0, 1)
 
     for i in [0, 1]:
-        data = data_plot.loc[data_plot['chin'] == i, :]
+        data = data_plot.loc[data_plot['task_nr'] == i, :]
         ax[i].errorbar(
             x=data['withinTaskIndex'],
             y=data[(outcome + '_median')],
@@ -47,16 +53,16 @@ def outcome_over_trials(data_trial, outcome):
             fmt='^k:',
             capsize=5
         )
-    makedir('results', 'plots', 'fix_task')
-    plt.savefig(
-        os.path.join('results', 'plots', 'fix_task',
-                     (outcome + '_vs_trials.png')))
+
+    save_plot((outcome + '_vs_trials.png'),
+              'results', 'plots', 'fix_task')
     plt.close()
 
 
 def outcome_over_trials_vs_chin(data_trial, outcome):
-    data_plot = group_chin_within_task_index(
+    data_plot = group_within_task_index(
         data_trial.loc[data_trial['fixTask'] == 1, :],
+        'chin',
         outcome)
 
     plt.style.use('seaborn-whitegrid')
@@ -75,30 +81,29 @@ def outcome_over_trials_vs_chin(data_trial, outcome):
             fmt='^k:',
             capsize=5
         )
-    makedir('results', 'plots', 'fix_task')
-    plt.savefig(
-        os.path.join('results', 'plots', 'fix_task',
-                     (outcome + '_vs_trials.png')))
+
+    save_plot((outcome + '_vs_chin_vs_trials.png'),
+              'results', 'plots', 'fix_task')
     plt.close()
 
 
-def group_chin_within_task_index(data, var_name):
+def group_within_task_index(data, group_var, var_name):
     df_m = data.groupby(
-        ['chin', 'withinTaskIndex'])[var_name].median() \
+        [group_var, 'withinTaskIndex'])[var_name].median() \
         .reset_index() \
         .rename(columns={var_name: var_name + '_median'}) \
         .reset_index()
 
-    data = data.merge(df_m, on=['chin', 'withinTaskIndex'], how='left')
+    data = data.merge(df_m, on=[group_var, 'withinTaskIndex'], how='left')
     data['above_median'] = data[var_name] > data[var_name + '_median']
 
     df_std_upper = data.loc[data['above_median'] == 1, :] \
-        .groupby(['chin', 'withinTaskIndex'])[var_name].median() \
+        .groupby([group_var, 'withinTaskIndex'])[var_name].median() \
         .reset_index() \
         .rename(columns={var_name: var_name + '_std_upper'}) \
         .reset_index()
     df_std_lower = data.loc[data['above_median'] == 0, :] \
-        .groupby(['chin', 'withinTaskIndex'])[var_name].median() \
+        .groupby([group_var, 'withinTaskIndex'])[var_name].median() \
         .reset_index() \
         .rename(columns={var_name: var_name + '_std_lower'}) \
         .reset_index()

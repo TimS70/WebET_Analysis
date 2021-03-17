@@ -7,7 +7,9 @@ import os
 from analysis.choice_task.init import analyze_choice_task
 from analysis.demographics import analyze_demographics
 from analysis.dropouts import dropout_analysis
+from analysis.fix_task.data_quality import outcome_over_trials
 from analysis.fix_task.init_fix_task_analysis import analyze_fix_task
+from analysis.fix_task.positions import compare_positions
 from data_prep.add_variables.data_quality import add_data_quality_var
 from data_prep.add_variables.init import global_add_variables_to_datasets
 from data_prep.add_variables.trial import add_position_index
@@ -71,5 +73,4 @@ def prep_and_analyze_fix_task():
 
 
 if __name__ == '__main__':
-    analyze_fix_task()
-    # main()
+    main()
