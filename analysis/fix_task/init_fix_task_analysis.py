@@ -4,7 +4,8 @@ import pandas as pd
 
 from analysis.fix_task.calibration import analyze_calibration
 from analysis.fix_task.correlations import corr_analysis
-from analysis.fix_task.data_quality import grand_mean_offset, outcome_over_trials, hist_plots_quality
+from analysis.fix_task.data_quality import grand_mean_offset, outcome_over_trials_vs_chin, hist_plots_quality, \
+    outcome_over_trials
 from analysis.fix_task.gaze_saccade import check_gaze_saccade
 from analysis.fix_task.main_effects import main_effect
 from analysis.fix_task.positions import compare_positions
@@ -54,6 +55,12 @@ def analyze_fix_task():
     # compare_conditions_subject(data_subject, data_trial_fix, 'precision')
 
     main_effect(data_trial_fix, data_subject)
+
+    outcome_over_trials_vs_chin(data_trial_fix, 'offset')
+    compare_positions(data_trial_fix, 'offset')
+
+    outcome_over_trials_vs_chin(data_trial_fix, 'precision')
+    compare_positions(data_trial_fix, 'precision')
 
     outcome_over_trials(data_trial_fix, 'offset')
     compare_positions(data_trial_fix, 'offset')

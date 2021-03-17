@@ -1,6 +1,7 @@
 import re
 import sys
 
+import numpy as np
 import pandas as pd
 
 if sys.version_info[0] < 3:
@@ -45,6 +46,8 @@ def create_survey_data(data, show_notes=False):
     survey_data = survey_data.rename(columns={'age': 'birthyear'})
     survey_data = clean_binary_survey_data(survey_data)
     survey_data['prolificID'] = survey_data['prolificID'].str.strip()
+    survey_data.loc[
+        survey_data['prolificID'] == 'Tim', 'prolificID'] = np.nan
 
     if show_notes:
         show_optional_notes(survey_data)

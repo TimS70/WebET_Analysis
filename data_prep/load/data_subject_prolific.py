@@ -27,7 +27,7 @@ def create_data_subject(data_raw):
             how='left') \
         .rename(columns={'age': 'birthyear'})
 
-    data_subject = add_data_from_prolific(data_subject)
+    data_subject = add_and_filter_prolific(data_subject)
 
     makedir('data', 'all_trials', 'combined')
     data_subject.to_csv(
@@ -83,42 +83,53 @@ def read_prolific_data():
     return data_prolific
 
 
-def add_data_from_prolific(data_subject):
+def add_and_filter_prolific(data_subject):
+
+    print(
+        f"""Runs without prolific ID: """
+        f"""{sum(pd.isna(data_subject['prolificID']))}""")
+
     data_prolific = read_prolific_data()
+
+    id_prolific = data_prolific['prolificID'].unique()
+    id_cognition = data_subject.loc[
+        pd.notna(data_subject['prolificID']), 'prolificID'].unique()
+
+    id_prolific_but_not_cognition = np.setdiff1d(
+        id_prolific, id_cognition, assume_unique=True)
+
+    print(
+        f"""n={len(id_prolific_but_not_cognition)} prolific IDs """
+        f"""are in Prolific not in cognition.run: \n"""
+        f"""{id_prolific_but_not_cognition} \n""")
+
+    id_cognition_but_not_prolific = np.setdiff1d(
+        id_cognition, id_prolific, assume_unique=True)
+
+    print(
+        f"""n={len(id_cognition_but_not_prolific)} prolific IDs """
+        f"""are in cognition.run not in Prolific: \n"""
+        f"""{id_cognition_but_not_prolific} \n""")
 
     data_subject = data_subject.merge(
         data_prolific, on='prolificID', how='left')
 
-    data_subject.loc[
-        pd.isna(data_subject['prolificID']) |
-        (data_subject['prolificID'] == 'Tim'),
-        'status'] = 'NOTPROLIFIC'
+    data_subject = data_subject.append(
+        data_prolific.loc[
+            data_prolific['prolificID'].isin(
+                id_prolific_but_not_cognition),
+            :])
+
+    ids_approved = data_subject.loc[
+        data_subject['status'] == 'APPROVED', 'prolificID'].unique()
+
+    print(f"""Unique approved IDs: {len(ids_approved)}""")
 
     summary_na = data_subject.loc[
         pd.isna(data_subject['status']),
         ['run_id', 'prolificID', 'session_id', 'status']
     ]
 
-    prolific_approved = data_prolific.loc[
-        data_prolific['status'] == 'APPROVED',
-        'prolificID'].unique()
-
-    cognition_approved = data_subject.loc[
-        data_subject['status'] == 'APPROVED',
-        'prolificID'].unique()
-
-    lonely_prolific_runs = np.setdiff1d(
-        prolific_approved, cognition_approved)
-
-    print(
-        f"""n={len(summary_na)} runs could not be found in """
-        f"""Prolific for being approved. \n"""
-        f"""{summary_na} \n\n"""
-        f"""prolific_approved: n={len(prolific_approved)} \n"""
-        f"""cognition_approved: n={len(cognition_approved)} \n\n"""
-        f"""n={len(lonely_prolific_runs)} runs were on """
-        f"""Prolific but did have any data: """
-        f"""{lonely_prolific_runs}""")
-
+    print(f"""Runs with missing status: \n {summary_na}""")
 
     return data_subject

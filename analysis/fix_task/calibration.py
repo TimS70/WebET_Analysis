@@ -66,3 +66,4 @@ def plot_outcome_vs_trials(data_trial_calibration, outcome, run):
     save_plot(
         ('calibration_' + outcome + '_vs_trials.png'),
         'results', 'plots', 'fix_task')
+    plt.close()

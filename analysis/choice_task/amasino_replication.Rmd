@@ -6,7 +6,7 @@ output:
 ---
 
 # Setup
-```{r, message=FALSE, warning=FALSE}
+```{r, setup, message=FALSE, warning=FALSE}
 root = "C:/Users/User/GitHub/WebET_Analysis"
 path_results = file.path(root, 'results', 'plots', 'choice_task')
 

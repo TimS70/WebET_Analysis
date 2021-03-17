@@ -49,18 +49,20 @@ def add_variables_to_choice_task_datasets(use_adjusted_et_data=False):
     data_trial = identify_amount_left(data_trial)
     data_trial = add_choice_options_num(data_trial)
     data_trial = reformat_attributes(data_trial)
-    data_trial = top_bottom_attributes(data_trial)
+
     data_trial['k'] = k(
         data_trial['aLL'], data_trial['aSS'], data_trial['tLL'])
 
-    data_subject = add_log_k(data_subject)
+    data_trial = top_bottom_attributes(data_trial)
+
+    # Behavioral responses
+    data_trial = choice_response_variables(data_trial)
 
     data_et = merge_by_index(
         data_et, data_trial, 'amountLeft', 'LL_top')
 
-    # Behavioral responses
-    data_trial = choice_response_variables(data_trial)
     data_subject = add_mean_choice_rt(data_subject, data_trial)
+
     data_subject = merge_by_subject(
         data_subject, data_trial,
         'choseLL', 'choseTop', 'LL_top')
@@ -133,9 +135,23 @@ def identify_amount_left(data):
         'amountLeft'] = 1
     data['amountLeft'].unique()
 
+    grouped_test = data.groupby(
+        ['run_id', 'amountLeft'],
+        as_index=False).agg(
+        n=('trial_index', 'count'),
+        max_task_nr=('withinTaskIndex', 'max'),
+        min_task_nr=('withinTaskIndex', 'min'),
+    )
+
+    example = data.loc[:,
+             ['amountLeft', 'option_topLeft', 'option_bottomLeft',
+              'option_topRight', 'option_bottomRight']] \
+        .sort_values(by='amountLeft')
+
     print(
         f"""data_trial: Identify amount left: \n"""
-        f"""{data.loc[:, ['amountLeft', 'option_topLeft']].head(5)} \n"""
+        f"""{example} \n"""
+        f"""{grouped_test} \n"""
     )
     return data
 
@@ -240,12 +256,23 @@ def top_bottom_attributes(data):
     example = data.loc[
         :,
         ['aT', 'tT', 'aB', 'tB', 'LL_top']
-    ].sort_values(by='LL_top').head(5)
+    ].sort_values(by='LL_top')
+
+    grouped_test = data.groupby(
+        ['run_id', 'LL_top'],
+        as_index=False).agg(
+            n=('trial_index', 'count'),
+            max_trial=('withinTaskIndex', 'max'),
+            aT_min=('aT', 'min'),
+            aT_max=('aT', 'max'),
+            aB_min=('aB', 'min'),
+            aB_max=('aB', 'max'),
+    )
 
     print(
         f"""data_trial: Added top and bottom attributes: \n"""
         f"""{example} \n"""
-    )
+        f"""{grouped_test} \n""")
 
     return data
 
@@ -259,6 +286,11 @@ def choice_response_variables(data):
     data.loc[(data["choseTop"] == 1) & (data["LL_top"] == 1), "choseLL"] = 1
     data.loc[(data["choseTop"] == 0) & (data["LL_top"] == 0), "choseLL"] = 1
 
+    print(
+        f"""Add choice response variables \n"""
+        f"""{data.loc[:, 
+             ['key_press', 'LL_top', 'choseTop', 'choseLL']]} \n"""
+    )
     return data
 
 
@@ -343,6 +375,13 @@ def add_log_k(data_subject):
     log_k = pd.read_csv(os.path.join(root, 'data', 'choice_task', 'logK.csv'))
 
     data_subject = merge_by_subject(data_subject, log_k, 'logK', 'noise')
+
+    missing_values = data_subject.loc[pd.isna(data_subject['logK']), :]
+
+    print(
+        f"""n={len(data_subject)} participants. """
+        f"""{len(missing_values)} missing logK values. \n"""
+        f"""{missing_values}""")
 
     return data_subject
 

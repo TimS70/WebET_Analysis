@@ -24,12 +24,43 @@ def hist_plots_quality(data_subject):
 
 
 def outcome_over_trials(data_trial, outcome):
+    data_plot = data_trial.groupby(
+        ['run_id', 'withinTaskIndex', 'task_nr'],
+        as_index=False)[outcome].mean()
+
+    data_plot['task_nr'] = data_plot['task_nr'] \
+        .replace([1, 2, 3], [0, 1, 1])
+
+    plt.style.use('seaborn-whitegrid')
+    fig, ax = plt.subplots(1, 2, sharey=True, figsize=(15, 6))
+    fig.suptitle('Task 1 vs. Task 2')
+
+    ax[0].set_ylim(0, 1)
+
+    for i in [0, 1]:
+        data = data_plot.loc[data_plot['chin'] == i, :]
+        ax[i].errorbar(
+            x=data['withinTaskIndex'],
+            y=data[(outcome + '_median')],
+            yerr=[data[(outcome + '_std_lower')],
+                  data[(outcome + '_std_upper')]],
+            fmt='^k:',
+            capsize=5
+        )
+    makedir('results', 'plots', 'fix_task')
+    plt.savefig(
+        os.path.join('results', 'plots', 'fix_task',
+                     (outcome + '_vs_trials.png')))
+    plt.close()
+
+
+def outcome_over_trials_vs_chin(data_trial, outcome):
     data_plot = group_chin_within_task_index(
         data_trial.loc[data_trial['fixTask'] == 1, :],
         outcome)
 
     plt.style.use('seaborn-whitegrid')
-    fig, ax = plt.subplots(1, 2, sharey='none', figsize=(15, 6))
+    fig, ax = plt.subplots(1, 2, sharey=True, figsize=(15, 6))
     fig.suptitle('chin==0 vs. chin==1')
 
     ax[0].set_ylim(0, 1)

@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from data_prep.cleaning.filter_approved import runs_not_approved
 from data_prep.cleaning.invalid_runs import clean_runs
 from utils.plots import save_plot
 from utils.tables import write_csv
@@ -21,22 +20,60 @@ def dropout_analysis():
     data_subject = pd.read_csv(
         os.path.join('data', 'all_trials', 'added_var', 'data_subject.csv'))
 
-    # Filter Prolific data
-    runs_not_prolific = data_subject.loc[
-        data_subject['status'] == 'NOTPROLIFIC', 'run_id']
+    # Filter those from prolific
+    data_subject = data_subject.loc[
+                   pd.notna(data_subject['prolificID']), :]
+    data_trial = data_trial.loc[
+        data_trial['run_id'].isin(data_subject['run_id']), :]
+
+    data_not_approved = data_subject.loc[
+        (data_subject['status'] != 'APPROVED') &
+        ~(data_subject['run_id'].isin(data_trial['run_id'])),
+        [
+            'run_id', 'prolificID', 'max_trial',
+            'recorded_date', 'status'
+        ]]
+
+    total_ids = data_subject['prolificID'].unique()
+    ids_not_approved = data_not_approved['prolificID'].unique()
+    rate_not_approved = len(ids_not_approved) / len(total_ids)
 
     print(
-        f""" \n"""
-        f"""Filtering Prolific Data: \n"""
-        f"""n={len(runs_not_prolific)} were not from Prolific """
-        f"""(e.g. from task development instead) and will be removed: \n""")
+        f"""Not approved participants who did not start the study: \n"""
+        f"""total: {len(ids_not_approved)} of """
+        f"""{len(total_ids)} ({rate_not_approved}) \n"""
+        f"""nan:   {sum(pd.isna(data_subject['status']))} \n"""
+        f"""{pd.crosstab(index=data_not_approved['status'], columns="n")} \n"""
+    )
 
-    data_trial = clean_runs(data_trial, runs_not_prolific, 'data_trial')
-    data_subject = clean_runs(data_subject, runs_not_prolific, 'data_subject')
-    runs_not_approved(data_subject)
+    # Filter those who have trials
+    data_subject = data_subject.loc[
+                   data_subject['run_id'].isin(data_trial['run_id']), :]
 
-    dropout_by_task_nr(data_trial)
+    print(
+        f"""Unique ID's who actually have some trials: \n"""
+        f"""   data_subject: {len(data_subject['prolificID'].unique())}\n"""
+        f"""   data_trial:   {len(data_trial['prolificID'].unique())}\n"""
+    )
+
+    data_not_approved = data_subject.loc[
+        data_subject['status'] != 'APPROVED',
+        [
+            'run_id', 'prolificID', 'max_trial',
+            'recorded_date', 'status'
+        ]]
+
+    print(
+        f"""not approved participants who started the trial: \n"""
+        f"""total: {len(data_not_approved['prolificID'].unique())} of """
+        f"""{len(data_subject['prolificID'].unique())} """
+        f"""participants \n"""
+        f"""nan:   {sum(pd.isna(data_subject['status']))} \n"""
+        f"""{pd.crosstab(index=data_not_approved['status'], columns="n")} \n"""
+    )
+
     how_many_runs_with_dropouts(data_trial)
+    dropout_by_task_nr(data_trial)
 
     group_dropout_by_type(data_trial)
     check_calibration(data_trial)
@@ -56,8 +93,7 @@ def how_many_runs_with_dropouts(data_trial):
 
     grouped_last_trial_dropout = grouped_last_trial.loc[
                                  grouped_last_trial['trial_type_new'] != 'end',
-                                 :
-                                 ]
+                                 :]
 
     runs_dropout = grouped_last_trial_dropout['run_id']
 

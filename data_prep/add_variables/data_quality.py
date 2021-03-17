@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from analysis.fix_task.data_quality import outcome_over_trials
+from analysis.fix_task.data_quality import outcome_over_trials_vs_chin
 from analysis.fix_task.positions import compare_positions
 
 from utils.data_frames import merge_mean_by_index, merge_by_subject

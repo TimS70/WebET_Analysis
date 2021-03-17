@@ -42,10 +42,10 @@ def create_trial_data(data_raw):
         data_trial[col] = data_trial[col].replace({'"': np.nan})
         data_trial[col] = pd.to_numeric(data_trial[col])
 
-    makedir('data', 'combined')
+    makedir('data', 'all_trials', 'combined')
 
     data_trial.to_csv(
-        "data/combined/data_trial.csv",
+        "data/all_trials/combined/data_trial.csv",
         index=False, header=True)
 
     print('data_trial saved!')

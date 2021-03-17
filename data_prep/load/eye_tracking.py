@@ -29,8 +29,9 @@ def create_et_data(data):
 
         data_et = data_et.append(pd.DataFrame(data=df), ignore_index=True)
 
-    makedir('data', 'combined')
-    data_et.to_csv("data/combined/data_et.csv", index=False, header=True)
+    makedir('data', 'all_trials', 'combined')
+    data_et.to_csv("data/all_trials/combined/data_et.csv",
+                   index=False, header=True)
     print('data_et saved!')
 
     return data_et

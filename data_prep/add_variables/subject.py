@@ -9,17 +9,6 @@ from utils.data_frames import merge_by_subject
 from utils.plots import save_plot
 
 
-def add_subject_variables(data_subject, data_trial):
-    data_subject = add_fps_subject_level(data_subject, data_trial)
-    data_subject = add_max_trials(data_subject, data_trial)
-    data_subject = add_glasses_binary(data_subject)
-    data_subject = add_recorded_date(data_subject, data_trial)
-    data_subject = add_employment_status(data_subject)
-    data_subject = add_full_time_binary(data_subject)
-
-    return data_subject
-
-
 def add_fps_subject_level(data_subject, data_trial):
     data_subject = merge_by_subject(data_subject, data_trial, 'fps')
 

@@ -34,7 +34,7 @@ def summarize_datasets(data_et, data_trial, data_subject):
                 'data_trial',
                 'data_subject'
             ],
-            'subjects':
+            'prolific_ids':
                 [
                     '-',
                     len(data_trial['prolificID'].unique()),

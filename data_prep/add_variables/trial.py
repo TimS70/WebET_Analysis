@@ -7,22 +7,16 @@ from utils.path import makedir
 from utils.plots import spaghetti_plot, save_plot
 
 
-def add_trial_variables(data_trial):
-    data_trial = invert_y_pos(data_trial)
-    data_trial = add_window_size(data_trial)
-    data_trial = exact_trial_duration(data_trial)
-    data_trial = add_new_task_nr(data_trial)
-    data_trial = add_trial_type_new(data_trial)
-    data_trial = identify_fix_task(data_trial)
-    data_trial = add_within_task_index(data_trial)
-    data_trial = add_position_index(data_trial)
-
-    return data_trial
-
-
 def invert_y_pos(data_trial):
+    data_trial['y_pos'] = data_trial['y_pos'].astype(float)
     data_trial['y_pos'] = 1 - data_trial['y_pos']
+    print(data_trial.dtypes)
+    print(data_trial['y_pos'].unique())
+    print(data_trial.loc[
+              data_trial['y_pos'] < 0.3, 'y_pos'].unique())
 
+    print(data_trial.loc[
+              data_trial['y_pos'] == 0.2, 'y_pos'].unique())
     return data_trial
 
 
@@ -55,7 +49,7 @@ def add_window_size(data):
     return data
 
 
-def exact_trial_duration(data):
+def add_exact_trial_duration(data):
     data["t_startTrial"] = pd.concat(
         [pd.Series([0]), data["time_elapsed"]],
         ignore_index=True)
@@ -347,7 +341,7 @@ def order_trial_types(data_trial):
     return data_trial
 
 
-def identify_fix_task(data_trial):
+def add_fix_task(data_trial):
     print('data_trial: Add fixation task. \n')
     data_trial['fixTask'] = 0
 
@@ -407,20 +401,41 @@ def within_task_index(data):
                     df_fix_task['withinTaskIndex'] = df_fix_task.index + 1
                     all_trial_indices.append(df_fix_task)
     all_trial_indices = pd.concat(all_trial_indices).reset_index(drop=True)
+
     return all_trial_indices
 
 
 def add_position_index(data):
+    data['x_pos'] = data['x_pos'].astype(float)
+    data['y_pos'] = data['y_pos'].astype(float)
+
     data['positionIndex'] = 0
 
-    x_pos = [0.2, 0.5, 0.8, 0.2, 0.5, 0.8, 0.2, 0.5, 0.8, 0.35, 0.65, 0.35, 0.65]
-    y_pos = [0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8, 0.35, 0.35, 0.65, 0.65]
+    x_pos = [
+        0.2, 0.5, 0.8,
+        0.2, 0.5, 0.8,
+        0.2, 0.5, 0.8,
+        0.35, 0.65,
+        0.35, 0.65
+    ]
+    y_pos = [
+        0.2, 0.2, 0.2,
+        0.5, 0.5, 0.5,
+        0.8, 0.8, 0.8,
+
+        0.65, 0.65,
+        0.35, 0.35,
+    ]
 
     for i in range(0, len(x_pos)):
-        data.loc[(data['x_pos'] == x_pos[i]) & (data['y_pos'] == y_pos[i]), 'positionIndex'] = i
+        data.loc[
+            (data['x_pos'] == x_pos[i]) &
+            (data['y_pos'] == y_pos[i]),
+            'positionIndex'] = i
 
     grouped_position_indices = data.loc[
-        (data['trial_type'] == 'eyetracking-calibration'), ['x_pos', 'y_pos', 'positionIndex']] \
+        (data['trial_type'] == 'eyetracking-calibration'),
+        ['x_pos', 'y_pos', 'positionIndex']] \
         .drop_duplicates() \
         .sort_values(by='positionIndex')
 

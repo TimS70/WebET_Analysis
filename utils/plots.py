@@ -153,6 +153,7 @@ def corr_matrix(data_plot, corr_columns, option,
         smg.plot_corr(this_corr_matrix, xnames=corr_columns)
         makedir('results', 'plots', 'choice_task')
         save_plot(file_name, *args)
+        plt.close()
 
 
 def save_table_as_plot(data_frame, file_name, *args):

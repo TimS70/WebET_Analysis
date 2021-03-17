@@ -300,7 +300,7 @@ def remove_long_trials(data_raw, max_duration, name):
     data = data_raw.loc[data_raw['trial_duration_exact'] < max_duration, :]
 
     print(
-        f"""Removing long trials (>10s) from {name}: \n"""
+        f"""Removing long trials (>{max_duration}) from {name}: \n"""
         f"""   Raw: {len(data_raw)} \n"""
         f"""   Cleaned: {len(data)} \n""")
 
