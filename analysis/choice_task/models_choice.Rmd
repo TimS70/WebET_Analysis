@@ -38,7 +38,6 @@ get_packages(c('broom',
               "RColorBrewer",
               'reshape2',
               'tidyverse'))
-
 ```
 
 
@@ -196,6 +195,9 @@ When I do not look at the summarized scores but on every trial, I need to accoun
 ## Step 1: Empty model (Intercept Only)
 https://stats.idre.ucla.edu/r/dae/mixed-effects-logistic-regression/
 ```{r, glmer0_io}
+library(Matrix)
+library(lme4)
+
 glmer0_io = glmer(
     choseLL ~ 1 + (1 | run_id), 
     data = data_trial %>%

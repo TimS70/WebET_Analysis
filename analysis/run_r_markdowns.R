@@ -4,10 +4,10 @@ dir.create(
 	file.path(root, 'results', 'html'),
 	showWarnings = FALSE)
 
-rmarkdown::render(
-	file.path(root, 'analysis', 'choice_task', 'amasino_replication.Rmd'), 
-	output_file = file.path(root, 'results', 'html', 
-							'amasino_replication.html'))
+# rmarkdown::render(
+# 	file.path(root, 'analysis', 'choice_task', 'amasino_replication.Rmd'), 
+# 	output_file = file.path(root, 'results', 'html', 
+# 							'amasino_replication.html'))
 
 rmarkdown::render(
 	file.path(root, 'analysis', 'choice_task', 'models_choice.Rmd'), 
