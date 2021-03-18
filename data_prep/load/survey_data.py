@@ -46,8 +46,15 @@ def create_survey_data(data, show_notes=False):
     survey_data = survey_data.rename(columns={'age': 'birthyear'})
     survey_data = clean_binary_survey_data(survey_data)
     survey_data['prolificID'] = survey_data['prolificID'].str.strip()
+
+    # That is me
     survey_data.loc[
         survey_data['prolificID'] == 'Tim', 'prolificID'] = np.nan
+    # Participant indicates that they accidentally copy pasted the
+    # text from another study
+    survey_data.loc[
+        survey_data['prolificID'] == """I'm moving to London.I'm looking for an apartment to rent.""",
+        'prolificID'] = '5ee2916b70aa643be19c0036'
 
     if show_notes:
         show_optional_notes(survey_data)
