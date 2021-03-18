@@ -41,23 +41,22 @@ def create_data_subject(data_raw):
 def create_data_prolific(data_subject):
     data_prolific = read_prolific_data()
 
-    temp = data_subject.rename(columns={
+    data_subject = data_subject.rename(columns={
         'chosenAmount': 'bonus_USD',
         'chosenDelay': 'bonus_delay'
-    }
-    )
+    })
 
     data_prolific = data_prolific.merge(
-        temp.loc[:, np.append(
+        data_subject.loc[:, np.append(
                 ['prolificID'],
-                temp.columns.difference(data_prolific.columns))],
+                data_subject.columns.difference(data_prolific.columns))],
         on='prolificID',
         how='left')
 
-    makedir('data', 'prolific')
+    makedir('data', 'all_trials', 'combined')
     data_prolific.to_csv(
-        os.path.join('data', 'prolific', 'data_prolific.csv'),
-                     index=False, header=True)
+        os.path.join('data', 'all_trials', 'combined', 'data_prolific.csv'),
+        index=False, header=True)
 
     print('data_prolific saved!')
 
