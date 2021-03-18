@@ -27,59 +27,34 @@ source(file.path(root, 'utils', 'r', 'identify_bad_choice_runs.R'))
 
 get_packages(c('broom',
               'car', 
-              'colorspace', 
-              'dplyr', 
+              'colorspace',
               "effsize",
               'e1071',
               'GGally',
-              "ggplot2",
               "ggsignif",
 			  'Hmisc',
               'lme4',
-              'matlabr',
               'QuantPsyc',
               "RColorBrewer",
               'reshape2',
-              'tidyr',
               'tidyverse'))
+
 ```
 
 
 # Read and create datasets
 ```{r, read_data}
-use_adjusted_et_data = FALSE
-if (use_adjusted_et_data) {
-    print('Using adjusted et_data. As a consequence there is no et data beyond the corrected aoi clusters')
-}
+data_subject = read.csv(
+    file.path(root, 'data', 'choice_task', 'cleaned', 
+              'data_subject.csv'))
 
-if (use_adjusted_et_data) {
-    
-    data_subject = read.csv(
-        file.path(root, 'data', 'choice_task', 'adjusted', 
-                  'data_subject.csv'))
-    
-    data_trial = read.csv(
-        file.path(root, 'data', 'choice_task', 'adjusted', 
-                  'data_trial.csv'))
-    
-    data_et = read.csv(
-        file.path(root, 'data', 'choice_task', 'adjusted', 
-                  'data_et.csv'))
+data_trial = read.csv(
+    file.path(root, 'data', 'choice_task', 'cleaned', 
+              'data_trial.csv'))
 
-} else {
-
-    data_subject = read.csv(
-        file.path(root, 'data', 'choice_task', 'uncorrected', 
-                  'data_subject.csv'))
-    
-    data_trial = read.csv(
-        file.path(root, 'data', 'choice_task', 'uncorrected', 
-                  'data_trial.csv'))
-    
-    data_et = read.csv(
-        file.path(root, 'data', 'choice_task', 'uncorrected', 
-                  'data_et.csv'))
-}
+data_et = read.csv(
+    file.path(root, 'data', 'choice_task', 'cleaned', 
+              'data_et.csv'))
 
 summarize_datasets(data_et, data_trial, data_subject)
 ```
@@ -117,26 +92,31 @@ ggsave(file.path(path_results, 'MLA', 'runs_vs_choice.pdf'),
 # Check distribution over categorical variables
 Enough data points for the categorical predictors? We need a sufficient ratio between the categories. Otherwise everything gets significant that happens in the larger category. 
 ```{r, freqency_tables}
-cat(paste('Mean choseLL:', mean(data_trial$choseLL), '\n'))
+cat(paste(
+	'Mean choseLL:', 
+	mean(data_trial$choseLL), '\n'))
 
-cat('\nLL_top vs. choseLL')
-table(data_trial$LL_top, data_trial$choseLL)
-    
+cat(paste(
+	'LL_top vs. choseLL: \n',
+	table(data_trial$LL_top, data_trial$choseLL)))
+
 temp = data_trial %>% 
     merge_by_subject(data_subject, 'birthyear') %>% 
     merge_by_subject(data_subject, 'gender')
 
-cat('\nbirthyear vs. choseLL')
 temp$birthyear_bin = cut(
                 temp$birthyear, 
                 breaks = c(0, 1950, 1960, 1970, 1980, 1990, 2000, 2010),
                 labels = c(1950, 1960, 1970, 1980, 1990, 2000, 2010),
                 include.lowest=TRUE)
-table(temp$birthyear_bin, temp$choseLL)
 
-cat('\ngender vs. choseLL')
-table(temp$gender, temp$choseLL)
+cat(paste(
+	'birthyear vs. choseLL: \n',
+	table(temp$birthyear_bin, temp$choseLL)))
 
+cat(paste(
+	'gender vs. choseLL: \n',
+	table(temp$gender, temp$choseLL)))
 ```
 
 # Correlative Analysis

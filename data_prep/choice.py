@@ -11,91 +11,58 @@ from data_prep.add_variables.aoi import add_fixation_counter, count_fixations_on
 from data_prep.add_variables.et_indices import add_et_indices
 from utils.data_frames import merge_by_index, merge_by_subject
 from utils.path import makedir
-from utils.tables import summarize_datasets
+from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets_to, write_csv
 
 
-def add_variables_to_choice_task_datasets():
+def add_variables_choice_task():
 
     print('################################### \n'
           'Add variables for choice data \n'
           '################################### \n')
 
-    data_et = pd.read_csv(
-        os.path.join('data', 'choice_task', 'raw', 'data_et.csv'))
+    data_et, data_trial, data_subject = load_all_three_datasets(
+        os.path.join('data', 'choice_task', 'raw'))
 
-    data_trial = pd.read_csv(
-        os.path.join('data', 'choice_task', 'raw', 'data_trial.csv'))
-    data_subject = pd.read_csv(
-        os.path.join('data', 'choice_task', 'raw', 'data_subject.csv'))
+    # Add data from fixation task
+    data_subject_fix = pd.read_csv(
+        os.path.join('data', 'fix_task', 'added_var', 'data_subject.csv'))
+    data_subject = merge_by_subject(data_subject, data_subject_fix, 'offset', 'precision')
 
-    print('Imported data from ' +
-          os.path.join('data', 'choice_task', 'raw') + ':')
-
-    summarize_datasets(data_et, data_trial, data_subject)
-
-    # # Information attributes
+    # Information attributes
     data_trial = identify_amount_left(data_trial)
     data_trial = add_choice_options_num(data_trial)
     data_trial = reformat_attributes(data_trial)
-
-    data_trial['k'] = k(
-        data_trial['aLL'], data_trial['aSS'], data_trial['tLL'])
-
+    data_trial = data_trial.assign(
+        k=k(data_trial['aLL'], data_trial['aSS'], data_trial['tLL']))
     data_trial = top_bottom_attributes(data_trial)
+
+    data_et = merge_by_index(data_et, data_trial, 'amountLeft', 'LL_top')
 
     # Behavioral responses
     data_trial = choice_response_variables(data_trial)
 
-    data_et = merge_by_index(
-        data_et, data_trial, 'amountLeft', 'LL_top')
-
     data_subject = add_mean_choice_rt(data_subject, data_trial)
 
     data_subject = merge_by_subject(
-        data_subject, data_trial,
-        'choseLL', 'choseTop', 'LL_top')
-
-    data_subject = add_log_k(data_subject)
+        data_subject, data_trial, 'choseLL', 'choseTop', 'LL_top')
 
     # AOIs
-    data_et = add_aoi_et(data_et, use_adjusted_et_data)
+    data_et = add_aoi_et(data_et)
     data_trial = match_remaining_et_trials(data_trial, data_et)
-
-    if use_adjusted_et_data:
-        data_trial = match_remaining_et_runs(
-            data_trial, data_et, 'data_trial')
-        data_subject = match_remaining_et_runs(
-            data_subject, data_et, 'data_subject')
-
     data_trial = add_aoi_counts_on_trial_level(data_trial, data_et)
-
     data_trial = add_et_indices(data_trial, data_et)
-    data_subject = add_et_indices_subject(data_subject, data_trial,
-                                          5)
+
+    data_subject = add_et_indices_subject(
+        data_subject, data_trial, 5)
 
     data_et = add_fixation_counter(data_et)
-    data_trial = count_fixations_on_trial_level(data_trial, data_et)
 
+    data_trial = count_fixations_on_trial_level(data_trial, data_et)
     data_trial = test_transition_clusters(data_trial)
 
-    makedir('data', 'choice_task', 'added_var')
-    print(
-        f"""Datasets saved to """
-        f"""{os.path.join('data', 'choice_task', 'added_var')} \n""")
-    data_et.to_csv(
-        os.path.join(
-            'data', 'choice_task', 'added_var', 'data_et.csv'),
-        index=False, header=True)
-    data_trial.to_csv(
-        os.path.join(
-            'data', 'choice_task', 'added_var', 'data_trial.csv'),
-        index=False, header=True)
-    data_subject.to_csv(
-        os.path.join(
-            'data', 'choice_task', 'added_var', 'data_subject.csv'),
-        index=False, header=True)
-
-    summarize_datasets(data_et, data_trial, data_subject)
+    save_all_three_datasets_to(
+        data_et, data_trial, data_subject,
+        os.path.join('data', 'choice_task', 'added_var'))
 
 
 def identify_amount_left(data):
@@ -330,7 +297,8 @@ def add_et_indices_subject(data_subject, data_trial,
     return data_subject
 
 
-def add_log_k(data_subject):
+def add_log_k():
+
     print('Fitting log(k) in Matlab. \n')
     os.chdir(os.path.join('data_prep', 'fit_k'))
 
@@ -345,14 +313,33 @@ def add_log_k(data_subject):
     root = "C:/Users/User/GitHub/WebET_Analysis"
     log_k = pd.read_csv(os.path.join(root, 'data', 'choice_task', 'logK.csv'))
 
-    data_subject = merge_by_subject(data_subject, log_k, 'logK', 'noise')
+    path = os.path.join('data', 'choice_task', 'added_var')
+    print('Imported data from ' + path + ':')
+    data_subject = pd.read_csv(os.path.join(
+        path, 'data_subject.csv'))
 
-    missing_values = data_subject.loc[pd.isna(data_subject['logK']), :]
+    data_subject = merge_by_subject(
+        data_subject, log_k, 'logK', 'noise')
+
+    missing_values = data_subject.loc[
+        pd.isna(data_subject['logK']),
+        ['run_id', 'prolificID', 'num_approvals', 'choice_rt', 'choseLL', 'choseTop', 'logK', 'noise']
+    ]
+
+    write_csv(missing_values, 'missing_log_k.csv',
+        'data', 'choice_task')
 
     print(
         f"""n={len(data_subject)} participants. """
         f"""{len(missing_values)} missing logK values. \n"""
         f"""{missing_values}""")
+
+    print('Data saved to ' + path + ':')
+
+    data_subject.to_csv(
+        os.path.join(path, 'data_subject.csv'),
+        index=False, header=True)
+
 
     return data_subject
 

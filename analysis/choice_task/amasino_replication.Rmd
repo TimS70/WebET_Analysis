@@ -23,90 +23,51 @@ source(file.path(root, 'utils', 'r', 'get_packages.R'))
 source(file.path(root, 'utils', 'r', 'remove_runs.R'))
 source(file.path(root, 'utils', 'r', 'add_x_count.R'))
 
-get_packages(c('plyr',
-              'dplyr', 
-              "effsize",
-              'e1071',
-              "ggplot2",
-              "ggsignif",
-              'knitrProgressBar',
-              'matlabr',
-              'progress',
-              'QuantPsyc',
-              "RColorBrewer",
-              'reshape2',
-              'tidyr')
-            )
+get_packages(c(
+	'plyr',
+	'dplyr', 
+	"effsize",
+	'e1071',
+	"ggplot2",
+	"ggsignif",
+	'knitrProgressBar',
+	'lme4',
+	'progress',
+	'QuantPsyc',
+	"RColorBrewer",
+	'reshape2',
+	'tidyr'))
 
 print(getwd())
 ```
 
 
 # Read and create datasets
-```{r}
-use_adjusted_et_data = FALSE
-if (use_adjusted_et_data) {
-    print('Using adjusted et_data. As a consequence there is no et data beyond the corrected aoi clusters')
-}
+```{r, load_datasets}
+data_subject = read.csv(
+    file.path(root, 'data', 'choice_task', 'cleaned', 
+              'data_subject.csv'))
 
-if (use_adjusted_et_data) {
-    
-    data_subject = read.csv(
-        file.path(root, 'data', 'choice_task', 'adjusted', 
-                  'data_subject.csv'))
-    
-    data_trial = read.csv(
-        file.path(root, 'data', 'choice_task', 'adjusted', 
-                  'data_trial.csv'))
-    
-    data_et = read.csv(
-        file.path(root, 'data', 'choice_task', 'adjusted', 
-                  'data_et.csv'))
+data_trial = read.csv(
+    file.path(root, 'data', 'choice_task', 'cleaned', 
+              'data_trial.csv'))
 
-} else {
-
-    data_subject = read.csv(
-        file.path(root, 'data', 'choice_task', 'uncorrected', 
-                  'data_subject.csv'))
-    
-    data_trial = read.csv(
-        file.path(root, 'data', 'choice_task', 'uncorrected', 
-                  'data_trial.csv'))
-    
-    data_et = read.csv(
-        file.path(root, 'data', 'choice_task', 'uncorrected', 
-                  'data_et.csv'))
-}
+data_et = read.csv(
+    file.path(root, 'data', 'choice_task', 'cleaned', 
+              'data_et.csv'))
 
 summarize_datasets(data_et, data_trial, data_subject)
 ```
 
-
-## choseTop
-```{r}
-grouped = data_trial %>% 
-      dplyr::group_by(run_id, trial_index) %>% 
-      dplyr::summarise(
-          choseTop = mean(choseTop),
-          .groups = 'keep')
-
-grouped %>% head(5)
-
-if ('choseTop' %in% names(data_et))
-    {data_et = data_et %>% select(!choseTop)}
-data_et = merge(data_et, grouped, by=c('run_id', 'trial_index'))
-```
-
-
 ## k-values
-K values and noise
-```{r}
+```{r, add_k_values}
 data_trial = merge_by_subject(data_trial, data_subject, 'logK')
 data_trial = merge_by_subject(data_trial, data_subject, 'noise')
 ```
 
+
 ## fixations
-```{r}
+```{r, add_fixations}
 grouped_fixations = data_et %>%
     group_by(run_id, withinTaskIndex) %>%
     dplyr::summarise(
@@ -121,10 +82,9 @@ data_trial = merge(
 summary(data_trial$n_fixations)
 ```
 
-# Screening & Cleaning
 
-## Distribution of k-values
-````{r}
+# Distribution of k-values
+````{r, plot_k}
 ggplot(data_subject, aes(x=logK))+
     geom_histogram(binwidth=.5, alpha=.5, position="identity")+
     scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
@@ -143,38 +103,17 @@ ggplot(data_subject, aes(x=logK, y=noise)) +
     theme(text=element_text(size=20)) +
     xlab("logK") + ylab("noise") +
     ggtitle('logK vs. noise') 
-
-ggplot(data_subject %>% filter(noise < 500), aes(x=logK, y=noise)) +
-    geom_point(size=2.5, aes(alpha=.5))+
-    guides(alpha=FALSE,color=FALSE, shape=FALSE)+
-    theme_bw() + 
-    scale_colour_grey() + 
-    theme(text=element_text(size=20)) +
-    xlab("logK") + ylab("noise") +
-    ggtitle('logK vs. noise') 
 ````
 
 
 # Histogram of left/right and top/bottom choice distribution
-```{r}
+```{r, plot_prop_top}
 dir.create(file.path(path_results, 'behavior'),  showWarnings = FALSE)
 ggplot(data_subject, aes(x=choseTop))+
   geom_histogram(bins=15)+theme_bw()+xlab("Proportion Top Choices")+
   theme(text=element_text(size=20))+xlim(0,1)
 ggsave(file.path(path_results, 'behavior', 'choice_vs_side.pdf'),
 			 width=5.5, height=5)
-```
-
-
-# Discount rate k (logK)
-## Histogram of log(k)
-```{r}
-ggplot(data_subject, aes(x=logK))+
-  geom_histogram(binwidth=.5, alpha=.5, position="identity")+
-  scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
-  theme_bw()+theme(text=element_text(size=40))
-  ggsave(file.path(path_results, 'behavior', 'log_k_hist.pdf'), 
-  			 width=5.5, height=5)
 ```
 
 
@@ -275,7 +214,7 @@ ggsave(file.path(path_results, 'SV', 'count.pdf'),width=5.5, height=5)
 
 # Eye tracking indices
 ## Correlation of Eye tracking indices and discount rate
-```{r}
+```{r, eyetracking_indices}
 dir.create(file.path(path_results, 'et'),  showWarnings = FALSE)
 ggplot(data_subject %>% filter(!is.na(optionIndex)), 
        aes(x=optionIndex, y=logK)) +
@@ -463,14 +402,13 @@ data_et %>%
 	head(5)
 ```
 
+
 ## Plot without null AOI
 ```{r}
-subjects_highFPS = data_subject %>%
-    filter(fps>10) %>%
-    arrange(run_id) %>%
-    dplyr::pull(run_id)
-
-timeBins_choseTB_long <- data_et %>%
+timeBins_choseTB_long = data_et %>%
+	merge(
+		data_trial %>% dplyr::select(run_id, trial_index, choseTop),
+		by=c('run_id', 'trial_index')) %>%
     filter(!is.na(aoi) & aoi!=0 &
            run_id %in% subjects_highFPS) %>%
     mutate(
@@ -610,6 +548,9 @@ subjects_highFPS = data_subject %>%
     dplyr::pull(run_id)
 
 et_bins_choseTB_long = data_et %>%
+	merge(
+		data_trial %>% dplyr::select(run_id, trial_index, choseTop),
+		by=c('run_id', 'trial_index')) %>%
     mutate(
         lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
         lookBottom = as.numeric(aoi %in% c('BL', 'BR')),
@@ -716,41 +657,95 @@ ggplot(et_bins_choseTB_long,
 ggsave(file.path(path_results, 'et', 'point_bins_bottom.pdf'), 
 			 width=5.5, height=5)
 
-if (!use_adjusted_et_data) {
     
-    ggplot(et_bins_choseTB_long, 
-           aes(
-               x=factor(et_bin), 
-               y=p_null_aoi, 
-               fill=factor(choseTop, c('1', '0'))
-               )
-           ) +
-        geom_split_violin(alpha=.7, size=1, position="dodge") +
-        stat_summary(
-            fun=mean, geom="point",
-            shape=45,size=10,
-            position=position_dodge(.9), 
-            aes(color=factor(choseTop, c('1', '0')))) +
-        theme_bw() + 
-        theme(text=element_text(size=20), 
-        legend.position="bottom") +
-        ggtitle('Eye-tracking time bins') +
-        scale_colour_manual(
-            values=c("1"="black", "0"="white"), 
-            name="", 
-            labels=c("Chose Top", "Chose Bottom")) +
-        scale_fill_grey(
-            start=.3, end=.7, name="",
-            labels=c("Chose Top", "Chose Bottom")) +
-        ylab("Proportion no AOI") +
-        xlab("ET bins")
-	ggsave(file.path(path_results, 'et', 'point_bins_null.pdf'), 
-			 width=5.5, height=5)
-}
+ggplot(et_bins_choseTB_long, 
+       aes(
+           x=factor(et_bin), 
+           y=p_null_aoi, 
+           fill=factor(choseTop, c('1', '0'))
+           )
+       ) +
+    geom_split_violin(alpha=.7, size=1, position="dodge") +
+    stat_summary(
+        fun=mean, geom="point",
+        shape=45,size=10,
+        position=position_dodge(.9), 
+        aes(color=factor(choseTop, c('1', '0')))) +
+    theme_bw() + 
+    theme(text=element_text(size=20), 
+    legend.position="bottom") +
+    ggtitle('Eye-tracking time bins') +
+    scale_colour_manual(
+        values=c("1"="black", "0"="white"), 
+        name="", 
+        labels=c("Chose Top", "Chose Bottom")) +
+    scale_fill_grey(
+        start=.3, end=.7, name="",
+        labels=c("Chose Top", "Chose Bottom")) +
+    ylab("Proportion no AOI") +
+    xlab("ET bins")
+ggsave(file.path(path_results, 'et', 'point_bins_null.pdf'), 
+		 width=5.5, height=5)
 
 et_bins_choseTB_long %>% head(5)
 ```
 
+
+
+
+
+
+```{r}
+# Pos. ~ looking top --> top - bottom
+
+grouped_tb_index = data_et %>% group_by(run_id, trial_index) %>%
+	dplyr::summarise(
+		look_top = sum(aoi %in% c('TL', 'TR')),
+		look_bottom = sum(aoi %in% c('BL', 'BR')),
+		tb_index = (look_top-look_bottom) / (look_top+look_bottom)) %>%
+	group_by(run_id) %>%
+	dplyr::summarise(
+		tb_index = mean(tb_index))
+
+print(paste(
+	'runs with tb_index < -0.4: n =',
+	grouped_tb_index %>% 
+		filter(tb_index < -0.4) %>%
+		unique() %>%
+		nrow()))
+
+runs_balanced_look = grouped_tb_index %>%
+	filter(tb_index > -0.8 & tb_index < 0.8) %>%
+	dplyr::pull(run_id)
+cat(paste('n balanced runs: ', 
+		  length(runs_balanced_look),
+		  'of',
+		  nrow(data_subject)))
+
+ggplot(grouped_tb_index, aes(tb_index))+
+    geom_histogram(binwidth=.1, alpha=.5, position="identity")+
+    scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
+    theme_bw()+theme(text=element_text(size=40))
+
+grouped_window = data_trial %>%
+	mutate(window_diagonal = sqrt(
+		window_width * window_width + 
+		window_height * window_height)) %>%
+	group_by(run_id) %>%
+	dplyr::summarise(
+		window = max(window_diagonal),
+		.groups = 'keep')
+grouped_window
+
+ggplot(grouped_window, aes(window))+
+    geom_histogram(binwidth=100, alpha=.5, position="identity")+
+    scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
+    theme_bw()+theme(text=element_text(size=40))
+
+runs_large_windows = grouped_window %>%
+	filter(window>1900) %>%
+	dplyr::pull(run_id)
+```
 
 
 # Last fixation

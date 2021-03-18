@@ -19,7 +19,7 @@ cd(fullfile(root, 'data_prep', 'fit_k'));
 f = waitbar(0,'Reading data');
 
 data = readtable(fullfile(root, ...
-    'data', 'choice_task', 'uncorrected', 'data_trial.csv'));
+    'data', 'choice_task', 'added_var', 'data_trial.csv'));
 
 data = data(:, {'run_id', 'aSS', 'aLL', 'tSS', 'tLL', ...
     'choseLL', 'trial_duration_exact', 'LL_top', 'choseTop'});

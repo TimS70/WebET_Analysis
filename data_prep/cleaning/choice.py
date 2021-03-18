@@ -16,33 +16,14 @@ def create_choice_data():
           'Create choice data \n'
           '################################### \n')
 
-    data_et = pd.read_csv(
-        os.path.join('data', 'all_trials', 'cleaned', 'data_et.csv'))
-    data_trial = pd.read_csv(
-        os.path.join('data', 'all_trials', 'cleaned', 'data_trial.csv'))
-    data_subject = pd.read_csv(
-        os.path.join('data', 'all_trials', 'cleaned', 'data_subject.csv'))
-    print('Imported from data/all_trials/cleaned: ')
-    summarize_datasets(data_et, data_trial, data_subject)
+    data_et, data_trial, data_subject = load_all_three_datasets(
+        os.path.join('data', 'all_trials', 'cleaned'))
 
     data_trial = init_choice_data_trial(data_trial)
     data_et = init_choice_data_et(data_et, data_trial)
 
-    print('Data saved to ' +
-          os.path.join('data', 'choice_task', 'raw') +
-          ':')
-
-    makedir('data', 'choice_task', 'raw')
-    data_et.to_csv(
-        os.path.join('data', 'choice_task', 'raw', 'data_et.csv'),
-        index=False, header=True)
-    data_trial.to_csv(
-        os.path.join('data', 'choice_task', 'raw', 'data_trial.csv'),
-        index=False, header=True)
-    data_subject.to_csv(
-        os.path.join('data', 'choice_task', 'raw', 'data_subject.csv'),
-        index=False, header=True)
-    summarize_datasets(data_et, data_trial, data_subject)
+    save_all_three_datasets_to(data_et, data_trial, data_subject,
+        os.path.join('data', 'choice_task', 'raw'))
 
 
 def clean_choice_data():
@@ -185,6 +166,16 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
         (data_subject['choseLL'] < 0.02),
         'run_id']
 
+    max_precision = 0.15
+    runs_low_precision = data_subject.loc[
+        data_subject['precision'] > max_precision, 'run_id']
+    print(f"""Maximum precision means >{max_precision}. \n""")
+
+    max_offset = 0.5
+    runs_high_offset = data_subject.loc[
+        data_subject['offset'] > max_offset, 'run_id']
+    print(f"""Maximum offset means >{max_offset}. \n""")
+
     grouped_trials_biased = data_trial.loc[
         data_trial['run_id'].isin(runs_biasedChoices), :] \
         .groupby(
@@ -195,7 +186,7 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
 
     print(
         f"""grouped_trials_biased \n"""
-        f"""{grouped_trials_biased}"""
+        f"""{grouped_trials_biased} \n"""
     )
 
     runs_missingLogK = data_subject.loc[
@@ -204,7 +195,7 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
     max_noise = 40
     runs_noisy_logK = data_subject.loc[
         data_subject['noise'] > max_noise, 'run_id']
-    print(f'runs_noisy_logK means noise > {max_noise}')
+    print(f'runs_noisy_logK means noise > {max_noise}. \n')
 
     runs_pos_logK = data_subject.loc[
         data_subject['logK'] > 0, 'run_id']
@@ -215,7 +206,9 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
         set(runs_biasedChoices) |
         set(runs_missingLogK) |
         set(runs_noisy_logK) |
-        set(runs_pos_logK))
+        set(runs_pos_logK) |
+        set(runs_low_precision) |
+        set(runs_high_offset))
 
     n_runs = len(data_trial['run_id'].unique())
 
@@ -228,6 +221,8 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
                 'runs_missingLogK',
                 'runs_noisy_logK',
                 'runs_pos_logK',
+                'runs_low_precision',
+                'runs_high_offset',
                 'total',
             ],
             'length': [
@@ -237,6 +232,8 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
                 len(runs_missingLogK),
                 len(runs_noisy_logK),
                 len(runs_pos_logK),
+                len(runs_low_precision),
+                len(runs_high_offset),
                 len(invalid_runs)
             ],
             'percent': [
@@ -246,6 +243,8 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
                 len(runs_missingLogK) / n_runs,
                 len(runs_noisy_logK) / n_runs,
                 len(runs_pos_logK) / n_runs,
+                len(runs_low_precision) / n_runs,
+                len(runs_high_offset) / n_runs,
                 len(invalid_runs) / n_runs
             ]
         }
@@ -272,14 +271,17 @@ def check_unequal_trial_numbers(data_et, data_trial):
                          pd.isna(data_trial_added_count_2['x_count_2']), :] \
         .groupby(['run_id'], as_index=False)['trial_index'].count()
 
-    print(
-        f"""{len(grouped_missing_et)} runs have at least one """
-        f"""empty (et-related) trial. \n"""
-        f"""That is where the difference of """
-        f"""{grouped_missing_et['trial_index'].sum()} trials """
-        f"""is coming from: \n"""
-        f"""{grouped_missing_et} \n"""
-    )
+    if len(grouped_missing_et) > 0:
+        print(
+            f"""{len(grouped_missing_et)} runs have at least one """
+            f"""empty (et-related) trial. \n"""
+            f"""That is where the difference of """
+            f"""{grouped_missing_et['trial_index'].sum()} trials """
+            f"""is coming from: \n"""
+            f"""{grouped_missing_et} \n"""
+        )
+    else:
+        print('No difference in trial number found')
 
 
 def remove_long_trials(data_raw, max_duration, name):

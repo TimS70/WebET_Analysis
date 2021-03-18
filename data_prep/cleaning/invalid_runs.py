@@ -171,7 +171,7 @@ def filter_runs_low_fps(data_trial, data_et, min_fps):
         len(runs_low_fps) / len(grouped_runs['run_id'].unique())
     print(
         f"""n={len(runs_low_fps)} ({round(100 * rate_low_fps, 2)}%) """
-        f"""runs with low fps (<{min_fps}). """)
+        f"""runs with low fps (<{min_fps}). \n""")
 
     return runs_low_fps
 

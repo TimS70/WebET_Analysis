@@ -12,48 +12,23 @@ from data_prep.cleaning.corr_data import clean_corr_data
 from utils.data_frames import merge_by_index
 from utils.path import makedir
 from utils.plots import corr_matrix, corr_plot_split, save_plot
-from utils.tables import summarize_datasets
+from utils.tables import summarize_datasets, load_all_three_datasets
 
 
-def analyze_choice_task(use_adjusted_et_data=True):
+def analyze_choice_task():
 
     print('################################### \n'
           'Analyze choice data \n'
           '################################### \n')
 
-    data_et_uncorrected = pd.read_csv(
-        os.path.join('data', 'choice_task', 'uncorrected', 'data_et.csv'))
-
-    data_et_adjusted = pd.read_csv(
-        os.path.join('data', 'choice_task', 'adjusted', 'data_et.csv'))
-
-    if use_adjusted_et_data:
-
-        data_trial = pd.read_csv(
-            os.path.join(
-                'data', 'choice_task', 'adjusted', 'data_trial.csv'))
-        data_subject = pd.read_csv(
-            os.path.join(
-                'data', 'choice_task', 'adjusted', 'data_subject.csv'))
-
-    else:
-        data_trial = pd.read_csv(
-            os.path.join(
-                'data', 'choice_task', 'uncorrected', 'data_trial.csv'))
-        data_subject = pd.read_csv(
-            os.path.join(
-                'data', 'choice_task', 'uncorrected', 'data_subject.csv'))
-
-    print('Imported from data/choice_task/ with data_et_adjusted: ')
-    summarize_datasets(data_et_adjusted, data_trial, data_subject)
-    print('Imported from data/choice_task/ with data_et_uncorrected: ')
-    summarize_datasets(data_et_uncorrected, data_trial, data_subject)
+    data_et, data_trial, data_subject = load_all_three_datasets(
+        os.path.join('data', 'choice_task', 'cleaned'))
 
     plot_categorical_confounders(data_subject)
     plot_example_eye_movement(
-        data_et_uncorrected, data_trial, data_subject,
+        data_et, data_trial, data_subject,
         run=data_subject['run_id'].unique()[0])
-    plot_choice_task_heatmap(data_et_uncorrected)
+    plot_choice_task_heatmap(data_et)
     corr_analysis_subject(data_subject)
     corr_analysis_trial(data_trial)
 
