@@ -689,7 +689,35 @@ ggplot(grouped_bottom,
 	    ggtitle('N bottom gaze points vs. fps (trial level)') + 
 		theme(plot.title = element_text(size = 15, face = "bold"))
 
-# Sujbect level
+
+# Trial Top-Bottom-Ratio
+grouped = data_et %>% 
+	group_by(run_id, trial_index) %>%
+	dplyr::summarise(
+		tb_ratio = 
+			sum(aoi %in% c('TL', 'TR')) / 
+			sum(aoi %in% c('BL', 'BR')),
+		.groups = 'keep') %>%
+	merge(
+		data_trial %>% dplyr::select(run_id, trial_index, fps),
+		by=c('run_id', 'trial_index')) %>% 
+	filter(!is.na(fps) & !is.na(tb_ratio))
+
+grouped = grouped %>% 
+	filter(!is.na(fps) & !is.na(tb_ratio))
+
+cor.test(grouped$tb_ratio, grouped$fps) 
+
+ggplot(grouped, 
+       aes(x=fps, y=tb_ratio)) +
+		geom_point(size=2.5, aes(alpha=.5)) +
+		guides(alpha=FALSE,color=FALSE, shape=FALSE) +
+		theme(text=element_text(size=20)) + 
+	    ggtitle('Top_bottom gaze ratio vs. fps (trial level)') + 
+		theme(plot.title = element_text(size = 15, face = "bold"))
+
+
+# Subject level
 grouped = data_et %>%
 	mutate(look_top = as.numeric(y > 0.5)) %>%
 	group_by(run_id, look_top) %>%
