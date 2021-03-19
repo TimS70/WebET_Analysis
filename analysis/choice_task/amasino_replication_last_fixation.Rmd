@@ -359,7 +359,7 @@ plot_et_time_bins = function(data_time_bins) {
 	# Violin Plot
 	bin_plot = ggplot(data_time_bins, 
 	       aes(x=factor(timeBin), y=p_lookTop, fill=choseTop)) +
-	    geom_split_violin(alpha=.7, size=1, position="dodge") +
+	    geom_split_violin(alpha=0.7, size=1, position="dodge") +
 	    stat_summary(
 	        fun=mean, geom="point",
 	        shape=45,size=10,
@@ -869,7 +869,7 @@ data_time_bins =  data_et %>%
 	merge_by_index(data_trial, 'tb_index') %>%
     filter(
     	!is.na(aoi) & aoi!=0 &
-	   	tb_index > -0.9 & tb_index < 0.9) %>%
+	   	tb_index > -0.99 & tb_index < 0.99) %>%
     mutate(
         lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
         lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
@@ -906,10 +906,88 @@ ggplot(data_time_bins,
         labels=c("Chose Top", "Chose Bottom")) +
     ylab("Proportion looking top") +
     xlab("Time bins")
+
+ggplot(data_time_bins, 
+	   aes(x=factor(timeBin), y=p_lookTop, fill=factor(choseTop, c('1', '0')))) + 
+	geom_violin(alpha=.7, size=0, position="dodge") +
+	stat_summary(
+		fun=mean, geom="point", 
+		shape=45, size=10, position=position_dodge(.9), 
+		aes(color=factor(choseTop, c('1', '0')))) +
+	scale_colour_manual(
+		values=c("1"="black", "0"="white"), name="", 
+		labels=c("Chose top", "Chose bottom")) +
+	scale_fill_grey(
+		start=.3, end=.7, name="",
+	  	labels=c("Chose top", "Chose bottom")) +
+	xlab("Time bins") + ylab("Proportion looking top") +
+	theme_bw() + theme(text=element_text(size=20), legend.position="bottom")
 ```
 
 
+## Higher fps & look at both options
+```{r}
+data_time_bins =  data_et %>%
+	merge_by_index(data_trial, 'choseTop') %>%
+	merge_by_index(data_trial, 'tb_index') %>%
+	merge_by_index(data_trial, 'fps') %>%
+    filter(
+    	!is.na(aoi) & aoi!=0 &
+	   	tb_index > -0.99 & tb_index < 0.99 &
+		fps > 15) %>%
+    mutate(
+        lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
+        lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
+    dplyr::group_by(run_id, choseTop, timeBin) %>%
+    dplyr::summarise(
+        n = n(),
+        n_lookTop = sum(lookTop),
+        n_lookBottom = sum(lookBottom),    
+        p_lookTop = sum(lookTop)/n,
+        p_lookBottom = sum(lookBottom)/n,
+        .groups = 'keep') %>%
+	mutate(
+		choseTop = factor(choseTop, c('1', '0')), 
+		timeBin = factor(timeBin))
 
+ggplot(data_time_bins, 
+       aes(x=factor(timeBin), y=p_lookTop, fill=choseTop)) +
+    geom_split_violin(alpha=.7, size=1, position="dodge") +
+    stat_summary(
+        fun=mean, geom="point",
+        shape=45,size=10,
+        position=position_dodge(.9), 
+        aes(color=factor(choseTop, c('1', '0')))) +
+    theme_bw() + 
+    theme(text=element_text(size=20), 
+    legend.position="bottom") +
+    ggtitle('Eye-tracking time bins') +
+    scale_colour_manual(
+        values=c("1"="black", "0"="white"), 
+        name="", 
+        labels=c("Chose Top", "Chose Bottom")) +
+    scale_fill_grey(
+        start=.3, end=.7, name="",
+        labels=c("Chose Top", "Chose Bottom")) +
+    ylab("Proportion looking top") +
+    xlab("Time bins")
+
+ggplot(data_time_bins, 
+	   aes(x=factor(timeBin), y=p_lookTop, fill=factor(choseTop, c('1', '0')))) + 
+	geom_violin(alpha=.7, size=0, position="dodge") +
+	stat_summary(
+		fun=mean, geom="point", 
+		shape=45, size=10, position=position_dodge(.9), 
+		aes(color=factor(choseTop, c('1', '0')))) +
+	scale_colour_manual(
+		values=c("1"="black", "0"="white"), name="", 
+		labels=c("Chose top", "Chose bottom")) +
+	scale_fill_grey(
+		start=.3, end=.7, name="",
+	  	labels=c("Chose top", "Chose bottom")) +
+	xlab("Time bins") + ylab("Proportion looking top") +
+	theme_bw() + theme(text=element_text(size=20), legend.position="bottom")
+```
 
 
 ### What about those participants who never look down?
