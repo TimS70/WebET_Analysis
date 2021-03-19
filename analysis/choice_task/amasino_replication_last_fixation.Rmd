@@ -1,0 +1,855 @@
+---
+title: 'Replication from Amasino et al. (2019)'
+output:
+  html_document:
+    df_print: paged
+---
+
+# Setup
+```{r, setup, message=FALSE, warning=FALSE}
+root = "C:/Users/User/GitHub/WebET_Analysis"
+path_results = file.path(root, 'results', 'plots', 'choice_task')
+
+knitr::opts_knit$set(root.dir = normalizePath(file.path('..', '..')))
+
+knitr::opts_knit$get("root.dir")
+
+
+source(file.path(root, 'utils', 'r', 'geom_split_violin.R'))
+source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
+source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
+source(file.path(root, 'utils', 'r', 'merge_by_index.R'))
+source(file.path(root, 'utils', 'r', 'summarize_datasets.R'))
+source(file.path(root, 'utils', 'r', 'get_packages.R'))
+source(file.path(root, 'utils', 'r', 'remove_runs.R'))
+source(file.path(root, 'utils', 'r', 'add_x_count.R'))
+
+get_packages(c(
+	'plyr',
+	'dplyr', 
+	"effsize",
+	'e1071',
+	"ggplot2",
+	"ggsignif",
+	'knitrProgressBar',
+	'lme4',
+	'progress',
+	'QuantPsyc',
+	"RColorBrewer",
+	'reshape2',
+	'tidyr'))
+
+print(getwd())
+```
+
+
+# Prep data 
+```{r, load_datasets}
+data_subject = read.csv(
+    file.path(root, 'data', 'choice_task', 'cleaned', 
+              'data_subject.csv'))
+
+data_trial = read.csv(
+    file.path(root, 'data', 'choice_task', 'cleaned', 
+              'data_trial.csv'))
+
+data_et = read.csv(
+    file.path(root, 'data', 'choice_task', 'cleaned', 
+              'data_et.csv'))
+
+summarize_datasets(data_et, data_trial, data_subject)
+```
+
+
+# Create Time bins
+```{r}
+createTimeBins = function(data, nBins) {
+    data$timeBin = 0
+    progress_bar <- progress_estimated(length(unique(data$run_id)), 0)
+    
+    for (subject in unique(data$run_id)){
+        df_subject = data %>% filter(run_id == subject)
+        
+        for (trial in unique(df_subject$withinTaskIndex)) {
+            df_trial = df_subject %>% filter(withinTaskIndex == trial)
+            
+            this_timeBin = cut(
+                df_trial$t_task, nBins,
+                labels = c(1:nBins),
+                include.lowest=TRUE)
+            
+            data = data %>%
+                mutate(timeBin=replace(
+                    timeBin, 
+                    run_id==subject & withinTaskIndex==trial, 
+                    this_timeBin))
+        }
+        progress_bar$pause(0.1)$tick()$print()
+    }
+    return(data)
+}
+
+data_et = createTimeBins(data_et, 5)
+
+data_et %>%
+    dplyr::select(run_id, withinTaskIndex, timeBin, t_task, aoi) %>%
+    arrange(run_id, withinTaskIndex, timeBin, t_task) %>% 
+	head(50)
+
+data_et %>% 
+	group_by(timeBin) %>%
+	dplyr::summarise(
+		t = mean(t_task),
+		t_min = min(t_task), 
+		t_max = max(t_task), 
+		n = n(),
+		.groups = 'keep')
+```
+
+
+# Plot time bins
+```{r}
+plot_et_time_bins = function(data_time_bins) {
+
+	runs_not_enough_bins = data_time_bins %>%
+	    group_by(run_id, choseTop) %>%
+	    dplyr::summarise(
+	    	n=length(unique(timeBin)),
+	    	.groups = 'keep') %>%
+	    filter(n<5) %>%
+	    dplyr::pull(run_id)
+	
+	cat(paste('These runs have less than 5 time bins: ',
+			  runs_not_enough_bins, '\n'))
+
+	# t-test
+	# for (bin in unique(data_time_bins$timeBin)) {
+	#     print(t.test(p_lookTop ~ choseTop,
+	#                  data=data_time_bins %>%
+	#                      filter(timeBin==bin &
+	#                             !(run_id %in% runs_not_enough_bins)),
+	#                  paired=TRUE))
+	# }
+	
+	# Violin Plot
+	bin_plot = ggplot(data_time_bins, 
+	       aes(x=factor(timeBin), y=p_lookTop, fill=choseTop)) +
+	    geom_split_violin(alpha=.7, size=1, position="dodge") +
+	    stat_summary(
+	        fun=mean, geom="point",
+	        shape=45,size=10,
+	        position=position_dodge(.9), 
+	        aes(color=factor(choseTop, c('1', '0')))) +
+	    theme_bw() + 
+	    theme(text=element_text(size=20), 
+	    legend.position="bottom") +
+	    ggtitle('Eye-tracking time bins') +
+	    scale_colour_manual(
+	        values=c("1"="black", "0"="white"), 
+	        name="", 
+	        labels=c("Chose Top", "Chose Bottom")) +
+	    scale_fill_grey(
+	        start=.3, end=.7, name="",
+	        labels=c("Chose Top", "Chose Bottom")) +
+	    ylab("Proportion looking top") +
+	    xlab("Time bins")
+	
+	print(bin_plot)
+}
+
+data_time_bins =  data_et %>%
+	merge_by_index(data_trial, 'choseTop') %>%
+    filter(!is.na(aoi) & aoi!=0) %>%
+    mutate(
+        lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
+        lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
+    dplyr::group_by(run_id, choseTop, timeBin) %>%
+    dplyr::summarise(
+        n = n(),
+        n_lookTop = sum(lookTop),
+        n_lookBottom = sum(lookBottom),    
+        p_lookTop = sum(lookTop)/n,
+        p_lookBottom = sum(lookBottom)/n,
+        .groups = 'keep') %>%
+	mutate(
+		choseTop = factor(choseTop, c('1', '0')), 
+		timeBin = factor(timeBin))
+
+plot_et_time_bins(data_time_bins)
+```
+
+
+# Technical issues
+
+## Use exaclty Diannas code
+Maybe your plot is wrong, check out Diannas code
+```{r}
+data_time_bins =  data_et %>%
+	merge_by_index(data_trial, 'choseTop') %>%
+    filter(!is.na(aoi) & aoi!=0) %>%
+    mutate(
+        lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
+        lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
+    dplyr::group_by(run_id, choseTop, timeBin) %>%
+    dplyr::summarise(
+        n = n(),
+        n_lookTop = sum(lookTop),
+        n_lookBottom = sum(lookBottom),    
+        p_lookTop = sum(lookTop)/n,
+        p_lookBottom = sum(lookBottom)/n,
+        .groups = 'keep') %>%
+	mutate(
+		choseTop = factor(choseTop, c('1', '0')), 
+		timeBin = factor(timeBin))
+
+data_time_bins
+
+ggplot(data_time_bins, 
+	   aes(x=factor(timeBin), y=p_lookTop, fill=factor(choseTop, c('1', '0')))) + 
+	geom_violin(alpha=.7, size=0, position="dodge") +
+	stat_summary(
+		fun=mean, geom="point", 
+		shape=45, size=10, position=position_dodge(.9), 
+		aes(color=factor(choseTop, c('1', '0')))) +
+	scale_colour_manual(
+		values=c("1"="black", "0"="white"), name="", 
+		labels=c("Chose top", "Chose bottom")) +
+	scale_fill_grey(
+		start=.3, end=.7, name="",
+	  	labels=c("Chose top", "Chose bottom")) +
+	xlab("Time bins") + ylab("Proportion looking top") +
+	theme_bw() + theme(text=element_text(size=20), legend.position="bottom")
+```
+
+
+## Median instead of mean
+```{r}
+data_time_bins =  data_et %>%
+	merge_by_index(data_trial, 'choseTop') %>%
+    filter(!is.na(aoi) & aoi!=0) %>%
+    mutate(
+        lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
+        lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
+    dplyr::group_by(run_id, choseTop, timeBin) %>%
+    dplyr::summarise(
+        n = n(),
+        n_lookTop = sum(lookTop),
+        n_lookBottom = sum(lookBottom),    
+        p_lookTop = sum(lookTop)/n,
+        p_lookBottom = sum(lookBottom)/n,
+        .groups = 'keep') %>%
+	mutate(
+		choseTop = factor(choseTop, c('1', '0')), 
+		timeBin = factor(timeBin))
+
+ggplot(data_time_bins, 
+       aes(x=factor(timeBin), y=p_lookTop, fill=choseTop)) +
+    geom_split_violin(alpha=.7, size=1, position="dodge") +
+    stat_summary(
+        fun=median, geom="point",
+        shape=45,size=10,
+        position=position_dodge(.9), 
+        aes(color=factor(choseTop, c('1', '0')))) +
+    theme_bw() + 
+    theme(text=element_text(size=20), 
+    legend.position="bottom") +
+    ggtitle('Eye-tracking time bins') +
+    scale_colour_manual(
+        values=c("1"="black", "0"="white"), 
+        name="", 
+        labels=c("Chose Top", "Chose Bottom")) +
+    scale_fill_grey(
+        start=.3, end=.7, name="",
+        labels=c("Chose Top", "Chose Bottom")) +
+    ylab("Proportion looking top") +
+    xlab("Time bins")
+```
+
+
+
+## Eyetracking data bins
+
+### Create bins
+```{r}
+create_eyeTracking_Bins = function(data, nBins) {
+    data$et_bin = 0
+    
+    progress_bar <- progress_estimated(length(unique(data$run_id)), 0)
+    
+    for (subject in unique(data$run_id)){
+    
+        df_subject = data %>% filter(run_id == subject)
+        
+        for (trial in unique(df_subject$withinTaskIndex)) {
+            df_trial = df_subject %>% filter(withinTaskIndex == trial)
+            
+            this_et_bin = cut(
+                c(1:nrow(df_trial)), 
+                nBins,
+                labels = c(1:nBins),
+                include.lowest=TRUE)
+            
+            data = data %>%
+                mutate(et_bin=replace(
+                    et_bin, 
+                    run_id==subject & withinTaskIndex==trial, 
+                    this_et_bin))
+        }
+        
+        progress_bar$pause(0.1)$tick()$print()
+        
+    }
+    return(data)
+}
+
+
+data_et = create_eyeTracking_Bins(data_et, 5)
+data_et %>%
+    group_by(run_id, withinTaskIndex, et_bin) %>%
+    dplyr::summarise(
+    	n=n(), 
+    	.groups = 'keep') %>% 
+	head(5)
+
+data_et %>%
+    dplyr::select(run_id, withinTaskIndex, et_bin, t_task) %>%
+    arrange(run_id, withinTaskIndex, et_bin, t_task) %>% 
+	head(5)
+```
+
+
+### Plot
+```{r}
+data_et_bins = data_et %>%
+	merge(
+		data_trial %>% dplyr::select(run_id, trial_index, choseTop),
+		by=c('run_id', 'trial_index')) %>%
+    mutate(
+        lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
+        lookBottom = as.numeric(aoi %in% c('BL', 'BR')),
+        null_aoi = as.numeric(aoi=='0')) %>%
+    dplyr::group_by(run_id, choseTop, et_bin) %>%
+    dplyr::summarise(
+        n = n(),
+        n_lookTop = sum(lookTop),
+        n_lookBottom = sum(lookBottom), 
+        n_null_aoi = sum(null_aoi),
+        p_lookTop = sum(lookTop)/n,
+        p_lookBottom = sum(lookBottom)/n,
+        p_null_aoi = sum(null_aoi)/n,
+        .groups = 'keep') %>%
+	mutate(
+		choseTop = factor(choseTop, c('1', '0')),
+		et_bin = factor(et_bin))
+
+
+runs_not_enough_bins = data_et_bins %>%
+    group_by(run_id, choseTop) %>%
+    dplyr::summarise(
+    	n=length(unique(et_bin)),
+    	.groups = 'keep') %>%
+    filter(n<5) %>%
+    dplyr::pull(run_id)
+
+data_et_bins = data_et_bins %>%
+    filter(!run_id %in% runs_not_enough_bins)
+
+
+#Violin plot of time bins
+ggplot(data_et_bins, 
+       aes(x=et_bin, y=p_lookTop, fill=choseTop)) +
+    geom_split_violin(alpha=.7, size=1, position="dodge") +
+    stat_summary(
+        fun=mean, geom="point",
+        shape=45,size=10,
+        position=position_dodge(.9), 
+        aes(color=factor(choseTop, c('1', '0')))) +
+    theme_bw() + 
+    theme(text=element_text(size=20), 
+    legend.position="bottom") +
+    ggtitle('Eye-tracking time bins') +
+    scale_colour_manual(
+        values=c("1"="black", "0"="white"), 
+        name="", 
+        labels=c("Chose Top", "Chose Bottom")) +
+    scale_fill_grey(
+        start=.3, end=.7, name="",
+        labels=c("Chose Top", "Chose Bottom")) +
+    ylab("Proportion looking top") +
+    xlab("ET bins")
+```
+
+
+
+# Participant related issues
+Do specific participants distort the data? 
+
+## Window
+Some participants might have very small 
+```{r}
+grouped_window = data_trial %>%
+	mutate(window_diagonal = sqrt(
+		window_width * window_width + 
+		window_height * window_height)) %>%
+	group_by(run_id) %>%
+	dplyr::summarise(
+		window = max(window_diagonal),
+		.groups = 'keep')
+grouped_window
+
+ggplot(grouped_window, aes(window))+
+    geom_histogram(binwidth=100, alpha=.5, position="identity")+
+    scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
+    theme_bw()+theme(text=element_text(size=40))
+
+runs_large_windows = grouped_window %>%
+	filter(window>1700) %>%
+	dplyr::pull(run_id)
+
+cat(paste('runs with large windows:', length(runs_large_windows), '\n'))
+
+data_time_bins =  data_et %>%
+	merge_by_index(data_trial, 'choseTop') %>%
+    filter(
+    	!is.na(aoi) & aoi!=0 &
+	   	run_id %in% runs_large_windows) %>%
+    mutate(
+        lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
+        lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
+    dplyr::group_by(run_id, choseTop, timeBin) %>%
+    dplyr::summarise(
+        n = n(),
+        n_lookTop = sum(lookTop),
+        n_lookBottom = sum(lookBottom),    
+        p_lookTop = sum(lookTop)/n,
+        p_lookBottom = sum(lookBottom)/n,
+        .groups = 'keep') %>%
+	mutate(
+		choseTop = factor(choseTop, c('1', '0')), 
+		timeBin = factor(timeBin))
+
+plot_et_time_bins(data_time_bins)
+```
+
+
+```{r}
+ggsave(file.path(path_results, 'et', 'bins_top_vs_bottom.pdf'), 
+			 width=5.5, height=5)
+```
+
+
+
+## FPS
+When some participants do not look bottom. Is that because of fps? FPS does not seem to have an impact.
+```{r}
+# Trial level
+grouped_bottom = data_et %>% 
+	group_by(run_id, trial_index) %>%
+	dplyr::summarise(
+		n_bottom = sum(y < 0.5),
+		.groups = 'keep') %>%
+	merge(
+		data_trial %>% dplyr::select(run_id, trial_index, fps),
+		by=c('run_id', 'trial_index')
+	)
+grouped_bottom = grouped_bottom %>% 
+	filter(!is.na(fps) & !is.na(n_bottom))
+
+cor.test(grouped_bottom$n_bottom, grouped_bottom$fps) 
+
+ggplot(grouped_bottom, 
+       aes(x=fps, y=n_bottom)) +
+		geom_point(size=2.5, aes(alpha=.5)) +
+		guides(alpha=FALSE,color=FALSE, shape=FALSE) +
+		theme(text=element_text(size=20)) + 
+	    ggtitle('N bottom gaze points vs. fps (trial level)') + 
+		theme(plot.title = element_text(size = 15, face = "bold"))
+
+# Sujbect level
+grouped = data_et %>%
+	mutate(look_top = as.numeric(y > 0.5)) %>%
+	group_by(run_id, look_top) %>%
+	dplyr::summarise(
+		n = n(),
+		.groups = 'keep') %>%
+	merge(
+		data_subject %>% dplyr::select(run_id, fps),
+		by=c('run_id'))
+
+grouped
+
+grouped = grouped %>% 
+	filter(!is.na(fps) & !is.na(n))
+
+cor.test(grouped_bottom$n_bottom, grouped_bottom$fps) 
+
+grouped$look_top = factor(grouped$look_top)
+
+ggplot(grouped, 
+       aes(x=fps, y=n, color=look_top)) +
+	geom_point(size=2.5) +
+	theme(text=element_text(size=20)) + 
+    ggtitle('N gaze points vs. fps (subject level)') + 
+		theme(plot.title = element_text(size = 15, face = "bold"))
+
+## Filter high fps
+
+runs_high_fps = data_subject %>%
+	filter(fps > 20) %>%
+	dplyr::pull(run_id)
+cat(paste('runs with fps >20:', length(runs_high_fps)))
+
+data_time_bins =  data_et %>%
+	merge_by_index(data_trial, 'choseTop') %>%
+    filter(
+    	!is.na(aoi) & aoi!=0 &
+    	run_id %in% runs_high_fps) %>%
+    mutate(
+        lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
+        lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
+    dplyr::group_by(run_id, choseTop, timeBin) %>%
+    dplyr::summarise(
+        n = n(),
+        n_lookTop = sum(lookTop),
+        n_lookBottom = sum(lookBottom),    
+        p_lookTop = sum(lookTop)/n,
+        p_lookBottom = sum(lookBottom)/n,
+        .groups = 'keep') %>%
+	mutate(
+		choseTop = factor(choseTop, c('1', '0')), 
+		timeBin = factor(timeBin))
+
+plot_et_time_bins(data_time_bins)
+```
+
+
+
+## What if participants do not look at the top option
+```{r}
+# Pos. ~ looking top --> top - bottom
+grouped_tb_index = data_et %>% group_by(run_id, trial_index) %>%
+	dplyr::summarise(
+		look_top = sum(aoi %in% c('TL', 'TR')),
+		look_bottom = sum(aoi %in% c('BL', 'BR')),
+		tb_index = (look_top-look_bottom) / (look_top+look_bottom),
+		.groups='keep')
+
+grouped_tb_index
+
+data_trial = merge_by_index(data_trial, grouped_tb_index, 'tb_index')
+
+ggplot(data_trial, aes(tb_index)) +
+    geom_histogram(binwidth=.1, alpha=.5, position="identity") +
+    scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
+    theme_bw() + 
+    ggtitle('Histogram of top_bottom relation (trial level)') + 
+	theme(plot.title = element_text(size = 15, face = "bold"))
+
+# Subject level
+grouped_tb_index = data_trial %>%
+	group_by(run_id) %>%
+	dplyr::summarise(
+		tb_index = mean(tb_index),
+		.groups = 'keep')
+
+data_subject = merge_by_subject(data_subject, grouped_tb_index, 'tb_index')
+
+ggplot(data_subject, aes(tb_index))+
+    geom_histogram(binwidth=.1, alpha=.5, position="identity")+
+    scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
+    theme_bw() + 
+    ggtitle('Histogram of top_bottom relation (subject level)') + 
+	theme(plot.title = element_text(size = 15, face = "bold"))
+```
+
+### Only those trials who look at both options
+When filtering for top_bottom_index, I get a tendency towards the middle
+```{r}
+data_time_bins =  data_et %>%
+	merge_by_index(data_trial, 'choseTop') %>%
+	merge_by_index(data_trial, 'tb_index') %>%
+    filter(
+    	!is.na(aoi) & aoi!=0 &
+	   	tb_index > -0.9 & tb_index < 0.9) %>%
+    mutate(
+        lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
+        lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
+    dplyr::group_by(run_id, choseTop, timeBin) %>%
+    dplyr::summarise(
+        n = n(),
+        n_lookTop = sum(lookTop),
+        n_lookBottom = sum(lookBottom),    
+        p_lookTop = sum(lookTop)/n,
+        p_lookBottom = sum(lookBottom)/n,
+        .groups = 'keep') %>%
+	mutate(
+		choseTop = factor(choseTop, c('1', '0')), 
+		timeBin = factor(timeBin))
+
+ggplot(data_time_bins, 
+       aes(x=factor(timeBin), y=p_lookTop, fill=choseTop)) +
+    geom_split_violin(alpha=.7, size=1, position="dodge") +
+    stat_summary(
+        fun=mean, geom="point",
+        shape=45,size=10,
+        position=position_dodge(.9), 
+        aes(color=factor(choseTop, c('1', '0')))) +
+    theme_bw() + 
+    theme(text=element_text(size=20), 
+    legend.position="bottom") +
+    ggtitle('Eye-tracking time bins') +
+    scale_colour_manual(
+        values=c("1"="black", "0"="white"), 
+        name="", 
+        labels=c("Chose Top", "Chose Bottom")) +
+    scale_fill_grey(
+        start=.3, end=.7, name="",
+        labels=c("Chose Top", "Chose Bottom")) +
+    ylab("Proportion looking top") +
+    xlab("Time bins")
+```
+
+
+
+
+
+### What about those participants who never look down?
+Are they less likely to choose the bottom option? Those trials, who have almost all gaze points in the upper half of the screen, are like 50% for choosing the top option. Same way vice versa, those trials who have almost all gaze points in the lower half, only had a chance of 60% for choosing the bottom areas
+```{r}
+grouped_top_bottom = data_et %>% 
+	merge_by_index(data_trial, 'choseTop') %>%
+	group_by(run_id, trial_index) %>%
+	dplyr::summarise(
+		n_top = sum(y > 0.5),
+		n_bottom = sum(y < 0.5),
+		choseTop = choseTop, 
+		.groups = 'keep') %>%
+	distinct()
+
+only_top_n = grouped_top_bottom %>%
+	filter(n_top > 25 & n_bottom < 1) %>% 
+	nrow()
+
+only_top_mean_choseTop = grouped_top_bottom %>%
+	filter(n_top > 25 & n_bottom < 1) %>%
+	dplyr::pull(choseTop) %>%
+	mean()
+
+cat(paste(
+		'Those trials, where participants had more than 25 gaze points',
+		'on the top option and zero gaze points on the bottom, had a ',
+		'probability of',
+		round(only_top_mean_choseTop, 2),
+		'(', only_top_n, ' trials)',
+		'for choosing the top option.'))
+
+only_bottom_n = grouped_top_bottom %>%
+	filter(n_top < 1 & n_bottom > 25) %>% 
+	nrow()
+
+only_bottom_mean_choseTop = grouped_top_bottom %>%
+	filter(n_top < 1 & n_bottom > 25) %>%
+	dplyr::pull(choseTop) %>%
+	mean()
+
+cat(paste(
+		'Those trials, where participants had more than 25 gaze points',
+		'on the bottom option and zero gaze points on the top, had a ',
+		'probability of',
+		round(only_bottom_mean_choseTop, 2),
+		'(', only_bottom_n, ' trials)',
+		'for choosing the top option.'))
+
+data_trial %>%
+	filter(tb_index %in% c(-1, 1)) %>%
+	group_by(tb_index, run_id) %>%
+	dplyr::summarise(
+		n = n(), 
+		choseTop = mean(key_press==38),
+		choseLL = mean(choseLL),
+		.groups = 'keep') %>% 
+	group_by(tb_index) %>%
+	dplyr::summarise(
+		n = n(),
+		top = mean(choseTop), 
+		top_std = sd(choseTop),
+		LL = mean(choseLL), 
+		LL_std = sd(choseLL),
+		.groups='keep')
+```
+
+
+
+
+
+# Last fixation
+
+## Last fix top
+```{r}
+add_lastGazeTop = function(data_trial, data_et) {
+    grouped_lastCoordinate = data_et %>%
+        dplyr::group_by(run_id, trial_index) %>%
+        dplyr::summarise(
+            t_task = max(t_task),
+            .groups = 'keep') %>%
+        merge(data_et %>% 
+                  dplyr::select(run_id, trial_index, t_task, aoi), 
+              by=c('run_id', 'trial_index', 't_task')) %>%
+        mutate(lastGazeTop = as.numeric(aoi %in% c('TL', 'TR')))
+    grouped_lastCoordinate
+    
+    if ('lastGazeTop' %in% names(data_trial)) {
+        data_trial = data_trial %>% dplyr::select(!lastGazeTop)}
+    data_trial = data_trial %>% 
+        merge(
+            grouped_lastCoordinate %>% 
+                dplyr::select(run_id, trial_index, lastGazeTop), 
+            by=c('run_id', 'trial_index'))
+    return(data_trial)
+}
+
+data_trial = add_lastGazeTop(data_trial, data_et)
+data_trial %>%
+    dplyr::select(run_id, trial_index, choseTop, lastGazeTop) %>% 
+	head(5)
+
+lastGaze_long <- data_trial %>%
+	filter(!tb_index %in% c(-1, 1)) %>%
+    dplyr::select(run_id, withinTaskIndex, lastGazeTop, choseTop) %>%
+    dplyr::group_by(run_id, lastGazeTop, withinTaskIndex) %>%
+    dplyr::summarise(
+    	choseTop=mean(choseTop),
+    	.groups = 'keep') %>%
+    dplyr::group_by(run_id, lastGazeTop) %>%
+    dplyr::summarise(
+        n=n(),
+    	choseTop=mean(choseTop),
+        .groups = 'keep') 
+
+lastGaze_long %>% head(5)
+
+# t-test
+subjects_noGaze = 
+    lastGaze_long %>% 
+    group_by(run_id) %>%
+    dplyr::summarise(n_subj = n()) %>%
+    filter(n_subj<2) %>%
+    arrange(run_id) %>%
+    dplyr::pull(run_id)
+
+lastGaze_long$lastGazeTop = factor(lastGaze_long$lastGazeTop, c('1', '0'))
+t.test(
+    choseTop ~ lastGazeTop,
+    data=lastGaze_long %>% filter(!(run_id %in% subjects_noGaze)), 
+    paired=TRUE)
+
+# plot
+ggplot(lastGaze_long, aes(x=lastGazeTop, y=choseTop)) +
+    geom_violin(fill="gray", size=0) +
+    stat_summary(fun=mean,geom="point",shape=45,size=10, color="white") +
+    geom_text(x=1.5, y=1.02, label="***") + 
+    annotate("segment",x=1, xend=2, y=1.01, yend=1.01) +
+    theme_bw()+ylim(0,1.03)+xlab("") + 
+    ylab("Proportion top choices") +
+    xlab("last Fixation on Top AOIs") + 
+    theme(text=element_text(size=20))
+```
+
+
+## Last fix LL 
+```{r}
+add_lastGazeLL = function(data_trial, data_et) {
+    grouped_lastCoordinate = data_et %>%
+        dplyr::group_by(run_id, trial_index) %>%
+        dplyr::summarise(
+        	t_task = max(t_task), 
+        	.groups = 'keep') %>%
+        merge(data_et %>% 
+                  dplyr::select(run_id, trial_index, t_task, aoi, LL_top) %>%
+                  filter(aoi!="0"), 
+              by=c('run_id', 'trial_index', 't_task')) %>%
+        mutate(lastGazeLL = as.numeric(
+            (aoi %in% c('TL', 'TR') & LL_top==1) |
+            (aoi %in% c('BL', 'BR') & LL_top==0)), 
+        ) 
+   
+    if ('lastGazeLL' %in% names(data_trial)) {
+        data_trial = data_trial %>% dplyr::select(!lastGazeLL)}
+    data_trial = data_trial %>% 
+        merge(
+            grouped_lastCoordinate %>% 
+                dplyr::select(run_id, trial_index, lastGazeLL), 
+            by=c('run_id', 'trial_index'))
+    
+    return(data_trial)
+}
+
+data_trial = add_lastGazeLL(data_trial, data_et)
+
+
+grouped_lastCoordinate = data_et %>%
+    dplyr::group_by(run_id, trial_index) %>%
+    dplyr::summarise(
+    	t_task = max(t_task), 
+    	.groups='keep') %>%
+    merge(data_et %>% 
+              dplyr::select(run_id, trial_index, t_task, aoi, LL_top) %>%
+              filter(aoi!="0"), 
+          by=c('run_id', 'trial_index', 't_task')) %>%
+    mutate(lastGazeLL = as.numeric(
+        (aoi %in% c('TL', 'TR') & LL_top==1) |
+        (aoi %in% c('BL', 'BR') & LL_top==0)), 
+    ) %>% 
+    merge(data_trial %>%
+              dplyr::select(run_id, trial_index, 
+                            option_TL, option_TR, option_BR, option_BL,
+                            choseLL),
+          by=c('run_id', 'trial_index'))
+
+grouped_lastCoordinate %>%
+    filter(lastGazeLL==0) %>% 
+	head(5)
+
+lastGaze_long <- data_trial %>% 
+    dplyr::select(run_id, withinTaskIndex, lastGazeLL, choseLL) %>%
+    dplyr::group_by(run_id, lastGazeLL, withinTaskIndex) %>%
+    dplyr::summarise(
+    	choseLL=mean(choseLL),
+    	.groups = 'keep') %>%
+    dplyr::group_by(run_id, lastGazeLL) %>%
+    dplyr::summarise(
+        n = n(),
+        choseLL = mean(choseLL),
+        .groups = 'keep') 
+
+lastGaze_long %>% head(5)
+
+subjects_noGaze = lastGaze_long %>% 
+    group_by(run_id) %>%
+    dplyr::summarise(
+    	n_subj = n(), 
+    	.groups = 'keep') %>%
+    filter(n_subj<2) %>%
+    arrange(run_id) %>%
+    dplyr::pull(run_id)
+
+lastGaze_long$lastGazeLL = factor(lastGaze_long$lastGazeLL, c('1', '0'))
+t.test(
+    choseLL ~ lastGazeLL,
+    data=lastGaze_long %>% filter(!(run_id %in% subjects_noGaze)), 
+    paired=TRUE)
+
+ggplot(lastGaze_long, 
+       aes(x=lastGazeLL, y=choseLL)) +
+    geom_violin(fill="gray", size=0) +
+    stat_summary(fun=mean,geom="point",shape=45,size=10, color="white") +
+    geom_text(x=1.5, y=1.02, label="***") + 
+    annotate("segment",x=1, xend=2, y=1.01, yend=1.01) +
+    theme_bw()+ylim(0,1.03)+xlab("") + 
+    ylab("Proportion LL choices") +
+    xlab("last Fixation on LL AOIs") + 
+    theme(text=element_text(size=20))
+```
+
+
+
