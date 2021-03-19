@@ -63,6 +63,57 @@ summarize_datasets(data_et, data_trial, data_subject)
 
 
 
+# Gaze points ~ choice
+```{r}
+grouped = data_et %>% 
+	merge_by_index(data_trial, 'choseTop') %>%
+	merge_by_index(data_trial, 'choseLL') %>%
+	merge_by_index(data_trial, 'LL_top') %>%
+	filter(!is.na(aoi) & !aoi %in% c(0, '0')) %>%
+	dplyr::group_by(run_id, trial_index) %>%
+	dplyr::summarise(
+		n = n(),
+		n_bottom = sum(aoi %in% c('BL', 'BR')), 
+		p_look_bottom = n_bottom / n,
+		choseTop = mean(choseTop), 
+		n_SS = sum(
+			(LL_top==1 & aoi %in% c('BL', 'BR')) |
+			(LL_top==0 & aoi %in% c('TL', 'TR'))),	
+		p_SS = n_SS / n,
+		choseLL = mean(choseLL),
+		.groups = 'keep') %>%
+	dplyr::group_by(run_id) %>%
+	dplyr::summarise(
+		n_look_bottom = sum(n_bottom),
+		p_look_bottom = mean(p_look_bottom),
+		choseTop = mean(choseTop), 
+		n_SS = mean(n_SS), 
+		p_SS = mean(p_SS), 
+		choseLL = mean(choseLL),
+		.groups = 'keep')
+
+# grouped = data_et %>% 
+# 	merge_by_index(data_trial, 'choseTop') %>%
+# 	merge_by_index(data_trial, 'choseLL') %>%
+# 	merge_by_index(data_trial, 'LL_top') %>%
+# 	filter(!is.na(aoi) & !aoi %in% c(0, '0')) %>%
+# 	dplyr::group_by(run_id) %>%
+# 	dplyr::summarise(
+# 		n = n(),
+# 		n_bottom = sum(aoi %in% c('BL', 'BR')), 
+# 		p_look_bottom = n_bottom / n,
+# 		choseTop = mean(choseTop), 
+# 		n_SS = sum(
+# 			(LL_top==1 & aoi %in% c('BL', 'BR')) |
+# 			(LL_top==0 & aoi %in% c('TL', 'TR'))),	
+# 		p_SS = n_SS / n, 
+# 		choseLL = mean(choseLL),
+# 		.groups = 'keep')
+
+cor.test(grouped$p_look_bottom, grouped$choseTop) 
+cor.test(grouped$p_SS, grouped$choseLL) 
+```
+
 # Last fixation
 
 ## Last fix top
@@ -355,54 +406,6 @@ plot_et_time_bins(data_time_bins)
 
 
 # Technical issues
-## Data quality
-```{r}
-ggplot(data_subject, aes(offset))+
-    geom_histogram(binwidth=0.025, alpha=.5, position="identity")+
-    scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
-    theme_bw()+theme(text=element_text(size=40))
-
-ggplot(data_subject, aes(precision))+
-    geom_histogram(binwidth=0.01, alpha=.5, position="identity")+
-    scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
-    theme_bw()+theme(text=element_text(size=40))
-
-ggplot(data_subject, aes(fps))+
-    geom_histogram(binwidth=1, alpha=.5, position="identity")+
-    scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
-    theme_bw()+theme(text=element_text(size=40))
-
-
-data_time_bins =  data_et %>%
-	merge_by_index(data_trial, 'choseTop') %>%
-    filter(!is.na(aoi) & aoi!=0) %>%
-    mutate(
-        lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
-        lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
-    dplyr::group_by(run_id, choseTop, timeBin) %>%
-    dplyr::summarise(
-        n = n(),
-        n_lookTop = sum(lookTop),
-        n_lookBottom = sum(lookBottom),    
-        p_lookTop = sum(lookTop)/n,
-        p_lookBottom = sum(lookBottom)/n,
-        .groups = 'keep') %>%
-	mutate(
-		choseTop = factor(choseTop, c('1', '0')), 
-		timeBin = factor(timeBin))
-
-runs_plot = data_subject %>% 
-	filter(
-		offset < 0.2 & 
-		precision < 0.08 & 
-		fps > 10) %>%
-	dplyr::pull(run_id)
-
-print(paste('N runs:', length(runs_plot)))
-
-plot_et_time_bins(data_time_bins %>% filter(run_id %in% runs_plot))
-```
-
 ## Use Diannas plot
 Maybe your plot is wrong, check out Diannas code
 ```{r}
@@ -716,7 +719,7 @@ ggplot(grouped,
 ## Filter high fps
 
 runs_high_fps = data_subject %>%
-	filter(fps > 20) %>%
+	filter(fps > 15) %>%
 	dplyr::pull(run_id)
 cat(paste('runs with fps >20:', length(runs_high_fps)))
 
@@ -744,6 +747,53 @@ plot_et_time_bins(data_time_bins)
 ```
 
 
+
+## Data quality
+```{r}
+ggplot(data_subject, aes(offset))+
+    geom_histogram(binwidth=0.025, alpha=.5, position="identity")+
+    scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
+    theme_bw()+theme(text=element_text(size=40))
+
+ggplot(data_subject, aes(precision))+
+    geom_histogram(binwidth=0.01, alpha=.5, position="identity")+
+    scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
+    theme_bw()+theme(text=element_text(size=40))
+
+ggplot(data_subject, aes(fps))+
+    geom_histogram(binwidth=1, alpha=.5, position="identity")+
+    scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
+    theme_bw()+theme(text=element_text(size=40))
+
+
+data_time_bins =  data_et %>%
+	merge_by_index(data_trial, 'choseTop') %>%
+    filter(!is.na(aoi) & aoi!=0) %>%
+    mutate(
+        lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
+        lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
+    dplyr::group_by(run_id, choseTop, timeBin) %>%
+    dplyr::summarise(
+        n = n(),
+        n_lookTop = sum(lookTop),
+        n_lookBottom = sum(lookBottom),    
+        p_lookTop = sum(lookTop)/n,
+        p_lookBottom = sum(lookBottom)/n,
+        .groups = 'keep') %>%
+	mutate(
+		choseTop = factor(choseTop, c('1', '0')), 
+		timeBin = factor(timeBin))
+
+runs_plot = data_subject %>% 
+	filter(
+		offset < 0.15 & 
+		precision < 0.1) %>%
+	dplyr::pull(run_id)
+
+print(paste('N runs:', length(runs_plot)))
+
+plot_et_time_bins(data_time_bins %>% filter(run_id %in% runs_plot))
+```
 
 ## What if participants do not look at the top option
 ```{r}
