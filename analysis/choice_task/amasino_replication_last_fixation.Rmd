@@ -1013,3 +1013,184 @@ print(paste('How much data?',
 
 plot_et_time_bins(data_time_bins)
 ```
+# Left vs. right time bins
+```{r}
+data_time_bins = data_et %>%
+	merge_by_index(data_trial, 'choseLL') %>%
+	merge_by_index(data_trial, 'amountLeft') %>%
+    filter(!is.na(aoi) & aoi!=0) %>%
+    mutate(
+        look_amount = as.numeric(
+        	(amountLeft==1 & aoi %in% c('TL', 'BL')) |
+        	(amountLeft==0 & aoi %in% c('TR', 'BR')))) %>%
+    dplyr::group_by(run_id, choseLL, timeBin) %>%
+    dplyr::summarise(
+        n = n(),
+        n_look_amount = sum(look_amount),  
+        p_look_amount = sum(look_amount)/n,
+        .groups = 'keep') %>%
+	mutate(
+		choseLL = factor(choseLL, c('1', '0')), 
+		timeBin = factor(timeBin))
+
+ggplot(data_time_bins, 
+       aes(x=factor(timeBin), y=p_look_amount, fill=choseLL)) +
+    geom_split_violin(alpha=.7, size=1, position="dodge") +
+    stat_summary(
+        fun=mean, geom="point",
+        shape=45,size=10,
+        position=position_dodge(.9), 
+        aes(color=choseLL)) +
+    theme_bw() + 
+    theme(text=element_text(size=20), 
+    legend.position="bottom") +
+    ggtitle('Eye-tracking time bins') +
+    scale_colour_manual(
+        values=c("1"="black", "0"="white"), 
+        name="", 
+        labels=c("Chose LL", "Chose SS")) +
+    scale_fill_grey(
+        start=.3, end=.7, name="",
+        labels=c("Chose LL", "Chose SS")) +
+    ylab("Proportion looking amount") +
+    xlab("Time bins")
+```
+
+# Last fix amount
+# Last fixation
+
+## Last fix top
+```{r}
+add_lastGazeTop = function(data_trial, data_et) {
+    grouped_lastCoordinate = data_et %>%
+        dplyr::group_by(run_id, trial_index) %>%
+        dplyr::summarise(
+            t_task = max(t_task),
+            .groups = 'keep') %>%
+        merge(data_et %>% 
+                  dplyr::select(run_id, trial_index, t_task, aoi), 
+              by=c('run_id', 'trial_index', 't_task')) %>%
+        mutate(lastGazeTop = as.numeric(aoi %in% c('TL', 'TR')))
+    grouped_lastCoordinate
+    
+    if ('lastGazeTop' %in% names(data_trial)) {
+        data_trial = data_trial %>% dplyr::select(!lastGazeTop)}
+    data_trial = data_trial %>% 
+        merge(
+            grouped_lastCoordinate %>% 
+                dplyr::select(run_id, trial_index, lastGazeTop), 
+            by=c('run_id', 'trial_index'))
+    return(data_trial)
+}
+
+data_trial = add_lastGazeTop(data_trial, data_et)
+data_trial %>%
+    dplyr::select(run_id, trial_index, choseTop, lastGazeTop) %>% 
+	head(5)
+
+lastGaze_long <- data_trial %>%
+    dplyr::select(run_id, withinTaskIndex, lastGazeTop, choseTop) %>%
+    dplyr::group_by(run_id, lastGazeTop, withinTaskIndex) %>%
+    dplyr::summarise(
+    	choseTop=mean(choseTop),
+    	.groups = 'keep') %>%
+    dplyr::group_by(run_id, lastGazeTop) %>%
+    dplyr::summarise(
+        n=n(),
+    	choseTop=mean(choseTop),
+        .groups = 'keep') 
+
+lastGaze_long %>% head(5)
+
+# t-test
+subjects_noGaze = 
+    lastGaze_long %>% 
+    group_by(run_id) %>%
+    dplyr::summarise(n_subj = n()) %>%
+    filter(n_subj<2) %>%
+    arrange(run_id) %>%
+    dplyr::pull(run_id)
+
+lastGaze_long$lastGazeTop = factor(lastGaze_long$lastGazeTop, c('1', '0'))
+t.test(
+    choseTop ~ lastGazeTop,
+    data=lastGaze_long %>% filter(!(run_id %in% subjects_noGaze)), 
+    paired=TRUE)
+
+# plot
+ggplot(lastGaze_long, aes(x=lastGazeTop, y=choseTop)) +
+    geom_violin(fill="gray", size=0) +
+    stat_summary(fun=mean,geom="point",shape=45,size=10, color="white") +
+    geom_text(x=1.5, y=1.02, label="***") + 
+    annotate("segment",x=1, xend=2, y=1.01, yend=1.01) +
+    theme_bw()+ylim(0,1.03)+xlab("") + 
+    ylab("Proportion top choices") +
+    xlab("last Fixation on Top AOIs") + 
+    theme(text=element_text(size=20))
+```
+
+
+## Last fix Amount
+```{r}
+add_lastGaze_amount = function(data_trial, data_et) {
+    grouped_lastCoordinate = data_et %>%
+        dplyr::group_by(run_id, trial_index) %>%
+        dplyr::summarise(
+        	t_task = max(t_task), 
+        	.groups = 'keep') %>%
+        merge(data_et %>% 
+                  dplyr::select(run_id, trial_index, t_task, aoi, amountLeft) %>%
+                  filter(aoi!="0"), 
+              by=c('run_id', 'trial_index', 't_task')) %>%
+        mutate(lastGaze_amount = as.numeric(
+            (aoi %in% c('TL', 'BL') & amountLeft==1) |
+            (aoi %in% c('TR', 'BR') & amountLeft==0)), 
+        ) 
+   
+    data_trial = data_trial %>%
+    	merge_by_index(grouped_lastCoordinate, 'lastGaze_amount')
+
+    return(data_trial)
+}
+
+data_trial = add_lastGaze_amount(data_trial, data_et)
+
+lastGaze_long <- data_trial %>% 
+    dplyr::select(run_id, withinTaskIndex, lastGaze_amount, choseLL) %>%
+    dplyr::group_by(run_id, lastGaze_amount, withinTaskIndex) %>%
+    dplyr::summarise(
+    	choseLL=mean(choseLL),
+    	.groups = 'keep') %>%
+    dplyr::group_by(run_id, lastGaze_amount) %>%
+    dplyr::summarise(
+        n = n(),
+        choseLL = mean(choseLL),
+        .groups = 'keep') 
+
+lastGaze_long %>% head(5)
+
+subjects_noGaze = lastGaze_long %>% 
+    group_by(run_id) %>%
+    dplyr::summarise(
+    	n_subj = n(), 
+    	.groups = 'keep') %>%
+    filter(n_subj<2) %>%
+    arrange(run_id) %>%
+    dplyr::pull(run_id)
+
+lastGaze_long$lastGaze_amount = factor(lastGaze_long$lastGaze_amount, c('1', '0'))
+t.test(
+    choseLL ~ lastGaze_amount,
+    data=lastGaze_long %>% filter(!(run_id %in% subjects_noGaze)), 
+    paired=TRUE)
+
+ggplot(lastGaze_long, aes(x=lastGaze_amount, y=choseLL)) +
+    geom_violin(fill="gray", size=0) +
+    stat_summary(fun=mean,geom="point",shape=45,size=10, color="white") +
+    geom_text(x=1.5, y=1.02, label="***") + 
+    annotate("segment",x=1, xend=2, y=1.01, yend=1.01) +
+    theme_bw()+ylim(0,1.03)+xlab("") + 
+    ylab("Proportion LL choices") +
+    xlab("last Fixation on amount AOIs") + 
+    theme(text=element_text(size=20))
+```
