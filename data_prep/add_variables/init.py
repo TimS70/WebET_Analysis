@@ -21,9 +21,9 @@ def global_add_variables_to_datasets():
     data_et, data_trial, data_subject = load_all_three_datasets(
         os.path.join('data', 'all_trials', 'combined'))
 
-    n_approved_unique = len(data_subject.loc[
-                                data_subject['status'] == 'APPROVED',
-                                'prolificID'].unique())
+    n_approved_unique = len(
+        data_subject.loc[data_subject['status'] == 'APPROVED',
+                         'prolificID'].unique())
 
     n_approved = len(data_subject.loc[
                      data_subject['status'] == 'APPROVED', :])

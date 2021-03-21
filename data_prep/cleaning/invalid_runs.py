@@ -28,11 +28,15 @@ def filter_invalid_runs(data_trial, data_et, data_subject):
     runs_low_fps = filter_runs_low_fps(data_trial, data_et, 3)
     runs_cannot_see = filter_wrong_glasses(data_subject)
 
+    # Plotting saccades from the fix task showed no variance
+    runs_no_saccade = [144, 171, 380]
+
     invalid_runs = list(
         set(subjects_not_full_trial) |
         set(runs_not_follow_instructions) |
         set(runs_low_fps) |
         set(runs_cannot_see) |
+        set(runs_no_saccade) |
         set(runs_full_but_not_enough_et)
     )
 
@@ -44,27 +48,26 @@ def filter_invalid_runs(data_trial, data_et, data_subject):
                    'runs_noInstruction',
                    'runs_lowFPS',
                    'runs_cannotSee',
+                   'runs_no_saccade',
                    'runs_full_but_not_enough_et',
-                   'total'
-       ],
+                   'total'],
         'length': [
                     len(subjects_not_full_trial),
                     len(runs_not_follow_instructions),
                     len(runs_low_fps),
                     len(runs_cannot_see),
+                    len(runs_no_saccade),
                     len(runs_full_but_not_enough_et),
-                    len(invalid_runs)
-               ],
+                    len(invalid_runs)],
         'percent': [
                     len(subjects_not_full_trial)/n_runs,
                     len(runs_not_follow_instructions)/n_runs,
                     len(runs_low_fps)/n_runs,
-                    len(runs_cannot_see)/len(data_subject),
+                    len(runs_cannot_see)/n_runs,
+                    len(runs_no_saccade)/n_runs,
                     len(runs_full_but_not_enough_et)/n_runs,
-                    len(invalid_runs)/n_runs
-        ]
-       }
-    )
+                    len(invalid_runs)/n_runs]
+       })
 
     print(
         f"""\n n={n_runs} runs in total. Invalid_runs: \n"""

@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 from utils.data_frames import merge_by_index, merge_by_subject
 from utils.path import makedir
+from utils.plots import save_plot
 from utils.tables import write_csv
 
 
@@ -125,10 +126,7 @@ def plot_aoi_scatter(data_et):
     plt.scatter(x, y)
     plt.ylim(0, 1)
     plt.xlim(0, 1)
-    makedir('results', 'plots', 'choice_task')
-    plt.savefig(
-        os.path.join('results', 'plots', 'choice_task',
-                      'aoi_scatter.png'))
+    save_plot('aoi_scatter.png', 'results', 'plots', 'choice_task')
     plt.close()
 
 

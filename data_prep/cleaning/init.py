@@ -7,8 +7,7 @@ from data_prep.cleaning.filter_approved import filter_approved_runs
 from data_prep.cleaning.invalid_runs import filter_invalid_runs, clean_runs
 from data_prep.cleaning.prolific_ids import drop_duplicate_ids
 from data_prep.cleaning.replace_subject_vars import replace_subject_variables
-from utils.path import makedir
-from utils.tables import summarize_datasets
+from utils.tables import summarize_datasets, save_all_three_datasets, load_all_three_datasets
 
 
 def global_cleaning():
@@ -17,14 +16,8 @@ def global_cleaning():
           'Clean global datasets \n'
           '################################### \n')
 
-    data_et = pd.read_csv(
-        os.path.join('data', 'all_trials', 'added_var', 'data_et.csv'))
-    data_trial = pd.read_csv(
-        os.path.join('data', 'all_trials', 'added_var', 'data_trial.csv'))
-    data_subject = pd.read_csv(
-        os.path.join('data', 'all_trials', 'added_var', 'data_subject.csv'))
-    print('Imported from data/all_trials/added_var:')
-    summarize_datasets(data_et, data_trial, data_subject)
+    data_et, data_trial, data_subject = load_all_three_datasets(
+        os.path.join('data', 'all_trials', 'added_var'))
 
     data_et = drop_na_data_et(data_et)
     data_subject = replace_subject_variables(data_subject)
@@ -45,9 +38,6 @@ def global_cleaning():
 
     runs_without_prolific_id = data_subject.loc[
         pd.isna(data_subject['prolificID']), 'run_id']
-
-    runs_with_prolific_ids = data_subject.loc[
-        pd.notna(data_subject['prolificID']), 'run_id']
 
     if len(runs_without_prolific_id) > 0:
         data_et = clean_runs(data_et, runs_without_prolific_id,
@@ -81,24 +71,8 @@ def global_cleaning():
     data_trial = clean_runs(data_trial, excluded_runs, 'data_trial')
     data_subject = clean_runs(data_subject, excluded_runs, 'data_subject')
 
-    makedir('data', 'all_trials', 'cleaned')
-    print(f"""Writing datasets to """
-          f"""{os.path.join('data', 'all_trials', 'cleaned')}""")
-
-    data_et.to_csv(
-        os.path.join('data', 'all_trials', 'cleaned',
-                     'data_et.csv'),
-        index=False, header=True)
-    data_trial.to_csv(
-        os.path.join('data', 'all_trials', 'cleaned',
-                     'data_trial.csv'),
-        index=False, header=True)
-    data_subject.to_csv(
-        os.path.join('data', 'all_trials', 'cleaned',
-                     'data_subject.csv'),
-        index=False, header=True)
-
-    summarize_datasets(data_et, data_trial, data_subject)
+    save_all_three_datasets(data_et, data_trial, data_subject,
+                            os.path.join('data', 'all_trials', 'cleaned'))
 
 
 # noinspection DuplicatedCode

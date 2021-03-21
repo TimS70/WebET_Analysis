@@ -12,7 +12,7 @@ from data_prep.add_variables.data_quality import add_data_quality
 from data_prep.add_variables.init import global_add_variables_to_datasets
 from data_prep.choice import add_variables_choice_task, add_log_k
 from data_prep.cleaning.choice import create_choice_data, clean_choice_data
-from data_prep.cleaning.fix_task import clean_fix_task_datasets, get_runs_no_variation
+from data_prep.cleaning.fix_task import clean_fix_task_datasets
 from data_prep.cleaning.init import global_cleaning
 from data_prep.fix_task import create_fix_tasks_datasets
 from data_prep.load.init import create_datasets_from_cognition
@@ -43,7 +43,6 @@ def prep_global_datasets():
 def prep_and_analyze_fix_task():
     create_fix_tasks_datasets()
     clean_fix_task_datasets()
-
     add_data_quality()
 
     analyze_fix_task()
@@ -65,8 +64,6 @@ def prep_and_analyze_choice_task():
 
 
 if __name__ == '__main__':
-    # data_trial = pd.read_csv(
-    #     os.path.join('data', 'fix_task', 'raw', 'data_trial_fix.csv'))
-    # get_runs_no_variation(data_trial)
-
+    global_add_variables_to_datasets()
     # main(new_data=False)
+
