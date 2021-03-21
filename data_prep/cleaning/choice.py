@@ -157,14 +157,6 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
         f"""{grouped_us} \n""")
 
     runs_low_fps = filter_runs_low_fps(data_trial, data_et, 5)
-    # Run 144 was found to barely have any variation in
-    # gaze transitions
-    runs_additional_flaws = np.array([144])
-
-    runs_biasedChoices = data_subject.loc[
-        (data_subject['choseLL'] > 0.98) |
-        (data_subject['choseLL'] < 0.02),
-        'run_id']
 
     max_precision = 0.15
     runs_low_precision = data_subject.loc[
@@ -175,6 +167,24 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
     runs_high_offset = data_subject.loc[
         data_subject['offset'] > max_offset, 'run_id']
     print(f"""Maximum offset means >{max_offset}. \n""")
+
+    runs_bad_quality = list(
+        set(runs_low_fps) |
+        set(runs_low_precision) |
+        set(runs_high_offset))
+
+    print(
+        f"""In total, {len(runs_bad_quality)} runs were excluded """
+        f"""because of bad data quality. \n""")
+
+    # Run 144 was found to barely have any variation in
+    # gaze transitions
+    runs_additional_flaws = np.array([144])
+
+    runs_biasedChoices = data_subject.loc[
+        (data_subject['choseLL'] > 0.98) |
+        (data_subject['choseLL'] < 0.02),
+        'run_id']
 
     grouped_trials_biased = data_trial.loc[
         data_trial['run_id'].isin(runs_biasedChoices), :] \
@@ -194,11 +204,13 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
 
     max_noise = 40
     runs_noisy_logK = data_subject.loc[
-        data_subject['noise'] > max_noise, 'run_id']
-    print(f'runs_noisy_logK means noise > {max_noise}. \n')
+        pd.notna(data_subject['logK']) &
+        (data_subject['noise'] > max_noise), 'run_id']
+    print(
+        f"""runs_noisy_logK means noise > {max_noise}. \n""")
 
-    runs_pos_logK = data_subject.loc[
-        data_subject['logK'] > 0, 'run_id']
+    # runs_pos_logK = data_subject.loc[
+    #     data_subject['logK'] > 0, 'run_id']
 
     invalid_runs = list(
         set(runs_low_fps) |
@@ -206,7 +218,7 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
         set(runs_biasedChoices) |
         set(runs_missingLogK) |
         set(runs_noisy_logK) |
-        set(runs_pos_logK) |
+        # set(runs_pos_logK) |
         set(runs_low_precision) |
         set(runs_high_offset))
 
@@ -220,7 +232,7 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
                 'runs_biasedChoices',
                 'runs_missingLogK',
                 'runs_noisy_logK',
-                'runs_pos_logK',
+                # 'runs_pos_logK',
                 'runs_low_precision',
                 'runs_high_offset',
                 'total',
@@ -231,7 +243,7 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
                 len(runs_biasedChoices),
                 len(runs_missingLogK),
                 len(runs_noisy_logK),
-                len(runs_pos_logK),
+                # len(runs_pos_logK),
                 len(runs_low_precision),
                 len(runs_high_offset),
                 len(invalid_runs)
@@ -242,7 +254,7 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
                 len(runs_biasedChoices) / n_runs,
                 len(runs_missingLogK) / n_runs,
                 len(runs_noisy_logK) / n_runs,
-                len(runs_pos_logK) / n_runs,
+                # len(runs_pos_logK) / n_runs,
                 len(runs_low_precision) / n_runs,
                 len(runs_high_offset) / n_runs,
                 len(invalid_runs) / n_runs

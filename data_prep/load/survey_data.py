@@ -53,8 +53,13 @@ def create_survey_data(data, show_notes=False):
     # Participant indicates that they accidentally copy pasted the
     # text from another study
     survey_data.loc[
-        survey_data['prolificID'] == """I'm moving to London.I'm looking for an apartment to rent.""",
-        'prolificID'] = '5ee2916b70aa643be19c0036'
+        survey_data['prolificID'].isin([
+            """I'm moving to London.I'm looking for an apartment to rent.""",
+            '55b237e6fdf99b19ea79d2f']), 'prolificID'] = \
+        [
+            '5ee2916b70aa643be19c0036',
+            '55b237e6fdf99b19ea79d2f7'
+        ]
 
     if show_notes:
         show_optional_notes(survey_data)

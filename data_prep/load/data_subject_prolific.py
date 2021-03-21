@@ -107,8 +107,12 @@ def add_and_filter_prolific(data_subject):
 
     print(
         f"""n={len(id_cognition_but_not_prolific)} prolific IDs """
-        f"""are in cognition.run not in Prolific: \n"""
+        f"""are in cognition.run but not in Prolific: \n"""
         f"""{id_cognition_but_not_prolific} \n""")
+
+    print(
+        f"""ID '5c670a430d80fd00014264f9' was asked via Prolific """
+        f"""but have not responded yet.""")
 
     data_subject = data_subject.merge(
         data_prolific, on='prolificID', how='left')
@@ -122,7 +126,10 @@ def add_and_filter_prolific(data_subject):
     ids_approved = data_subject.loc[
         data_subject['status'] == 'APPROVED', 'prolificID'].unique()
 
-    print(f"""Unique approved IDs: {len(ids_approved)}""")
+    print(
+        f"""Unique approved IDs: {len(ids_approved)} \n"""
+        f"""ID '5c670a430d80fd00014264f9' was asked via Prolific """
+        f"""but have not responded yet.""")
 
     summary_na = data_subject.loc[
         pd.isna(data_subject['status']),

@@ -31,14 +31,17 @@ def check_gaze_saccade(data_et, data_trial):
         data_et_cross_and_task['new_y_pos']
     )
 
-    for subject in tqdm(
-            data_et_cross_and_task['run_id'].unique(),
-            desc='Plotting fix task saccade: '):
-        plot_gaze_saccade(
-            data_et_cross_and_task.loc[
-                data_et_cross_and_task['run_id'] == subject, :],
-            ('offset' + str(subject) + '_gaze_shift.png')
-        )
+    plot_gaze_saccade(
+        data_et_cross_and_task,
+        ('offset_all_gaze_shift.png'))
+
+    # for subject in tqdm(
+    #         data_et_cross_and_task['run_id'].unique(),
+    #         desc='Plotting fix task saccade: '):
+    #     plot_gaze_saccade(
+    #         data_et_cross_and_task.loc[
+    #             data_et_cross_and_task['run_id'] == subject, :],
+    #         ('offset' + str(subject) + '_gaze_shift.png'))
 
 
 def plot_gaze_saccade(data_et_cross_and_task, file_name):

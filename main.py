@@ -61,9 +61,7 @@ def prep_and_analyze_fix_task():
 
 
 if __name__ == '__main__':
-    # Render R markdowns
-    subprocess.call(
-        ['Rscript', '--vanilla', 'analysis/run_r_markdowns.R'],
-        shell=True)
+    clean_choice_data()
 
+    analyze_choice_task()
     # main(new_data=False)

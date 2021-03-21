@@ -34,7 +34,7 @@ def analyze_fix_task():
         os.path.join('data', 'fix_task', 'added_var', 'data_subject.csv'))
 
     print('Datasets read from data/fix_task/added_var (all trials): ')
-    summarize_datasets(data_et, data_trial, data_subject)
+    # summarize_datasets(data_et, data_trial, data_subject)
 
     print('Datasets read from data/fix_task/added_var (fix trials): ')
     summarize_datasets(data_et_fix, data_trial_fix, data_subject)

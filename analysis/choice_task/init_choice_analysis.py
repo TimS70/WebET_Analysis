@@ -108,11 +108,9 @@ def plot_example_eye_movement(data_et, data_trial, data_subject, run):
 
     fig.colorbar(image, ax=axes)
 
-    makedir('results', 'plots', 'choice_task')
-    plt.savefig(
-        os.path.join(
-            'results', 'plots', '',
-            ('example_' + str(run) + '.png')))
+    save_plot(('example_' + str(round(run, 0)) + '.png'),
+              'results', 'plots', 'choice_task', 'et')
+    plt.close()
 
 
 # noinspection PyUnresolvedReferences
@@ -134,24 +132,22 @@ def plot_choice_task_heatmap(data_et):
     img, extent = my_plot(x, y, s=s)
     ax.imshow(img, extent=extent, origin='upper', cmap=cm.Greens, aspect=(9 / 16))
 
-    rect = patches.Rectangle((0.05, 0.05), 0.9, 0.4, linewidth=1, edgecolor='black', facecolor='none')
-    ax.add_patch(rect)
-    rect = patches.Rectangle((0.05, 0.55), 0.9, 0.4, linewidth=1, edgecolor='black', facecolor='none')
-    ax.add_patch(rect)
-
-    x_pos = [0.25, 0.75, 0.25, 0.75]
-    y_pos = [0.25, 0.25, 0.75, 0.75]
-    for i in range(0, len(x_pos)):
-        plt.text(x_pos[i], y_pos[i], '[attribute]', size=12, ha="center")
+    # rect = patches.Rectangle((0.05, 0.05), 0.9, 0.4, linewidth=1, edgecolor='black', facecolor='none')
+    # ax.add_patch(rect)
+    # rect = patches.Rectangle((0.05, 0.55), 0.9, 0.4, linewidth=1, edgecolor='black', facecolor='none')
+    # ax.add_patch(rect)
+    #
+    # x_pos = [0.25, 0.75, 0.25, 0.75]
+    # y_pos = [0.25, 0.25, 0.75, 0.75]
+    # for i in range(0, len(x_pos)):
+    #     plt.text(x_pos[i], y_pos[i], '[attribute]', size=15, ha="center")
 
     ax.set_title("Distribution of fixations after 1 second, $\sigma$ = %d" % s)
 
-    # plt.show()
-
-    makedir('results', 'plots', 'choice_task')
-    plt.savefig(
-        os.path.join(
-            'results', 'plots', '', 'choice_heatmap.png'))
+    save_plot(
+        'choice_heatmap.png',
+        'results', 'plots', 'choice_task')
+    plt.close()
 
 
 def corr_analysis_subject(data_subject):

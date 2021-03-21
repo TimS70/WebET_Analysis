@@ -11,14 +11,18 @@ from utils.tables import write_csv
 
 def hist_plots_quality(data_subject):
     plt.hist(data_subject['offset'], bins=20)
+    plt.title('Offset histogram')
     save_plot('offset_participants.png', 'results', 'plots', 'fix_task')
+
     plt.close()
 
     plt.hist(data_subject['precision'], bins=20)
+    plt.title('Precision histogram')
     save_plot('precision_participants.png', 'results', 'plots', 'fix_task')
     plt.close()
 
     plt.hist(data_subject['fps'], bins=20)
+    plt.title('FPS histogram')
     save_plot('fps_participants_cleaned.png', 'results', 'plots', 'fps')
     plt.close()
 

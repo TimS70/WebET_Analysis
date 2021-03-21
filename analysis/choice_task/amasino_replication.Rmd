@@ -408,7 +408,7 @@ data_et %>%
 ```{r}
 timeBins_choseTB_long = data_et %>%
 	merge(
-		data_trial %>% dplyr::select(run_id, trial_index, choseTop, tb_index),
+		data_trial %>% dplyr::select(run_id, trial_index, choseTop),
 		by=c('run_id', 'trial_index')) %>%
     filter(
     	!is.na(aoi) & aoi!=0) %>%
@@ -521,7 +521,6 @@ data_trial %>%
 
 ```{r}
 lastGaze_long <- data_trial %>%
-	filter(!tb_index %in% c(-1, 1)) %>%
     dplyr::select(run_id, withinTaskIndex, lastGazeTop, choseTop) %>%
     dplyr::group_by(run_id, lastGazeTop, withinTaskIndex) %>%
     dplyr::summarise(
