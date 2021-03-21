@@ -113,8 +113,7 @@ dir.create(file.path(path_results, 'behavior'),  showWarnings = FALSE)
 ggplot(data_subject, aes(x=choseTop))+
   geom_histogram(bins=15)+theme_bw()+xlab("Proportion Top Choices")+
   theme(text=element_text(size=20))+xlim(0,1)
-ggsave(file.path(path_results, 'behavior', 'choice_vs_side.pdf'),
-			 width=5.5, height=5)
+  
 ```
 
 

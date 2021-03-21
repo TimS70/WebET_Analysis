@@ -173,6 +173,7 @@ def test_top_vs_bottom_positions(data_trial_fix, outcome):
     outcome_by_y_long = outcome_by_y_long.loc[
                         outcome_by_y_long['y_pos'] != 0.5, :]
 
+    print(outcome_by_y_long)
     outcome_by_y_wide = pd.pivot_table(
         outcome_by_y_long,
         index='run_id',

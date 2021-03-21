@@ -5,7 +5,7 @@ import pandas as pd
 from data_prep.add_variables.trial import merge_count_by_index
 from utils.data_frames import merge_by_index, merge_by_subject
 from utils.path import makedir
-from utils.tables import summarize_datasets
+from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets
 
 
 def create_fix_tasks_datasets():
@@ -14,14 +14,8 @@ def create_fix_tasks_datasets():
           'Create fix task dataset \n'
           '################################### \n')
 
-    data_et = pd.read_csv(
-        os.path.join('data', 'all_trials', 'cleaned', 'data_et.csv'))
-    data_trial = pd.read_csv(
-        os.path.join('data', 'all_trials', 'cleaned', 'data_trial.csv'))
-    data_subject = pd.read_csv(
-        os.path.join('data', 'all_trials', 'cleaned', 'data_subject.csv'))
-    print('Data read from data/all_trials/cleaned: ')
-    summarize_datasets(data_et, data_trial, data_subject)
+    data_et, data_trial, data_subject = load_all_three_datasets(
+        os.path.join('data', 'all_trials', 'cleaned'))
 
     data_et = merge_by_index(data_et, data_trial,
                                  'task_nr', 'chin', 'chinFirst', 'trial_type',
@@ -31,13 +25,13 @@ def create_fix_tasks_datasets():
     data_trial = merge_by_subject(data_trial, data_subject, 'glasses_binary')
 
     print('for the fixation task, gaze points after 1000ms were selected. \n')
-    data_et_fix = data_et.loc[
+    data_et = data_et.loc[
                   (data_et['trial_type'] == 'eyetracking-fix-object') &
                   (data_et['trial_duration'] == 5000) &
                   (data_et['t_task'] > 1000), :
                   ]
 
-    data_trial_fix = data_trial.loc[
+    data_trial = data_trial.loc[
         (data_trial['trial_type'] == 'eyetracking-fix-object') &
         (data_trial['trial_duration'] == 5000),
         [
@@ -52,24 +46,5 @@ def create_fix_tasks_datasets():
         ]
     ]
 
-    makedir('data', 'fix_task', 'raw')
-    data_et.to_csv(
-        os.path.join('data', 'fix_task', 'raw', 'data_et.csv'),
-        index=False, header=True)
-    data_et_fix.to_csv(
-        os.path.join('data', 'fix_task', 'raw', 'data_et_fix.csv'),
-        index=False, header=True)
-    data_trial.to_csv(
-        os.path.join('data', 'fix_task', 'raw', 'data_trial.csv'),
-        index=False, header=True)
-    data_trial_fix.to_csv(
-        os.path.join('data', 'fix_task', 'raw', 'data_trial_fix.csv'),
-        index=False, header=True)
-    data_subject.to_csv(
-        os.path.join('data', 'fix_task', 'raw', 'data_subject.csv'),
-        index=False, header=True)
-    print('Datasets saved to data/fix_task/raw (fix task trials): ')
-    summarize_datasets(data_et_fix, data_trial_fix, data_subject)
-
-    print('Datasets saved to data/fix_task/raw (all trials): ')
-    summarize_datasets(data_et, data_trial, data_subject)
+    save_all_three_datasets(data_et, data_trial, data_subject,
+                            os.path.join('data', 'fix_task', 'raw'))

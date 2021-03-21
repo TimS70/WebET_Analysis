@@ -8,76 +8,32 @@ from analysis.fix_task.positions import compare_positions
 
 from utils.data_frames import merge_mean_by_index, merge_by_subject
 from utils.path import makedir
-from utils.tables import summarize_datasets
+from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets
 
 
-def add_data_quality_var():
-
+def add_data_quality():
     print('################################### \n'
           'Calculate data quality variables \n'
           '################################### \n')
 
-    data_et = pd.read_csv(
-        os.path.join('data', 'fix_task', 'cleaned', 'data_et.csv'))
-    data_et_fix = pd.read_csv(
-        os.path.join('data', 'fix_task', 'cleaned', 'data_et_fix.csv'))
-    data_trial_fix = pd.read_csv(
-        os.path.join('data', 'fix_task', 'cleaned', 'data_trial_fix.csv'))
-    data_trial = pd.read_csv(
-        os.path.join('data', 'fix_task', 'cleaned', 'data_trial.csv'))
-    data_subject = pd.read_csv(
-        os.path.join('data', 'fix_task', 'cleaned', 'data_subject.csv'))
-    print('Datasets read from data/fix_task/cleaned (all trials): ')
-    summarize_datasets(data_et, data_trial, data_subject)
-
-    print('Datasets read from data/fix_task/cleaned (fix trials): ')
-    summarize_datasets(data_et_fix, data_trial_fix, data_subject)
+    data_et, data_trial, data_subject = load_all_three_datasets(
+        os.path.join('data', 'fix_task', 'cleaned'))
 
     # Offset
-
-    data_et_fix = add_offset(data_et_fix)
-
-    data_trial_fix = merge_mean_by_index(
-        data_trial_fix, data_et_fix, 'offset', 'offset_px')
-
-    data_subject = merge_by_subject(
-        data_subject, data_trial_fix, 'offset', 'offset_px')
+    data_et = add_offset(data_et)
+    data_trial = merge_mean_by_index(data_trial, data_et,
+                                     'offset', 'offset_px')
+    data_subject = merge_by_subject(data_subject, data_trial,
+                                    'offset', 'offset_px')
 
     # Precision
-    data_et_fix = distance_from_xy_mean_square(data_et_fix)
-    data_trial_fix = aggregate_precision_from_et_data(
-        data_trial_fix, data_et_fix)
-    data_subject = merge_by_subject(
-        data_subject, data_trial_fix, 'precision', 'precision_px')
+    data_et = distance_from_xy_mean_square(data_et)
+    data_trial = aggregate_precision_from_et_data(data_trial, data_et)
+    data_subject = merge_by_subject(data_subject, data_trial,
+                                    'precision', 'precision_px')
 
-    print(
-        f"""Saving data to """
-        f"""{os.path.join('data', 'fix_task', 'added_var')}""")
-
-    makedir('data', 'fix_task', 'added_var')
-    data_et.to_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_et.csv'),
-        index=False, header=True)
-    data_et_fix.to_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_et_fix.csv'),
-        index=False, header=True)
-    data_trial_fix.to_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_trial_fix.csv'),
-        index=False, header=True)
-    data_trial.to_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_trial.csv'),
-        index=False, header=True)
-    data_subject.to_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_subject.csv'),
-        index=False, header=True)
-
-    print(
-        'Datasets written to data/fix_task/added_var (all trials): ')
-    summarize_datasets(data_et, data_trial, data_subject)
-
-    print(
-        'Datasets written to data/fix_task/added_var (fix trials): ')
-    summarize_datasets(data_et_fix, data_trial_fix, data_subject)
+    save_all_three_datasets(data_et, data_trial, data_subject,
+                            os.path.join('data', 'fix_task', 'added_var'))
 
 
 def euclidean_distance(x, x_target, y, y_target):

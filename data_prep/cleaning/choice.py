@@ -8,7 +8,7 @@ from data_prep.cleaning.invalid_runs \
     import filter_runs_low_fps, clean_runs
 from utils.data_frames import merge_by_index
 from utils.path import makedir
-from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets_to
+from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets
 
 
 def create_choice_data():
@@ -22,8 +22,8 @@ def create_choice_data():
     data_trial = init_choice_data_trial(data_trial)
     data_et = init_choice_data_et(data_et, data_trial)
 
-    save_all_three_datasets_to(data_et, data_trial, data_subject,
-        os.path.join('data', 'choice_task', 'raw'))
+    save_all_three_datasets(data_et, data_trial, data_subject,
+                            os.path.join('data', 'choice_task', 'raw'))
 
 
 def clean_choice_data():
@@ -51,8 +51,8 @@ def clean_choice_data():
     data_et = remove_long_trials(data_et, 10000, 'data_et')
     data_et = data_et.drop(columns='trial_duration_exact')
 
-    save_all_three_datasets_to(data_et, data_trial, data_subject,
-        os.path.join('data', 'choice_task', 'cleaned'))
+    save_all_three_datasets(data_et, data_trial, data_subject,
+                            os.path.join('data', 'choice_task', 'cleaned'))
 
     check_unequal_trial_numbers(data_et, data_trial)
 
@@ -191,8 +191,9 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
         .groupby(
             ['run_id', 'choseLL'],
             as_index=False).agg(
-            n=('trial_index', 'count')
-        )
+            n=('trial_index', 'count'))
+    grouped_trials_biased = grouped_trials_biased \
+        .loc[grouped_trials_biased['n'] > 1, :]
 
     print(
         f"""grouped_trials_biased \n"""
@@ -213,12 +214,13 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
     #     data_subject['logK'] > 0, 'run_id']
 
     invalid_runs = list(
-        set(runs_low_fps) |
+
         set(runs_additional_flaws) |
         set(runs_biasedChoices) |
         set(runs_missingLogK) |
         set(runs_noisy_logK) |
         # set(runs_pos_logK) |
+        set(runs_low_fps) |
         set(runs_low_precision) |
         set(runs_high_offset))
 
@@ -227,34 +229,34 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
     summary_output = pd.DataFrame(
         {
             'name': [
-                'subjects_lowFPS',
                 'run nr. 144',
                 'runs_biasedChoices',
                 'runs_missingLogK',
                 'runs_noisy_logK',
                 # 'runs_pos_logK',
+                'subjects_lowFPS',
                 'runs_low_precision',
                 'runs_high_offset',
                 'total',
             ],
             'length': [
-                len(runs_low_fps),
                 len(runs_additional_flaws),
                 len(runs_biasedChoices),
                 len(runs_missingLogK),
                 len(runs_noisy_logK),
                 # len(runs_pos_logK),
+                len(runs_low_fps),
                 len(runs_low_precision),
                 len(runs_high_offset),
                 len(invalid_runs)
             ],
             'percent': [
-                len(runs_low_fps) / n_runs,
                 len(runs_additional_flaws) / n_runs,
                 len(runs_biasedChoices) / n_runs,
                 len(runs_missingLogK) / n_runs,
                 len(runs_noisy_logK) / n_runs,
                 # len(runs_pos_logK) / n_runs,
+                len(runs_low_fps) / n_runs,
                 len(runs_low_precision) / n_runs,
                 len(runs_high_offset) / n_runs,
                 len(invalid_runs) / n_runs

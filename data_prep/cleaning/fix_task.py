@@ -1,76 +1,69 @@
 import os
 
+import numpy as np
 import pandas as pd
 
 from data_prep.cleaning.choice import remove_long_trials
 from data_prep.cleaning.invalid_runs import clean_runs
 from utils.path import makedir
-from utils.tables import summarize_datasets
+from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets
 
 
 def clean_fix_task_datasets():
-
     print('################################### \n'
           'Clean fix task datasets \n'
           '################################### \n')
 
-    data_et = pd.read_csv(
-        os.path.join('data', 'fix_task', 'raw', 'data_et.csv'))
-    data_et_fix = pd.read_csv(
-        os.path.join('data', 'fix_task', 'raw', 'data_et_fix.csv'))
-    data_trial = pd.read_csv(
-        os.path.join('data', 'fix_task', 'raw', 'data_trial.csv'))
-    data_trial_fix = pd.read_csv(
-        os.path.join('data', 'fix_task', 'raw', 'data_trial_fix.csv'))
-    data_subject = pd.read_csv(
-        os.path.join('data', 'fix_task', 'raw', 'data_subject.csv'))
-
-    print('Datasets read from data/fix_task/raw (fix task trials): ')
-    summarize_datasets(data_et_fix, data_trial_fix, data_subject)
-
-    print('Datasets read from data/fix_task/raw (all trials): ')
-    summarize_datasets(data_et, data_trial, data_subject)
+    data_et, data_trial, data_subject = load_all_three_datasets(
+        os.path.join('data', 'fix_task', 'raw'))
 
     # Screening
-    invalid_runs = screen_fix_task(data_trial_fix, data_subject)
+    invalid_runs = invalid_runs_fix(data_trial, data_subject)
 
-    data_trial = clean_runs(data_trial, invalid_runs, 'data_trial')
-    data_et = clean_runs(data_et, invalid_runs, 'data_et')
-    data_trial_fix = clean_runs(data_trial_fix, invalid_runs, 'data_trial_fix')
-    data_et_fix = clean_runs(data_et_fix, invalid_runs, 'data_et_fix')
+    data_trial = clean_runs(data_trial, invalid_runs, 'data_trial_fix')
+    data_et = clean_runs(data_et, invalid_runs, 'data_et_fix')
     data_subject = clean_runs(data_subject, invalid_runs, 'data_subject')
 
-    data_trial = remove_long_trials(data_trial, 5500, 'data_trial')
-    data_et = remove_long_trials(data_et, 5500, 'data_et')
-    data_trial_fix = remove_long_trials(data_trial_fix, 5500, 'data_trial_fix')
-    data_et_fix = remove_long_trials(data_et_fix, 5500, 'data_et_fix')
+    data_trial = remove_long_trials(data_trial, 5500, 'data_trial_fix')
+    data_et = remove_long_trials(data_et, 5500, 'data_et_fix')
 
-    data_trial_fix = data_trial_fix.loc[
-                     pd.notna(data_trial_fix['x_count']), :]
+    data_trial = data_trial.loc[pd.notna(data_trial['x_count']), :]
 
-    makedir('data', 'fix_task', 'cleaned')
-    data_et.to_csv(
-        os.path.join('data', 'fix_task', 'cleaned', 'data_et.csv'),
-        index=False, header=True)
-    data_et_fix.to_csv(
-        os.path.join('data', 'fix_task', 'cleaned', 'data_et_fix.csv'),
-        index=False, header=True)
-    data_trial.to_csv(
-        os.path.join('data', 'fix_task', 'cleaned', 'data_trial.csv'),
-        index=False, header=True)
-    data_trial_fix.to_csv(
-        os.path.join('data', 'fix_task', 'cleaned', 'data_trial_fix.csv'),
-        index=False, header=True)
-    data_subject.to_csv(
-        os.path.join('data', 'fix_task', 'cleaned', 'data_subject.csv'),
-        index=False, header=True)
-    print('Datasets saved to data/fix_task/cleaned: ')
-    summarize_datasets(data_et_fix, data_trial_fix, data_subject)
+    save_all_three_datasets(data_et, data_trial, data_subject,
+                            os.path.join('data', 'fix_task', 'cleaned'))
 
 
-def screen_fix_task(data_trial_fix, data_subject):
+def get_runs_no_variation(data_trial_fix):
+
+    data_trial_fix['center_offset'] = euclidean_distance(
+        data_trial_fix['x'], 0.5,
+        data_trial_fix['y'], 0.5)
+
+    grouped = data_trial_fix.groupby(['run_id'], as_index=False).agg(
+        m_offset=('center_offset', 'mean'),
+        std_offset=('center_offset', 'std'))
+
+    print(grouped.head(15))
+
+    print(grouped.loc[
+        grouped['std_offset'] < 0.15,
+        ['run_id', 'm_offset', 'std_offset']
+    ])
+
+
+def euclidean_distance(x, x_target, y, y_target):
+    x_diff = x - x_target
+    y_diff = y - y_target
+    output = np.sqrt(x_diff ** 2 + y_diff ** 2)
+
+    return output
+
+
+def invalid_runs_fix(data_trial_fix, data_subject):
     show_empty_fix_trials(data_trial_fix)
     show_trials_high_t_task(data_trial_fix, max_t_task=5500)
+
+    # get_runs_no_variation(data_trial_fix)
 
     runs_incomplete_fix_task = runs_with_incomplete_fix_tasks(
         data_trial_fix)

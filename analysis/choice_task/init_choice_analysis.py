@@ -118,20 +118,14 @@ def plot_choice_task_heatmap(data_et):
     x = data_et.loc[data_et['t_task'] > 1000, 'x']
     y = data_et.loc[data_et['t_task'] > 1000, 'y']
 
-    # noinspection PyUnresolvedReferences,PyShadowingNames
-    def my_plot(x, y, s, bins=[1200, 675]):
-        heatmap, x_edges, y_edges = np.histogram2d(x, y, bins=bins)
-        heatmap = gaussian_filter(heatmap, sigma=s)
-        extent = [x_edges[0], x_edges[-1], y_edges[-1], y_edges[0]]
-        return heatmap.T, extent
-
     # Create figure and axes
     fig, ax = plt.subplots(figsize=(7, 7))
 
     s = 34
-    img, extent = my_plot(x, y, s=s)
+    img, extent = my_heatmap(x, y, s=s)
     ax.imshow(img, extent=extent, origin='upper', cmap=cm.Greens, aspect=(9 / 16))
-
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
     # rect = patches.Rectangle((0.05, 0.05), 0.9, 0.4, linewidth=1, edgecolor='black', facecolor='none')
     # ax.add_patch(rect)
     # rect = patches.Rectangle((0.05, 0.55), 0.9, 0.4, linewidth=1, edgecolor='black', facecolor='none')
@@ -146,8 +140,16 @@ def plot_choice_task_heatmap(data_et):
 
     save_plot(
         'choice_heatmap.png',
-        'results', 'plots', 'choice_task')
+        'results', 'plots', 'choice_task', 'et')
     plt.close()
+
+
+# noinspection PyUnresolvedReferences,PyShadowingNames
+def my_heatmap(x, y, s, bins=[1200, 675]):
+    heatmap, x_edges, y_edges = np.histogram2d(x, y, bins=bins)
+    heatmap = gaussian_filter(heatmap, sigma=s)
+    extent = [x_edges[0], x_edges[-1], y_edges[-1], y_edges[0]]
+    return heatmap.T, extent
 
 
 def corr_analysis_subject(data_subject):

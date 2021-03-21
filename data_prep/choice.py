@@ -11,7 +11,7 @@ from data_prep.add_variables.aoi import add_fixation_counter, count_fixations_on
 from data_prep.add_variables.et_indices import add_et_indices
 from utils.data_frames import merge_by_index, merge_by_subject
 from utils.path import makedir
-from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets_to, write_csv
+from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets, write_csv
 
 
 def add_variables_choice_task():
@@ -60,7 +60,7 @@ def add_variables_choice_task():
     data_trial = count_fixations_on_trial_level(data_trial, data_et)
     data_trial = test_transition_clusters(data_trial)
 
-    save_all_three_datasets_to(
+    save_all_three_datasets(
         data_et, data_trial, data_subject,
         os.path.join('data', 'choice_task', 'added_var'))
 

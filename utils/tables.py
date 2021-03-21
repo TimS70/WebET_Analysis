@@ -37,7 +37,7 @@ def load_all_three_datasets(path):
     return data_et, data_trial, data_subject
 
 
-def save_all_three_datasets_to(data_et, data_trial, data_subject, path):
+def save_all_three_datasets(data_et, data_trial, data_subject, path):
 
     print('Data saved to ' + path + ':')
 

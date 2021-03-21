@@ -10,7 +10,14 @@ from utils.data_frames import merge_by_index
 from utils.path import makedir
 
 
-def check_gaze_saccade(data_et, data_trial):
+def check_gaze_saccade():
+
+    data_et = pd.read_csv(
+        os.path.join('data', 'fix_task', 'added_var', 'data_et.csv'))
+
+    data_trial = pd.read_csv(
+        os.path.join('data', 'fix_task', 'added_var', 'data_trial.csv'))
+
     data_et = merge_by_index(
         data_et, data_trial,
         'task_nr_new', 'chinFirst',

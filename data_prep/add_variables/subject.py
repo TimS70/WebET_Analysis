@@ -13,6 +13,7 @@ def add_fps_subject_level(data_subject, data_trial):
     data_subject = merge_by_subject(data_subject, data_trial, 'fps')
 
     plt.hist(data_subject['fps'], bins=20)
+    plt.rc('font', size=10)
     save_plot('fps_participants.png', 'results', 'plots', 'fps')
     plt.close()
 

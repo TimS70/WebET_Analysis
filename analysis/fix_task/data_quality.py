@@ -4,26 +4,30 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from utils.data_frames import merge_by_index
 from utils.path import makedir
 from utils.plots import save_plot
 from utils.tables import write_csv
 
 
 def hist_plots_quality(data_subject):
-    plt.hist(data_subject['offset'], bins=20)
-    plt.title('Offset histogram')
-    save_plot('offset_participants.png', 'results', 'plots', 'fix_task')
 
-    plt.close()
+    font_size = 15
+    plt.rcParams.update({'font.size': font_size})
 
     plt.hist(data_subject['precision'], bins=20)
     plt.title('Precision histogram')
     save_plot('precision_participants.png', 'results', 'plots', 'fix_task')
     plt.close()
 
+    plt.hist(data_subject['offset'], bins=20)
+    plt.title('Offset histogram')
+    save_plot('offset_participants.png', 'results', 'plots', 'fix_task')
+    plt.close()
+
     plt.hist(data_subject['fps'], bins=20)
     plt.title('FPS histogram')
-    save_plot('fps_participants_cleaned.png', 'results', 'plots', 'fps')
+    save_plot('fps_participants_cleaned.png', 'results', 'plots', 'fix_task')
     plt.close()
 
 
@@ -121,46 +125,57 @@ def group_within_task_index(data, group_var, var_name):
     return output
 
 
-def grand_mean_offset(data_et_fix, data_trial_fix):
+def grand_mean_offset(data_et_fix, data_trial):
     grouped = data_et_fix.groupby(
         ['run_id', 'trial_index'],
         as_index=False)[['x', 'y']].mean() \
         .rename(columns={'x': 'x_mean', 'y': 'y_mean'})
 
-    if 'x_mean' in data_trial_fix.columns:
-        data_trial_fix = data_trial_fix.drop(columns=['x_mean'])
-    if 'y_mean' in data_trial_fix.columns:
-        data_trial_fix = data_trial_fix.drop(columns=['y_mean'])
-    data_trial_fix = data_trial_fix.merge(
-        grouped,
-        on=['run_id', 'trial_index'],
-        how='left'
-    )
-    data_trial_fix['x_mean_px'] = \
-        data_trial_fix['x_mean'] * data_trial_fix['window_width']
-    data_trial_fix['y_mean_px'] = \
-        data_trial_fix['y_mean'] * data_trial_fix['window_height']
-    data_trial_fix.loc[:, [
-        'x_mean', 'x_mean_px',
-        'y_mean', 'y_mean_px']].describe()
+    data_trial = merge_by_index(data_trial, grouped, 'x_mean')
+    data_trial = merge_by_index(data_trial, grouped, 'y_mean')
 
-    data_trial_fix['grand_deviation'] = euclidean_distance(
-        data_trial_fix['x_mean'], data_trial_fix['x_pos'],
-        data_trial_fix['y_mean'], data_trial_fix['y_pos']
-    )
+    data_trial['x_mean_px'] = \
+        data_trial['x_mean'] * data_trial['window_width']
+    data_trial['y_mean_px'] = \
+        data_trial['y_mean'] * data_trial['window_height']
 
-    summary = data_trial_fix['grand_deviation'].describe()
+    data_trial['grand_deviation'] = euclidean_distance(
+        data_trial['x_mean'], data_trial['x_pos'],
+        data_trial['y_mean'], data_trial['y_pos'])
+
+    summary = data_trial['grand_deviation'].describe()
 
     write_csv(
         summary,
-        'offset_grand_deviation.csv',
+        'grand_mean.csv',
         'results', 'tables', 'fix_task')
 
     print(
         f"""Grand mean deviation: \n"""
         f"""{summary} \n""")
 
-    return data_trial_fix
+    grand_mean_positions = data_trial \
+        .loc[data_trial['fixTask'] == 1, :] \
+        .groupby(
+            ['positionIndex'],
+            as_index=False).agg(
+            grand_dev=('grand_deviation', 'mean'),
+            grand_dev_std=('grand_deviation', 'std'))
+
+    write_csv(
+        grand_mean_positions,
+        'grand_mean_positions.csv',
+        'results', 'tables', 'fix_task')
+
+    font_size = 15
+    plt.rcParams.update({'font.size': font_size})
+
+    plt.hist(data_trial['grand_deviation'], bins=20)
+    plt.title('Grand mean deviation')
+    save_plot('grand_mean.png', 'results', 'plots', 'fix_task')
+    plt.close()
+
+    return data_trial
 
 
 def euclidean_distance(x, x_target, y, y_target):

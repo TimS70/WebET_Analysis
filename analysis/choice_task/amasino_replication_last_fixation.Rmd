@@ -184,6 +184,8 @@ ggplot(lastGaze_long, aes(x=lastGazeTop, y=choseTop)) +
     ylab("Proportion top choices") +
     xlab("last Fixation on Top AOIs") + 
     theme(text=element_text(size=20))
+ggsave(file.path(path_results, 'et', 'last_fix_top_vs_choice.pdf'),
+			 width=5.5, height=5)
 ```
 
 
@@ -237,9 +239,7 @@ grouped_lastCoordinate = data_et %>%
                             choseLL),
           by=c('run_id', 'trial_index'))
 
-grouped_lastCoordinate %>%
-    filter(lastGazeLL==0) %>% 
-	head(5)
+grouped_lastCoordinate %>% head(25)
 
 lastGaze_long <- data_trial %>% 
     dplyr::select(run_id, withinTaskIndex, lastGazeLL, choseLL) %>%
@@ -253,7 +253,7 @@ lastGaze_long <- data_trial %>%
         choseLL = mean(choseLL),
         .groups = 'keep') 
 
-lastGaze_long %>% head(5)
+lastGaze_long %>% head(25)
 
 subjects_noGaze = lastGaze_long %>% 
     group_by(run_id) %>%
@@ -280,6 +280,8 @@ ggplot(lastGaze_long,
     ylab("Proportion LL choices") +
     xlab("last Fixation on LL AOIs") + 
     theme(text=element_text(size=20))
+ggsave(file.path(path_results, 'et', 'last_fix_ll_vs_choice.pdf'),
+			 width=5.5, height=5)
 ```
 
 
@@ -401,33 +403,6 @@ data_time_bins =  data_et %>%
 		timeBin = factor(timeBin))
 
 plot_et_time_bins(data_time_bins)
-```
-
-
-
-# Technical issues
-## Use Diannas plot
-Maybe your plot is wrong, check out Diannas code
-```{r}
-data_time_bins =  data_et %>%
-	merge_by_index(data_trial, 'choseTop') %>%
-    filter(!is.na(aoi) & aoi!=0) %>%
-    mutate(
-        lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
-        lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
-    dplyr::group_by(run_id, choseTop, timeBin) %>%
-    dplyr::summarise(
-        n = n(),
-        n_lookTop = sum(lookTop),
-        n_lookBottom = sum(lookBottom),    
-        p_lookTop = sum(lookTop)/n,
-        p_lookBottom = sum(lookBottom)/n,
-        .groups = 'keep') %>%
-	mutate(
-		choseTop = factor(choseTop, c('1', '0')), 
-		timeBin = factor(timeBin))
-
-data_time_bins
 
 ggplot(data_time_bins, 
 	   aes(x=factor(timeBin), y=p_lookTop, fill=factor(choseTop, c('1', '0')))) + 
@@ -436,7 +411,7 @@ ggplot(data_time_bins,
 		fun=mean, geom="point", 
 		shape=45, size=10, position=position_dodge(.9), 
 		aes(color=factor(choseTop, c('1', '0')))) +
-	scale_colour_manual(
+	scale_colour_manual( 
 		values=c("1"="black", "0"="white"), name="", 
 		labels=c("Chose top", "Chose bottom")) +
 	scale_fill_grey(
@@ -444,8 +419,13 @@ ggplot(data_time_bins,
 	  	labels=c("Chose top", "Chose bottom")) +
 	xlab("Time bins") + ylab("Proportion looking top") +
 	theme_bw() + theme(text=element_text(size=20), legend.position="bottom")
+ggsave(file.path(path_results, 'et', 'bins_top_vs_bottom.pdf'), 
+			 width=5.5, height=5)
 ```
 
+
+
+# Technical issues
 
 ## Median instead of mean
 ```{r}
@@ -987,6 +967,8 @@ ggplot(data_time_bins,
 	  	labels=c("Chose top", "Chose bottom")) +
 	xlab("Time bins") + ylab("Proportion looking top") +
 	theme_bw() + theme(text=element_text(size=20), legend.position="bottom")
+ggsave(file.path(path_results, 'et', 'bins_top_vs_bottom_fps_tb_index.pdf'),
+			 width=5.5, height=5)
 ```
 
 

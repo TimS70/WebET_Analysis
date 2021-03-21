@@ -1,4 +1,7 @@
+import os
+
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from data_prep.add_variables.data_quality import add_offset, distance_from_xy_mean_square, \
     aggregate_precision_from_et_data
@@ -10,7 +13,7 @@ from utils.plots import spaghetti_plot, save_plot
 # Does data quality improve during calibration?
 
 
-def analyze_calibration(data_et, data_trial):
+def analyze_calibration():
 
     print(
         """
@@ -19,6 +22,13 @@ def analyze_calibration(data_et, data_trial):
             ###############################
         """
     )
+
+    data_et = pd.read_csv(
+        os.path.join('data', 'fix_task', 'added_var', 'data_et.csv'))
+
+    data_trial = pd.read_csv(
+        os.path.join('data', 'fix_task', 'added_var', 'data_trial.csv'))
+
     data_et = add_offset(data_et)
     data_trial = merge_mean_by_index(
         data_trial, data_et, 'offset', 'offset_px')

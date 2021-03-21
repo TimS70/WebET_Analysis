@@ -13,7 +13,7 @@ from analysis.fix_task.randomization import check_randomization
 from analysis.fix_task.visualize_gaze import visualize_exemplary_run, fix_heatmap
 from utils.data_frames import merge_by_index
 from utils.plots import get_box_plots, save_plot
-from utils.tables import summarize_datasets
+from utils.tables import summarize_datasets, load_all_three_datasets
 
 
 def analyze_fix_task():
@@ -22,51 +22,39 @@ def analyze_fix_task():
           'Analyze fix task data \n'
           '################################### \n')
 
-    data_et = pd.read_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_et.csv'))
-    data_et_fix = pd.read_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_et_fix.csv'))
-    data_trial_fix = pd.read_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_trial_fix.csv'))
-    data_trial = pd.read_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_trial.csv'))
-    data_subject = pd.read_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_subject.csv'))
+    data_et, data_trial, data_subject = load_all_three_datasets(
+        os.path.join('data', 'fix_task', 'added_var'))
 
-    print('Datasets read from data/fix_task/added_var (all trials): ')
-    # summarize_datasets(data_et, data_trial, data_subject)
-
-    print('Datasets read from data/fix_task/added_var (fix trials): ')
-    summarize_datasets(data_et_fix, data_trial_fix, data_subject)
-
-    describe_data_quality = data_subject.loc[:,
-                            ['fps', 'offset', 'offset_px', 'precision',
-                             'precision_px']].describe()
+    describe_data_quality = data_subject.loc[:, [
+                                                    'fps', 'offset',
+                                                    'offset_px', 'precision',
+                                                    'precision_px'
+                                                ]].describe()
     print(f"""FPS: \n{describe_data_quality}""")
 
     hist_plots_quality(data_subject)
 
     # Design checks
-    check_randomization(data_trial_fix)
-    check_gaze_saccade(data_et, data_trial)
+    check_randomization(data_trial)
+    # check_gaze_saccade()
 
     # Descriptives (not necessary)
-    # compare_conditions_subject(data_subject, data_trial_fix, 'offset')
-    # compare_conditions_subject(data_subject, data_trial_fix, 'precision')
+    # compare_conditions_subject(data_subject, data_trial, 'offset')
+    # compare_conditions_subject(data_subject, data_trial, 'precision')
 
-    main_effect(data_trial_fix, data_subject)
+    main_effect(data_trial, data_subject)
 
-    outcome_over_trials_vs_chin(data_trial_fix, 'offset')
-    compare_positions(data_trial_fix, 'offset')
+    outcome_over_trials_vs_chin(data_trial, 'offset')
+    compare_positions(data_trial, 'offset')
 
-    outcome_over_trials_vs_chin(data_trial_fix, 'precision')
-    compare_positions(data_trial_fix, 'precision')
+    outcome_over_trials_vs_chin(data_trial, 'precision')
+    compare_positions(data_trial, 'precision')
 
-    outcome_over_trials(data_trial_fix, 'offset')
-    compare_positions(data_trial_fix, 'offset')
+    outcome_over_trials(data_trial, 'offset')
+    compare_positions(data_trial, 'offset')
 
-    outcome_over_trials(data_trial_fix, 'precision')
-    compare_positions(data_trial_fix, 'precision')
+    outcome_over_trials(data_trial, 'precision')
+    compare_positions(data_trial, 'precision')
 
     # Categorical confounders analysis
     for outcome in ['offset', 'precision', 'fps']:
@@ -77,16 +65,16 @@ def analyze_fix_task():
                       'results', 'plots', 'fix_task')
 
     # Correlations
-    corr_analysis(data_trial_fix, data_subject)
+    corr_analysis(data_trial, data_subject)
 
     # Additional
-    analyze_calibration(data_et, data_trial)
-    data_trial_fix = grand_mean_offset(data_et_fix, data_trial_fix)
+    # analyze_calibration(data_et, data_trial)
+    data_trial = grand_mean_offset(data_et, data_trial)
 
     # Visualize_exemplary_run
-    data_plot = merge_by_index(data_et_fix, data_trial_fix, 'chin')
+    data_plot = merge_by_index(data_et, data_trial, 'chin')
     visualize_exemplary_run(data_plot.loc[
         (data_plot['run_id'] == 43) & (data_plot['chin'] == 0), :])
 
     # Heatmap for all gaze points
-    fix_heatmap(data_et_fix)
+    fix_heatmap(data_et)
