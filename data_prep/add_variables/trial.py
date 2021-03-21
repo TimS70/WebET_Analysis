@@ -3,20 +3,14 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from utils.path import makedir
 from utils.plots import spaghetti_plot, save_plot
 
 
 def invert_y_pos(data_trial):
+
     data_trial['y_pos'] = data_trial['y_pos'].astype(float)
     data_trial['y_pos'] = 1 - data_trial['y_pos']
-    print(data_trial.dtypes)
-    print(data_trial['y_pos'].unique())
-    print(data_trial.loc[
-              data_trial['y_pos'] < 0.3, 'y_pos'].unique())
 
-    print(data_trial.loc[
-              data_trial['y_pos'] == 0.2, 'y_pos'].unique())
     return data_trial
 
 
@@ -406,31 +400,33 @@ def within_task_index(data):
 
 
 def add_position_index(data):
+
     data['x_pos'] = data['x_pos'].astype(float)
     data['y_pos'] = data['y_pos'].astype(float)
 
     data['positionIndex'] = 0
 
-    x_pos = [
-        0.2, 0.5, 0.8,
-        0.2, 0.5, 0.8,
-        0.2, 0.5, 0.8,
-        0.35, 0.65,
-        0.35, 0.65
-    ]
-    y_pos = [
-        0.2, 0.2, 0.2,
-        0.5, 0.5, 0.5,
-        0.8, 0.8, 0.8,
+    xy_positions = [
+        (0.2, 0.2),
+        (0.5, 0.2),
+        (0.8, 0.2),
+        (0.2, 0.5),
+        (0.5, 0.5),
+        (0.8, 0.5),
+        (0.2, 0.8),
+        (0.5, 0.8),
+        (0.8, 0.8),
+        (0.35, 0.65),
+        (0.65, 0.65),
+        (0.35, 0.35),
+        (0.65, 0.35)]
 
-        0.65, 0.65,
-        0.35, 0.35,
-    ]
-
-    for i in range(0, len(x_pos)):
+    # Get list into an iterable number
+    # (x, y) are the parameters ('rows') of the tuple
+    for i, (x, y) in enumerate(xy_positions):
         data.loc[
-            (data['x_pos'] == x_pos[i]) &
-            (data['y_pos'] == y_pos[i]),
+            (data['x_pos'] == x) &
+            (data['y_pos'] == y),
             'positionIndex'] = i
 
     grouped_position_indices = data.loc[

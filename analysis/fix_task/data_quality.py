@@ -157,7 +157,7 @@ def grand_mean_offset(data_et_fix, data_trial):
     grand_mean_positions = data_trial \
         .loc[data_trial['fixTask'] == 1, :] \
         .groupby(
-            ['positionIndex'],
+            ['x_pos', 'y_pos'],
             as_index=False).agg(
             grand_dev=('grand_deviation', 'mean'),
             grand_dev_std=('grand_deviation', 'std'))

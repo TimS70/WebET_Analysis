@@ -32,11 +32,13 @@ def global_add_variables_to_datasets():
           f"""n={n_approved_unique} unique participants """
           f"""({n_approved} approved IDs, incl. duplicates). \n""")
 
-    data_et = invert_y_axis(data_et)
+    # data_et = invert_y_axis(data_et)
+    # data_trial = invert_y_pos(data_trial)
 
     data_trial = merge_count_by_index(data_trial, data_et, 'x')
-    data_trial = invert_y_pos(data_trial)
-    data_trial = add_position_index(data_trial)
+
+    # Bug
+    # data_trial = add_position_index(data_trial)
     data_trial = add_window_size(data_trial)
     data_trial = add_exact_trial_duration(data_trial)
     data_trial = add_new_task_nr(data_trial)

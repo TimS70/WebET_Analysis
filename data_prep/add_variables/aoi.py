@@ -123,7 +123,7 @@ def plot_aoi_scatter(data_et):
     data_plot = data_et.loc[data_et['aoi'] != 0, ['x', 'y']]
     x = data_plot['x']
     y = data_plot['y']
-    plt.scatter(x, y)
+    plt.scatter(x, y, s=0.1)
     plt.ylim(0, 1)
     plt.xlim(0, 1)
     save_plot('aoi_scatter.png', 'results', 'plots', 'choice_task')

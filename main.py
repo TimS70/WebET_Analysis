@@ -8,6 +8,7 @@ from analysis.choice_task.init_choice_analysis import analyze_choice_task
 from analysis.demographics import analyze_demographics
 from analysis.dropouts import dropout_analysis
 from analysis.fix_task.init_fix_task_analysis import analyze_fix_task
+from data_prep.add_variables.aoi import add_aoi_et
 from data_prep.add_variables.data_quality import add_data_quality
 from data_prep.add_variables.init import global_add_variables_to_datasets
 from data_prep.choice import add_variables_choice_task, add_log_k
@@ -16,6 +17,7 @@ from data_prep.cleaning.fix_task import clean_fix_task_datasets
 from data_prep.cleaning.init import global_cleaning
 from data_prep.fix_task import create_fix_tasks_datasets
 from data_prep.load.init import create_datasets_from_cognition
+from utils.tables import load_all_three_datasets
 
 
 def main(new_data=False):
@@ -64,6 +66,5 @@ def prep_and_analyze_choice_task():
 
 
 if __name__ == '__main__':
-    global_add_variables_to_datasets()
-    # main(new_data=False)
+    main(new_data=False)
 
