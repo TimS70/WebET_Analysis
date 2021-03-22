@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from data_prep.cleaning.invalid_runs import clean_runs
-from utils.plots import save_plot
+from visualize.all_tasks import save_plot
 from utils.tables import write_csv
 
 

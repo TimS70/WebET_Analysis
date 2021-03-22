@@ -10,7 +10,7 @@ from scipy import stats
 
 from analysis.fix_task.main_effects import t_test_ind_outcomes_vs_factor
 from utils.path import makedir
-from utils.plots import save_plot
+from visualize.all_tasks import save_plot
 from utils.tables import write_csv
 
 

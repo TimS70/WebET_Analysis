@@ -1,7 +1,7 @@
 import numpy as np
 
 from data_prep.cleaning.corr_data import clean_corr_data
-from utils.plots import corr_matrix, corr_plot_split
+from visualize.all_tasks import corr_matrix, corr_plot_split
 
 
 def corr_analysis(data_trial_fix, data_subject):

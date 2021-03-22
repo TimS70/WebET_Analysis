@@ -6,7 +6,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from utils.data_frames import merge_by_subject
-from utils.plots import save_plot
+from visualize.all_tasks import save_plot
 
 
 def add_fps_subject_level(data_subject, data_trial):

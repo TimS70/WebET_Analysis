@@ -4,7 +4,7 @@ import statsmodels.stats.multitest as smt
 from scipy import stats
 
 from analysis.fix_task.sight import plot_sight_vs_outcomes, anova_outcomes_sight
-from utils.plots import split_violin_plot, violin_plot
+from visualize.all_tasks import split_violin_plot, violin_plot
 from utils.tables import write_csv
 
 

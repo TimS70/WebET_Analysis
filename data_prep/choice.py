@@ -14,7 +14,7 @@ from utils.path import makedir
 from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets, write_csv
 
 
-def add_variables_choice_task():
+def add_variables_choice():
 
     print('################################### \n'
           'Add variables for choice data \n'

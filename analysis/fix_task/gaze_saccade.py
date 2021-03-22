@@ -22,11 +22,9 @@ def check_gaze_saccade():
         data_et, data_trial,
         'task_nr_new', 'chinFirst',
         'trial_duration', 'trial_duration_exact',
-        'fixTask', 'positionIndex')
+        'fixTask')
 
     data_et_cross_and_task = select_fix_cross_and_fix_task(data_et)
-
-    data_et_cross_and_task = add_new_position(data_et_cross_and_task)
 
     data_et_cross_and_task = shift_t_task_for_fix_cross(
         data_et_cross_and_task)
@@ -139,51 +137,6 @@ def shift_t_task_for_fix_cross(data):
     print('Shifted t_task for fixation cross. \n')
 
     return data
-
-
-def add_new_position(data_et):
-    data_new_pos = create_new_pos_datasets(data_et)
-    data_et = data_et.merge(
-        data_new_pos,
-        on=['run_id', 'trial_index'],
-        how='left')
-
-    print('Added new position variables. \n')
-
-    return data_et
-
-
-def create_new_pos_datasets(data_et_fix):
-    data_trial = data_et_fix.loc[:, ['run_id', 'trial_index', 'trial_duration',
-                                     'x_pos', 'y_pos', 'positionIndex']] \
-        .reset_index() \
-        .drop_duplicates()
-
-    data_trial['new_x_pos'] = data_trial['x_pos']
-    data_trial['new_y_pos'] = data_trial['y_pos']
-    data_trial['new_position_index'] = data_trial['positionIndex']
-
-    for subject in tqdm(data_trial['run_id'].unique(),
-                        desc='Create new positions'):
-
-        df_subject = data_trial.loc[data_trial['run_id'] == subject]
-
-        for i in df_subject.index[:-1]:
-
-            cross_trial = (data_trial.loc[i, 'trial_duration'] == 1500) & \
-                          (data_trial.loc[i + 1, 'trial_duration'] == 5000)
-
-            if cross_trial:
-                data_trial.loc[i, 'new_x_pos'] = data_trial.loc[i + 1, 'x_pos']
-                data_trial.loc[i, 'new_y_pos'] = data_trial.loc[i + 1, 'y_pos']
-                data_trial.loc[i, 'new_position_index'] = \
-                    data_trial.loc[i + 1, 'positionIndex']
-
-    data_trial = data_trial.loc[:, [
-                                       'run_id', 'trial_index',
-                                       'new_x_pos', 'new_y_pos', 'new_position_index']]
-
-    return data_trial
 
 
 def euclidean_distance(x, x_target, y, y_target):

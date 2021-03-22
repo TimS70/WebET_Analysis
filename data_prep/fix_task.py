@@ -42,7 +42,7 @@ def create_fix_tasks_datasets():
             'window_height_max', 'window_diagonal_max', 'window_diagonal',
             't_startTrial', 'trial_duration_exact', 'task_nr_new',
             'trial_type_new', 'trial_type_nr', 'fixTask', 'withinTaskIndex',
-            'x_count', 'fps', 'positionIndex', 'glasses_binary'
+            'x_count', 'fps', 'glasses_binary'
         ]
     ]
 

@@ -1019,22 +1019,27 @@ cat(paste(
 		'(', only_bottom_n, ' trials)',
 		'for choosing the top option.'))
 
-data_trial %>%
+grouped = data_trial %>%
 	filter(tb_index %in% c(-1, 1)) %>%
 	group_by(tb_index, run_id) %>%
 	dplyr::summarise(
-		n = n(), 
+		n_trials = n(), 
 		choseTop = mean(key_press==38),
 		choseLL = mean(choseLL),
 		.groups = 'keep') %>% 
 	group_by(tb_index) %>%
 	dplyr::summarise(
-		n = n(),
+		n_participants = n(),
+		n_trials = sum(n_trials),
 		top = mean(choseTop), 
 		top_std = sd(choseTop),
 		LL = mean(choseLL), 
 		LL_std = sd(choseLL),
 		.groups='keep')
+
+grouped
+
+write.csv(grouped, file.path('results', 'tables', 'choice_task', 'biased_gaze.csv'))
 ```
 
 

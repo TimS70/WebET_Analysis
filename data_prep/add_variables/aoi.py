@@ -5,17 +5,17 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from utils.data_frames import merge_by_index, merge_by_subject
+from utils.data_frames import merge_by_index
 from utils.path import makedir
-from utils.plots import save_plot
 from utils.tables import write_csv
+from visualize.choice import plot_aoi_scatter
 
 
 def add_aoi_et(data_et):
 
     print(f"""AOI will be calculated. No cluster correction.""")
-    # data_et = add_aoi(data_et, 0.3, 0.3)
-    data_et = aoi_corners(data_et)
+    data_et = add_aoi(data_et, 0.3, 0.3)
+    # data_et = aoi_corners(data_et)
 
     freq_table = pd.crosstab(
         index=data_et['aoi'],
@@ -117,17 +117,6 @@ def match_remaining_et_runs(data, data_et, data_name):
     data = data.loc[data['run_id'].isin(data_et['run_id'].unique()), :]
 
     return data
-
-
-def plot_aoi_scatter(data_et):
-    data_plot = data_et.loc[data_et['aoi'] != 0, ['x', 'y']]
-    x = data_plot['x']
-    y = data_plot['y']
-    plt.scatter(x, y, s=0.1)
-    plt.ylim(0, 1)
-    plt.xlim(0, 1)
-    save_plot('aoi_scatter.png', 'results', 'plots', 'choice_task')
-    plt.close()
 
 
 def create_aoi_columns(data):

@@ -1,16 +1,12 @@
 import os
 
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 
 
 from data_prep.cleaning.choice import remove_long_trials
 from data_prep.cleaning.invalid_runs import clean_runs
-from utils.data_frames import merge_by_index
-from utils.path import makedir
-from utils.plots import save_plot
-from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets
+from utils.tables import load_all_three_datasets, save_all_three_datasets
 
 
 def clean_fix_task_datasets():

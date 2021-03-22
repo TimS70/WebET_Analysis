@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from utils.plots import spaghetti_plot, save_plot
+from visualize.all_tasks import spaghetti_plot, save_plot
 
 
 def invert_y_pos(data_trial):

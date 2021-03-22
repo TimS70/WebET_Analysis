@@ -1,34 +1,10 @@
-import os
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 from utils.data_frames import merge_by_index
-from utils.path import makedir
-from utils.plots import save_plot
+from visualize.all_tasks import save_plot
 from utils.tables import write_csv
-
-
-def hist_plots_quality(data_subject):
-
-    font_size = 15
-    plt.rcParams.update({'font.size': font_size})
-
-    plt.hist(data_subject['precision'], bins=20)
-    plt.title('Precision histogram')
-    save_plot('precision_participants.png', 'results', 'plots', 'fix_task')
-    plt.close()
-
-    plt.hist(data_subject['offset'], bins=20)
-    plt.title('Offset histogram')
-    save_plot('offset_participants.png', 'results', 'plots', 'fix_task')
-    plt.close()
-
-    plt.hist(data_subject['fps'], bins=20)
-    plt.title('FPS histogram')
-    save_plot('fps_participants_cleaned.png', 'results', 'plots', 'fix_task')
-    plt.close()
 
 
 def outcome_over_trials(data_trial, outcome):

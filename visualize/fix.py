@@ -1,12 +1,32 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-from scipy.ndimage.filters import gaussian_filter
-
-from utils.plots import save_plot
 
 
-# noinspection PyUnresolvedReferences
+from visualize.all_tasks import save_plot, my_heatmap
+
+
+def hist_plots_quality(data_subject):
+
+    font_size = 15
+    plt.rcParams.update({'font.size': font_size})
+
+    plt.hist(data_subject['precision'], bins=20)
+    plt.title('Precision histogram')
+    save_plot('precision_participants.png', 'results', 'plots', 'fix_task')
+    plt.close()
+
+    plt.hist(data_subject['offset'], bins=20)
+    plt.title('Offset histogram')
+    save_plot('offset_participants.png', 'results', 'plots', 'fix_task')
+    plt.close()
+
+    plt.hist(data_subject['fps'], bins=20)
+    plt.title('FPS histogram')
+    save_plot('fps_participants_cleaned.png', 'results', 'plots', 'fix_task')
+    plt.close()
+    
+
 def fix_heatmap(data_et_fix):
     x = data_et_fix.loc[
         (data_et_fix['x'] > 0) & (data_et_fix['x'] < 1) &
@@ -19,7 +39,7 @@ def fix_heatmap(data_et_fix):
         'y']
 
     s = 34
-    img, extent = my_plot(x, y, s=s)
+    img, extent = my_heatmap(x, y, s=s)
 
     plt.figure(figsize=(7, 7))
     plt.imshow(img, extent=extent, origin='upper', cmap=cm.Greens, aspect=(9 / 16))
@@ -32,14 +52,6 @@ def fix_heatmap(data_et_fix):
 
     save_plot('fix_heatmap.png', 'results', 'plots', 'fix_task')
     plt.close()
-
-
-# noinspection PyDefaultArgument,PyUnresolvedReferences
-def my_plot(x, y, s, bins=[1200, 675]):
-    heatmap, x_edges, y_edges = np.histogram2d(x, y, bins=bins)
-    heatmap = gaussian_filter(heatmap, sigma=s)
-    extent = [x_edges[0], x_edges[-1], y_edges[0], y_edges[-1]]
-    return heatmap.T, extent
 
 
 # noinspection PyUnboundLocalVariable
@@ -58,7 +70,7 @@ def visualize_exemplary_run(data_plot):
             c=axes_data['t_task'],
             cmap='viridis'
         )
-        axes[i].set_ylim(0, 1)
+        axes[i].set_ylim(1, 0)
         axes[i].set_xlim(0, 1)
 
     fig.colorbar(image, ax=axes)

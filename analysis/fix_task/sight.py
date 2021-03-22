@@ -3,7 +3,7 @@ import seaborn as sns
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
 
-from utils.plots import save_plot
+from visualize.all_tasks import save_plot
 from utils.tables import write_csv
 
 
