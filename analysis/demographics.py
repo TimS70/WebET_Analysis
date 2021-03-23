@@ -34,7 +34,7 @@ def analyze_demographics():
 
     demo_table = pd.DataFrame(columns=['variable', 'n', 'percent'])
     for predictor in predictors:
-        freq_table = frequency_table(data_subject, predictor)
+        freq_table = frequency_table(data_subject, predictor, save_table=True)
 
         sub_header = pd.DataFrame(
             [[freq_table.columns[0], ' ', ' ']],
@@ -47,6 +47,28 @@ def analyze_demographics():
     print(demo_table)
     write_csv(demo_table, 'demographics.csv',
               'results', 'tables', 'demographics')
+
+    # Only US sample
+    demo_table = pd.DataFrame(columns=['variable', 'n', 'percent'])
+    for predictor in predictors:
+        freq_table = frequency_table(
+            data_subject.loc[data_subject['residence']=='United States', :],
+            predictor, save_table=False)
+
+        sub_header = pd.DataFrame(
+            [[freq_table.columns[0], ' ', ' ']],
+            columns=list(freq_table.columns))
+
+        freq_table = sub_header.append(freq_table)
+        freq_table.columns = ['variable', 'n', 'percent']
+        demo_table = demo_table.append(freq_table, ignore_index=True)
+
+    print(demo_table)
+    write_csv(demo_table, 'demographics_us.csv',
+              'results', 'tables', 'demographics')
+
+
+
 
     plot_pie_charts(data_subject, predictors)
 
@@ -77,7 +99,7 @@ def add_demographic_grouped_variable(data_subject, old_column, new_column, categ
     return data_subject
 
 
-def frequency_table(data_subject, predictor):
+def frequency_table(data_subject, predictor, save_table=True):
     freq_table = pd.crosstab(
             index=data_subject[predictor],
             columns="count") \
@@ -88,8 +110,9 @@ def frequency_table(data_subject, predictor):
 
     # print(f"""{freq_table} \n""")
 
-    write_csv(freq_table, (predictor + '.csv'),
-              'results', 'tables', 'demographics')
+    if save_table:
+        write_csv(freq_table, (predictor + '.csv'),
+                  'results', 'tables', 'demographics')
 
     return freq_table
 
