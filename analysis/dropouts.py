@@ -5,9 +5,11 @@ import numpy as np
 import pandas as pd
 
 from data_prep.cleaning.prolific_ids import drop_duplicate_ids
+from utils.add_next_trial import add_next_trial
 from utils.data_frames import merge_by_subject
 from visualize.all_tasks import save_plot
 from utils.tables import write_csv
+from visualize.dropouts import plot_incomplete_runs
 
 
 def analyze_dropouts():
@@ -17,28 +19,71 @@ def analyze_dropouts():
           '################################### \n')
 
     data_subject = pd.read_csv(
-        os.path.join('data', 'all_trials', 'added_var', 'data_subject.csv'))
+        os.path.join('data', 'all_trials', 'added_var',
+                     'data_subject.csv'))
     data_trial = pd.read_csv(
-        os.path.join('data', 'all_trials', 'added_var', 'data_trial.csv')) \
+        os.path.join('data', 'all_trials', 'added_var',
+                     'data_trial.csv')) \
 
     data_trial = merge_by_subject(data_trial, data_subject,
                                   'prolificID', 'status')
 
     # Filter those from prolific
-    data_subject = data_subject.loc[pd.notna(data_subject['prolificID']), :]
-    data_trial = data_trial.loc[
-                 data_trial['run_id'].isin(data_subject['run_id']), :]
+    data_subject = data_subject[
+        pd.notna(data_subject['prolificID'])]
+    data_trial = data_trial[
+        data_trial['run_id'].isin(data_subject['run_id'])]
 
     dropouts_participants(data_subject, data_trial)
 
-    # Check runs
-    # how_many_runs_with_dropouts(data_trial)
-    # dropout_by_task_nr(data_trial)
-    #
-    # group_dropout_by_type(data_trial)
-    # check_calibration(data_trial)
-    #
-    # multi_participation_by_trial_type(data_trial)
+    # Check incomplete runs
+    report_incomplete_runs(data_trial)
+    dropout_by_task_nr(data_trial)
+    dropout_by_type(data_trial)
+    check_calibration(data_trial)
+    multi_participation_by_type(data_trial)
+
+
+def report_incomplete_runs(data_trial):
+    max_trial_by_run = data_trial \
+        .groupby(['run_id'], as_index=False).agg(
+            trial_index=('trial_index', 'max')) \
+        .merge(
+            data_trial[['run_id', 'trial_index',
+                        'chinFirst', 'prolificID',
+                        'trial_type_new', 'status']],
+            on=['run_id', 'trial_index'],
+            how='left')
+
+    max_trial_by_run = add_next_trial(max_trial_by_run, data_trial)
+
+
+    data_incomplete_runs = max_trial_by_run[
+        max_trial_by_run['trial_type_new'] != 'end']
+
+    dropout_rate = len(data_incomplete_runs['run_id']) / \
+                   len(max_trial_by_run['run_id'].unique())
+
+    summary_data_trial = pd.DataFrame({
+        'names': [
+            'run_id',
+            'prolificID'],
+        'n': [
+            len(max_trial_by_run['run_id'].unique()),
+            len(max_trial_by_run['prolificID'].unique())
+        ],
+        'n_approved': [
+            '-',
+            len(max_trial_by_run.loc[
+                    max_trial_by_run['status'] == 'APPROVED',
+                    'prolificID'].unique())]
+    })
+
+    print(
+        f"""{summary_data_trial} \n"""
+        f"""n={len(data_incomplete_runs['run_id'])} """
+        f"""incomplete runs """
+        f"""({round(100 * dropout_rate, 2)}%) \n""")
 
 
 def dropouts_participants(data_subject, data_trial):
@@ -84,6 +129,13 @@ def dropouts_participants(data_subject, data_trial):
         'status_2_id'] = 'multiple_attempts'
 
     # Conclusions
+    print(
+        f"""Approved: {len(data_subject[
+                               data_subject['status'] == 'APPROVED'])} \n"""
+        f"""Not Approved: {len(data_subject[
+                               data_subject['status'] != 'APPROVED'])} \n"""
+    )
+
     freq_table_status = pd.crosstab(
               index=drop_duplicate_ids(data_subject)['status'],
               columns="n")
@@ -119,80 +171,31 @@ def dropouts_participants(data_subject, data_trial):
               columns="n")} \n""")
 
 
-def how_many_runs_with_dropouts(data_trial):
-    grouped_last_trial = data_trial.groupby(['run_id'])['trial_index'].max() \
-        .reset_index() \
+def dropout_by_task_nr(data_trial):
+
+    max_trial_by_run = data_trial \
+        .groupby(['run_id'], as_index=False).agg(
+            max_trial=('trial_index', 'max')) \
         .merge(
-        data_trial.loc[:, [
-               'run_id', 'trial_index', 'prolificID',
-               'trial_type_nr', 'trial_type_new']],
-        on=['run_id', 'trial_index'],
-        how='left'
-    )
+            data_trial[['run_id', 'trial_index', 'prolificID',
+                        'trial_type_nr', 'task_nr_new',
+                        'status']] \
+                .rename(columns={'trial_index': 'max_trial'}),
+            on=['run_id', 'max_trial'],
+            how='left')
 
-    grouped_last_trial_dropout = grouped_last_trial.loc[
-                                 grouped_last_trial['trial_type_new'] != 'end',
-                                 :]
-
-    runs_dropout = grouped_last_trial_dropout['run_id']
-
-    dropout_rate = len(runs_dropout) / len(data_trial['run_id'].unique())
-    print(
-        f"""n={len(runs_dropout)} incomplete runs """
-        f"""({round(100 * dropout_rate, 2)}%) \n""")
-
-    data = grouped_last_trial_dropout \
-        .groupby(
-            ['trial_type_nr', 'trial_type_new'],
-            as_index=False)['run_id'].count() \
-        .rename(columns={'run_id': 'n'})
-
-    fig, ax = plt.subplots()
-    ax.bar(data['trial_type_new'], data['n'])
-
-    max_y = round(data['n'].max()/10)*10
-    ax.set_ylabel('Frequency')
-    ax.yaxis.set_ticks(np.arange(0, max_y, 5))
-    ax.set_title('Dropouts by trial type')
-
-    fig.autofmt_xdate(rotation=45)
-
-    plt.tight_layout()
-    save_plot('dropouts.png', 'results', 'plots', 'dropouts')
-
-    plt.close()
-
-
-def dropout_by_task_nr(data):
-    grouped_trial_type_new = data.loc[:, [
-                                             'run_id',
-                                             'trial_index',
-                                             'task_nr_new']] \
-        .drop_duplicates()
-
-    last_trial_for_each_subject = data.groupby(
-            ['run_id'],
-            as_index=False)['trial_index'].max() \
-        .merge(
-            grouped_trial_type_new,
-            on=['run_id', 'trial_index'],
-            how='left') \
-        .loc[:, ['run_id', 'task_nr_new']]
-
-    output = last_trial_for_each_subject \
-        .groupby(
-            ['task_nr_new'],
-            as_index=False)['run_id'].count() \
-        .rename(columns={'run_id': 'n_run_id'}) \
-        .sort_values(by='n_run_id')
+    max_trial_by_nr = max_trial_by_run \
+        .groupby(['task_nr_new'], as_index=False) \
+        .agg(n=('run_id', 'count')) \
+        .sort_values(by='n')
 
     print(
         f"""Dropout by task nr: \n"""
-        f"""{output} \n"""
+        f"""{max_trial_by_nr} \n"""
     )
 
     write_csv(
-        output,
+        max_trial_by_nr,
         'dropout_by_task_nr.csv',
         'results', 'tables', 'dropouts')
 
@@ -216,94 +219,64 @@ def group_last_trial_for_each_run(data_trial):
     return last_trial_for_each_run
 
 
-def group_dropout_by_type(data_trial):
+def dropout_by_type(data_trial):
 
-    last_trial_for_each_run = group_last_trial_for_each_run(data_trial)
-    dropout_by_type = last_trial_for_each_run.groupby(
-            ['trial_type_new', 'next_trial_type_new',
-             'next_trial_type'],
-            as_index=False).count() \
-        .rename(columns={'run_id': 'n_run_id'}) \
-        .loc[:, ['trial_type_new', 'next_trial_type_new',
-               'next_trial_type', 'n_run_id']] \
-        .sort_values(by='n_run_id')
+    max_trial_by_run = data_trial \
+        .groupby(['run_id'], as_index=False).agg(
+            trial_index=('trial_index', 'max')) \
+        .merge(
+            data_trial[['run_id', 'trial_index',
+                        'chinFirst', 'prolificID',
+                        'trial_type_new', 'status']],
+            on=['run_id', 'trial_index'],
+            how='left')
 
-    dropout_by_type['percent'] = round(
-        100 * dropout_by_type['n_run_id'] / len(data_trial['run_id'].unique()),
-        1
-    )
+    max_trial_by_run = add_next_trial(max_trial_by_run, data_trial)
 
-    print(f'Dropout by type: \n {dropout_by_type} \n')
+    max_trial_by_type = max_trial_by_run \
+        .groupby(['next_trial_type_new'], as_index=False) \
+        .agg(n=('run_id', 'count')) \
+        .sort_values(by='n')
+
+    max_trial_by_type['percent'] = round(
+        100 * max_trial_by_type['n'] /
+        len(data_trial['run_id'].unique()), 1)
+
+    print(f'Dropout by type: \n {max_trial_by_type} \n')
 
     write_csv(
-        dropout_by_type,
+        max_trial_by_type,
         'dropout_by_type.csv',
         'results', 'tables', 'dropouts')
 
-    return dropout_by_type
+    data_plot = max_trial_by_run[
+        max_trial_by_run['next_trial_type_new'] != 'end'] \
+            .groupby(
+                ['next_trial_type_new'],
+                as_index=False).agg(n=('run_id', 'count'))
 
+    fig, ax = plt.subplots()
+    ax.bar(data_plot['next_trial_type_new'], data_plot['n'])
 
-def add_next_trial(data, data_trial):
-    full_trials_no_chin = data_trial.loc[
-        data_trial['run_id'] == 421,
-        ['trial_index', 'trial_type', 'trial_type_new']
-    ].reset_index(drop=True)
+    max_y = round(data_plot['n'].max() / 10) * 10
+    ax.set_ylabel('Frequency')
+    ax.yaxis.set_ticks(np.arange(0, max_y, 5))
+    ax.set_title('Dropouts by trial type')
 
-    next_trials_no_chin = full_trials_no_chin
-    next_trials_no_chin['trial_index'] -= 1
+    fig.autofmt_xdate(rotation=45)
 
-    full_trials_chin = data_trial.loc[
-        data_trial['run_id'] == 270,
-        ['trial_index', 'trial_type', 'trial_type_new']
-    ].reset_index(drop=True)
-
-    next_trials_chin = full_trials_chin
-    next_trials_chin['trial_index'] -= 1
-
-    data = data.copy()
-    data['next_trial_type'] = 0
-    data['next_trial_type_new'] = 0
-
-    for i in data.index:
-        this_trial = data.loc[i, 'trial_index']
-
-        if data.loc[i, 'trial_type_new'] != 'end':
-            if this_trial > 0:
-                next_trials = next_trials_chin \
-                    if data.loc[i, 'chinFirst'] > 0 \
-                    else next_trials_no_chin
-
-                next_trial_type = next_trials.loc[
-                    next_trials['trial_index'] == this_trial,
-                    'trial_type'].values[0]
-
-                next_trial_type_new = next_trials.loc[
-                    next_trials['trial_index'] == this_trial,
-                    'trial_type_new'].values[0]
-
-            else:
-                next_trial_type = np.nan
-                next_trial_type_new = np.nan
-
-            data.loc[i, 'next_trial_type'] = next_trial_type
-            data.loc[i, 'next_trial_type_new'] = next_trial_type_new
-
-        else:
-            data.loc[i, 'next_trial_type'] = 'end'
-            data.loc[i, 'next_trial_type_new'] = 'end'
-
-    return data
+    plt.tight_layout()
+    save_plot('dropouts.png', 'results', 'plots', 'dropouts')
+    plt.close()
 
 
 def check_calibration(data_trial):
     #    The last trial during calibration varies. There no one
     #    first calibration or similar, when the subjects drop out.
 
-    grouped_trial_type_new = data_trial.loc[
-                             :,
-                             [
-                                 'run_id', 'trial_index', 'chinFirst',
-                                 'trial_type', 'trial_type_new']] \
+    grouped_trial_type_new = data_trial[[
+         'run_id', 'trial_index', 'chinFirst',
+         'trial_type', 'trial_type_new']] \
         .drop_duplicates()
 
     last_trial_for_each_subject = data_trial \
@@ -375,10 +348,11 @@ def multi_participation_by_run(data_trial):
     return ids_one_attempt, ids_multiple_attempts
 
 
-def multi_participation_by_trial_type(data_trial):
+def multi_participation_by_type(data_trial):
     """
-        Most of the participants, who try again, reload at the beginning of
-        the experiment.
+        When do the participants stop and go back?
+        Most of the participants, who try again, reload at the
+        beginning of the experiment.
     """
     duplicate_subjects = data_trial \
                              .loc[:, ['prolificID', 'run_id']] \
@@ -392,13 +366,12 @@ def multi_participation_by_trial_type(data_trial):
     runs_max_trial = data_trial.loc[data_trial['prolificID'].isin(duplicate_subjects), :] \
         .groupby(['prolificID', 'run_id'], as_index=False)['trial_index'].max() \
         .merge(
-        data_trial.loc[:, [
-                              'run_id', 'chinFirst', 'trial_index',
-                              'trial_type', 'trial_type_nr', 'trial_type_new']],
-        on=['run_id', 'trial_index'],
-        how='left')
+            data_trial[['run_id', 'chinFirst', 'trial_index',
+                        'trial_type', 'trial_type_nr', 'trial_type_new']],
+            on=['run_id', 'trial_index'],
+            how='left')
     runs_max_trial = runs_max_trial.loc[
-                     runs_max_trial['trial_type_new'] != 'end', :]
+        runs_max_trial['trial_type_new'] != 'end', :]
 
     runs_max_trial = add_next_trial(runs_max_trial, data_trial)
 
