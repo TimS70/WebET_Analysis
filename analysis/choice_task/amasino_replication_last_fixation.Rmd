@@ -17,7 +17,7 @@ knitr::opts_knit$get("root.dir")
 
 source(file.path(root, 'utils', 'r', 'geom_split_violin.R'))
 source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
-source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
+source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
 source(file.path(root, 'utils', 'r', 'merge_by_index.R'))
 source(file.path(root, 'utils', 'r', 'summarize_datasets.R'))
 source(file.path(root, 'utils', 'r', 'get_packages.R'))
@@ -831,7 +831,7 @@ grouped_tb_index = data_trial %>%
 		tb_index = mean(tb_index),
 		.groups = 'keep')
 
-data_subject = merge_by_subject(data_subject, grouped_tb_index, 'tb_index')
+data_subject = merge_mean_by_subject(data_subject, grouped_tb_index, 'tb_index')
 
 ggplot(data_subject, aes(tb_index))+
     geom_histogram(binwidth=.1, alpha=.5, position="identity")+

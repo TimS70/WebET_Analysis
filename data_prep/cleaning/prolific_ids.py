@@ -2,8 +2,8 @@ import pandas as pd
 
 
 def drop_duplicate_ids(data_subject_raw):
-    n_duplicated = data_subject_raw \
-        .duplicated(subset=['prolificID']) \
+    n_duplicated = data_subject_raw[['prolificID']] \
+        .duplicated() \
         .sum()
 
     data_subject = data_subject_raw \

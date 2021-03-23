@@ -5,12 +5,12 @@ import pandas as pd
 
 from tqdm import tqdm
 
-from utils.data_frames import merge_by_subject
+from utils.data_frames import merge_mean_by_subject
 from visualize.all_tasks import save_plot
 
 
 def add_fps_subject_level(data_subject, data_trial):
-    data_subject = merge_by_subject(data_subject, data_trial, 'fps')
+    data_subject = merge_mean_by_subject(data_subject, data_trial, 'fps')
 
     plt.hist(data_subject['fps'], bins=20)
     plt.rc('font', size=10)

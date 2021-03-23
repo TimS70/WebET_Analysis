@@ -4,10 +4,11 @@ import pandas as pd
 
 from data_prep.cleaning.drop_na_eye_tracking import drop_na_data_et
 from data_prep.cleaning.filter_approved import filter_approved_runs
-from data_prep.cleaning.invalid_runs import filter_invalid_runs, clean_runs
+from data_prep.cleaning.invalid_runs import find_invalid_runs, clean_runs
 from data_prep.cleaning.prolific_ids import drop_duplicate_ids
 from data_prep.cleaning.replace_subject_vars import replace_subject_variables
-from utils.tables import summarize_datasets, save_all_three_datasets, load_all_three_datasets
+from utils.tables import summarize_datasets, save_all_three_datasets, \
+    load_all_three_datasets
 
 
 def global_cleaning():
@@ -64,7 +65,7 @@ def global_cleaning():
         data_subject, data_trial, data_et)
 
     # Other invalid participants
-    excluded_runs = filter_invalid_runs(
+    excluded_runs = find_invalid_runs(
         data_trial, data_et, data_subject)
 
     data_et = clean_runs(data_et, excluded_runs, 'data_et')

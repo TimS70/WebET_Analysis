@@ -1,7 +1,7 @@
 import subprocess
 
 from analysis.demographics import analyze_demographics
-from analysis.dropouts import dropout_analysis
+from analysis.dropouts import analyze_dropouts
 from analysis.main import analyze_fix_task, analyze_choice_task
 from data_prep.add_variables.data_quality import add_data_quality
 from data_prep.add_variables.init import global_add_variables_to_datasets
@@ -37,7 +37,7 @@ def prep_data():
 
 
 def analyze():
-    dropout_analysis()
+    analyze_dropouts()
     analyze_demographics()
     analyze_fix_task()
     analyze_choice_task()
@@ -49,5 +49,5 @@ def analyze():
 
 
 if __name__ == '__main__':
-    clean_choice_data()
+    analyze_dropouts()
     # main(new_data=False)

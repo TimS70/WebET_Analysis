@@ -16,7 +16,7 @@ knitr::opts_knit$get("root.dir")
 
 source(file.path(root, 'utils', 'r', 'geom_split_violin.R'))
 source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
-source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
+source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
 source(file.path(root, 'utils', 'r', 'summarize_datasets.R'))
 source(file.path(root, 'utils', 'r', 'get_packages.R'))
 source(file.path(root, 'utils', 'r', 'remove_runs.R'))

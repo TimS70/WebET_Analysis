@@ -16,7 +16,7 @@ knitr::opts_knit$get("root.dir")
 
 source(file.path(root, 'utils', 'r', 'geom_split_violin.R'))
 source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
-source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
+source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
 source(file.path(root, 'utils', 'r', 'summarize_datasets.R'))
 source(file.path(root, 'utils', 'r', 'get_packages.R'))
 source(file.path(root, 'utils', 'r', 'remove_runs.R'))
@@ -88,7 +88,7 @@ if ('window_diagonal' %in% names(data_subject)) {
     }
 data_subject = merge(data_subject, grouped, by='run_id')
 
-data_trial = merge_by_subject(data_trial, data_subject, 'age')
+data_trial = merge_mean_by_subject(data_trial, data_subject, 'age')
 ```
 
 
@@ -275,7 +275,7 @@ grouped = data_trial %>%
     	fps_subject = mean(fps),
     	.groups = 'keep')
 data_trial = data_trial %>%
-    merge_by_subject(grouped, 'fps_subject') %>%
+    merge_mean_by_subject(grouped, 'fps_subject') %>%
     mutate(fps_subject_c = fps - mean(grouped$fps_subject))
     
 lmer7_iao = lmer(

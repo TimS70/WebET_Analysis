@@ -4,79 +4,119 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from data_prep.cleaning.prolific_ids import drop_duplicate_ids
+from utils.data_frames import merge_by_subject
 from visualize.all_tasks import save_plot
 from utils.tables import write_csv
 
 
-def dropout_analysis():
+def analyze_dropouts():
 
     print('################################### \n'
           'Analyze dropouts \n'
           '################################### \n')
 
-    data_trial = pd.read_csv(
-        os.path.join('data', 'all_trials', 'added_var', 'data_trial.csv'))
     data_subject = pd.read_csv(
         os.path.join('data', 'all_trials', 'added_var', 'data_subject.csv'))
+    data_trial = pd.read_csv(
+        os.path.join('data', 'all_trials', 'added_var', 'data_trial.csv')) \
+
+    data_trial = merge_by_subject(data_trial, data_subject,
+                                  'prolificID', 'status')
 
     # Filter those from prolific
-    data_subject = data_subject.loc[
-                   pd.notna(data_subject['prolificID']), :]
+    data_subject = data_subject.loc[pd.notna(data_subject['prolificID']), :]
     data_trial = data_trial.loc[
-        data_trial['run_id'].isin(data_subject['run_id']), :]
+                 data_trial['run_id'].isin(data_subject['run_id']), :]
 
-    data_not_approved = data_subject.loc[
-        (data_subject['status'] != 'APPROVED') &
-        ~(data_subject['run_id'].isin(data_trial['run_id'])),
-        [
-            'run_id', 'prolificID', 'max_trial',
-            'recorded_date', 'status'
-        ]]
+    dropouts_participants(data_subject, data_trial)
 
-    total_ids = data_subject['prolificID'].unique()
-    ids_not_approved = data_not_approved['prolificID'].unique()
-    rate_not_approved = len(ids_not_approved) / len(total_ids)
+    # Check runs
+    # how_many_runs_with_dropouts(data_trial)
+    # dropout_by_task_nr(data_trial)
+    #
+    # group_dropout_by_type(data_trial)
+    # check_calibration(data_trial)
+    #
+    # multi_participation_by_trial_type(data_trial)
 
-    print(
-        f"""Not approved participants who did not start the study: \n"""
-        f"""total: {len(ids_not_approved)} of """
-        f"""{len(total_ids)} ({rate_not_approved}) \n"""
-        f"""nan:   {sum(pd.isna(data_subject['status']))} \n"""
-        f"""{pd.crosstab(index=data_not_approved['status'], columns="n")} \n"""
-    )
 
-    # Filter those who have trials
-    data_subject = data_subject.loc[
-                   data_subject['run_id'].isin(data_trial['run_id']), :]
+def dropouts_participants(data_subject, data_trial):
 
-    print(
-        f"""Unique ID's who actually have some trials: \n"""
-        f"""   data_subject: {len(data_subject['prolificID'].unique())}\n"""
-        f"""   data_trial:   {len(data_trial['prolificID'].unique())}\n"""
-    )
+    # Mark participants with trials
+    data_subject['status_2_id'] = np.nan
+    data_subject.loc[
+        ~data_subject['run_id'].isin(data_trial['run_id']),
+        'status_2_id'] = 'no_trials'
 
-    data_not_approved = data_subject.loc[
-        data_subject['status'] != 'APPROVED',
-        [
-            'run_id', 'prolificID', 'max_trial',
-            'recorded_date', 'status'
-        ]]
+    runs_returned_no_trials = data_subject.loc[
+              (data_subject['status'] == 'RETURNED') &
+              (data_subject['status_2_id'] == 'no_trials'),
+              'prolificID'].unique()
+    print(f"""Returned and no trials: {len(runs_returned_no_trials)}""")
 
-    print(
-        f"""Not approved participants who actually participated in the study: \n"""
-        f"""total: {len(data_not_approved['prolificID'].unique())} of """
-        f"""{len(data_subject['prolificID'].unique())} """
-        f"""participants \n"""
-        f"""nan:   {sum(pd.isna(data_subject['status']))} \n"""
-        f"""{pd.crosstab(index=data_not_approved['status'], columns="n")} \n"""
-    )
+    # Check for multiple attempts
+    print('Attempts in total')
+    attempts_by_id = multi_participation_by_run(data_trial)
 
-    how_many_runs_with_dropouts(data_trial)
-    dropout_by_task_nr(data_trial)
+    print('Attempts approved')
+    ids_one_attempt, ids_multiple_attempts = multi_participation_by_run(
+        data_trial[data_trial['status'] == 'APPROVED'])
 
-    group_dropout_by_type(data_trial)
-    check_calibration(data_trial)
-    check_multi_participation(data_trial)
+    data_subject.loc[
+        data_subject['prolificID'].isin(ids_one_attempt),
+        'status_2_id'] = 'one_attempt'
+
+    data_subject.loc[
+        data_subject['prolificID'].isin(ids_multiple_attempts),
+        'status_2_id'] = 'multiple_attempts'
+
+    print('Attempts not approved')
+    ids_one_attempt, ids_multiple_attempts = multi_participation_by_run(
+        data_trial[data_trial['status'] != 'APPROVED'])
+
+    data_subject.loc[
+        data_subject['prolificID'].isin(ids_one_attempt),
+        'status_2_id'] = 'one_attempt'
+
+    data_subject.loc[
+        data_subject['prolificID'].isin(ids_multiple_attempts),
+        'status_2_id'] = 'multiple_attempts'
+
+    # Conclusions
+    freq_table_status = pd.crosstab(
+              index=drop_duplicate_ids(data_subject)['status'],
+              columns="n")
+    print(f"""Freq_table status: {freq_table_status} \n""")
+
+    freq_table_status = pd.crosstab(
+              index=drop_duplicate_ids(data_subject[
+                  data_subject['status_2_id'] == 'no_trials'])['status'],
+              columns="n")
+    print(f"""Freq_table status no_trials: {freq_table_status} \n""")
+
+    freq_table_status = pd.crosstab(
+              index=drop_duplicate_ids(data_subject[
+                  data_subject['status_2_id'] != 'no_trials'])['status'],
+              columns="n")
+    print(f"""Freq_table status has trials: {freq_table_status} \n""")
+
+    print(f"""Freq_table status_2_d: \n"""
+          f"""{pd.crosstab(
+              index=drop_duplicate_ids(data_subject)['status_2_id'], 
+              columns="n")} \n""")
+
+    print(f"""Freq_table status_2_d approved: \n"""
+          f"""{pd.crosstab(
+              index=drop_duplicate_ids(data_subject[
+                  data_subject['status'] == 'APPROVED'])['status_2_id'], 
+              columns="n")} \n""")
+
+    print(f"""Freq_table status_2_d not approved: \n"""
+          f"""{pd.crosstab(
+              index=drop_duplicate_ids(data_subject[
+                  data_subject['status'] != 'APPROVED'])['status_2_id'], 
+              columns="n")} \n""")
 
 
 def how_many_runs_with_dropouts(data_trial):
@@ -98,7 +138,7 @@ def how_many_runs_with_dropouts(data_trial):
 
     dropout_rate = len(runs_dropout) / len(data_trial['run_id'].unique())
     print(
-        f"""n={len(runs_dropout)} incomplete runs"""
+        f"""n={len(runs_dropout)} incomplete runs """
         f"""({round(100 * dropout_rate, 2)}%) \n""")
 
     data = grouped_last_trial_dropout \
@@ -290,70 +330,49 @@ def check_calibration(data_trial):
         'results', 'tables', 'dropouts')
 
 
-def check_multi_participation(data_trial):
-    """
-        Most subjects, who had to redo, previously dropped out during
-        calibration briefing (n=7) and the initialization (n=11) multiple times
-    """
-
-    print('Multiple participation: ')
-    multi_participation_by_run(data_trial)
-    multi_participation_by_trial_type(data_trial)
-
-
 def multi_participation_by_run(data_trial):
-    grouped_last_trial = data_trial.groupby(['run_id'])['trial_index'].max() \
-        .reset_index() \
-        .merge(data_trial.loc[:, [
-                   'run_id', 'trial_index', 'prolificID',
-                   'trial_type_nr', 'trial_type_new']],
-               on=['run_id', 'trial_index'],
-               how='left')
+    """
+        Check, how participants try again and how many only try once
+    :param data_trial:
+    :return:
+    """
 
-    grouped_last_trial_dropout = grouped_last_trial.loc[
-                                 grouped_last_trial['trial_type_new'] != 'end', :]
+    max_trial_by_run = data_trial \
+        .groupby(['run_id'], as_index=False).agg(
+            max_trial=('trial_index', 'max')) \
+        .merge(
+            data_trial[['run_id', 'trial_index', 'prolificID',
+                        'trial_type_nr', 'trial_type_new', 'status']] \
+                .rename(columns={'trial_index': 'max_trial'}),
+            on=['run_id', 'max_trial'],
+            how='left')
 
-    grouped_last_trial = data_trial.groupby(['run_id'])['trial_index'].max() \
-        .reset_index() \
-        .merge(data_trial.loc[:, [
-                   'run_id', 'trial_index', 'prolificID',
-                   'trial_type_nr', 'trial_type_new']],
-               on=['run_id', 'trial_index'],
-               how='left')
+    attempts_by_id = max_trial_by_run \
+        .groupby(['prolificID'], as_index=False).agg(
+            n=('run_id', 'count'),
+            status=('status', 'unique'))
 
-    grouped_last_trial_full = grouped_last_trial.loc[
-                              grouped_last_trial['trial_type_new'] == 'end',
-                              :
-                              ]
+    ids_one_attempt = attempts_by_id.loc[
+        attempts_by_id['n'] < 2, 'prolificID'].unique()
+    ids_multiple_attempts = attempts_by_id.loc[
+        attempts_by_id['n'] > 1, 'prolificID'].unique()
 
-    subjects_multiple_attempts = []
-    subjects_actual_dropouts = []
+    summary = pd.DataFrame({
+        'name': [
+            'ids_one_attempt',
+            'ids_multiple_attempts'],
+        'length': [
+            len(ids_one_attempt),
+            len(ids_multiple_attempts)],
+        'percentage (resp.)': [
+            len(ids_one_attempt) / len(data_trial['prolificID'].unique()),
+            len(ids_multiple_attempts) / len(data_trial['prolificID'].unique())],
+    })
 
-    for ID in grouped_last_trial_dropout.loc[
-        pd.notna(grouped_last_trial_dropout['prolificID']),
-        'prolificID'].unique():
-        previous_attempt = grouped_last_trial_full.loc[
-                           grouped_last_trial_full['prolificID'] == ID,
-                           :]
-        if len(previous_attempt) > 0:
-            subjects_multiple_attempts = np.append(
-                subjects_multiple_attempts, ID)
-        else:
-            subjects_actual_dropouts = np.append(
-                subjects_actual_dropouts, ID)
+    print(f"""attempts_by_id: \n{attempts_by_id['n'].describe()} \n"""
+          f"""{summary}\n""")
 
-    prolific_ids = data_trial['prolificID'].unique()
-    multi_attempts_rate = len(subjects_multiple_attempts) / len(prolific_ids)
-    actual_dropout_rate = len(subjects_actual_dropouts) / len(prolific_ids)
-
-    print(
-        f"""Of n={len(prolific_ids)} Prolific participants """
-        f"""n={len(subjects_multiple_attempts)} participants """
-        f"""({round(100 * multi_attempts_rate, 2)}%) tried again and """
-        f"""n={len(subjects_actual_dropouts)} """
-        f"""({round(100 * actual_dropout_rate, 2)}%) only tried once and """
-        f"""then dropped out. \n"""
-    )
+    return ids_one_attempt, ids_multiple_attempts
 
 
 def multi_participation_by_trial_type(data_trial):

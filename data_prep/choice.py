@@ -9,7 +9,7 @@ from data_prep.add_variables.aoi import add_fixation_counter, count_fixations_on
     add_aoi_counts_on_trial_level, add_aoi_et, match_remaining_et_trials, \
     match_remaining_et_runs
 from data_prep.add_variables.et_indices import add_et_indices
-from utils.data_frames import merge_by_index, merge_by_subject
+from utils.data_frames import merge_by_index, merge_mean_by_subject
 from utils.path import makedir
 from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets, write_csv
 
@@ -26,7 +26,7 @@ def add_variables_choice():
     # Add data from fixation task
     data_subject_fix = pd.read_csv(
         os.path.join('data', 'fix_task', 'added_var', 'data_subject.csv'))
-    data_subject = merge_by_subject(data_subject, data_subject_fix, 'offset', 'precision')
+    data_subject = merge_mean_by_subject(data_subject, data_subject_fix, 'offset', 'precision')
 
     # Information attributes
     data_trial = identify_amount_left(data_trial)
@@ -43,7 +43,7 @@ def add_variables_choice():
 
     data_subject = add_mean_choice_rt(data_subject, data_trial)
 
-    data_subject = merge_by_subject(
+    data_subject = merge_mean_by_subject(
         data_subject, data_trial, 'choseLL', 'choseTop', 'LL_top')
 
     # AOIs
@@ -284,7 +284,7 @@ def add_et_indices_subject(data_subject, data_trial,
         grouped['payneIndex_n'] < min_required_count,
         'payneIndex'] = np.nan
 
-    data_subject = merge_by_subject(
+    data_subject = merge_mean_by_subject(
         data_subject, grouped,
         'attributeIndex', 'optionIndex', 'payneIndex')
 
@@ -318,7 +318,7 @@ def add_log_k():
     data_subject = pd.read_csv(os.path.join(
         path, 'data_subject.csv'))
 
-    data_subject = merge_by_subject(
+    data_subject = merge_mean_by_subject(
         data_subject, log_k, 'logK', 'noise')
 
     missing_values = data_subject.loc[

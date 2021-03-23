@@ -6,7 +6,7 @@ import pandas as pd
 from analysis.fix_task.data_quality import outcome_over_trials_vs_chin
 from analysis.fix_task.positions import compare_positions
 
-from utils.data_frames import merge_mean_by_index, merge_by_subject
+from utils.data_frames import merge_mean_by_index, merge_mean_by_subject
 from utils.path import makedir
 from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets
 
@@ -23,13 +23,13 @@ def add_data_quality():
     data_et = add_offset(data_et)
     data_trial = merge_mean_by_index(data_trial, data_et,
                                      'offset', 'offset_px')
-    data_subject = merge_by_subject(data_subject, data_trial,
+    data_subject = merge_mean_by_subject(data_subject, data_trial,
                                     'offset', 'offset_px')
 
     # Precision
     data_et = distance_from_xy_mean_square(data_et)
     data_trial = aggregate_precision_from_et_data(data_trial, data_et)
-    data_subject = merge_by_subject(data_subject, data_trial,
+    data_subject = merge_mean_by_subject(data_subject, data_trial,
                                     'precision', 'precision_px')
 
     save_all_three_datasets(data_et, data_trial, data_subject,

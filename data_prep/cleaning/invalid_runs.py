@@ -5,7 +5,7 @@ from utils.data_frames import merge_by_index
 from utils.tables import write_csv
 
 
-def filter_invalid_runs(data_trial, data_et, data_subject):
+def find_invalid_runs(data_trial, data_et, data_subject):
 
     print(
         f"""\n"""

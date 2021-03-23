@@ -1,13 +1,27 @@
 import numpy as np
 import pandas as pd
 
-
-def merge_by_subject(data, large_data, *args):
+def merge_by_subject(data, data_2, *args):
 
     for var in [*args]:
 
-        grouped = large_data.groupby(['run_id'])[var].mean() \
-            .reset_index()
+        grouped = data_2[['run_id', var]].drop_duplicates()
+
+        if var in data.columns:
+            data = data.drop(columns=[var])
+
+        data = data.merge(grouped, on=['run_id'], how='left')
+
+    return data
+
+
+def merge_mean_by_subject(data, large_data, *args):
+
+    for var in [*args]:
+
+        grouped = large_data.groupby(
+            ['run_id'],
+            as_index=False)[var].mean()
 
         if var in data.columns:
             data = data.drop(columns=[var])

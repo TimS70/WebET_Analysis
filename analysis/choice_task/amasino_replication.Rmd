@@ -17,7 +17,7 @@ knitr::opts_knit$get("root.dir")
 
 source(file.path(root, 'utils', 'r', 'geom_split_violin.R'))
 source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
-source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
+source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
 source(file.path(root, 'utils', 'r', 'merge_by_index.R'))
 source(file.path(root, 'utils', 'r', 'summarize_datasets.R'))
 source(file.path(root, 'utils', 'r', 'get_packages.R'))
@@ -62,8 +62,8 @@ summarize_datasets(data_et, data_trial, data_subject)
 
 ## k-values
 ```{r, add_k_values}
-data_trial = merge_by_subject(data_trial, data_subject, 'logK')
-data_trial = merge_by_subject(data_trial, data_subject, 'noise')
+data_trial = merge_mean_by_subject(data_trial, data_subject, 'logK')
+data_trial = merge_mean_by_subject(data_trial, data_subject, 'noise')
 ```
 
 
