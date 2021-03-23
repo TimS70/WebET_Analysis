@@ -49,5 +49,5 @@ def analyze():
 
 
 if __name__ == '__main__':
-    analyze_demographics()
+    clean_choice_data()
     # main(new_data=False)

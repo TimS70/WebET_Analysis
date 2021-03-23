@@ -8,7 +8,7 @@ from data_prep.cleaning.invalid_runs \
     import filter_runs_low_fps, clean_runs
 from utils.data_frames import merge_by_index
 from utils.path import makedir
-from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets
+from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets, write_csv
 
 
 def create_choice_data():
@@ -121,13 +121,13 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
     runs_not_us = data_subject.loc[
         data_subject['residence'] != 'United States', 'run_id']
 
-    data_subject['us_residence'] = 1
+    data_subject['residence'] = 'us'
     data_subject.loc[
         data_subject['run_id'].isin(runs_not_us),
-        'us_residence'] = 0
+        'residence'] = 'international'
 
     grouped_us = data_subject.groupby(
-        ['us_residence'],
+        ['residence'],
         as_index=False).agg(
             n=('run_id', 'count'),
             attributeIndex=('attributeIndex', 'mean'),
@@ -142,11 +142,17 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
             choseTop_std=('choseTop', 'std'),
             logK=('logK', 'mean'),
             logK_std=('logK', 'std'),
-            fps=('fps', 'mean'),
-            fps_std=('fps', 'std'),
             choice_rt=('choice_rt', 'mean'),
             choice_rt_std=('choice_rt', 'std'),
-    ).T
+            offset=('offset', 'mean'),
+            offset_std=('offset', 'std'),
+            precision=('precision', 'mean'),
+            precision_std=('precision', 'std'),
+            fps=('fps', 'mean'),
+            fps_std=('fps', 'std')).T
+
+    write_csv(grouped_us, 'us_vs_international_sample.csv',
+              'results', 'tables', 'demographics')
 
     print(
         f"""{len(runs_not_us)} runs do not reside inside the us. """
