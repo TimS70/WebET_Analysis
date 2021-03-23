@@ -98,7 +98,7 @@ def how_many_runs_with_dropouts(data_trial):
 
     dropout_rate = len(runs_dropout) / len(data_trial['run_id'].unique())
     print(
-        f"""N Runs with dropout: n={len(runs_dropout)} """
+        f"""n={len(runs_dropout)} incomplete runs"""
         f"""({round(100 * dropout_rate, 2)}%) \n""")
 
     data = grouped_last_trial_dropout \

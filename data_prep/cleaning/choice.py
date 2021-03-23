@@ -32,8 +32,7 @@ def clean_choice_data():
           '################################### \n')
 
     data_et, data_trial, data_subject = load_all_three_datasets(
-        os.path.join('data', 'choice_task', 'added_var')
-    )
+        os.path.join('data', 'choice_task', 'added_var'))
 
     # Screening
     show_slow_reaction_times(data_trial)
@@ -182,8 +181,8 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
     runs_additional_flaws = np.array([144])
 
     runs_biasedChoices = data_subject.loc[
-        (data_subject['choseLL'] > 0.98) |
-        (data_subject['choseLL'] < 0.02),
+        (data_subject['choseLL'] > 0.99) |
+        (data_subject['choseLL'] < 0.01),
         'run_id']
 
     grouped_trials_biased = data_trial.loc[

@@ -18,13 +18,36 @@ def analyze_demographics():
         os.path.join('data', 'all_trials', 'cleaned', 'data_subject.csv'))
     data_subject['kind_of_correction'] = data_subject['glasses']
 
+    data_subject = add_demographic_grouped_variable(
+        data_subject, 'Current Country of Residence', 'residence',
+        ['Poland', 'United Kingdom', 'United States'])
+
+    data_subject = add_demographic_grouped_variable(
+        data_subject, 'Nationality', 'nationality_grouped',
+        ['Poland', 'United Kingdom', 'United States', 'Italy'])
+
     predictors = [
-        'Current Country of Residence', 'Nationality',
+        'residence', 'nationality_grouped',
         'employment_status', 'Student Status', 'degree',
         'kind_of_correction', 'sight', 'vertPosition', 'webcam_fps',
         'ethnic', 'gender']
 
-    frequency_tables(data_subject, predictors)
+    demo_table = pd.DataFrame(columns=['variable', 'n', 'percent'])
+    for predictor in predictors:
+        freq_table = frequency_table(data_subject, predictor)
+
+        sub_header = pd.DataFrame(
+            [[freq_table.columns[0], ' ', ' ']],
+            columns=list(freq_table.columns))
+
+        freq_table = sub_header.append(freq_table)
+        freq_table.columns = ['variable', 'n', 'percent']
+        demo_table = demo_table.append(freq_table, ignore_index=True)
+
+    print(demo_table)
+    write_csv(demo_table, 'demographics.csv',
+              'results', 'tables', 'demographics')
+
     plot_pie_charts(data_subject, predictors)
 
     n_bins = 10
@@ -32,7 +55,6 @@ def analyze_demographics():
     plt.title('Birthyear histogram (bins=' + str(n_bins) + ')')
     plt.xlabel('Birthyear')
     plt.ylabel('Frequency')
-
 
     age = 2021 - data_subject['birthyear']
     print(
@@ -44,20 +66,32 @@ def analyze_demographics():
     plt.close()
 
 
-def frequency_tables(data_subject, predictors):
+def add_demographic_grouped_variable(data_subject, old_column, new_column, categories):
+    data_subject[new_column] = 'other'
+    for col in categories:
+        data_subject.loc[data_subject[old_column] == col, new_column] = col
 
-    for col in predictors:
+    print(f"""Columns {new_column} was aggregated from {old_column}: \n"""
+          f"""{frequency_table(data_subject, new_column)} \n""")
 
-        freq_table = pd.crosstab(
-                index=data_subject[col],
-                columns="count")
-        freq_table.reset_index()
-        freq_table['percent'] = freq_table['count'] / sum(freq_table['count'])
+    return data_subject
 
-        print(f"""{freq_table} \n""")
 
-        write_csv(freq_table, (col + '.csv'),
-                  'results', 'tables', 'demographics')
+def frequency_table(data_subject, predictor):
+    freq_table = pd.crosstab(
+            index=data_subject[predictor],
+            columns="count") \
+        .reset_index() \
+        .assign(percent=lambda data_frame: data_frame['count'] /
+                                           sum(data_frame['count'])) \
+        .sort_values(by='count')
+
+    # print(f"""{freq_table} \n""")
+
+    write_csv(freq_table, (predictor + '.csv'),
+              'results', 'tables', 'demographics')
+
+    return freq_table
 
 
 def plot_pie_charts(data_subject, predictors):
