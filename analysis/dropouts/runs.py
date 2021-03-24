@@ -3,11 +3,13 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from pandas import MultiIndex
+import scipy
 
 from data_prep.cleaning.prolific_ids import drop_duplicate_ids
+from scipy import stats
 from utils.add_next_trial import add_next_trial
 from utils.data_frames import merge_by_subject
+from utils.inference import welch_dof, welch_ttest
 from visualize.all_tasks import save_plot
 from utils.tables import write_csv
 from visualize.dropouts import plot_incomplete_runs
@@ -291,3 +293,49 @@ def multi_participation_by_type(data_trial):
           f"""Total: {len(grouped['prolificID'].unique())} \n"""
           f"""N complete: {len(ids_complete)} \n"""
           f"""{grouped.set_index(['prolificID', 'run_id'])}""")
+
+
+def check_et_initialization(data_subject, data_trial):
+    data_trial = merge_by_subject(data_trial, data_subject, 'status')
+    data_init = data_trial[data_trial['trial_type'] == 'eyetracking-init']
+
+    grouped = data_init \
+        .groupby(['status'], as_index=False) \
+        .agg(
+            n_runs=('run_id', 'nunique'),
+            t=('trial_duration_exact', 'mean'),
+            t_std=('trial_duration_exact', 'std'))
+
+    print(f"""et_init statistics: \n"""
+          f"""{grouped} \n""")
+
+    grouped_not_approved = data_trial \
+        .loc[
+            (data_trial['run_id'].isin(data_init['run_id'])) &
+            (data_trial['status'] != 'APPROVED'), :] \
+        .groupby(['status', 'run_id'], as_index=False) \
+        .agg(trial_index=('trial_index', 'max')) \
+        .merge(
+            data_init[['run_id', 'trial_duration_exact']],
+            on='run_id',
+            how='left') \
+        .merge(
+            data_subject[['run_id', 'fps']],
+            on='run_id',
+            how='left')
+
+    print(f"""Not approved runs, et_init statistics: \n"""
+          f"""{grouped_not_approved} \n""")
+
+    # T-Tests
+    print('Time')
+    welch_ttest(
+        data_init.loc[
+            data_init['status'] == 'APPROVED', 'trial_duration_exact'].dropna(),
+        data_init.loc[
+            data_init['status'] == 'RETURNED', 'trial_duration_exact'].dropna())
+
+    print('FPS')
+    welch_ttest(
+        data_subject.loc[data_subject['status'] == 'APPROVED', 'fps'].dropna(),
+        data_subject.loc[data_subject['status'] == 'RETURNED', 'fps'].dropna())

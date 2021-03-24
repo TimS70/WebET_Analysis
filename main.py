@@ -49,5 +49,4 @@ def analyze():
 
 
 if __name__ == '__main__':
-    analyze_dropouts()
-    # main(new_data=False)
+    main(new_data=False)
