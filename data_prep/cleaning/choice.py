@@ -215,8 +215,8 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
     print(
         f"""runs_noisy_logK means noise > {max_noise}. \n""")
 
-    # runs_pos_logK = data_subject.loc[
-    #     data_subject['logK'] > 0, 'run_id']
+    runs_pos_logK = data_subject.loc[
+        data_subject['logK'] > 0, 'run_id']
 
     invalid_runs = list(
 
@@ -224,7 +224,7 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
         set(runs_biasedChoices) |
         set(runs_missingLogK) |
         set(runs_noisy_logK) |
-        # set(runs_pos_logK) |
+        set(runs_pos_logK) |
         set(runs_low_fps) |
         set(runs_low_precision) |
         set(runs_high_offset))
@@ -238,7 +238,7 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
                 'runs_biasedChoices',
                 'runs_missingLogK',
                 'runs_noisy_logK',
-                # 'runs_pos_logK',
+                'runs_pos_logK',
                 'subjects_lowFPS',
                 'runs_low_precision',
                 'runs_high_offset',
@@ -249,7 +249,7 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
                 len(runs_biasedChoices),
                 len(runs_missingLogK),
                 len(runs_noisy_logK),
-                # len(runs_pos_logK),
+                len(runs_pos_logK),
                 len(runs_low_fps),
                 len(runs_low_precision),
                 len(runs_high_offset),
@@ -260,14 +260,13 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
                 len(runs_biasedChoices) / n_runs,
                 len(runs_missingLogK) / n_runs,
                 len(runs_noisy_logK) / n_runs,
-                # len(runs_pos_logK) / n_runs,
+                len(runs_pos_logK) / n_runs,
                 len(runs_low_fps) / n_runs,
                 len(runs_low_precision) / n_runs,
                 len(runs_high_offset) / n_runs,
                 len(invalid_runs) / n_runs
             ]
-        }
-    )
+        })
 
     print(
         f"""\n"""

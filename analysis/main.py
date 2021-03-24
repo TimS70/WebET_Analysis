@@ -31,12 +31,11 @@ def analyze_choice_task():
 
     # corr_analysis_subject
     data_plot = clean_corr_data(
-        data_subject.loc[:, [
-                                'run_id',
-                                'choseLL', 'choice_rt',
-                                'chinFirst', 'LL_top', 'logK',
-                                'attributeIndex', 'optionIndex', 'payneIndex', 'fps',
-                                'gender', 'degree', 'age']])
+        data_subject[[
+            'run_id', 'choseLL', 'choice_rt',
+            'chinFirst', 'LL_top', 'logK',
+            'attributeIndex', 'optionIndex', 'payneIndex', 'fps',
+            'gender', 'degree', 'age']])
 
     corr_columns = [
         'age', 'choseLL',

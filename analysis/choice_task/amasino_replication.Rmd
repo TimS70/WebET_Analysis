@@ -216,13 +216,13 @@ ggsave(file.path(path_results, 'SV', 'rt.pdf'),width=5.5, height=5)
 ggplot(data=SV_bins, aes(x=dSV_bin, y=n_fixations)) +
     theme_bw() +
     geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
-    xlim(-5,5) + ylim(0,10) + 
+    xlim(-5,5) + ylim(0,15) + 
     geom_line(stat="summary", fun="mean", size=.5) +
     stat_summary(fun.data=mean_se, geom="errorbar", width=.8) +
     xlab("SV top - SV bottom") + 
     ylab("Number of Fixations") +
     theme(text=element_text(size=20))
-ggsave(file.path(path_results, 'SV', 'count.pdf'),width=5.5, height=5)
+ggsave(file.path(path_results, 'SV', 'fixations.pdf'),width=5.5, height=5)
 ```
 
 # Eye tracking indices
