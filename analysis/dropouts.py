@@ -3,6 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from pandas import MultiIndex
 
 from data_prep.cleaning.prolific_ids import drop_duplicate_ids
 from utils.add_next_trial import add_next_trial
@@ -110,11 +111,11 @@ def dropouts_participants(data_subject, data_trial):
 
     data_subject.loc[
         data_subject['prolificID'].isin(ids_one_attempt),
-        'status_2_id'] = 'one_attempt'
+        'status_2_id'] = 'attempts_one'
 
     data_subject.loc[
         data_subject['prolificID'].isin(ids_multiple_attempts),
-        'status_2_id'] = 'multiple_attempts'
+        'status_2_id'] = 'attempts_multiple'
 
     print('Attempts not approved')
     ids_one_attempt, ids_multiple_attempts = multi_participation_by_run(
@@ -337,36 +338,54 @@ def multi_participation_by_type(data_trial):
         Most of the participants, who try again, reload at the
         beginning of the experiment.
     """
-    duplicate_subjects = data_trial \
-                             .loc[:, ['prolificID', 'run_id']] \
+    ids_multiple_runs = data_trial[['prolificID', 'run_id']] \
         .drop_duplicates() \
-        .groupby(['prolificID'], as_index=False)['run_id'].count() \
-        .rename(columns={'run_id': 'n'})
-    duplicate_subjects = duplicate_subjects \
-        .loc[duplicate_subjects['n'] > 1, 'prolificID'] \
+        .groupby(['prolificID'], as_index=False) \
+        .agg(n=('run_id', 'count'))
+
+    ids_multiple_runs = ids_multiple_runs \
+        .loc[ids_multiple_runs['n'] > 1, 'prolificID'] \
         .unique()
 
-    runs_max_trial = data_trial.loc[data_trial['prolificID'].isin(duplicate_subjects), :] \
+    runs_max_trial = data_trial \
+        .loc[data_trial['prolificID'].isin(ids_multiple_runs), :] \
         .groupby(['prolificID', 'run_id'], as_index=False)['trial_index'].max() \
         .merge(
             data_trial[['run_id', 'chinFirst', 'trial_index',
                         'trial_type', 'trial_type_nr', 'trial_type_new']],
             on=['run_id', 'trial_index'],
             how='left')
-    runs_max_trial = runs_max_trial.loc[
-        runs_max_trial['trial_type_new'] != 'end', :]
 
     runs_max_trial = add_next_trial(runs_max_trial, data_trial)
 
-    output = runs_max_trial \
-        .groupby(['next_trial_type_new']).nunique()['prolificID'] \
-        .reset_index() \
-        .sort_values(by='prolificID')
+    grouped_trial_type = runs_max_trial \
+        .groupby(['next_trial_type_new'], as_index=False) \
+        .agg(n=('prolificID', 'nunique')) \
+        .sort_values(by='n')
+
     print(
         f"""Those with multiple attempts previously dropped out at: \n"""
-        f"""{output} \n""")
+        f"""Duplicate participants: {len(ids_multiple_runs)}"""
+        f"""{grouped_trial_type} \n""")
 
     write_csv(
-        output,
+        grouped_trial_type,
         'multi_participation_trial_type.csv',
         'results', 'tables', 'dropouts')
+
+    ids_stuck_at_et_init = runs_max_trial.loc[
+        runs_max_trial['next_trial_type_new'] == 'et_init', 'prolificID'] \
+        .unique()
+
+    grouped = runs_max_trial \
+        .loc[
+            runs_max_trial['prolificID'].isin(ids_stuck_at_et_init),
+            ['prolificID', 'run_id', 'trial_index', 'next_trial_type']]
+
+    ids_complete = grouped.loc[grouped['next_trial_type'] == 'end',
+                               'prolificID'].unique()
+
+    print(f"""Participants, who got stuck at et_index: \n"""
+          f"""Total: {len(grouped['prolificID'].unique())} \n"""
+          f"""N complete: {len(ids_complete)} \n"""
+          f"""{grouped.set_index(['prolificID', 'run_id'])}""")
