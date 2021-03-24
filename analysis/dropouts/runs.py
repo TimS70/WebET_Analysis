@@ -13,38 +13,6 @@ from utils.tables import write_csv
 from visualize.dropouts import plot_incomplete_runs
 
 
-def analyze_dropouts():
-
-    print('################################### \n'
-          'Analyze dropouts \n'
-          '################################### \n')
-
-    data_subject = pd.read_csv(
-        os.path.join('data', 'all_trials', 'added_var',
-                     'data_subject.csv'))
-    data_trial = pd.read_csv(
-        os.path.join('data', 'all_trials', 'added_var',
-                     'data_trial.csv')) \
-
-    data_trial = merge_by_subject(data_trial, data_subject,
-                                  'prolificID', 'status')
-
-    # Filter those from prolific
-    data_subject = data_subject[
-        pd.notna(data_subject['prolificID'])]
-    data_trial = data_trial[
-        data_trial['run_id'].isin(data_subject['run_id'])]
-
-    dropouts_participants(data_subject, data_trial)
-
-    # Check incomplete runs
-    report_incomplete_runs(data_trial)
-    dropout_by_task_nr(data_trial)
-    dropout_by_type(data_trial)
-    check_calibration(data_trial)
-    multi_participation_by_type(data_trial)
-
-
 def report_incomplete_runs(data_trial):
     max_trial_by_run = data_trial \
         .groupby(['run_id'], as_index=False).agg(
@@ -85,74 +53,6 @@ def report_incomplete_runs(data_trial):
         f"""n={len(data_incomplete_runs['run_id'])} """
         f"""incomplete runs """
         f"""({round(100 * dropout_rate, 2)}%) \n""")
-
-
-def dropouts_participants(data_subject, data_trial):
-
-    # Mark participants with trials
-    data_subject['status_2_id'] = np.nan
-    data_subject.loc[
-        ~data_subject['run_id'].isin(data_trial['run_id']),
-        'status_2_id'] = 'no_trials'
-
-    runs_returned_no_trials = data_subject.loc[
-              (data_subject['status'] == 'RETURNED') &
-              (data_subject['status_2_id'] == 'no_trials'),
-              'prolificID'].unique()
-    print(f"""Returned and no trials: {len(runs_returned_no_trials)}""")
-
-    # Check for multiple attempts
-    print('Attempts in total')
-    attempts_by_id = multi_participation_by_run(data_trial)
-
-    print('Attempts approved')
-    ids_one_attempt, ids_multiple_attempts = multi_participation_by_run(
-        data_trial[data_trial['status'] == 'APPROVED'])
-
-    data_subject.loc[
-        data_subject['prolificID'].isin(ids_one_attempt),
-        'status_2_id'] = 'attempts_one'
-
-    data_subject.loc[
-        data_subject['prolificID'].isin(ids_multiple_attempts),
-        'status_2_id'] = 'attempts_multiple'
-
-    print('Attempts not approved')
-    ids_one_attempt, ids_multiple_attempts = multi_participation_by_run(
-        data_trial[data_trial['status'] != 'APPROVED'])
-
-    data_subject.loc[
-        data_subject['prolificID'].isin(ids_one_attempt),
-        'status_2_id'] = 'attempts_one'
-
-    data_subject.loc[
-        data_subject['prolificID'].isin(ids_multiple_attempts),
-        'status_2_id'] = 'attempts_multiple'
-
-    # Conclusions
-    freq_table_status = pd.crosstab(
-              index=drop_duplicate_ids(data_subject)['status'],
-              columns="n")
-    print(f"""Freq_table status: {freq_table_status} \n""")
-
-    grouped = data_subject \
-        .assign(status_bin=(data_subject['status'] == 'APPROVED').astype(int)) \
-        .groupby(['status', 'status_2_id'], as_index=False) \
-        .agg(n=('prolificID', 'nunique'))
-    print(f"""Grouped status: \n"""
-          f"""{grouped} \n""")
-
-    print(f"""Freq_table status_2_d: \n"""
-          f"""{pd.crosstab(
-              index=drop_duplicate_ids(data_subject)['status_2_id'], 
-              columns="n")} \n""")
-
-    grouped = data_subject \
-        .assign(status_bin=(data_subject['status'] == 'APPROVED').astype(int)) \
-        .groupby(['status_2_id', 'status'], as_index=False) \
-        .agg(n=('prolificID', 'nunique'))
-    print(f"""Grouped status: \n"""
-          f"""{grouped} \n""")
 
 
 def dropout_by_task_nr(data_trial):
@@ -353,7 +253,7 @@ def multi_participation_by_type(data_trial):
         .agg(trial_index=('trial_index', 'max')) \
         .merge(
             data_trial[['run_id', 'chinFirst', 'trial_index',
-                        'trial_type', 'trial_type_nr', 'trial_type_new']],
+                        'trial_type', 'trial_type_nr', 'trial_type_new', 'trial_duration_exact']],
             on=['run_id', 'trial_index'],
             how='left')
 
@@ -381,7 +281,8 @@ def multi_participation_by_type(data_trial):
     grouped = runs_max_trial \
         .loc[
             runs_max_trial['prolificID'].isin(ids_stuck_at_et_init),
-            ['prolificID', 'run_id', 'trial_index', 'next_trial_type']]
+            ['prolificID', 'run_id', 'trial_index', 'next_trial_type',
+             'trial_duration_exact']]
 
     ids_complete = grouped.loc[grouped['next_trial_type'] == 'end',
                                'prolificID'].unique()
