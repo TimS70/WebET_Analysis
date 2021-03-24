@@ -1,7 +1,7 @@
 import subprocess
 
 from analysis.demographics import analyze_demographics
-from analysis.dropouts import analyze_dropouts
+from analysis.dropouts.main import analyze_dropouts
 from analysis.main import analyze_fix_task, analyze_choice_task
 from data_prep.add_variables.data_quality import add_data_quality
 from data_prep.add_variables.init import global_add_variables_to_datasets
