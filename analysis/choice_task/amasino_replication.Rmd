@@ -86,16 +86,22 @@ summary(data_trial$n_fixations)
 
 # Distribution of k-values
 ````{r, plot_k}
+dir.create(file.path(path_results, 'log_k'), showWarnings = FALSE)
+
 ggplot(data_subject, aes(x=logK))+
     geom_histogram(binwidth=.5, alpha=.5, position="identity")+
     scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
     theme_bw()+theme(text=element_text(size=40))
-    
+ggsave(file.path(path_results, 'log_k', 'log_k_hist.pdf'), 
+	   width=5.5, height=5)
+
 ggplot(data_subject, aes(x=noise))+
     geom_histogram(binwidth=1, alpha=.5, position="identity")+
     scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
     theme_bw()+theme(text=element_text(size=40))
-    
+ggsave(file.path(path_results, 'log_k', 'noise_hist.pdf'), 
+	   width=5.5, height=5)
+
 ggplot(data_subject, aes(x=logK, y=noise)) +
     geom_point(size=2.5, aes(alpha=.5))+
     guides(alpha=FALSE,color=FALSE, shape=FALSE)+
@@ -104,16 +110,22 @@ ggplot(data_subject, aes(x=logK, y=noise)) +
     theme(text=element_text(size=20)) +
     xlab("logK") + ylab("noise") +
     ggtitle('logK vs. noise') 
+ggsave(file.path(path_results, 'log_k', 'log_k_vs_noise.pdf'), 
+	   width=5.5, height=5)
 ````
 
 
 # Histogram of left/right and top/bottom choice distribution
 ```{r, plot_prop_top}
 dir.create(file.path(path_results, 'behavior'),  showWarnings = FALSE)
-ggplot(data_subject, aes(x=choseTop))+
-  geom_histogram(bins=15)+theme_bw()+xlab("Proportion Top Choices")+
-  theme(text=element_text(size=20))+xlim(0,1)
-  
+ggplot(data_subject, aes(x=choseTop)) +
+	geom_histogram(bins=15) + 
+	xlab("Proportion Top Choices") +
+	theme_bw() + 
+	theme(text=element_text(size=20))+xlim(0,1)
+
+ggsave(file.path(path_results, 'behavior', 'top_vs_bottom_choices.pdf'), 
+	   width=5.5, height=5)
 ```
 
 
@@ -187,7 +199,8 @@ ggplot(data=SV_bins, aes(x=dSV_bin, y=choseTop)) +
     stat_summary(fun.data=mean_se, geom="errorbar", width=.8)+
     xlab("SV top - SV bottom")+ylab("Proportion top choices")+
     theme(text=element_text(size=20))+ylim(0,1)
-ggsave(file.path(path_results, 'SV', 'choseTop.pdf'), width=5.5, height=5)
+ggsave(file.path(path_results, 'SV', 'choseTop.pdf'), 
+	   width=5.5, height=5)
 
 ggplot(data=SV_bins, aes(x=dSV_bin, y=rt)) +
     theme_bw() +
