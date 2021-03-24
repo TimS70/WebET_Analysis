@@ -122,53 +122,36 @@ def dropouts_participants(data_subject, data_trial):
 
     data_subject.loc[
         data_subject['prolificID'].isin(ids_one_attempt),
-        'status_2_id'] = 'one_attempt'
+        'status_2_id'] = 'attempts_one'
 
     data_subject.loc[
         data_subject['prolificID'].isin(ids_multiple_attempts),
-        'status_2_id'] = 'multiple_attempts'
+        'status_2_id'] = 'attempts_multiple'
 
     # Conclusions
-    print(
-        f"""Approved: {len(data_subject[
-                               data_subject['status'] == 'APPROVED'])} \n"""
-        f"""Not Approved: {len(data_subject[
-                               data_subject['status'] != 'APPROVED'])} \n"""
-    )
-
     freq_table_status = pd.crosstab(
               index=drop_duplicate_ids(data_subject)['status'],
               columns="n")
     print(f"""Freq_table status: {freq_table_status} \n""")
 
-    freq_table_status = pd.crosstab(
-              index=drop_duplicate_ids(data_subject[
-                  data_subject['status_2_id'] == 'no_trials'])['status'],
-              columns="n")
-    print(f"""Freq_table status no_trials: {freq_table_status} \n""")
-
-    freq_table_status = pd.crosstab(
-              index=drop_duplicate_ids(data_subject[
-                  data_subject['status_2_id'] != 'no_trials'])['status'],
-              columns="n")
-    print(f"""Freq_table status has trials: {freq_table_status} \n""")
+    grouped = data_subject \
+        .assign(status_bin=(data_subject['status'] == 'APPROVED').astype(int)) \
+        .groupby(['status', 'status_2_id'], as_index=False) \
+        .agg(n=('prolificID', 'nunique'))
+    print(f"""Grouped status: \n"""
+          f"""{grouped} \n""")
 
     print(f"""Freq_table status_2_d: \n"""
           f"""{pd.crosstab(
               index=drop_duplicate_ids(data_subject)['status_2_id'], 
               columns="n")} \n""")
 
-    print(f"""Freq_table status_2_d approved: \n"""
-          f"""{pd.crosstab(
-              index=drop_duplicate_ids(data_subject[
-                  data_subject['status'] == 'APPROVED'])['status_2_id'], 
-              columns="n")} \n""")
-
-    print(f"""Freq_table status_2_d not approved: \n"""
-          f"""{pd.crosstab(
-              index=drop_duplicate_ids(data_subject[
-                  data_subject['status'] != 'APPROVED'])['status_2_id'], 
-              columns="n")} \n""")
+    grouped = data_subject \
+        .assign(status_bin=(data_subject['status'] == 'APPROVED').astype(int)) \
+        .groupby(['status_2_id', 'status'], as_index=False) \
+        .agg(n=('prolificID', 'nunique'))
+    print(f"""Grouped status: \n"""
+          f"""{grouped} \n""")
 
 
 def dropout_by_task_nr(data_trial):
