@@ -350,7 +350,7 @@ def multi_participation_by_type(data_trial):
     runs_max_trial = data_trial \
         .loc[data_trial['prolificID'].isin(ids_multiple_runs), :] \
         .groupby(['prolificID', 'run_id'], as_index=False) \
-        .agg(trial_index=('trial_index', 'max'))\
+        .agg(trial_index=('trial_index', 'max')) \
         .merge(
             data_trial[['run_id', 'chinFirst', 'trial_index',
                         'trial_type', 'trial_type_nr', 'trial_type_new']],
