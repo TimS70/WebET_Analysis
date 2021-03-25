@@ -14,8 +14,8 @@ from visualize.choice import plot_aoi_scatter
 def add_aoi_et(data_et):
 
     print(f"""AOI will be calculated. No cluster correction.""")
-    data_et = add_aoi(data_et, 0.3, 0.3)
-    # data_et = aoi_corners(data_et)
+    # data_et = add_aoi(data_et, 0.3, 0.3)
+    data_et = aoi_corners(data_et)
 
     freq_table = pd.crosstab(
         index=data_et['aoi'],
@@ -34,10 +34,10 @@ def add_aoi_et(data_et):
 def add_aoi(data, aoi_width, aoi_height):
     aoi_centers = pd.DataFrame(
         [
-            [(0.05 + 0.9 * 0.2), 0.75],
-            [(0.05 + 0.9 * 0.8), 0.75],
             [(0.05 + 0.9 * 0.2), 0.25],
-            [(0.05 + 0.9 * 0.8), 0.25]
+            [(0.05 + 0.9 * 0.8), 0.25],
+            [(0.05 + 0.9 * 0.2), 0.75],
+            [(0.05 + 0.9 * 0.8), 0.75]
         ],
         columns=['x', 'y'],
         index=['TL', 'TR', 'BL', 'BR']
@@ -57,10 +57,10 @@ def add_aoi(data, aoi_width, aoi_height):
 def aoi_corners(data, aoi_width=0.5, aoi_height=0.5):
     aoi_centers = pd.DataFrame(
         [
-            [0.25, 0.75],
-            [0.75, 0.75],
             [0.25, 0.25],
-            [0.75, 0.25]
+            [0.75, 0.25],
+            [0.25, 0.75],
+            [0.75, 0.75]
         ],
         columns=['x', 'y'],
         index=['TL', 'TR', 'BL', 'BR']

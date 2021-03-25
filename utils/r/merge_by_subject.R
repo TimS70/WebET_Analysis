@@ -1,4 +1,4 @@
-merge_mean_by_subject = function(data, data_source, varName) {
+merge_by_subject = function(data, data_source, varName) {
 	
     grouped = data_source %>%
         dplyr::select(run_id, varName) %>%
