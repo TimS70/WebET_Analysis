@@ -28,30 +28,35 @@ def hist_plots_quality(data_subject):
     
 
 def fix_heatmap(data_et_fix):
-    x = data_et_fix.loc[
-        (data_et_fix['x'] > 0) & (data_et_fix['x'] < 1) &
-        (data_et_fix['y'] > 0) & (data_et_fix['y'] < 1),
-        'x']
 
-    y = data_et_fix.loc[
-        (data_et_fix['x'] > 0) & (data_et_fix['x'] < 1) &
-        (data_et_fix['y'] > 0) & (data_et_fix['y'] < 1),
-        'y']
+    for run in data_et_fix['run_id'].unique():
 
-    s = 34
-    img, extent = my_heatmap(x, y, s=s)
+        data = data_et_fix[
+            (data_et_fix['run_id'] == run) &
+            (data_et_fix['t_task'] > 1000) &
+            (data_et_fix['x'] > 0) & (data_et_fix['x'] < 1) &
+            (data_et_fix['y'] > 0) & (data_et_fix['y'] < 1)]
 
-    plt.figure(figsize=(7, 7))
-    plt.imshow(img, extent=extent, origin='upper', cmap=cm.Greens, aspect=(9 / 16))
-    plt.title("Distribution of fixations after 1 second, $\sigma$ = %d" % s)
+        x = data['x']
+        y = data['y']
 
-    x_pos = [0.2, 0.5, 0.8, 0.2, 0.5, 0.8, 0.2, 0.5, 0.8]
-    y_pos = [0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8]
-    for i in range(0, len(x_pos)):
-        plt.text(x_pos[i], y_pos[i], '+', size=12, ha="center")
+        fig, ax = plt.subplots(figsize=(7, 7))
 
-    save_plot('fix_heatmap.png', 'results', 'plots', 'fix_task')
-    plt.close()
+        s = 34
+        img, extent = my_heatmap(x, y, s=s)
+
+        ax.imshow(img, extent=extent, origin='upper', cmap=cm.Greens, aspect=(9 / 16))
+        ax.set_xlim(0, 1)
+        ax.set_ylim(1, 0)
+        ax.set_title("Distribution of fixations after 1 second, $\sigma$ = %d" % s)
+
+        x_pos = [0.2, 0.5, 0.8, 0.2, 0.5, 0.8, 0.2, 0.5, 0.8]
+        y_pos = [0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8]
+        for i in range(0, len(x_pos)):
+            plt.text(x_pos[i], y_pos[i], '+', size=12, ha="center")
+
+        save_plot(str(run) + '.png', 'results', 'plots', 'fix_task', 'heatmaps')
+        plt.close()
 
 
 # noinspection PyUnboundLocalVariable

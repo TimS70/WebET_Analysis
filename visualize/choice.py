@@ -22,37 +22,43 @@ def plot_aoi_scatter(data_et):
 
 def plot_choice_task_heatmap(data_et):
 
-    if 't_task' in data_et.columns:
-        x = data_et.loc[data_et['t_task'] > 1000, 'x']
-        y = data_et.loc[data_et['t_task'] > 1000, 'y']
-    else:
-        x = data_et.loc[60:, 'x']
-        y = data_et.loc[60:, 'y']
+    for run in data_et['run_id'].unique():
 
-    # Create figure and axes
-    fig, ax = plt.subplots(figsize=(7, 7))
+        # Define data
+        if 't_task' in data_et.columns:
+            data = data_et[
+                (data_et['run_id'] == run) &
+                (data_et['t_task'] > 1000)]
+            x = data['x']
+            y = data['y']
+        else:
+            data = data_et[data_et['run_id'] == run]
+            x = data['x']
+            y = data['y']
 
-    s = 34
-    img, extent = my_heatmap(x, y, s=s)
-    ax.imshow(img, extent=extent, origin='upper', cmap=cm.Greens, aspect=(9 / 16))
-    ax.set_xlim(0, 1)
-    ax.set_ylim(1, 0)
-    # rect = patches.Rectangle((0.05, 0.05), 0.9, 0.4, linewidth=1, edgecolor='black', facecolor='none')
-    # ax.add_patch(rect)
-    # rect = patches.Rectangle((0.05, 0.55), 0.9, 0.4, linewidth=1, edgecolor='black', facecolor='none')
-    # ax.add_patch(rect)
-    #
-    # x_pos = [0.25, 0.75, 0.25, 0.75]
-    # y_pos = [0.25, 0.25, 0.75, 0.75]
-    # for i in range(0, len(x_pos)):
-    #     plt.text(x_pos[i], y_pos[i], '[attribute]', size=15, ha="center")
+        # Create figure and axes
+        fig, ax = plt.subplots(figsize=(7, 7))
 
-    ax.set_title("Distribution of fixations after 1 second, $\sigma$ = %d" % s)
+        s = 34
+        img, extent = my_heatmap(x, y, s=s)
+        ax.imshow(img, extent=extent, origin='upper', cmap=cm.Greens, aspect=(9 / 16))
+        ax.set_xlim(0, 1)
+        ax.set_ylim(1, 0)
+        # rect = patches.Rectangle((0.05, 0.05), 0.9, 0.4, linewidth=1, edgecolor='black', facecolor='none')
+        # ax.add_patch(rect)
+        # rect = patches.Rectangle((0.05, 0.55), 0.9, 0.4, linewidth=1, edgecolor='black', facecolor='none')
+        # ax.add_patch(rect)
+        #
+        # x_pos = [0.25, 0.75, 0.25, 0.75]
+        # y_pos = [0.25, 0.25, 0.75, 0.75]
+        # for i in range(0, len(x_pos)):
+        #     plt.text(x_pos[i], y_pos[i], '[attribute]', size=15, ha="center")
+        ax.set_title("Distribution of fixations after 1 second, $\sigma$ = %d" % s)
 
-    save_plot(
-        'choice_heatmap.png',
-        'results', 'plots', 'choice_task', 'et')
-    plt.close()
+        save_plot(
+            str(run) + '.png',
+            'results', 'plots', 'choice_task', 'et', 'heatmaps')
+        plt.close()
 
 
 def plot_example_eye_movement(data_et, data_trial, run):

@@ -340,7 +340,6 @@ def add_log_k():
         os.path.join(path, 'data_subject.csv'),
         index=False, header=True)
 
-
     return data_subject
 
 
