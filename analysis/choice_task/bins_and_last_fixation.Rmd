@@ -47,6 +47,17 @@ get_packages(c(
 print(getwd())
 ```
 
+# Specific participants
+```{r}
+choice_best_runs = c(7, 45, 48, 58, 63, 96, 103, 197, 212, 238, 344, 358, 
+					 376, 454)
+
+fix_best_runs = c(16,41,126,162,199,205,253,299,318,347,378,414,418,420,427,
+				  437,491)
+
+clustering_best_runs = c(7,32,45,48,63,96,126,128,130,197,205,212,238,275,
+						 280,288,344,420)
+```
 
 
 # Prep data 
@@ -69,19 +80,17 @@ summarize_datasets(data_et, data_trial, data_subject)
 
 ## Check AOI (optionally new AOIs)
 ```{r}
-# data_et = add_new_aoi(data_et, 0.30, 0.30)
+data_et = add_new_aoi(data_et, 0.40, 0.40)
 
 ggplot(data_et %>% filter(aoi != 0), aes(x=x, y=y)) +
     geom_point(size=2.5, aes(alpha=.5))+
     guides(alpha=FALSE,color=FALSE, shape=FALSE)+
     theme_bw() + 
+	xlim(0, 1) + ylim(1, 0) +
     scale_colour_grey() + 
     theme(text=element_text(size=20)) +
     xlab("x") + ylab("y") +
-    ggtitle('aois') 
-
-
-data_trial %>% filter(run_id == 128)
+    ggtitle('AOIs') 
 ```
 
 ## Window
@@ -156,32 +165,23 @@ cor.test(grouped$p_SS, grouped$choseLL)
 ```{r}
 add_lastGazeTop = function(data_trial, data_et) {
     grouped_lastCoordinate = data_et %>%
+    	filter(!aoi %in% c(0, '0') & !is.na(aoi)) %>%
         dplyr::group_by(run_id, trial_index) %>%
-        dplyr::summarise(
-            t_task = max(t_task),
-            .groups = 'keep') %>%
-        merge(data_et %>% 
-                  dplyr::select(run_id, trial_index, t_task, aoi), 
-              by=c('run_id', 'trial_index', 't_task')) %>%
-        mutate(lastGazeTop = factor(
-        	   	as.numeric(aoi %in% c('TL', 'TR')),
-        	   	c('1', '0')))
-    grouped_lastCoordinate
+        slice(n()) %>%
+    	mutate(
+    		lastGazeTop = factor(as.numeric(aoi %in% c('TL', 'TR')),
+    							 c('1', '0')),
+        	lastGazeBottom = factor(as.numeric(aoi %in% c('BL', 'BR')),
+        							c('1', '0')))
     
-    if ('lastGazeTop' %in% names(data_trial)) {
-        data_trial = data_trial %>% dplyr::select(!lastGazeTop)}
-    data_trial = data_trial %>% 
-        merge(
-            grouped_lastCoordinate %>% 
-                dplyr::select(run_id, trial_index, lastGazeTop), 
-            by=c('run_id', 'trial_index'))
+    data_trial = data_trial %>%
+    	merge_by_index(grouped_lastCoordinate, 'lastGazeTop') %>%
+    	merge_by_index(grouped_lastCoordinate, 'lastGazeBottom')
+    
     return(data_trial)
 }
 
 data_trial = add_lastGazeTop(data_trial, data_et)
-data_trial %>%
-    dplyr::select(run_id, trial_index, choseTop, lastGazeTop) %>% 
-	head(5)
 
 lastGaze_long <- data_trial %>%
     dplyr::group_by(run_id, lastGazeTop, withinTaskIndex) %>%
@@ -194,25 +194,11 @@ lastGaze_long <- data_trial %>%
     	choseTop=mean(choseTop),
         .groups = 'keep') 
 
-lastGaze_long %>% 
-	arrange(lastGazeTop, n_trials)
-
-# t-test
-# subjects_noGaze = 
-#     lastGaze_long %>% 
-#     group_by(run_id) %>%
-#     dplyr::summarise(n_subj = n()) %>%
-#     filter(n_subj<2) %>%
-#     arrange(run_id) %>%
-#     dplyr::pull(run_id)
-
-# t.test(
-#     choseTop ~ lastGazeTop,
-#     data=lastGaze_long %>% filter(!(run_id %in% subjects_noGaze)), 
-#     paired=TRUE)
+lastGaze_long %>% filter(run_id %in% fix_best_runs)
 
 # plot
-ggplot(lastGaze_long, aes(x=lastGazeTop, y=choseTop)) +
+ggplot(lastGaze_long %>% filter(run_id %in% c(choice_best_runs, fix_best_runs)), 
+	   aes(x=lastGazeTop, y=choseTop)) +
     geom_violin(fill="gray", size=0) +
     stat_summary(fun=mean,geom="point",shape=45,size=10, color="white") +
     geom_text(x=1.5, y=1.02, label="***") + 
@@ -223,6 +209,31 @@ ggplot(lastGaze_long, aes(x=lastGazeTop, y=choseTop)) +
     theme(text=element_text(size=20))
 ggsave(file.path(path_results, 'et', 'time_bins', 'last_fix_top_vs_choice.png'),
 			 width=5.5, height=5)
+```
+
+## Last fix Bottom
+```{r}
+lastGaze_long_bottom <- data_trial %>%
+    dplyr::group_by(run_id, lastGazeBottom, withinTaskIndex) %>%
+    dplyr::summarise(
+    	choseTop=mean(choseTop),
+    	.groups = 'keep') %>%
+    dplyr::group_by(run_id, lastGazeBottom) %>%
+    dplyr::summarise(
+        n_trials=n(),
+    	choseTop=mean(choseTop),
+        .groups = 'keep') 
+
+ggplot(lastGaze_long_bottom %>% filter(run_id %in% choice_best_runs), 
+	   aes(x=lastGazeBottom, y=choseTop)) +
+    geom_violin(fill="gray", size=0) +
+    stat_summary(fun=mean,geom="point",shape=45,size=10, color="white") +
+    geom_text(x=1.5, y=1.02, label="***") + 
+    annotate("segment",x=1, xend=2, y=1.01, yend=1.01) +
+    theme_bw()+ylim(0,1.03)+xlab("") + 
+    ylab("Proportion top choices") +
+    xlab("last Fixation on Bottom AOIs") + 
+    theme(text=element_text(size=20))
 ```
 
 
@@ -423,23 +434,9 @@ createTimeBins = function(data, nBins) {
 
 data_et = createTimeBins(data_et, 5)
 
-data_et %>%
-    dplyr::select(run_id, withinTaskIndex, timeBin, t_task, aoi) %>%
-    arrange(run_id, withinTaskIndex, timeBin, t_task) %>% 
-	head(50)
-
-data_et %>% 
-	group_by(timeBin) %>%
-	dplyr::summarise(
-		t = mean(t_task),
-		t_min = min(t_task), 
-		t_max = max(t_task), 
-		n = n(),
-		.groups = 'keep')
-
 data_time_bins =  data_et %>%
 	merge_by_index(data_trial, 'choseTop') %>%
-    filter(!is.na(aoi) & aoi!=0) %>%
+    filter(!is.na(aoi) & !aoi %in% c(0, '0')) %>%
     mutate(
         lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
         lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
@@ -542,6 +539,13 @@ ggsave(file.path(path_results, 'et', 'time_bins', 'bins_top_vs_bottom.png'),
 			 width=5.5, height=5)
 ```
 
+## Only 'good participants'
+```{r}
+plot_et_time_bins(data_time_bins %>% filter(
+	run_id %in% c(clustering_best_runs, choice_best_runs,fix_best_runs)))
+ggsave(file.path(path_results, 'et', 'time_bins', 'bins_best_participants.png'), 
+			 width=5.5, height=5)
+```
 
 ## Reduce bins
 ```{r}
@@ -1029,7 +1033,7 @@ ggplot(bins_left_vs_right,
 ```
 
 
-### Eyetracking data bins
+## Eyetracking data bins
 ```{r}
 create_eyeTracking_Bins = function(data, nBins) {
     data$et_bin = 0
@@ -1098,7 +1102,7 @@ data_et_bins_new = data_et %>%
 		choseTop = factor(choseTop, c('1', '0')),
 		et_bin = factor(et_bin))
 
-ggplot(data_et_bins_new, 
+ggplot(data_et_bins_new %>% filter(run_id %in% clustering_best_runs), 
 		aes(x=factor(et_bin), y=p_lookTop, 
 			fill=factor(choseTop, c('1', '0')))) + 
 	geom_violin(alpha=.7, size=0, position="dodge") +
