@@ -11,7 +11,8 @@ from utils.path import makedir
 from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets
 
 
-def add_hit_ratio(data_trial, data_et, max_offset=0.1, min_hit_ratio=0.8):
+def add_hit_ratio(data_trial, data_et, max_offset=0.10,
+                  min_hit_ratio=0.8):
     data_et = data_et \
         .assign(hit=(data_et['offset'] < max_offset).astype(int))
 
@@ -19,8 +20,8 @@ def add_hit_ratio(data_trial, data_et, max_offset=0.1, min_hit_ratio=0.8):
         .groupby(['run_id', 'trial_index'], as_index=False) \
         .agg(hit_mean=('hit', 'mean'))
 
-    grouped = grouped \
-        .assign(hit_suffice=(grouped['hit_mean']>=min_hit_ratio).astype(int))
+    grouped = grouped.assign(
+        hit_suffice=(grouped['hit_mean'] >= min_hit_ratio).astype(int))
 
     data_trial = merge_by_index(data_trial, grouped,
                                 'hit_mean', 'hit_suffice')
@@ -31,45 +32,21 @@ def add_hit_ratio(data_trial, data_et, max_offset=0.1, min_hit_ratio=0.8):
 def add_n_valid_dots(data_subject, data_trial):
     grouped = data_trial[data_trial['chin'] == 1] \
         .groupby(['run_id'], as_index=False) \
-        .agg(n_valid_dots=('hit_suffice', 'count'))
+        .agg(n_valid_dots=('hit_suffice', 'sum'))
 
-    data_subject = merge_by_subject(data_subject, grouped, 'n_valid_dots')
+    data_subject = merge_by_subject(data_subject, grouped,
+                                    'n_valid_dots')
 
-    print(f"""How many dots are valid per subject. Dots during chin-rest """
-          f"""validation: \n"""
+    freq_table = pd.crosstab(
+        index=data_subject['n_valid_dots'],
+        columns="count")
+
+    print(f"""How many dots are valid per subject. Dots during """
+          f"""chin-rest validation: \n"""
+          f"""{data_subject['n_valid_dots'].describe()} \n\n"""
+          f"""{freq_table} \n\n"""
           f"""{data_subject[['run_id', 'fps', 'n_valid_dots']]}""")
     return data_subject
-
-
-def add_data_quality():
-    print('################################### \n'
-          'Calculate data quality variables \n'
-          '################################### \n')
-
-    data_et, data_trial, data_subject = load_all_three_datasets(
-        os.path.join('data', 'fix_task', 'cleaned'))
-
-    # Offset
-    data_et = add_offset(data_et)
-    data_trial = merge_mean_by_index(data_trial, data_et,
-                                     'offset', 'offset_px')
-    data_trial = add_hit_ratio(data_trial, data_et,
-                               max_offset=0.1, min_hit_ratio=0.8)
-
-    data_subject = add_n_valid_dots(data_subject, data_trial)
-
-    exit()
-    data_subject = merge_mean_by_subject(data_subject, data_trial,
-                                    'offset', 'offset_px')
-
-    # Precision
-    data_et = distance_from_xy_mean_square(data_et)
-    data_trial = aggregate_precision_from_et_data(data_trial, data_et)
-    data_subject = merge_mean_by_subject(data_subject, data_trial,
-                                    'precision', 'precision_px')
-
-    save_all_three_datasets(data_et, data_trial, data_subject,
-                            os.path.join('data', 'fix_task', 'added_var'))
 
 
 def euclidean_distance(x, x_target, y, y_target):
@@ -89,12 +66,12 @@ def add_offset(data_et):
         (data_et["x"] * data_et['window_width']),
         (data_et['x_pos'] * data_et['window_width']),
         (data_et["y"] * data_et['window_height']),
-        (data_et['y_pos'] * data_et['window_height'])
-    )
+        (data_et['y_pos'] * data_et['window_height']))
 
-    print(
-        f"""Offset: \n"""
-        f"""{round(data_et[['offset', 'offset_px']].describe(), 2)} \n""")
+    summary = data_et[['offset', 'offset_px']].describe()
+
+    print(f"""Offset: \n"""
+          f"""{round(summary, 2)} \n""")
 
     return data_et
 
@@ -175,3 +152,34 @@ def aggregate_precision_from_et_data(data_trial, data_et):
         )
 
     return data_trial
+
+
+def add_data_quality():
+    print('################################### \n'
+          'Calculate data quality variables \n'
+          '################################### \n')
+
+    data_et, data_trial, data_subject = load_all_three_datasets(
+        os.path.join('data', 'fix_task', 'cleaned'))
+
+    # Offset
+    data_et = add_offset(data_et)
+    data_trial = merge_mean_by_index(data_trial, data_et,
+                                     'offset', 'offset_px')
+    data_trial = add_hit_ratio(data_trial, data_et,
+                               max_offset=0.13, min_hit_ratio=0.8)
+
+    data_subject = add_n_valid_dots(data_subject, data_trial)
+
+    exit()
+    data_subject = merge_mean_by_subject(data_subject, data_trial,
+                                    'offset', 'offset_px')
+
+    # Precision
+    data_et = distance_from_xy_mean_square(data_et)
+    data_trial = aggregate_precision_from_et_data(data_trial, data_et)
+    data_subject = merge_mean_by_subject(data_subject, data_trial,
+                                    'precision', 'precision_px')
+
+    save_all_three_datasets(data_et, data_trial, data_subject,
+                            os.path.join('data', 'fix_task', 'added_var'))
