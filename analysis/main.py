@@ -26,7 +26,7 @@ def analyze_choice_task():
         os.path.join('data', 'choice_task', 'cleaned'))
 
     plot_categorical_confounders(data_subject)
-    plot_example_eye_movement(data_et, data_trial, data_subject['run_id'].unique()[0])
+    plot_example_eye_movement(data_et, data_trial, 43) #data_subject['run_id'].unique()[0])
     plot_choice_task_heatmap(data_et)
 
     # corr_analysis_subject

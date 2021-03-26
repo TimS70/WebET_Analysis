@@ -7,7 +7,7 @@ import pandas as pd
 from analysis.choice_task.test_clusters import test_transition_clusters
 from data_prep.add_variables.aoi import add_fixation_counter, count_fixations_on_trial_level, \
     add_aoi_counts_on_trial_level, add_aoi_et, match_remaining_et_trials, \
-    match_remaining_et_runs
+    match_remaining_et_runs, create_aoi_columns
 from data_prep.add_variables.et_indices import add_et_indices
 from utils.data_frames import merge_by_index, merge_mean_by_subject
 from utils.path import makedir
@@ -48,12 +48,12 @@ def add_variables_choice():
 
     # AOIs
     data_et = add_aoi_et(data_et)
+    data_et = create_aoi_columns(data_et)
     data_trial = match_remaining_et_trials(data_trial, data_et)
     data_trial = add_aoi_counts_on_trial_level(data_trial, data_et)
     data_trial = add_et_indices(data_trial, data_et)
 
-    data_subject = add_et_indices_subject(
-        data_subject, data_trial, 5)
+    data_subject = add_et_indices_subject(data_subject, data_trial, 5)
 
     data_et = add_fixation_counter(data_et)
 

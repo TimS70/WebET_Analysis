@@ -1,0 +1,978 @@
+---
+title: 'Replication from Amasino et al. (2019)'
+output:
+  html_document:
+    df_print: paged
+---
+
+# Setup
+```{r, setup, message=FALSE, warning=FALSE}
+root = "C:/Users/User/GitHub/WebET_Analysis"
+path_results = file.path(root, 'results', 'plots', 'choice_task')
+
+knitr::opts_knit$set(root.dir = normalizePath(file.path('..', '..')))
+
+knitr::opts_knit$get("root.dir")
+
+
+source(file.path(root, 'utils', 'r', 'geom_split_violin.R'))
+source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
+source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
+source(file.path(root, 'utils', 'r', 'merge_by_index.R'))
+source(file.path(root, 'utils', 'r', 'summarize_datasets.R'))
+source(file.path(root, 'utils', 'r', 'get_packages.R'))
+source(file.path(root, 'utils', 'r', 'remove_runs.R'))
+source(file.path(root, 'utils', 'r', 'add_x_count.R'))
+
+get_packages(c(
+	'plyr',
+	'dplyr', 
+	"effsize",
+	'e1071',
+	"ggplot2",
+	"ggsignif",
+	'knitrProgressBar',
+	'lme4',
+	'progress',
+	'QuantPsyc',
+	"RColorBrewer",
+	'reshape2',
+	'tidyr'))
+
+print(getwd())
+```
+
+
+# Read and create datasets
+```{r, load_datasets}
+data_subject = read.csv(
+    file.path(root, 'data', 'choice_task', 'cleaned', 
+              'data_subject.csv'))
+
+data_trial = read.csv(
+    file.path(root, 'data', 'choice_task', 'cleaned', 
+              'data_trial.csv'))
+
+data_et = read.csv(
+    file.path(root, 'data', 'choice_task', 'cleaned', 
+              'data_et.csv'))
+
+summarize_datasets(data_et, data_trial, data_subject)
+```
+
+## k-values
+```{r, add_k_values}
+data_trial = merge_mean_by_subject(data_trial, data_subject, 'logK')
+data_trial = merge_mean_by_subject(data_trial, data_subject, 'noise')
+```
+
+
+## fixations
+```{r, add_fixations}
+grouped_fixations = data_et %>%
+    group_by(run_id, withinTaskIndex) %>%
+    dplyr::summarise(
+        n_fixations = length(unique(fix_counter)),
+        .groups='keep')
+
+data_trial = merge(
+    data_trial,
+    grouped_fixations,
+    by=c('run_id', 'withinTaskIndex'))
+
+summary(data_trial$n_fixations)
+```
+
+
+# Distribution of k-values
+````{r, plot_k}
+dir.create(file.path(path_results, 'log_k'), showWarnings = FALSE)
+
+ggplot(data_subject, aes(x=logK))+
+    geom_histogram(binwidth=.5, alpha=.5, position="identity")+
+    scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
+    theme_bw()+theme(text=element_text(size=40))
+ggsave(file.path(path_results, 'log_k', 'log_k_hist.pdf'), 
+	   width=5.5, height=5)
+
+ggplot(data_subject, aes(x=noise))+
+    geom_histogram(binwidth=1, alpha=.5, position="identity")+
+    scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
+    theme_bw()+theme(text=element_text(size=40))
+ggsave(file.path(path_results, 'log_k', 'noise_hist.pdf'), 
+	   width=5.5, height=5)
+
+ggplot(data_subject, aes(x=logK, y=noise)) +
+    geom_point(size=2.5, aes(alpha=.5))+
+    guides(alpha=FALSE,color=FALSE, shape=FALSE)+
+    theme_bw() + 
+    scale_colour_grey() + 
+    theme(text=element_text(size=20)) +
+    xlab("logK") + ylab("noise") +
+    ggtitle('logK vs. noise') 
+ggsave(file.path(path_results, 'log_k', 'log_k_vs_noise.pdf'), 
+	   width=5.5, height=5)
+````
+
+
+# Histogram of left/right and top/bottom choice distribution
+```{r, plot_prop_top}
+dir.create(file.path(path_results, 'behavior'),  showWarnings = FALSE)
+ggplot(data_subject, aes(x=choseTop)) +
+	geom_histogram(bins=15) + 
+	xlab("Proportion Top Choices") +
+	theme_bw() + 
+	theme(text=element_text(size=20))+xlim(0,1)
+
+ggsave(file.path(path_results, 'behavior', 'top_vs_bottom_choices.pdf'), 
+	   width=5.5, height=5)
+```
+
+
+# Subjective value 
+## Subjective value for top and bottom options
+```{r}
+subjectiveValues = function(data) {
+    data$svLL = data$aLL / (1 + exp(data$logK) * data$tLL)
+    data$svSS = data$aSS / (1 + exp(data$logK) * data$tSS)
+    data$dSV_LLSS = data$svLL - data$svSS
+    
+    data$svT = data$aT / (1+ exp(data$logK) * data$tT)
+    data$svB = data$aB / (1+ exp(data$logK) * data$tB)
+    data$dSV_TB = data$svT - data$svB
+    
+    return(data)
+}
+
+data_trial = subjectiveValues(data_trial)
+
+
+data_trial %>%
+    dplyr::select(run_id, aT, tT, svT, aB, tB, svB, dSV_TB, choseTop) %>%
+    mutate(across(c('svT', 'svB', 'dSV_TB'), round, 2)) %>%
+    arrange(dSV_TB) %>%
+	head(5)
+```
+
+## ChoseTop by dSV bins
+```{r}
+data_trial$dSV_bin = cut(
+				data_trial$dSV_TB,
+		    breaks = seq(-5, 5, 1),
+		    labels = seq(-4.5, 4.5, 1),
+    include.lowest=TRUE) %>%
+    paste() %>%
+    as.numeric()
+
+SV_bins = data_trial %>%
+		add_x_count(data_et) %>%
+    dplyr::group_by(run_id, dSV_bin) %>%
+    dplyr::summarise(
+        n=n(),
+        logK = mean(logK),
+        noise = mean(noise),
+        choseTop=mean(choseTop), 
+        rt=mean(trial_duration_exact)/1000, 
+        n_fixations = mean(n_fixations),
+        count=mean(x_count),
+        .groups = 'keep') %>%
+    filter(n>1) %>%
+    arrange(dSV_bin)
+
+SV_bins %>% head(5)
+
+print(
+    paste(
+        'Remaining subjects: ', 
+        SV_bins %>% 
+            dplyr::pull(run_id) %>%
+            unique() %>%
+            length()))
+
+dir.create(file.path(path_results, 'SV'),  showWarnings = FALSE)
+
+ggplot(data=SV_bins, aes(x=dSV_bin, y=choseTop)) + 
+    theme_bw() +
+    geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
+    xlim(-5,5) +
+    geom_line(stat="summary", fun="mean", size=.5)+
+    stat_summary(fun.data=mean_se, geom="errorbar", width=.8)+
+    xlab("SV top - SV bottom")+ylab("Proportion top choices")+
+    theme(text=element_text(size=20))+ylim(0,1)
+ggsave(file.path(path_results, 'SV', 'choseTop.pdf'), 
+	   width=5.5, height=5)
+
+ggplot(data=SV_bins, aes(x=dSV_bin, y=rt)) +
+    theme_bw() +
+    geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
+    xlim(-5,5) + ylim(0, 6.5) +
+    geom_line(stat="summary", fun="mean", size=.5) +
+    stat_summary(fun.data=mean_se, geom="errorbar", width=.8) +
+    xlab("SV top - SV bottom") + 
+    ylab("Response Time (s)") +
+    theme(text=element_text(size=20))
+ggsave(file.path(path_results, 'SV', 'rt.pdf'),width=5.5, height=5)
+
+ggplot(data=SV_bins, aes(x=dSV_bin, y=n_fixations)) +
+    theme_bw() +
+    geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
+    xlim(-5,5) + ylim(0,15) + 
+    geom_line(stat="summary", fun="mean", size=.5) +
+    stat_summary(fun.data=mean_se, geom="errorbar", width=.8) +
+    xlab("SV top - SV bottom") + 
+    ylab("Number of Fixations") +
+    theme(text=element_text(size=20))
+ggsave(file.path(path_results, 'SV', 'fixations.pdf'),width=5.5, height=5)
+```
+
+# Eye tracking indices
+## Correlation of Eye tracking indices and discount rate
+```{r, eyetracking_indices}
+dir.create(file.path(path_results, 'et'),  showWarnings = FALSE)
+ggplot(data_subject %>% filter(!is.na(optionIndex)), 
+       aes(x=optionIndex, y=logK)) +
+		geom_point(size=2.5, aes(alpha=.5)) +
+		guides(alpha=FALSE,color=FALSE, shape=FALSE) +
+		theme_bw() + 
+		xlim(-1,1) +
+		theme(text=element_text(size=20))+
+		xlab("Option index") +
+		ylab("log(k)") + 
+		scale_colour_grey()
+ggsave(file.path(path_results, 'et', 'logK_oi.pdf'), width=5.7, height=5)
+
+data_test = data_subject %>% filter(!is.na(optionIndex))
+cor.test(data_test$optionIndex, data_test$logK) 
+
+ggplot(data_subject %>% filter(!is.na(attributeIndex)), 
+       aes(x=attributeIndex, y=logK)) +
+		geom_point(size=2.5, aes(alpha=.5)) +
+		guides(alpha=FALSE,color=FALSE, shape=FALSE) +
+		theme_bw() + 
+		xlim(-1,1) +
+		scale_colour_grey()
+		theme(text=element_text(size=20)) +
+		xlab("Attribute index") + ylab("log(k)") 
+ggsave(file.path(path_results, 'et', 'logK_ai.pdf'),width=5.7, height=5)
+
+data_test = data_subject %>% filter(!is.na(attributeIndex))
+cor.test(data_test$attributeIndex, data_test$logK) 
+
+#Plot correlation between Payne index and discount rate
+#Replication sample
+ggplot(data_subject %>% filter(!is.na(attributeIndex)), 
+       aes(x=payneIndex, y=logK)) +
+		geom_point(size=2.5, aes(alpha=.5))+
+		guides(alpha=FALSE,color=FALSE, shape=FALSE)+
+		theme_bw() + 
+		xlim(-1,1) + 
+		scale_colour_grey() + 
+		theme(text=element_text(size=20))+
+		xlab("Payne index") +
+		ylab("log(k)") 
+ggsave(file.path(path_results, 'et', 'logK_pi.pdf'),width=5.7, height=5)
+
+data_test = data_subject %>% filter(!is.na(payneIndex))
+cor.test(data_test$payneIndex, data_test$logK) 
+```
+
+## Correlation of Eye tracking indices among each other
+```{r}
+ggplot(data_subject %>% 
+           filter(!is.na(optionIndex) & !is.na(attributeIndex)), 
+       aes(x=optionIndex, y=attributeIndex)) +
+		geom_point(size=2.5, aes(alpha=.5)) +
+		guides(alpha=FALSE,color=FALSE, shape=FALSE) +
+		theme_bw() + 
+		xlim(-1,1) +
+		theme(text=element_text(size=20))+
+		xlab("Option index") +
+		ylab("Attribute Index") + 
+		scale_colour_grey()
+ggsave(file.path(path_results, 'et', 'oi_ai.pdf'),width=5.7, height=5)
+
+data_test = data_subject %>% 
+    filter(!is.na(optionIndex) & !is.na(attributeIndex))
+cor.test(data_test$optionIndex, data_test$attributeIndex) 
+
+ggplot(data_subject %>% 
+           filter(!is.na(optionIndex) & !is.na(payneIndex)), 
+       aes(x=optionIndex, y=payneIndex)) +
+		geom_point(size=2.5, aes(alpha=.5))+
+		guides(alpha=FALSE,color=FALSE, shape=FALSE) +
+		theme_bw() + 
+		xlim(-1,1) +
+		scale_colour_grey()
+		theme(text=element_text(size=20)) +
+		xlab("Option Index") + ylab("Payne Index") 
+ggsave(file.path(path_results, 'et', 'oi_pi.pdf'), width=5.7, height=5)
+
+data_test = data_subject %>% 
+    filter(!is.na(optionIndex) & !is.na(payneIndex))
+cor.test(data_test$optionIndex, data_test$payneIndex) 
+
+#Plot correlation between Payne index and discount rate
+#Replication sample
+ggplot(data_subject %>% 
+    filter(!is.na(payneIndex) & !is.na(attributeIndex)), 
+       aes(x=attributeIndex, y=payneIndex)) +
+		geom_point(size=2.5, aes(alpha=.5))+
+		guides(alpha=FALSE,color=FALSE, shape=FALSE) +
+		theme_bw() + 
+		xlim(-1,1) + 
+		scale_colour_grey() + 
+		theme(text=element_text(size=20)) +
+		xlab("Attribute index") +
+		ylab("Payne Index") 
+ggsave(file.path(path_results, 'et', 'ai_pi.pdf'), width=5.7, height=5)
+
+data_test = data_subject %>% 
+    filter(!is.na(payneIndex) & !is.na(attributeIndex))
+cor.test(data_test$attributeIndex, data_test$payneIndex) 
+```
+
+### Trial bins
+Little variance across the trials but this could also be due to the lower sample size
+```{r}
+data = data_trial
+nBins = 8
+
+data = data %>%
+    mutate(trial_bin = cut(
+    		withinTaskIndex, nBins, include.lowest=TRUE, labels=c(1:nBins)))
+    
+grouped_choseLL = data %>% 
+    group_by(run_id, trial_bin) %>%
+    dplyr::summarise(
+    	choseLL = mean(choseLL),
+    	.groups='keep')
+
+grouped_trialMeans = data %>%
+    group_by(trial_bin) %>%
+    dplyr::summarise(
+    	trialMeans = mean(withinTaskIndex),
+    	.groups = 'keep')
+
+trial_bins = merge(grouped_choseLL, grouped_trialMeans, by='trial_bin')
+
+trial_bins %>% head(5)
+
+ggplot(
+    data=trial_bins, 
+    aes(x=trialMeans, y=choseLL)) + 
+    theme_bw() +
+    geom_line(color='grey',alpha=.2, aes(group=as.numeric(run_id))) +
+    xlim(0, 80) +
+    geom_line(stat="summary", fun="mean", size=.5)+
+    stat_summary(fun.data=mean_se, geom="errorbar", width=.8)+
+    xlab("Trial_index") + 
+    ylab("Proportion LL choices") + 
+    ggtitle("ChoseLL across trials") +
+    theme(text=element_text(size=20))+ylim(0,1)
+ggsave(file.path(path_results, 'behavior', 'chose_ll_vs_trials.pdf'), 
+			 width=5.7, height=5)
+```
+
+
+
+
+# Eye Tracking Bins
+Eye tracking bins with average proportion of looking top for each 
+subject over trials when they chose the top option or the bottom option.
+
+## Create time bins
+```{r}
+createTimeBins = function(data, nBins) {
+    data$timeBin = 0
+    progress_bar <- progress_estimated(length(unique(data$run_id)), 0)
+    
+    for (subject in unique(data$run_id)){
+        df_subject = data %>% filter(run_id == subject)
+        
+        for (trial in unique(df_subject$withinTaskIndex)) {
+            df_trial = df_subject %>% filter(withinTaskIndex == trial)
+            
+            this_timeBin = cut(
+                df_trial$t_task, nBins,
+                labels = c(1:nBins),
+                include.lowest=TRUE)
+            
+            data = data %>%
+                mutate(timeBin=replace(
+                    timeBin, 
+                    run_id==subject & withinTaskIndex==trial, 
+                    this_timeBin))
+        }
+        progress_bar$pause(0.1)$tick()$print()
+    }
+    return(data)
+}
+
+data_et = createTimeBins(data_et, 5)
+
+data_et %>%
+    dplyr::select(run_id, withinTaskIndex, timeBin, t_task, aoi) %>%
+    arrange(run_id, withinTaskIndex, timeBin, t_task) %>% 
+	head(5)
+```
+
+
+```{r}
+timeBins_choseTB_long = data_et %>%
+	merge(
+		data_trial %>% dplyr::select(run_id, trial_index, choseTop),
+		by=c('run_id', 'trial_index')) %>%
+    filter(
+    	!is.na(aoi) & aoi!=0) %>%
+    mutate(
+        lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
+        lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
+    dplyr::group_by(run_id, choseTop, timeBin) %>%
+    dplyr::summarise(
+        n = n(),
+        n_lookTop = sum(lookTop),
+        n_lookBottom = sum(lookBottom),    
+        p_lookTop = sum(lookTop)/n,
+        p_lookBottom = sum(lookBottom)/n,
+        .groups = 'keep') %>%
+    arrange(choseTop)
+
+timeBins_choseTB_long %>% head(5)
+
+timeBins_choseTB_long %>%
+    group_by(run_id, choseTop) %>%
+    dplyr::summarise(
+    	n=length(unique(timeBin)),
+    	.groups = 'keep') %>%
+    filter(n<5)
+
+subjects_not_enough_bins = timeBins_choseTB_long %>%
+    group_by(run_id, choseTop) %>%
+    dplyr::summarise(
+    	n=length(unique(timeBin)),
+    	.groups = 'keep') %>%
+    filter(n<5) %>%
+    dplyr::pull(run_id)
+
+timeBins_choseTB_long %>%
+    filter(timeBin %in% c(4, 5)) %>%
+    dplyr::group_by(timeBin, choseTop) %>%
+    dplyr::summarise(
+    	p_lookTop = mean(p_lookTop),
+    	.groups = 'keep')
+#Violin plot of time bins
+
+timeBins_choseTB_long$choseTop = as.factor(timeBins_choseTB_long$choseTop)
+
+for (bin in unique(timeBins_choseTB_long$timeBin)) {
+    print(t.test(p_lookTop ~ choseTop, 
+                 data=timeBins_choseTB_long %>% 
+                     filter(timeBin==bin &
+                            !(run_id %in% subjects_not_enough_bins)), 
+                 paired=TRUE))
+}
+
+ggplot(timeBins_choseTB_long, 
+       aes(x=factor(timeBin), y=p_lookTop, fill=factor(choseTop, c('1', '0')))) +
+    geom_split_violin(alpha=.7, size=1, position="dodge") +
+    stat_summary(
+        fun=mean, geom="point",
+        shape=45,size=10,
+        position=position_dodge(.9), 
+        aes(color=factor(choseTop, c('1', '0')))) +
+    theme_bw() + 
+    theme(text=element_text(size=20), 
+    legend.position="bottom") +
+    ggtitle('Eye-tracking time bins') +
+    scale_colour_manual(
+        values=c("1"="black", "0"="white"), 
+        name="", 
+        labels=c("Chose Top", "Chose Bottom")) +
+    scale_fill_grey(
+        start=.3, end=.7, name="",
+        labels=c("Chose Top", "Chose Bottom")) +
+              # If significant
+    geom_text(x=5, y=1.03, label="***") + 
+    annotate("segment",x=4.7, xend=5.3, y=1.02, yend=1.02) +
+    ylab("Proportion looking top") +
+    xlab("Time bins")
+ggsave(file.path(path_results, 'et', 'bins_top_vs_bottom.pdf'), 
+			 width=5.5, height=5)
+```
+
+# Last fixation
+## Proportion of top choice 
+```{r}
+add_lastGazeTop = function(data_trial, data_et) {
+    grouped_lastCoordinate = data_et %>%
+        dplyr::group_by(run_id, trial_index) %>%
+        dplyr::summarise(
+            t_task = max(t_task),
+            .groups = 'keep') %>%
+        merge(data_et %>% 
+                  dplyr::select(run_id, trial_index, t_task, aoi), 
+              by=c('run_id', 'trial_index', 't_task')) %>%
+        mutate(lastGazeTop = as.numeric(aoi %in% c('TL', 'TR')))
+    grouped_lastCoordinate
+    
+    if ('lastGazeTop' %in% names(data_trial)) {
+        data_trial = data_trial %>% dplyr::select(!lastGazeTop)}
+    data_trial = data_trial %>% 
+        merge(
+            grouped_lastCoordinate %>% 
+                dplyr::select(run_id, trial_index, lastGazeTop), 
+            by=c('run_id', 'trial_index'))
+    return(data_trial)
+}
+
+data_trial = add_lastGazeTop(data_trial, data_et)
+data_trial %>%
+    dplyr::select(run_id, trial_index, choseTop, lastGazeTop) %>% 
+	head(5)
+```
+
+```{r}
+lastGaze_long <- data_trial %>%
+    dplyr::select(run_id, withinTaskIndex, lastGazeTop, choseTop) %>%
+    dplyr::group_by(run_id, lastGazeTop, withinTaskIndex) %>%
+    dplyr::summarise(
+    	choseTop=mean(choseTop),
+    	.groups = 'keep') %>%
+    dplyr::group_by(run_id, lastGazeTop) %>%
+    dplyr::summarise(
+        n=n(),
+    	choseTop=mean(choseTop),
+        .groups = 'keep') 
+
+lastGaze_long %>% head(5)
+
+# t-test
+subjects_noGaze = 
+    lastGaze_long %>% 
+    group_by(run_id) %>%
+    dplyr::summarise(n_subj = n()) %>%
+    filter(n_subj<2) %>%
+    arrange(run_id) %>%
+    dplyr::pull(run_id)
+
+lastGaze_long$lastGazeTop = factor(lastGaze_long$lastGazeTop, c('1', '0'))
+t.test(
+    choseTop ~ lastGazeTop,
+    data=lastGaze_long %>% filter(!(run_id %in% subjects_noGaze)), 
+    paired=TRUE)
+
+# plot
+ggplot(lastGaze_long, aes(x=lastGazeTop, y=choseTop)) +
+    geom_violin(fill="gray", size=0) +
+    stat_summary(fun=mean,geom="point",shape=45,size=10, color="white") +
+    geom_text(x=1.5, y=1.02, label="***") + 
+    annotate("segment",x=1, xend=2, y=1.01, yend=1.01) +
+    theme_bw()+ylim(0,1.03)+xlab("") + 
+    ylab("Proportion top choices") +
+    xlab("last Fixation on Top AOIs") + 
+    theme(text=element_text(size=20))
+ggsave(file.path(path_results, 'et', 'last_gaze_vs_choice.pdf'), 
+			 width=5.5, height=5)
+```
+
+
+## Proportion of LL choice 
+```{r}
+add_lastGazeLL = function(data_trial, data_et) {
+    grouped_lastCoordinate = data_et %>%
+        dplyr::group_by(run_id, trial_index) %>%
+        dplyr::summarise(
+        	t_task = max(t_task), 
+        	.groups = 'keep') %>%
+        merge(data_et %>% 
+                  dplyr::select(run_id, trial_index, t_task, aoi, LL_top) %>%
+                  filter(aoi!="0"), 
+              by=c('run_id', 'trial_index', 't_task')) %>%
+        mutate(lastGazeLL = as.numeric(
+            (aoi %in% c('TL', 'TR') & LL_top==1) |
+            (aoi %in% c('BL', 'BR') & LL_top==0)), 
+        ) 
+   
+    if ('lastGazeLL' %in% names(data_trial)) {
+        data_trial = data_trial %>% dplyr::select(!lastGazeLL)}
+    data_trial = data_trial %>% 
+        merge(
+            grouped_lastCoordinate %>% 
+                dplyr::select(run_id, trial_index, lastGazeLL), 
+            by=c('run_id', 'trial_index'))
+    
+    return(data_trial)
+}
+
+data_trial = add_lastGazeLL(data_trial, data_et)
+```
+
+```{r}
+grouped_lastCoordinate = data_et %>%
+    dplyr::group_by(run_id, trial_index) %>%
+    dplyr::summarise(
+    	t_task = max(t_task), 
+    	.groups='keep') %>%
+    merge(data_et %>% 
+              dplyr::select(run_id, trial_index, t_task, aoi, LL_top) %>%
+              filter(aoi!="0"), 
+          by=c('run_id', 'trial_index', 't_task')) %>%
+    mutate(lastGazeLL = as.numeric(
+        (aoi %in% c('TL', 'TR') & LL_top==1) |
+        (aoi %in% c('BL', 'BR') & LL_top==0)), 
+    ) %>% 
+    merge(data_trial %>%
+              dplyr::select(run_id, trial_index, 
+                            option_TL, option_TR, option_BR, option_BL,
+                            choseLL),
+          by=c('run_id', 'trial_index'))
+
+grouped_lastCoordinate %>%
+    filter(lastGazeLL==0) %>% 
+	head(5)
+```
+
+```{r}
+lastGaze_long <- data_trial %>% 
+    dplyr::select(run_id, withinTaskIndex, lastGazeLL, choseLL) %>%
+    dplyr::group_by(run_id, lastGazeLL, withinTaskIndex) %>%
+    dplyr::summarise(
+    	choseLL=mean(choseLL),
+    	.groups = 'keep') %>%
+    dplyr::group_by(run_id, lastGazeLL) %>%
+    dplyr::summarise(
+        n = n(),
+        choseLL = mean(choseLL),
+        .groups = 'keep') 
+
+lastGaze_long %>% head(5)
+
+subjects_noGaze = lastGaze_long %>% 
+    group_by(run_id) %>%
+    dplyr::summarise(
+    	n_subj = n(), 
+    	.groups = 'keep') %>%
+    filter(n_subj<2) %>%
+    arrange(run_id) %>%
+    dplyr::pull(run_id)
+
+lastGaze_long$lastGazeLL = factor(lastGaze_long$lastGazeLL, c('1', '0'))
+t.test(
+    choseLL ~ lastGazeLL,
+    data=lastGaze_long %>% filter(!(run_id %in% subjects_noGaze)), 
+    paired=TRUE)
+
+ggplot(lastGaze_long, 
+       aes(x=lastGazeLL, y=choseLL)) +
+    geom_violin(fill="gray", size=0) +
+    stat_summary(fun=mean,geom="point",shape=45,size=10, color="white") +
+    geom_text(x=1.5, y=1.02, label="***") + 
+    annotate("segment",x=1, xend=2, y=1.01, yend=1.01) +
+    theme_bw()+ylim(0,1.03)+xlab("") + 
+    ylab("Proportion LL choices") +
+    xlab("last Fixation on LL AOIs") + 
+    theme(text=element_text(size=20))
+ggsave(file.path(path_results, 'et', 'last_fix_ll_vs_choice_ll.pdf'), 
+			 width=5.5, height=5)
+```
+
+
+
+# Error Analyis
+Error trials are those that are not predicted based on the subjective values, 
+which themselves are based on individual's fitted k value
+## Find Error trials
+```{r}
+identify_error_trials = function(data) {
+    data$predictLL = as.integer(data$svLL > data$svSS)
+    data$errorTrial = as.integer((data$choseLL != data$predictLL))
+    data$patientError = as.integer((data$choseLL & !data$predictLL))
+    data$impatientError = as.integer((!data$choseLL & data$predictLL))
+    return(data)
+}
+
+data_trial = identify_error_trials(data_trial)
+
+data_trial %>% 
+    dplyr::select(svLL, svSS, predictLL, choseLL, 
+                  errorTrial, patientError, impatientError) %>% 
+	head(5)
+   
+data_trial %>%
+    dplyr::group_by(run_id) %>%
+    dplyr::summarise(
+    	choseLL = mean(choseLL), 
+    	errorTrial=sum(errorTrial),
+    	.groups = 'keep') %>% 
+	head(5)
+```
+
+
+## Find Correct trial for each Error trial
+````{r}
+matchTrials = function(data) {
+    data$matched_trial=0
+    for (i in 1:nrow(data)) {
+        if (data[i, ]$errorTrial) {
+            if (data[i, ]$impatientError) {
+                correctTrials = data %>% 
+                    filter(
+                        run_id==data[i, ]$run_id & 
+                        !errorTrial & choseLL) %>%
+                    dplyr::select(run_id, withinTaskIndex, dSV_LLSS)
+                
+            } 
+            if (data[i, ]$patientError) {
+                correctTrials = data %>% 
+                    filter(
+                        run_id==data[i, ]$run_id & 
+                        !errorTrial & !choseLL) %>%
+                    dplyr::select(run_id, withinTaskIndex, dSV_LLSS)
+            }
+        # If it is an error trial  
+            
+            if (nrow(correctTrials) > 0) {
+                correctTrials$dSV_difference = 
+                    abs(correctTrials$dSV_LLSS - data[i, ]$dSV_LLSS)
+            
+                matched_trials = correctTrials %>%
+                    filter(dSV_difference == 
+                                min(correctTrials$dSV_difference)) %>%
+                    dplyr::pull(withinTaskIndex)
+            
+                data[i, ]$matched_trial = matched_trials[1]
+                
+                if (length(matched_trials)>1) {
+                    already_matched = data %>% 
+                        filter(run_id==data[i, ]$run_id) %>%
+                        dplyr::pull(matched_trial)
+                  
+                    for (j in 1:length(matched_trials)) {
+                        if (!(matched_trials[j] %in% already_matched)) {
+                            data[i, ]$matched_trial = matched_trials[j]
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return(data)
+}
+data_trial = matchTrials(data_trial)
+
+data_trial %>% 
+#    filter(errorTrial==1) %>%
+    dplyr::select(errorTrial, patientError, 
+    			  impatientError, matched_trial) %>% 
+	head(5)
+
+````
+
+## ET indices and reaction time for error trials
+Do subjects behave differently when they correctly choose LL (as expected) than when they unexpectedly chose SS instead?
+
+### Group by LL or SS expected
+```{r}
+data_trial = data_trial %>%
+    mutate(LLexpected = as.numeric(svLL > svSS))
+
+data_trial %>%
+    dplyr:: select(svLL, svSS, LLexpected) %>% 
+	head(5)
+```
+
+
+### Filter those subjects with matched error and correct trials
+````{r}
+subjects_LLcorrect = data_trial %>%
+    filter(LLexpected==1) %>%
+    dplyr::group_by(run_id) %>%
+    dplyr::summarise(
+    	n_unique_matched = length(unique(matched_trial)),
+    	.groups = 'keep') %>%
+    filter(n_unique_matched>2) %>%
+    dplyr::pull(run_id)
+subjects_LLcorrect
+
+length(subjects_LLcorrect)
+
+subjects_SScorrect = data_trial %>%
+    filter(LLexpected==0) %>%
+    dplyr::group_by(run_id) %>%
+    dplyr::summarise(
+    	n_unique_matched = length(unique(matched_trial)),
+    	.groups = 'keep') %>%
+    filter(n_unique_matched>2) %>%
+    dplyr::pull(run_id)
+subjects_SScorrect
+
+length(subjects_SScorrect)
+```
+
+
+Dianna found differences reaction time and option index
+
+### group_by(LLexpected, run_id, errorTrial)
+```{r}
+grouped = data_trial %>%
+    filter(
+        (LLexpected==1 & run_id %in% subjects_LLcorrect) |
+        (LLexpected==0 & run_id %in% subjects_SScorrect)) %>%
+    dplyr::group_by(LLexpected, run_id, errorTrial) %>%
+    dplyr::summarise(
+    	n = n(), 
+		rt = mean(trial_duration_exact), 
+		optionIndex = mean(optionIndex), 
+		attributeIndex = mean(attributeIndex),
+		payneIndex = mean(payneIndex),
+		.groups = 'keep') %>%
+    mutate(
+        errorTrial = factor(errorTrial),
+        rt = rt/1000)
+
+grouped %>% head(5)
+```
+
+## t-test LL expected 
+Do subjects behave differently when they correctly choose LL (as expected) than when they unexpectedly chose SS instead?
+`````{r}
+runs_na_oi = data_subject %>%
+	filter(is.na(optionIndex)) %>%
+	dplyr::pull(run_id)
+
+runs_na_ai = data_subject %>%
+	filter(is.na(attributeIndex)) %>%
+	dplyr::pull(run_id)
+
+runs_na_pi = data_subject %>%
+	filter(is.na(payneIndex)) %>%
+	dplyr::pull(run_id)
+
+
+t.test(rt ~ errorTrial,
+       data=grouped %>% filter(
+           LLexpected==1),
+       paired=TRUE, na.action=na.pass)
+
+t.test(
+	optionIndex ~ errorTrial,
+    data=grouped %>% 
+		filter(LLexpected==1 & !run_id %in% runs_na_oi),
+    paired=TRUE, na.action=na.pass)
+
+t.test(attributeIndex ~ errorTrial,
+       data=grouped %>% filter(
+           LLexpected==1 & !run_id %in% runs_na_ai),
+       paired=TRUE, na.action=na.pass)
+
+t.test(payneIndex ~ errorTrial,
+       data=grouped %>% filter(
+           LLexpected==1 & !run_id %in% runs_na_pi),
+       paired=TRUE, na.action=na.pass)
+````
+
+
+## SS expected 
+Do subjects behave differently when they correctly choose SS (as expected) than when they unexpectedly chose LL instead?
+````{r}
+runs_na_oi = data_subject %>%
+	filter(is.na(optionIndex)) %>%
+	dplyr::pull(run_id)
+
+runs_na_ai = data_subject %>%
+	filter(is.na(attributeIndex)) %>%
+	dplyr::pull(run_id)
+
+runs_na_pi = data_subject %>%
+	filter(is.na(payneIndex)) %>%
+	dplyr::pull(run_id)
+
+
+t.test(rt ~ errorTrial,
+       data=grouped %>% filter(
+           LLexpected==0),
+       paired=TRUE, na.action=na.pass)
+
+t.test(
+	optionIndex ~ errorTrial,
+    data=grouped %>% 
+		filter(LLexpected==0 & !run_id %in% runs_na_oi),
+    paired=TRUE, na.action=na.pass)
+
+t.test(attributeIndex ~ errorTrial,
+       data=grouped %>% filter(
+           LLexpected==0 & !run_id %in% runs_na_ai),
+       paired=TRUE, na.action=na.pass)
+
+t.test(payneIndex ~ errorTrial,
+       data=grouped %>% filter(
+           LLexpected==0 & !run_id %in% runs_na_pi),
+       paired=TRUE, na.action=na.pass)
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+data_plot = grouped %>%
+    mutate(
+        errorTrial = mapvalues(
+            factor(errorTrial), 
+            from = c(0, 1), 
+            to = c("Correct", "Error")),
+        LLexpected = factor(LLexpected)
+        )
+
+ggplot(data_plot, aes(x=LLexpected, y=rt, fill=errorTrial)) +
+  geom_split_violin(alpha=.6, size=0, position=position_dodge(0)) +
+  stat_summary(
+      fun.data="mean_se",
+      geom="linerange",
+      aes(color=errorTrial),
+      alpha=1,
+      size=1.5) +
+  stat_summary(
+      fun=mean, 
+      geom="line",
+      aes(group=errorTrial, color=errorTrial), 
+      size=1.5) +
+  # geom_text(x=2, y=7.4, label="***",size=10) + 
+  coord_cartesian(ylim=c(0,7.5)) +
+  theme_bw() + 
+  theme(text=element_text(size=20)) +
+  scale_x_discrete(labels=c("SS>LL", "LL>SS")) +
+  xlab("Choices") + ylab("Response Time (s)") + 
+  labs(fill="",color="")+
+  guides(size="none") + 
+  scale_colour_grey() + scale_fill_grey()
+ggsave(file.path(path_results, 'behavior', 'error_trials_vs_rt.pdf'), 
+			 width=5.5, height=5)
+```
+
+```{r}
+ggplot(
+    data_plot %>% filter(
+        !is.na(optionIndex)), 
+       aes(x=LLexpected, y=optionIndex, fill=errorTrial)) +
+  geom_split_violin(alpha=.6, size=0, position=position_dodge(0)) +
+  stat_summary(
+      fun.data="mean_se",
+      geom="linerange",
+      aes(color=errorTrial),
+      alpha=1,
+      size=1.5) +
+  stat_summary(
+      fun=mean, 
+      geom="line",
+      aes(group=errorTrial, color=errorTrial), 
+      size=1.5) +
+  # geom_text(x=2, y=7.4, label="***",size=10) + 
+  coord_cartesian(ylim=c(-2.5, 2.5)) +
+  theme_bw() + 
+  theme(text=element_text(size=20)) +
+  scale_x_discrete(labels=c("SS>LL", "LL>SS")) +
+  xlab("Choices") + ylab("Option Index") + 
+  labs(fill="",color="")+
+  guides(size="none") + 
+  scale_colour_grey() + scale_fill_grey()
+ggsave(file.path(path_results, 'et', 'error_trials_vs_oi.pdf'), 
+			 width=5.5, height=5)
+```

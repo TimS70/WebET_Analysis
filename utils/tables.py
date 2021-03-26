@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 import pandas as pd
 
 from IPython.display import HTML
@@ -32,7 +33,8 @@ def load_all_three_datasets(path):
 
     print('Imported data from ' + path + ':')
 
-    summarize_datasets(data_et, data_trial, data_subject)
+    if 'prolificID' in data_trial.columns:
+        summarize_datasets(data_et, data_trial, data_subject)
 
     return data_et, data_trial, data_subject
 
@@ -53,10 +55,12 @@ def save_all_three_datasets(data_et, data_trial, data_subject, path):
         os.path.join(path, 'data_subject.csv'),
         index=False, header=True)
 
-    summarize_datasets(data_et, data_trial, data_subject)
+    if 'prolificID' in data_trial.columns:
+        summarize_datasets(data_et, data_trial, data_subject)
 
 
 def summarize_datasets(data_et, data_trial, data_subject):
+
     et_trial_count = data_et.groupby(
         ['run_id', 'trial_index'], as_index=False)['x'].count() \
         .loc[:, 'trial_index'].count()
@@ -96,4 +100,4 @@ def write_csv(data_frame, file_name, *args):
     path = os.path.join(*args)
     data_frame.to_csv(os.path.join(path, file_name))
     print(
-        f"""Results '{file_name}' written to {path} \n""")
+        f"""File '{file_name}' saved in {path} \n""")

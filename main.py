@@ -1,5 +1,6 @@
 import subprocess
 
+from amasino.main import prep_data, test_amasino_data
 from analysis.demographics import analyze_demographics
 from analysis.dropouts.main import analyze_dropouts
 from analysis.main import analyze_fix_task, analyze_choice_task
@@ -49,4 +50,5 @@ def analyze():
 
 
 if __name__ == '__main__':
-    main(new_data=False)
+    test_amasino_data()
+    # main(new_data=False)

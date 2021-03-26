@@ -16,6 +16,9 @@ def add_et_indices(data_trial, data_et):
     data_trial = add_transition_type(data_trial, data_et)
     data_trial['payneIndex'] = add_payne_index(data_trial)
 
+    print(f"""Eye-tracking Indices: \n"""
+          f"""{data_trial[['attributeIndex', 'optionIndex', 
+                           'payneIndex']].describe()}""")
     return data_trial
 
 
@@ -88,9 +91,18 @@ def et_data_transition_type(data):
     data['transition_type'] = np.append([0], np.diff(data['newAOIIndex']))
     data['transition_type'] = abs(data['transition_type'])
 
-    data.loc[data['t_task'] == 0, 'transition_type'] = 0
+    if 't_task' in data.columns:
+        data.loc[data['t_task'] == 0, 'transition_type'] = 0
+        data = data[['run_id', 'trial_index', 't_task',
+                     'transition_type']]
+    else:
+        new_trial_begins = (np.append([0], np.diff(data['trial_index'])) != 0) \
+            .astype(int)
 
-    return data.loc[:, ['run_id', 'trial_index', 't_task', 'transition_type']]
+        data.loc[new_trial_begins, 'transition_type'] = 0
+        data = data[['run_id', 'trial_index', 'transition_type']]
+
+    return data
 
 
 def add_transition_type(data, data_et):

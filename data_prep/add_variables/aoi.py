@@ -26,8 +26,6 @@ def add_aoi_et(data_et):
         f"""{freq_table} \n""")
     plot_aoi_scatter(data_et)
 
-    data_et = create_aoi_columns(data_et)
-
     return data_et
 
 
