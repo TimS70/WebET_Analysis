@@ -50,6 +50,5 @@ def analyze():
 
 
 if __name__ == '__main__':
-    analyze_fix_task()
-    analyze_choice_task()
+    add_data_quality()
     # main(new_data=False)

@@ -184,7 +184,11 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
 
     # Run 144 was found to barely have any variation in
     # gaze transitions
-    runs_additional_flaws = np.array([144])
+    runs_no_variance = np.intersect1d(
+        data_subject['run_id'].unique(),
+        [12, 23, 93, 144, 243, 258, 268, 343, 356, 373, 384, 386, 387,
+         393, 404, 379, 410, 411, 417, 410, 417, 425, 429, 440, 441, 445,
+         449, 458, 462, 475, 425, 488, 493])
 
     runs_biasedChoices = data_subject.loc[
         (data_subject['choseLL'] > 0.99) |
@@ -220,7 +224,7 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
 
     invalid_runs = list(
 
-        set(runs_additional_flaws) |
+        set(runs_no_variance) |
         set(runs_biasedChoices) |
         set(runs_missingLogK) |
         set(runs_noisy_logK) |
@@ -245,7 +249,7 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
                 'total',
             ],
             'length': [
-                len(runs_additional_flaws),
+                len(runs_no_variance),
                 len(runs_biasedChoices),
                 len(runs_missingLogK),
                 len(runs_noisy_logK),
@@ -256,7 +260,7 @@ def invalid_choice_runs(data_trial, data_et, data_subject):
                 len(invalid_runs)
             ],
             'percent': [
-                len(runs_additional_flaws) / n_runs,
+                len(runs_no_variance) / n_runs,
                 len(runs_biasedChoices) / n_runs,
                 len(runs_missingLogK) / n_runs,
                 len(runs_noisy_logK) / n_runs,

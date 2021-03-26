@@ -6,9 +6,39 @@ import pandas as pd
 from analysis.fix_task.data_quality import outcome_over_trials_vs_chin
 from analysis.fix_task.positions import compare_positions
 
-from utils.data_frames import merge_mean_by_index, merge_mean_by_subject
+from utils.data_frames import merge_mean_by_index, merge_mean_by_subject, merge_by_index, merge_by_subject
 from utils.path import makedir
 from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets
+
+
+def add_hit_ratio(data_trial, data_et, max_offset=0.1, min_hit_ratio=0.8):
+    data_et = data_et \
+        .assign(hit=(data_et['offset'] < max_offset).astype(int))
+
+    grouped = data_et \
+        .groupby(['run_id', 'trial_index'], as_index=False) \
+        .agg(hit_mean=('hit', 'mean'))
+
+    grouped = grouped \
+        .assign(hit_suffice=(grouped['hit_mean']>=min_hit_ratio).astype(int))
+
+    data_trial = merge_by_index(data_trial, grouped,
+                                'hit_mean', 'hit_suffice')
+
+    return data_trial
+
+
+def add_n_valid_dots(data_subject, data_trial):
+    grouped = data_trial[data_trial['chin'] == 1] \
+        .groupby(['run_id'], as_index=False) \
+        .agg(n_valid_dots=('hit_suffice', 'count'))
+
+    data_subject = merge_by_subject(data_subject, grouped, 'n_valid_dots')
+
+    print(f"""How many dots are valid per subject. Dots during chin-rest """
+          f"""validation: \n"""
+          f"""{data_subject[['run_id', 'fps', 'n_valid_dots']]}""")
+    return data_subject
 
 
 def add_data_quality():
@@ -23,6 +53,12 @@ def add_data_quality():
     data_et = add_offset(data_et)
     data_trial = merge_mean_by_index(data_trial, data_et,
                                      'offset', 'offset_px')
+    data_trial = add_hit_ratio(data_trial, data_et,
+                               max_offset=0.1, min_hit_ratio=0.8)
+
+    data_subject = add_n_valid_dots(data_subject, data_trial)
+
+    exit()
     data_subject = merge_mean_by_subject(data_subject, data_trial,
                                     'offset', 'offset_px')
 
