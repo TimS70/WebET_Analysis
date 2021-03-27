@@ -12,7 +12,10 @@ from data_prep.cleaning.find_invalid_runs.fix import runs_with_incomplete_fix_ta
 from utils.save_data import write_csv
 
 
-def invalid_runs_global(data_trial, data_et, data_subject):
+def invalid_runs_global(
+    data_trial, data_et, data_subject,
+    max_t_task=5500,
+    min_fps=3):
     print(f"""Clean runs that are otherwise not valid: """)
 
     # Not enough trials
@@ -33,13 +36,14 @@ def invalid_runs_global(data_trial, data_et, data_subject):
     runs_incomplete_fix_task = runs_with_incomplete_fix_tasks(
         data_trial_fix)
     runs_bad_time_measure = filter_runs_bad_time_measure(
-        data_trial_fix, max_t_task=5500)
+        data_trial_fix, max_t_task=max_t_task)
 
-    runs_not_follow_instructions = filter_runs_no_instruction(
-        data_subject)
+    runs_not_follow_instructions = \
+        filter_runs_no_instruction(data_subject)
     runs_full_but_not_enough_et = \
         filter_full_but_no_et_data(data_et, data_trial)
-    runs_low_fps = filter_runs_low_fps(data_trial, data_et, 3)
+    runs_low_fps = filter_runs_low_fps(
+        data_trial, data_et, min_fps)
     runs_cannot_see = filter_wrong_glasses(data_subject)
 
     # Plotting saccades from the fix task showed no variance
@@ -101,13 +105,24 @@ def invalid_runs_global(data_trial, data_et, data_subject):
     return invalid_runs
 
 
-def invalid_runs_choice(data_trial, data_et, data_subject):
+def invalid_runs_choice(
+        data_trial, data_et, data_subject,
+        min_hit_ratio=0.8, max_precision=0.15,
+        max_offset=0.5, min_fps=5,
+        min_choice_percentage=0.01,
+        max_choice_percentage=0.99
+):
+
     filter_runs_not_us(data_subject)
 
-    runs_low_fps = filter_runs_low_fps(data_trial, data_et, 5)
-    runs_low_precision = filter_runs_precision(data_subject, max_precision=0.15)
-    runs_high_offset = filter_runs_offset(data_subject, max_offset=0.5)
-    runs_low_hit_ratio = filter_hit_ratio(data_subject, min_hit_ratio=0.8)
+    runs_low_fps = filter_runs_low_fps(
+        data_trial, data_et, min_fps=min_fps)
+    runs_low_precision = filter_runs_precision(
+        data_subject, max_precision=max_precision)
+    runs_high_offset = filter_runs_offset(
+        data_subject, max_offset=max_offset)
+    runs_low_hit_ratio = filter_hit_ratio(
+        data_subject, min_hit_ratio=min_hit_ratio)
 
     runs_bad_quality = list(
         set(runs_low_fps) |
@@ -125,7 +140,8 @@ def invalid_runs_choice(data_trial, data_et, data_subject):
 
     runs_biased_choices = filter_biased_choices(
         data_subject, data_trial,
-        min_percentage=0.01, max_percentage=0.99)
+        min_percentage=min_choice_percentage,
+        max_percentage=max_choice_percentage)
 
     runs_missing_log_k, runs_noisy_log_k, runs_pos_log_k = \
         filter_bad_log_k(data_subject, max_noise=40)

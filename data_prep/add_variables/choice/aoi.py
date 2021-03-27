@@ -11,11 +11,18 @@ from utils.save_data import write_csv
 from visualize.choice import plot_aoi_scatter
 
 
-def add_aoi_et(data_et):
+def add_aoi_et(data_et, aoi_width=0.3, aoi_height=0.3):
 
     print(f"""AOI will be calculated. No cluster correction.""")
-    # data_et = add_aoi(data_et, 0.3, 0.3)
-    data_et = aoi_corners(data_et)
+
+    if (aoi_width >= 0.5) | (aoi_height >= 0.5):
+        print(f"""Define the 4 quadrants of the screen """
+              f"""as AOIs. \n""")
+        data_et = aoi_corners(data_et)
+    else:
+        print(f"""AOIs with width={aoi_width} and """
+              f"""heigth={aoi_height}. \n""")
+        data_et = add_aoi(data_et, aoi_width, aoi_height)
 
     freq_table = pd.crosstab(
         index=data_et['aoi'],

@@ -2,11 +2,14 @@ import numpy as np
 import pandas as pd
 
 
-def add_et_indices(data_trial, data_et):
-    min_n_points = 3
+def add_et_indices(data_trial, data_et,
+                   min_gaze_points=3):
 
-    data_trial['optionIndex'] = add_option_index(data_trial, min_n_points)
-    data_trial['attributeIndex'] = add_attribute_index(data_trial, min_n_points)
+
+    data_trial['optionIndex'] = add_option_index(
+        data_trial, min_gaze_points)
+    data_trial['attributeIndex'] = add_attribute_index(
+        data_trial, min_gaze_points)
 
     print(data_trial.loc[:, [
                                 'aoi_aLL', 'aoi_tLL', 'aoi_aSS', 'aoi_tSS',

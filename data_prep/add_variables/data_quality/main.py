@@ -8,7 +8,7 @@ from utils.combine_frames import merge_mean_by_index, merge_mean_by_subject
 from utils.save_data import load_all_three_datasets, save_all_three_datasets
 
 
-def add_data_quality():
+def add_data_quality(max_offset=0.13, min_hit_ratio=0.8):
     print('################################### \n'
           'Calculate data quality variables \n'
           '################################### \n')
@@ -29,14 +29,19 @@ def add_data_quality():
 
     # Hit-ratio
     data_trial = add_hit_ratio(
-        data_trial, data_et, max_offset=0.13, min_hit_ratio=0.8)
+        data_trial, data_et,
+        max_offset=max_offset,
+        min_hit_ratio=min_hit_ratio)
     data_subject = add_n_valid_dots(data_subject, data_trial)
 
     # Precision
     data_et = distance_from_xy_mean_square(data_et)
-    data_trial = aggregate_precision_from_et_data(data_trial, data_et)
-    data_subject = merge_mean_by_subject(data_subject, data_trial,
-                                         'precision', 'precision_px')
+    data_trial = aggregate_precision_from_et_data(
+        data_trial, data_et)
+    data_subject = merge_mean_by_subject(
+        data_subject, data_trial,
+        'precision', 'precision_px')
 
-    save_all_three_datasets(data_et, data_trial, data_subject,
-                            os.path.join('data', 'fix_task', 'added_var'))
+    save_all_three_datasets(
+        data_et, data_trial, data_subject,
+        os.path.join('data', 'fix_task', 'added_var'))

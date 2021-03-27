@@ -66,12 +66,16 @@ def add_variables_global():
         os.path.join('data', 'all_trials', 'added_var'))
 
 
-def add_variables_choice():
+def add_variables_choice(
+        aoi_width=0.3, aoi_height=0.3,
+        min_required_trials=5,
+        min_gaze_points=3):
     print('################################### \n'
           'Add variables for choice data \n'
           '################################### \n')
 
-    data_et, data_trial, data_subject = load_all_three_datasets(
+    data_et, data_trial, data_subject = \
+        load_all_three_datasets(
         os.path.join('data', 'choice_task', 'raw'))
 
     # Add data from fixation task
@@ -87,31 +91,43 @@ def add_variables_choice():
     data_trial = add_choice_options_num(data_trial)
     data_trial = reformat_attributes(data_trial)
     data_trial = data_trial.assign(
-        k=add_k(data_trial['aLL'], data_trial['aSS'], data_trial['tLL']))
+        k=add_k(data_trial['aLL'], data_trial['aSS'],
+                data_trial['tLL']))
     data_trial = top_bottom_attributes(data_trial)
 
-    data_et = merge_by_index(data_et, data_trial, 'amountLeft', 'LL_top')
+    data_et = merge_by_index(
+        data_et, data_trial, 'amountLeft', 'LL_top')
 
     # Behavioral responses
     data_trial = choice_response_variables(data_trial)
 
-    data_subject = add_mean_choice_rt(data_subject, data_trial)
+    data_subject = add_mean_choice_rt(
+        data_subject, data_trial)
 
     data_subject = merge_mean_by_subject(
-        data_subject, data_trial, 'choseLL', 'choseTop', 'LL_top')
+        data_subject, data_trial,
+        'choseLL', 'choseTop', 'LL_top')
 
     # AOIs
-    data_et = add_aoi_et(data_et)
+    data_et = add_aoi_et(
+        data_et, aoi_width=aoi_width, aoi_height=aoi_height)
     data_et = create_aoi_columns(data_et)
-    data_trial = match_remaining_et_trials(data_trial, data_et)
-    data_trial = add_aoi_counts_on_trial_level(data_trial, data_et)
-    data_trial = add_et_indices(data_trial, data_et)
+    data_trial = match_remaining_et_trials(
+        data_trial, data_et)
+    data_trial = add_aoi_counts_on_trial_level(
+        data_trial, data_et)
+    data_trial = add_et_indices(
+        data_trial, data_et,
+        min_gaze_points=min_gaze_points)
 
-    data_subject = add_et_indices_subject(data_subject, data_trial, 5)
+    data_subject = add_et_indices_subject(
+        data_subject, data_trial,
+        min_required_trials=min_required_trials)
 
     data_et = add_fixation_counter(data_et)
 
-    data_trial = count_fixations_on_trial_level(data_trial, data_et)
+    data_trial = count_fixations_on_trial_level(
+        data_trial, data_et)
     data_trial = test_transition_clusters(data_trial)
 
     save_all_three_datasets(

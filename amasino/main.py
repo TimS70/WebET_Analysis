@@ -61,7 +61,9 @@ def prep_data():
     data_et, data_trial, data_subject = load_all_three_datasets(
         os.path.join('data', 'amasino', 'added_var'))
 
-    data_trial = add_et_indices(data_trial, data_et)
+    data_trial = add_et_indices(
+        data_trial, data_et,
+        min_gaze_points=3)
 
     data_et = add_fixation_counter(data_et)
 

@@ -7,7 +7,7 @@ from utils.combine_frames import merge_mean_by_subject
 
 
 def add_et_indices_subject(data_subject, data_trial,
-                           min_required_count):
+                           min_required_trials=5):
 
     grouped = data_trial.groupby(
         ['run_id'],
@@ -24,17 +24,17 @@ def add_et_indices_subject(data_subject, data_trial,
 
     print(
         f"""Aggregate ET indices on subject level. \n"""
-        f"""Require >= {min_required_count} valid trials to aggregate """
+        f"""Require >= {min_required_trials} valid trials to aggregate """
         f"""on subject level. \n""")
 
     grouped.loc[
-        grouped['attributeIndex_n'] < min_required_count,
+        grouped['attributeIndex_n'] < min_required_trials,
         'attributeIndex'] = np.nan
     grouped.loc[
-        grouped['optionIndex_n'] < min_required_count,
+        grouped['optionIndex_n'] < min_required_trials,
         'optionIndex'] = np.nan
     grouped.loc[
-        grouped['payneIndex_n'] < min_required_count,
+        grouped['payneIndex_n'] < min_required_trials,
         'payneIndex'] = np.nan
 
     data_subject = merge_mean_by_subject(
