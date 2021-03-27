@@ -10,7 +10,7 @@ def clean_trial_duration(data_raw, min_time, max_time, name):
           f"""M = {round(data_raw['trial_duration_exact'].mean(), 2)}, """
           f"""SD = {round(data_raw['trial_duration_exact'].std(), 2)} \n\n"""
           f"""Average reaction time below 10 seconds: \n"""
-          f"""M = {round(data['trial_duration_exact'], 2)}, """
-          f"""SD = {round(data['trial_duration_exact'], 2)} \n""")
+          f"""M = {round(data['trial_duration_exact'].mean(), 2)}, """
+          f"""SD = {round(data['trial_duration_exact'].mean(), 2)} \n""")
 
     return data

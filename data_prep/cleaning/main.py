@@ -15,7 +15,7 @@ from utils.save_data import summarize_datasets, save_all_three_datasets, \
     load_all_three_datasets
 
 
-def clean_data_global():
+def clean_global_data():
 
     print('################################### \n'
           'Clean global datasets \n'

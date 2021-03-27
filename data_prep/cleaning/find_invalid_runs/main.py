@@ -21,9 +21,19 @@ def invalid_runs_global(data_trial, data_et, data_subject):
         .unique()
     print(f'n={len(subjects_full_trial)} runs with full trials. ')
 
-    subjects_not_full_trial = np.setdiff1d(
+    runs_not_full_trial = np.setdiff1d(
         data_trial['run_id'].unique(),
         subjects_full_trial)
+
+    # Fixation task. No validation possible
+    data_trial_fix = data_trial.loc[
+        (data_trial['trial_type'] == 'eyetracking-fix-object') &
+        (data_trial['trial_duration'] == 5000)]
+
+    runs_incomplete_fix_task = runs_with_incomplete_fix_tasks(
+        data_trial_fix)
+    runs_bad_time_measure = filter_runs_bad_time_measure(
+        data_trial_fix, max_t_task=5500)
 
     runs_not_follow_instructions = filter_runs_no_instruction(
         data_subject)
@@ -36,7 +46,9 @@ def invalid_runs_global(data_trial, data_et, data_subject):
     runs_no_saccade = [144, 171, 380]
 
     invalid_runs = list(
-        set(subjects_not_full_trial) |
+        set(runs_not_full_trial) |
+        set(runs_incomplete_fix_task) |
+        set(runs_bad_time_measure) |
         set(runs_not_follow_instructions) |
         set(runs_low_fps) |
         set(runs_cannot_see) |
@@ -48,7 +60,9 @@ def invalid_runs_global(data_trial, data_et, data_subject):
 
     summary = pd.DataFrame({
         'name': [
-            'subjects_not_full_trial',
+            'runs_not_full_trial',
+            'runs_incomplete_fix_task',
+            'runs_bad_time_measure',
             'runs_noInstruction',
             'runs_lowFPS',
             'runs_cannotSee',
@@ -56,7 +70,9 @@ def invalid_runs_global(data_trial, data_et, data_subject):
             'runs_full_but_not_enough_et',
             'total'],
         'length': [
-            len(subjects_not_full_trial),
+            len(runs_not_full_trial),
+            len(runs_incomplete_fix_task),
+            len(runs_bad_time_measure),
             len(runs_not_follow_instructions),
             len(runs_low_fps),
             len(runs_cannot_see),
@@ -64,7 +80,9 @@ def invalid_runs_global(data_trial, data_et, data_subject):
             len(runs_full_but_not_enough_et),
             len(invalid_runs)],
         'percent': [
-            len(subjects_not_full_trial) / n_runs,
+            len(runs_not_full_trial) / n_runs,
+            len(runs_incomplete_fix_task) / n_runs,
+            len(runs_bad_time_measure) / n_runs,
             len(runs_not_follow_instructions) / n_runs,
             len(runs_low_fps) / n_runs,
             len(runs_cannot_see) / n_runs,
@@ -86,20 +104,9 @@ def invalid_runs_global(data_trial, data_et, data_subject):
 def invalid_runs_choice(data_trial, data_et, data_subject):
     filter_runs_not_us(data_subject)
 
-    # Fixation task. No validation possible
-    data_trial_fix = data_trial.loc[
-        (data_trial['trial_type'] == 'eyetracking-fix-object') &
-        (data_trial['trial_duration'] == 5000)]
-
-    runs_incomplete_fix_task = runs_with_incomplete_fix_tasks(
-        data_trial_fix)
-    runs_bad_time_measure = filter_runs_bad_time_measure(
-        data_trial_fix, max_t_task=5500)
-
     runs_low_fps = filter_runs_low_fps(data_trial, data_et, 5)
     runs_low_precision = filter_runs_precision(data_subject, max_precision=0.15)
     runs_high_offset = filter_runs_offset(data_subject, max_offset=0.5)
-
     runs_low_hit_ratio = filter_hit_ratio(data_subject, min_hit_ratio=0.8)
 
     runs_bad_quality = list(
@@ -125,8 +132,6 @@ def invalid_runs_choice(data_trial, data_et, data_subject):
 
     invalid_runs = list(
         set(runs_no_variance) |
-        set(runs_incomplete_fix_task) |
-        set(runs_bad_time_measure) |
         set(runs_biased_choices) |
         set(runs_missing_log_k) |
         set(runs_noisy_log_k) |
@@ -141,8 +146,6 @@ def invalid_runs_choice(data_trial, data_et, data_subject):
     summary_output = pd.DataFrame({
         'name': [
             'runs_no_variance',
-            'runs_incomplete_fix_task',
-            'runs_bad_time_measure',
             'runs_biasedChoices',
             'runs_missingLogK',
             'runs_noisy_logK',
@@ -154,8 +157,6 @@ def invalid_runs_choice(data_trial, data_et, data_subject):
             'total'],
         'length': [
             len(runs_no_variance),
-            len(runs_incomplete_fix_task),
-            len(runs_bad_time_measure),
             len(runs_biased_choices),
             len(runs_missing_log_k),
             len(runs_noisy_log_k),
@@ -167,8 +168,6 @@ def invalid_runs_choice(data_trial, data_et, data_subject):
             len(invalid_runs)],
         'percent': [
             len(runs_no_variance) / n_runs,
-            len(runs_incomplete_fix_task) / n_runs,
-            len(runs_bad_time_measure) / n_runs,
             len(runs_biased_choices) / n_runs,
             len(runs_missing_log_k) / n_runs,
             len(runs_noisy_log_k) / n_runs,

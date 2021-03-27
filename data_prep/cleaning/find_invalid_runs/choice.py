@@ -94,8 +94,8 @@ def filter_bad_log_k(data_subject, max_noise=40):
 def filter_biased_choices(data_subject, data_trial, min_percentage=0.01,
                           max_percentage=0.99):
     runs_biased_choices = data_subject.loc[
-        (data_subject['choseLL'] > min_percentage) |
-        (data_subject['choseLL'] < max_percentage),
+        (data_subject['choseLL'] < min_percentage) |
+        (data_subject['choseLL'] > max_percentage),
         'run_id']
 
     grouped_trials_biased = data_trial \

@@ -21,16 +21,16 @@ def add_data_quality():
     data_trial = merge_mean_by_index(data_trial, data_et,
                                      'offset', 'offset_px')
 
+    data_subject, data_trial = add_grand_mean_offset(
+        data_subject, data_trial, data_et)
+
+    data_subject = merge_mean_by_subject(
+        data_subject, data_trial, 'offset', 'offset_px')
+
     # Hit-ratio
-    data_trial = add_hit_ratio(data_trial, data_et,
-                               max_offset=0.13, min_hit_ratio=0.8)
+    data_trial = add_hit_ratio(
+        data_trial, data_et, max_offset=0.13, min_hit_ratio=0.8)
     data_subject = add_n_valid_dots(data_subject, data_trial)
-
-    data_trial = add_grand_mean_offset(data_trial)
-
-
-    data_subject = merge_mean_by_subject(data_subject, data_trial,
-                                         'offset', 'offset_px')
 
     # Precision
     data_et = distance_from_xy_mean_square(data_et)
