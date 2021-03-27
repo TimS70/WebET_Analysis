@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 
-from data_prep.cleaning.choice import remove_long_trials
+from data_prep.cleaning.choice import clean_trial_duration
 from data_prep.cleaning.invalid_runs import clean_runs
 from utils.tables import load_all_three_datasets, save_all_three_datasets
 
@@ -24,8 +24,8 @@ def clean_fix_task_datasets():
     data_et = clean_runs(data_et, invalid_runs, 'data_et')
     data_subject = clean_runs(data_subject, invalid_runs, 'data_subject')
 
-    data_trial = remove_long_trials(data_trial, 5500, 'data_trial')
-    data_et = remove_long_trials(data_et, 5500, 'data_et')
+    data_trial = clean_trial_duration(data_trial, 0, 5500, 'data_trial')
+    data_et = clean_trial_duration(data_et, 0, 5500, 'data_et')
 
     data_trial = data_trial.loc[pd.notna(data_trial['x_count']), :]
 

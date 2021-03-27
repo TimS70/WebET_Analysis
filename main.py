@@ -4,7 +4,7 @@ from amasino.main import prep_data
 from analysis.demographics import analyze_demographics
 from analysis.dropouts.main import analyze_dropouts
 from analysis.main import analyze_fix_task, analyze_choice_task
-from data_prep.add_variables.data_quality import add_data_quality
+from data_prep.add_variables.data_quality.main import add_data_quality
 from data_prep.add_variables.init import global_add_variables_to_datasets
 from data_prep.choice import add_variables_choice, add_log_k, run_et_cluster_correction
 from data_prep.cleaning.choice import create_choice_data, clean_choice_data
@@ -50,5 +50,4 @@ def analyze():
 
 
 if __name__ == '__main__':
-    add_data_quality()
-    # main(new_data=False)
+    main(new_data=False)
