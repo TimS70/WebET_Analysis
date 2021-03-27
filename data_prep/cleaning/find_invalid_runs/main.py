@@ -86,6 +86,16 @@ def invalid_runs_global(data_trial, data_et, data_subject):
 def invalid_runs_choice(data_trial, data_et, data_subject):
     filter_runs_not_us(data_subject)
 
+    # Fixation task. No validation possible
+    data_trial_fix = data_trial.loc[
+        (data_trial['trial_type'] == 'eyetracking-fix-object') &
+        (data_trial['trial_duration'] == 5000)]
+
+    runs_incomplete_fix_task = runs_with_incomplete_fix_tasks(
+        data_trial_fix)
+    runs_bad_time_measure = filter_runs_bad_time_measure(
+        data_trial_fix, max_t_task=5500)
+
     runs_low_fps = filter_runs_low_fps(data_trial, data_et, 5)
     runs_low_precision = filter_runs_precision(data_subject, max_precision=0.15)
     runs_high_offset = filter_runs_offset(data_subject, max_offset=0.5)
@@ -114,8 +124,9 @@ def invalid_runs_choice(data_trial, data_et, data_subject):
         filter_bad_log_k(data_subject, max_noise=40)
 
     invalid_runs = list(
-
         set(runs_no_variance) |
+        set(runs_incomplete_fix_task) |
+        set(runs_bad_time_measure) |
         set(runs_biased_choices) |
         set(runs_missing_log_k) |
         set(runs_noisy_log_k) |
@@ -129,7 +140,9 @@ def invalid_runs_choice(data_trial, data_et, data_subject):
 
     summary_output = pd.DataFrame({
         'name': [
-            'run nr. 144',
+            'runs_no_variance',
+            'runs_incomplete_fix_task',
+            'runs_bad_time_measure',
             'runs_biasedChoices',
             'runs_missingLogK',
             'runs_noisy_logK',
@@ -141,6 +154,8 @@ def invalid_runs_choice(data_trial, data_et, data_subject):
             'total'],
         'length': [
             len(runs_no_variance),
+            len(runs_incomplete_fix_task),
+            len(runs_bad_time_measure),
             len(runs_biased_choices),
             len(runs_missing_log_k),
             len(runs_noisy_log_k),
@@ -152,6 +167,8 @@ def invalid_runs_choice(data_trial, data_et, data_subject):
             len(invalid_runs)],
         'percent': [
             len(runs_no_variance) / n_runs,
+            len(runs_incomplete_fix_task) / n_runs,
+            len(runs_bad_time_measure) / n_runs,
             len(runs_biased_choices) / n_runs,
             len(runs_missing_log_k) / n_runs,
             len(runs_noisy_log_k) / n_runs,
@@ -174,25 +191,20 @@ def invalid_runs_fix(data_trial_fix, data_subject):
         data_trial_fix)
     runs_bad_time_measure = filter_runs_bad_time_measure(
         data_trial_fix, max_t_task=5500)
-    runs_na_glasses = missing_glasses(data_subject)
 
     invalid_runs = list(
         set(runs_incomplete_fix_task) |
-        set(runs_bad_time_measure) |
-        set(runs_na_glasses)
-    )
+        set(runs_bad_time_measure))
 
     summary = pd.DataFrame(
         {'name': [
             'runs_incomplete_fix_task',
             'runs_bad_time_measure',
-            'runs_na_glasses',
             'total'
         ],
             'length': [
                 len(runs_incomplete_fix_task),
                 len(runs_bad_time_measure),
-                len(runs_na_glasses),
                 len(invalid_runs)
             ]}
     )

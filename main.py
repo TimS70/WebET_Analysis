@@ -50,7 +50,6 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    add_log_k()
     clean_data_choice()
     analyze()
     # main(new_data=False)

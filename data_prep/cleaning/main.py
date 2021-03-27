@@ -92,19 +92,15 @@ def clean_data_fix():
     show_empty_fix_trials(data_trial)
     show_trials_high_t_task(data_trial, max_t_task=5500)
 
-    invalid_runs = invalid_runs_fix(data_trial, data_subject)
-
-    data_trial = clean_runs(data_trial, invalid_runs, 'data_trial')
-    data_et = clean_runs(data_et, invalid_runs, 'data_et')
-    data_subject = clean_runs(data_subject, invalid_runs, 'data_subject')
-
-    data_trial = clean_trial_duration(data_trial, 0, 5500, 'data_trial')
+    data_trial = clean_trial_duration(data_trial, 0, 5500,
+                                      'data_trial')
     data_et = clean_trial_duration(data_et, 0, 5500, 'data_et')
 
-    data_trial = data_trial.loc[pd.notna(data_trial['x_count']), :]
+    data_trial = data_trial[pd.notna(data_trial['x_count'])]
 
     save_all_three_datasets(data_et, data_trial, data_subject,
-                            os.path.join('data', 'fix_task', 'cleaned'))
+                            os.path.join('data', 'fix_task',
+                                         'cleaned'))
 
 
 def clean_data_choice():
@@ -115,6 +111,7 @@ def clean_data_choice():
     data_et, data_trial, data_subject = load_all_three_datasets(
         os.path.join('data', 'choice_task', 'added_var'))
 
+    print(data_subject.columns)
     # Screening
     invalid_runs = invalid_runs_choice(data_trial, data_et, data_subject)
 

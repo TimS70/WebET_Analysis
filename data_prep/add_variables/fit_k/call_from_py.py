@@ -9,7 +9,7 @@ from utils.save_data import write_csv
 
 def add_log_k():
 
-    print('Fitting log(add_k) in Matlab. \n')
+    print('Fitting discounting parameter log(k) in Matlab. \n')
     os.chdir(os.path.join('data_prep', 'add_variables', 'fit_k'))
 
     # noinspection SpellCheckingInspection

@@ -76,8 +76,11 @@ def add_variables_choice():
 
     # Add data from fixation task
     data_subject_fix = pd.read_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_subject.csv'))
-    data_subject = merge_mean_by_subject(data_subject, data_subject_fix, 'offset', 'precision')
+        os.path.join('data', 'fix_task', 'added_var',
+                     'data_subject.csv'))
+    data_subject = merge_mean_by_subject(
+        data_subject, data_subject_fix,
+        'offset', 'precision', 'hit_ratio', 'n_valid_dots')
 
     # Information attributes
     data_trial = identify_amount_left(data_trial)

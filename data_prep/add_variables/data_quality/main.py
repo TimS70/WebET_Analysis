@@ -24,10 +24,10 @@ def add_data_quality():
     # Hit-ratio
     data_trial = add_hit_ratio(data_trial, data_et,
                                max_offset=0.13, min_hit_ratio=0.8)
+    data_subject = add_n_valid_dots(data_subject, data_trial)
 
     data_trial = add_grand_mean_offset(data_trial)
 
-    data_subject = add_n_valid_dots(data_subject, data_trial)
 
     data_subject = merge_mean_by_subject(data_subject, data_trial,
                                          'offset', 'offset_px')
