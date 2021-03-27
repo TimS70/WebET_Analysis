@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
 import seaborn as sns
+from matplotlib import patches
 
 from utils.combine_frames import merge_by_index
 from visualize.all_tasks import save_plot
@@ -42,18 +43,34 @@ def plot_choice_task_heatmap(data_et):
 
         s = 34
         img, extent = my_heatmap(x, y, s=s)
-        ax.imshow(img, extent=extent, origin='upper', cmap=cm.Greens, aspect=(9 / 16))
+        ax.imshow(img, extent=extent, origin='upper',
+                  cmap=cm.Greens, aspect=(9 / 16))
         ax.set_xlim(0, 1)
         ax.set_ylim(1, 0)
-        # rect = patches.Rectangle((0.05, 0.05), 0.9, 0.4, linewidth=1, edgecolor='black', facecolor='none')
-        # ax.add_patch(rect)
-        # rect = patches.Rectangle((0.05, 0.55), 0.9, 0.4, linewidth=1, edgecolor='black', facecolor='none')
-        # ax.add_patch(rect)
-        #
-        # x_pos = [0.25, 0.75, 0.25, 0.75]
-        # y_pos = [0.25, 0.25, 0.75, 0.75]
-        # for i in range(0, len(x_pos)):
-        #     plt.text(x_pos[i], y_pos[i], '[attribute]', size=15, ha="center")
+
+        rect = patches.Rectangle((0.05, 0.05), 0.9, 0.4,
+                                 linewidth=1,
+                                 edgecolor='black',
+                                 facecolor='none')
+        ax.add_patch(rect)
+
+        rect = patches.Rectangle((0.05, 0.55), 0.9, 0.4,
+                                 linewidth=1,
+                                 edgecolor='black',
+                                 facecolor='none')
+        ax.add_patch(rect)
+
+        x_pos = [0.25, 0.75, 0.25, 0.75]
+        y_pos = [0.25, 0.25, 0.75, 0.75]
+
+        text_params = {'ha': 'center',
+                       'va': 'center',
+                       'size': '15',
+                       'family': 'sans-serif'}
+
+        for i in range(0, len(x_pos)):
+            plt.text(x_pos[i], y_pos[i],
+                     '[attribute]', **text_params)
         ax.set_title("Distribution of fixations after 1 second, $\sigma$ = %d" % s)
 
         save_plot(

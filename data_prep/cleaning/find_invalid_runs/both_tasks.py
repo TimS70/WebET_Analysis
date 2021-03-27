@@ -89,16 +89,10 @@ def filter_runs_low_fps(data_trial, data_et, min_fps):
         data_trial['trial_duration_exact']
 
     grouped_runs = data_trial.groupby(
-        ['run_id'],
-        as_index=False)['fps'].mean()
+        ['run_id'], as_index=False)['fps'].mean()
 
-    runs_low_fps = grouped_runs.loc[grouped_runs['fps'] < min_fps, 'run_id']
-
-    rate_low_fps = \
-        len(runs_low_fps) / len(grouped_runs['run_id'].unique())
-    print(
-        f"""n={len(runs_low_fps)} ({round(100 * rate_low_fps, 2)}%) """
-        f"""runs with low fps (<{min_fps}). \n""")
+    runs_low_fps = grouped_runs.loc[
+        grouped_runs['fps'] < min_fps, 'run_id']
 
     return runs_low_fps
 

@@ -7,25 +7,47 @@ from utils.combine_frames import merge_mean_by_subject
 from visualize.distributions import plot_histogram, plot_2d_histogram
 
 
-def plot_xy(data_subject, data_et):
+def plot_grand_mean(data_subject, data_et):
 
+    plot_histogram(
+        data_subject['x_bias'],
+        'x_bias_trial_mean.png',
+        os.path.join('results', 'plots', 'fix_task', 'offset',
+                     'grand_mean'))
+
+    plot_histogram(
+        data_subject['y_bias'],
+        'y_bias_trial_mean.png',
+        os.path.join('results', 'plots', 'fix_task', 'offset',
+                     'grand_mean'))
+
+    plot_2d_histogram(
+        data_subject['x_bias'], data_subject['y_bias'],
+        'xy_bias_trial_mean_2d.png',
+        os.path.join('results', 'plots', 'fix_task', 'offset',
+                     'grand_mean'))
+
+    # Regardless of trials
     data_subject = merge_mean_by_subject(
         data_subject, data_et, 'x', 'y')
 
     plot_histogram(
         data_subject['x'],
-        'x.png',
-        os.path.join('results', 'plots', 'fix_task', 'offset'))
+        'x_bias_no_trials.png',
+        os.path.join('results', 'plots', 'fix_task', 'offset',
+                     'grand_mean'))
 
     plot_histogram(
         data_subject['y'],
-        'y.png',
-        os.path.join('results', 'plots', 'fix_task', 'offset'))
+        'y_bias_no_trials.png',
+        os.path.join('results', 'plots', 'fix_task', 'offset',
+                     'grand_mean'))
 
     plot_2d_histogram(
         data_subject['x'], data_subject['y'],
-        'xy_2d.png',
-        os.path.join('results', 'plots', 'fix_task', 'offset'))
+        'xy_bias_no_trials_2d.png',
+        os.path.join('results', 'plots', 'fix_task', 'offset',
+                     'grand_mean'))
 
 
 def my_heatmap(x, y, s, bins=[np.arange(0, 1, 0.001),

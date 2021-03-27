@@ -115,21 +115,16 @@ def invalid_runs_choice(
 
     filter_runs_not_us(data_subject)
 
-    runs_low_fps = filter_runs_low_fps(
-        data_trial, data_et, min_fps=min_fps)
-    runs_low_precision = filter_runs_precision(
-        data_subject, max_precision=max_precision)
-    runs_high_offset = filter_runs_offset(
-        data_subject, max_offset=max_offset)
-    runs_low_hit_ratio = filter_hit_ratio(
-        data_subject, min_hit_ratio=min_hit_ratio)
+    runs_low_fps = filter_runs_low_fps(data_trial, data_et, min_fps=min_fps)
+    runs_low_precision = filter_runs_precision(data_subject, max_precision=max_precision)
+    runs_high_offset = filter_runs_offset(data_subject, max_offset=max_offset)
+    runs_low_hit_ratio = filter_hit_ratio(data_subject, min_hit_ratio=min_hit_ratio)
 
     runs_bad_quality = list(
         set(runs_low_fps) |
         set(runs_low_precision) |
         set(runs_high_offset) |
         set(runs_low_hit_ratio))
-    print(f"""n={len(runs_bad_quality)} runs had bad data quality \n""")
 
     # These runs have barely have any variation in gaze points
     runs_no_variance = np.intersect1d(
@@ -138,23 +133,25 @@ def invalid_runs_choice(
          393, 404, 379, 410, 411, 417, 410, 417, 425, 429, 440, 441, 445,
          449, 458, 462, 475, 425, 488, 493])
 
-    runs_biased_choices = filter_biased_choices(
-        data_subject, data_trial,
-        min_percentage=min_choice_percentage,
-        max_percentage=max_choice_percentage)
+    runs_biased_SS = data_subject.loc[
+        data_subject['choseLL'] < min_choice_percentage, 'run_id']
+
+    runs_biased_LL = data_subject.loc[
+        data_subject['choseLL'] > max_choice_percentage, 'run_id']
 
     runs_missing_log_k, runs_noisy_log_k, runs_pos_log_k = \
         filter_bad_log_k(data_subject, max_noise=40)
 
     invalid_runs = list(
         set(runs_no_variance) |
-        set(runs_biased_choices) |
+        set(runs_biased_SS) |
+        set(runs_biased_LL) |
         set(runs_missing_log_k) |
         set(runs_noisy_log_k) |
         set(runs_pos_log_k) |
         set(runs_low_fps) |
-        set(runs_low_precision) |
-        set(runs_high_offset) |
+        # set(runs_low_precision) |
+        # set(runs_high_offset) |
         set(runs_low_hit_ratio))
 
     n_runs = len(data_trial['run_id'].unique())
@@ -162,35 +159,38 @@ def invalid_runs_choice(
     summary_output = pd.DataFrame({
         'name': [
             'runs_no_variance',
-            'runs_biasedChoices',
+            'runs_biased_SS',
+            'runs_biased_LL',
             'runs_missingLogK',
             'runs_noisy_logK',
             'runs_pos_logK',
             'subjects_lowFPS',
-            'runs_low_precision',
-            'runs_high_offset',
+            # 'runs_low_precision',
+            # 'runs_high_offset',
             'runs_low_hit_ratio',
             'total'],
         'length': [
             len(runs_no_variance),
-            len(runs_biased_choices),
+            len(runs_biased_SS),
+            len(runs_biased_LL),
             len(runs_missing_log_k),
             len(runs_noisy_log_k),
             len(runs_pos_log_k),
             len(runs_low_fps),
-            len(runs_low_precision),
-            len(runs_high_offset),
+            # len(runs_low_precision),
+            # len(runs_high_offset),
             len(runs_low_hit_ratio),
             len(invalid_runs)],
         'percent': [
             len(runs_no_variance) / n_runs,
-            len(runs_biased_choices) / n_runs,
+            len(runs_biased_SS) / n_runs,
+            len(runs_biased_LL) / n_runs,
             len(runs_missing_log_k) / n_runs,
             len(runs_noisy_log_k) / n_runs,
             len(runs_pos_log_k) / n_runs,
             len(runs_low_fps) / n_runs,
-            len(runs_low_precision) / n_runs,
-            len(runs_high_offset) / n_runs,
+            # len(runs_low_precision) / n_runs,
+            # len(runs_high_offset) / n_runs,
             len(runs_low_hit_ratio) / n_runs,
             len(invalid_runs) / n_runs]
     })

@@ -34,7 +34,7 @@ def outcome_over_trials(data_trial, outcome):
             y=data[(outcome + '_median')],
             yerr=[data[(outcome + '_std_lower')],
                   data[(outcome + '_std_upper')]],
-            fmt='^add_k:',
+            fmt='^k:',
             capsize=5
         )
 
@@ -62,12 +62,11 @@ def outcome_over_trials_vs_chin(data_trial, outcome):
             y=data[(outcome + '_median')],
             yerr=[data[(outcome + '_std_lower')],
                   data[(outcome + '_std_upper')]],
-            fmt='^add_k:',
-            capsize=5
-        )
+            fmt='^k:',
+            capsize=5)
 
     save_plot((outcome + '_vs_chin_vs_trials.png'),
-              'results', 'plots', 'fix_task')
+              'results', 'plots', 'fix_task', outcome)
     plt.close()
 
 
@@ -148,7 +147,8 @@ def grand_mean_offset(data_et_fix, data_trial):
 
     plt.hist(data_trial['grand_deviation'], bins=20)
     plt.title('Grand mean deviation')
-    save_plot('grand_mean.png', 'results', 'plots', 'fix_task')
+    save_plot('grand_mean.png', 'results', 'plots',
+              'fix_task', 'offset')
     plt.close()
 
     return data_trial

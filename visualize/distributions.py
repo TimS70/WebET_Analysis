@@ -14,8 +14,20 @@ def plot_histogram(variable, file_name, path):
 
 
 def plot_2d_histogram(x, y, file_name, path):
-    plt.imshow(np.histogram2d(x, y, bins=200))
+    plt.scatter(x, y, s=0.5, label='xy participant mean')
+
     plt.xlim(0, 1)
     plt.ylim(1, 0)
+    plt.xticks(np.arange(0, 1, 0.1))
+    plt.yticks(np.arange(0, 1, 0.1))
+
+    plt.legend()
+    plt.xlabel('X [%]')
+    plt.ylabel('Y [%]')
+    plt.grid()
+    plt.tight_layout()
+    plt.box(False)
+    plt.title('x_participant_mean, y_participant_mean')
+
     save_plot(file_name, path)
     plt.close()

@@ -97,21 +97,6 @@ def add_grand_mean_offset(data_subject, data_trial, data_et):
         .loc[:, ['x_bias', 'y_bias', 'grand_offset']] \
         .describe()
 
-    plot_histogram(
-        data_subject['x_bias'],
-        'x_bias.png',
-        os.path.join('results', 'plots', 'fix_task', 'offset'))
-
-    plot_histogram(
-        data_subject['y_bias'],
-        'y_bias.png',
-        os.path.join('results', 'plots', 'fix_task', 'offset'))
-
-    plot_2d_histogram(
-        data_subject['x_bias'], data_subject['y_bias'],
-        'xy_bias_2d.png',
-        os.path.join('results', 'plots', 'fix_task', 'offset'))
-
     print(f"""Added grand mean offset: \n"""
           f"""{summary} \n""")
 

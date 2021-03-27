@@ -55,7 +55,6 @@ def filter_runs_not_us(data_subject):
 def filter_runs_precision(data_subject, max_precision=0.15):
     runs_low_precision = data_subject.loc[
         data_subject['precision'] > max_precision, 'run_id']
-    print(f"""Maximum precision means >{max_precision}. \n""")
 
     return runs_low_precision
 
@@ -63,14 +62,24 @@ def filter_runs_precision(data_subject, max_precision=0.15):
 def filter_runs_offset(data_subject, max_offset=0.5):
     runs_high_offset = data_subject.loc[
         data_subject['offset'] > max_offset, 'run_id']
-    print(f"""Maximum offset means >{max_offset}. \n""")
 
     return runs_high_offset
 
 
 def filter_hit_ratio(data_subject, min_hit_ratio=0.8):
+
+    freq_table = pd.crosstab(
+        index=data_subject['n_valid_dots'],
+        columns="count")
+
+    print(f"""How many dots are valid per subject. Dots during """
+          f"""chin-rest validation: \n"""
+          f"""{data_subject['n_valid_dots'].describe()} \n\n"""
+          f"""{freq_table} \n\n"""
+          f"""{data_subject[['run_id', 'fps', 'n_valid_dots']]}""")
+
     runs_low_hit_ratio = data_subject.loc[
-        data_subject['hit_ratio'] > min_hit_ratio,
+        data_subject['hit_ratio'] < min_hit_ratio,
         'run_id']
 
     return runs_low_hit_ratio
@@ -89,23 +98,3 @@ def filter_bad_log_k(data_subject, max_noise=40):
         data_subject['logK'] > 0, 'run_id']
 
     return runs_missing_log_k, runs_noisy_log_k, runs_pos_log_k
-
-
-def filter_biased_choices(data_subject, data_trial, min_percentage=0.01,
-                          max_percentage=0.99):
-    runs_biased_choices = data_subject.loc[
-        (data_subject['choseLL'] < min_percentage) |
-        (data_subject['choseLL'] > max_percentage),
-        'run_id']
-
-    grouped_trials_biased = data_trial \
-        .loc[data_trial['run_id'].isin(runs_biased_choices)] \
-        .groupby(['run_id', 'choseLL'], as_index=False) \
-        .agg(n=('trial_index', 'count'))
-    grouped_trials_biased = grouped_trials_biased \
-                                .loc[grouped_trials_biased['n'] > 1, :]
-
-    print(f"""grouped_trials_biased \n"""
-          f"""{grouped_trials_biased} \n""")
-
-    return runs_biased_choices

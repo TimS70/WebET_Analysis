@@ -29,7 +29,8 @@ def main_effect(data_trial_fix, data_subject):
                                   'main_effect')
 
     for outcome in ['offset', 'precision', 'fps']:
-        split_violin_plot(data_trial_fix, outcome, 'chin', 'glasses_binary')
+        split_violin_plot(
+            data_trial_fix, outcome, 'chin', 'glasses_binary')
 
     # Check only those with high fps (Semmelmann & Weigelt, 2019)
 

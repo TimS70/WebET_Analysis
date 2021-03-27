@@ -3,28 +3,20 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 
-from visualize.all_tasks import save_plot, my_heatmap
+from visualize.all_tasks import save_plot
+from visualize.eye_tracking import my_heatmap
 
 
 def hist_plots_quality(data_subject):
-
     font_size = 15
     plt.rcParams.update({'font.size': font_size})
 
-    plt.hist(data_subject['precision'], bins=20)
-    plt.title('Precision histogram')
-    save_plot('precision_participants.png', 'results', 'plots', 'fix_task')
-    plt.close()
-
-    plt.hist(data_subject['offset'], bins=20)
-    plt.title('Offset histogram')
-    save_plot('offset_participants.png', 'results', 'plots', 'fix_task')
-    plt.close()
-
-    plt.hist(data_subject['fps'], bins=20)
-    plt.title('FPS histogram')
-    save_plot('fps_participants_cleaned.png', 'results', 'plots', 'fix_task')
-    plt.close()
+    for outcome in ['offset', 'precision', 'fps']:
+        plt.hist(data_subject[outcome], bins=20)
+        plt.title(outcome + 'Histogram')
+        save_plot(outcome + '_histogram.png', 'results', 'plots',
+                  'fix_task', outcome)
+        plt.close()
     
 
 def fix_heatmap(data_et_fix):
@@ -55,7 +47,9 @@ def fix_heatmap(data_et_fix):
         for i in range(0, len(x_pos)):
             plt.text(x_pos[i], y_pos[i], '+', size=12, ha="center")
 
-        save_plot(str(run) + '.png', 'results', 'plots', 'fix_task', 'heatmaps')
+        save_plot(str(run) + '.png', 'results', 'plots',
+                  'fix_task', 'individual_participants',
+                  'heatmaps')
         plt.close()
 
 
@@ -82,5 +76,5 @@ def visualize_exemplary_run(data_plot):
 
     run = data_plot['run_id'].unique()[0]
     save_plot(('exemplary_run_' + str(run) + '.png'),
-              'results', 'plots', 'fix_task')
+              'results', 'plots', 'fix_task', 'individual_participants')
     plt.close()

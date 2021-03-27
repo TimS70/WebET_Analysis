@@ -7,10 +7,10 @@ from data_prep.add_variables.data_quality.precision import distance_from_xy_mean
 from utils.combine_frames import merge_mean_by_index, merge_mean_by_subject
 from utils.save_data import load_all_three_datasets, save_all_three_datasets
 from visualize.distributions import plot_histogram
-from visualize.eye_tracking import plot_xy
+from visualize.eye_tracking import plot_grand_mean
 
 
-def add_data_quality(max_offset=0.13, min_hit_ratio=0.8):
+def add_data_quality(max_offset=0.13, min_hits_per_dot=0.8):
     print('################################### \n'
           'Calculate data quality variables \n'
           '################################### \n')
@@ -29,14 +29,14 @@ def add_data_quality(max_offset=0.13, min_hit_ratio=0.8):
     data_subject = merge_mean_by_subject(
         data_subject, data_trial, 'offset', 'offset_px')
 
-    plot_xy(data_subject, data_et)
+    plot_grand_mean(data_subject, data_et)
 
 
     # Hit-ratio
     data_trial = add_hit_ratio(
         data_trial, data_et,
         max_offset=max_offset,
-        min_hit_ratio=min_hit_ratio)
+        min_hit_ratio=min_hits_per_dot)
     data_subject = add_n_valid_dots(data_subject, data_trial)
 
     # Precision

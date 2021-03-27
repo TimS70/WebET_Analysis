@@ -26,7 +26,7 @@ def analyze_choice_task():
         os.path.join('data', 'choice_task', 'cleaned'))
 
     plot_categorical_confounders(data_subject)
-    plot_example_eye_movement(data_et, data_trial, 43) #data_subject['run_id'].unique()[0])
+    plot_example_eye_movement(data_et, data_trial, data_subject['run_id'].unique()[0])
     plot_choice_task_heatmap(data_et)
 
     # corr_analysis_subject
@@ -132,18 +132,15 @@ def analyze_fix_task():
 
     # Categorical confounders analysis
     for outcome in ['offset', 'precision', 'fps']:
-        get_box_plots(data_subject, outcome, [
-            'vertPosition', 'gender', 'ethnic',
+        get_box_plots(
+            data_subject, outcome,
+            ['vertPosition', 'gender', 'ethnic',
             'degree', 'browser', 'glasses', 'sight', 'sight'],
-                      ('box_plots_confounders_vs_' + outcome),
-                      'results', 'plots', 'fix_task')
+            ('box_plots_confounders_vs_' + outcome),
+            'results', 'plots', 'fix_task', outcome)
 
     # Correlations
     corr_analysis(data_trial, data_subject)
-
-    # Additional
-    # analyze_calibration(data_et, data_trial)
-    data_trial = grand_mean_offset(data_et, data_trial)
 
     # Visualize_exemplary_run
     data_plot = merge_by_index(data_et, data_trial, 'chin')

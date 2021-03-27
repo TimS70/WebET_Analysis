@@ -15,7 +15,7 @@ from utils.save_data import summarize_datasets, save_all_three_datasets, \
     load_all_three_datasets
 
 
-def clean_global_data():
+def clean_global_data(max_t_task=5500, min_fps=3):
 
     print('################################### \n'
           'Clean global datasets \n'
@@ -121,7 +121,6 @@ def clean_data_choice(
     data_et, data_trial, data_subject = load_all_three_datasets(
         os.path.join('data', 'choice_task', 'added_var'))
 
-    print(data_subject.columns)
     # Screening
     invalid_runs = invalid_runs_choice(
         data_trial, data_et, data_subject,
@@ -129,8 +128,8 @@ def clean_data_choice(
         max_precision=max_precision,
         max_offset=max_offset,
         min_fps=min_fps,
-        min_choice_percentage = min_choice_percentage,
-        max_choice_percentage = max_choice_percentage)
+        min_choice_percentage=min_choice_percentage,
+        max_choice_percentage=max_choice_percentage)
 
     # Remove invalid runs
     data_subject = clean_runs(data_subject, invalid_runs, 'data_subject')

@@ -80,7 +80,7 @@ summarize_datasets(data_et, data_trial, data_subject)
 
 ## Check AOI (optionally new AOIs)
 ```{r}
-data_et = add_new_aoi(data_et, 0.40, 0.40)
+# data_et = add_new_aoi(data_et, 0.40, 0.40)
 
 ggplot(data_et %>% filter(aoi != 0), aes(x=x, y=y)) +
     geom_point(size=2.5, aes(alpha=.5))+
