@@ -5,7 +5,7 @@ import matplotlib.cm as cm
 import numpy as np
 import seaborn as sns
 
-from utils.data_frames import merge_by_index
+from utils.combine_frames import merge_by_index
 from visualize.all_tasks import save_plot, my_heatmap
 
 

@@ -1,35 +1,5 @@
-import os
-
 import numpy as np
 import pandas as pd
-
-from data_prep.cleaning.choice import clean_trial_duration
-from data_prep.cleaning.find_invalid_runs.main import invalid_runs_fix
-from utils.tables import load_all_three_datasets, save_all_three_datasets
-
-
-def clean_fix_task_datasets():
-    print('################################### \n'
-          'Clean fix task datasets \n'
-          '################################### \n')
-
-    data_et, data_trial, data_subject = load_all_three_datasets(
-        os.path.join('data', 'fix_task', 'raw'))
-
-    # Screening
-    invalid_runs = invalid_runs_fix(data_trial, data_subject)
-
-    data_trial = clean_runs(data_trial, invalid_runs, 'data_trial')
-    data_et = clean_runs(data_et, invalid_runs, 'data_et')
-    data_subject = clean_runs(data_subject, invalid_runs, 'data_subject')
-
-    data_trial = clean_trial_duration(data_trial, 0, 5500, 'data_trial')
-    data_et = clean_trial_duration(data_et, 0, 5500, 'data_et')
-
-    data_trial = data_trial.loc[pd.notna(data_trial['x_count']), :]
-
-    save_all_three_datasets(data_et, data_trial, data_subject,
-                            os.path.join('data', 'fix_task', 'cleaned'))
 
 
 def euclidean_distance(x, x_target, y, y_target):
@@ -58,5 +28,5 @@ def show_trials_high_t_task(data_trial, max_t_task):
                                 .reset_index() \
                                 .loc[:, ['run_id', 'trial_index', 'trial_duration_exact']]
 
-    print(f"""k={len(grouped_time_by_trial)} very long trials: \n"""
+    print(f"""add_k={len(grouped_time_by_trial)} very long trials: \n"""
           f"""{grouped_time_by_trial} \n""")

@@ -15,7 +15,7 @@ from utils.path import makedir
 # Parametric measures of effect size, pages 231–244.
 # New York, NY: Russel Sage Foundation, 1994.
 # t / sqrt n
-from utils.tables import write_csv
+from utils.save_data import write_csv
 
 
 def compare_positions(data_trial_fix, outcome):
@@ -127,7 +127,7 @@ def pos_combinations():
         .drop_duplicates() \
         .reset_index(drop=True)
     print(
-        f"""There are k ={len(combinations)} """
+        f"""There are add_k ={len(combinations)} """
         f"""possible combinations of positions \n""")
 
     return combinations

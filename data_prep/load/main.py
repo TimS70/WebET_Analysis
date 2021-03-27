@@ -2,7 +2,7 @@ from data_prep.load.data_subject_prolific import create_data_subject, create_dat
 from data_prep.load.eye_tracking import create_et_data
 from data_prep.load.prolific import combine_cognition_data
 from data_prep.load.trial import create_trial_data
-from utils.tables import summarize_datasets
+from utils.save_data import summarize_datasets
 
 
 def create_datasets_from_cognition():

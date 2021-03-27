@@ -5,7 +5,7 @@ from scipy import stats
 
 from analysis.fix_task.sight import plot_sight_vs_outcomes, anova_outcomes_sight
 from visualize.all_tasks import split_violin_plot, violin_plot
-from utils.tables import write_csv
+from utils.save_data import write_csv
 
 
 def main_effect(data_trial_fix, data_subject):

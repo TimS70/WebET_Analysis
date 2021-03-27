@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+
 def merge_by_subject(data, data_2, *args):
 
     for var in [*args]:

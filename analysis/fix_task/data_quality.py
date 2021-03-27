@@ -2,9 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from utils.data_frames import merge_by_index
+from utils.combine_frames import merge_by_index
 from visualize.all_tasks import save_plot
-from utils.tables import write_csv
+from utils.save_data import write_csv
 
 
 def outcome_over_trials(data_trial, outcome):
@@ -34,7 +34,7 @@ def outcome_over_trials(data_trial, outcome):
             y=data[(outcome + '_median')],
             yerr=[data[(outcome + '_std_lower')],
                   data[(outcome + '_std_upper')]],
-            fmt='^k:',
+            fmt='^add_k:',
             capsize=5
         )
 
@@ -62,7 +62,7 @@ def outcome_over_trials_vs_chin(data_trial, outcome):
             y=data[(outcome + '_median')],
             yerr=[data[(outcome + '_std_lower')],
                   data[(outcome + '_std_upper')]],
-            fmt='^k:',
+            fmt='^add_k:',
             capsize=5
         )
 

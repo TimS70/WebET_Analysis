@@ -60,7 +60,7 @@ data_et = read.csv(
 summarize_datasets(data_et, data_trial, data_subject)
 ```
 
-## k-values
+## add_k-values
 ```{r, add_k_values}
 data_trial = merge_mean_by_subject(data_trial, data_subject, 'logK')
 data_trial = merge_mean_by_subject(data_trial, data_subject, 'noise')
@@ -84,7 +84,7 @@ summary(data_trial$n_fixations)
 ```
 
 
-# Distribution of k-values
+# Distribution of add_k-values
 ````{r, plot_k}
 dir.create(file.path(path_results, 'log_k'), showWarnings = FALSE)
 
@@ -237,7 +237,7 @@ ggplot(data_subject %>% filter(!is.na(optionIndex)),
 		xlim(-1,1) +
 		theme(text=element_text(size=20))+
 		xlab("Option index") +
-		ylab("log(k)") + 
+		ylab("log(add_k)") +
 		scale_colour_grey()
 ggsave(file.path(path_results, 'et', 'logK_oi.pdf'), width=5.7, height=5)
 
@@ -252,7 +252,7 @@ ggplot(data_subject %>% filter(!is.na(attributeIndex)),
 		xlim(-1,1) +
 		scale_colour_grey()
 		theme(text=element_text(size=20)) +
-		xlab("Attribute index") + ylab("log(k)") 
+		xlab("Attribute index") + ylab("log(add_k)")
 ggsave(file.path(path_results, 'et', 'logK_ai.pdf'),width=5.7, height=5)
 
 data_test = data_subject %>% filter(!is.na(attributeIndex))
@@ -269,7 +269,7 @@ ggplot(data_subject %>% filter(!is.na(attributeIndex)),
 		scale_colour_grey() + 
 		theme(text=element_text(size=20))+
 		xlab("Payne index") +
-		ylab("log(k)") 
+		ylab("log(add_k)")
 ggsave(file.path(path_results, 'et', 'logK_pi.pdf'),width=5.7, height=5)
 
 data_test = data_subject %>% filter(!is.na(payneIndex))
@@ -680,7 +680,7 @@ ggsave(file.path(path_results, 'et', 'last_fix_ll_vs_choice_ll.pdf'),
 
 # Error Analyis
 Error trials are those that are not predicted based on the subjective values, 
-which themselves are based on individual's fitted k value
+which themselves are based on individual's fitted add_k value
 ## Find Error trials
 ```{r}
 identify_error_trials = function(data) {

@@ -9,7 +9,7 @@ import statsmodels.graphics.api as smg
 
 from scipy.ndimage.filters import gaussian_filter
 from utils.path import makedir
-from utils.tables import write_csv
+from utils.save_data import write_csv
 
 
 def spaghetti_plot(data, x_var, y_var, highlighted_subject):

@@ -10,9 +10,9 @@ from analysis.fix_task.data_quality import grand_mean_offset, \
 from analysis.fix_task.main_effects import main_effect
 from analysis.fix_task.positions import compare_positions
 from analysis.fix_task.randomization import check_randomization
-from utils.data_frames import merge_by_index
+from utils.combine_frames import merge_by_index
 from visualize.all_tasks import get_box_plots
-from utils.tables import load_all_three_datasets
+from utils.save_data import load_all_three_datasets
 from visualize.fix import visualize_exemplary_run, fix_heatmap, hist_plots_quality
 
 

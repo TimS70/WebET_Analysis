@@ -5,9 +5,9 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from utils.data_frames import merge_by_index
+from utils.combine_frames import merge_by_index
 from utils.path import makedir
-from utils.tables import write_csv
+from utils.save_data import write_csv
 from visualize.choice import plot_aoi_scatter
 
 
@@ -93,7 +93,7 @@ def match_remaining_et_trials(data_trial, data_et):
 
     print(
         f"""data_trial: Removing trials with missing eye-tracking data: \n"""
-        f"""k={sum(missing_values['n'])} trials of """
+        f"""add_k={sum(missing_values['n'])} trials of """
         f"""{missing_values['run_id'].nunique()} runs. \n"""
     )
 

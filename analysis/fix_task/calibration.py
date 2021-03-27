@@ -5,7 +5,7 @@ import pandas as pd
 
 from data_prep.add_variables.data_quality.offset import add_offset, distance_from_xy_mean_square, \
     aggregate_precision_from_et_data
-from utils.data_frames import merge_mean_by_index
+from utils.combine_frames import merge_mean_by_index
 from visualize.all_tasks import spaghetti_plot, save_plot
 
 

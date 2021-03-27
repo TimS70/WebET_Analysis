@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from utils.data_frames import merge_by_index, merge_by_subject
+from utils.combine_frames import merge_by_index, merge_by_subject
 
 
 def add_hit_ratio(data_trial, data_et, max_offset=0.10,

@@ -38,14 +38,14 @@ for i = 1:length(subject)  %loop over all subjects
         data_thisSubject.tLL);
     
     noise = info.b(1);
-    k = info.b(2);
+    add_k = info.b(2);
     
-    if k<.0001 && mean(data_thisSubject.choseLL)>.95 %Extremely patient
+    if add_k<.0001 && mean(data_thisSubject.choseLL)>.95 %Extremely patient
         output=[output; subject(i), -9.5, noise];
-    elseif k<0 %Inconsistent choice, can't properly fit
+    elseif add_k<0 %Inconsistent choice, can't properly fit
         output=[output; subject(i), NaN, noise];
     else %Fit within typical range, keep fit
-        output=[output; subject(i), log(k), noise]; %Save log(k) as output
+        output=[output; subject(i), log(add_k), noise]; %Save log(add_k) as output
     end
     
     waitbar(i/length(subject),f,'Looping over subjects');

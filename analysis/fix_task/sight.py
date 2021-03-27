@@ -4,7 +4,7 @@ import statsmodels.api as sm
 from statsmodels.formula.api import ols
 
 from visualize.all_tasks import save_plot
-from utils.tables import write_csv
+from utils.save_data import write_csv
 
 
 def plot_sight_vs_outcomes(data_subject):

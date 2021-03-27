@@ -4,7 +4,7 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
 from utils.path import makedir
-from utils.tables import write_csv
+from utils.save_data import write_csv
 
 
 def test_transition_clusters(data_trial):

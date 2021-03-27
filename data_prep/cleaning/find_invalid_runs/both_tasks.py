@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from utils.data_frames import merge_by_index
+from utils.combine_frames import merge_by_index
 
 
 def filter_runs_no_instruction(data_subject):

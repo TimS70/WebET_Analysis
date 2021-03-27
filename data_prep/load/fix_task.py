@@ -1,14 +1,11 @@
 import os
 
-import pandas as pd
-
-from data_prep.add_variables.trial import merge_count_by_index
-from utils.data_frames import merge_by_index, merge_mean_by_subject
-from utils.path import makedir
-from utils.tables import summarize_datasets, load_all_three_datasets, save_all_three_datasets
+from data_prep.add_variables.both_tasks.trial import merge_count_by_index
+from utils.combine_frames import merge_by_index, merge_mean_by_subject
+from utils.save_data import load_all_three_datasets, save_all_three_datasets
 
 
-def create_fix_tasks_datasets():
+def load_fix_data():
 
     print('################################### \n'
           'Create fix task dataset \n'

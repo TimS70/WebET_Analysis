@@ -1,6 +1,6 @@
 import pandas as pd
 
-from utils.tables import write_csv
+from utils.save_data import write_csv
 
 
 def filter_runs_not_us(data_subject):
@@ -66,6 +66,14 @@ def filter_runs_offset(data_subject, max_offset=0.5):
     print(f"""Maximum offset means >{max_offset}. \n""")
 
     return runs_high_offset
+
+
+def filter_hit_ratio(data_subject, min_hit_ratio=0.8):
+    runs_low_hit_ratio = data_subject.loc[
+        data_subject['hit_ratio'] > min_hit_ratio,
+        'run_id']
+
+    return runs_low_hit_ratio
 
 
 def filter_bad_log_k(data_subject, max_noise=40):

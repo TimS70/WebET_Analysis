@@ -5,13 +5,13 @@ from analysis.demographics import analyze_demographics
 from analysis.dropouts.main import analyze_dropouts
 from analysis.main import analyze_fix_task, analyze_choice_task
 from data_prep.add_variables.data_quality.main import add_data_quality
-from data_prep.add_variables.init import global_add_variables_to_datasets
-from data_prep.choice import add_variables_choice, add_log_k, run_et_cluster_correction
-from data_prep.cleaning.choice import create_choice_data, clean_choice_data
-from data_prep.cleaning.fix_task import clean_fix_task_datasets
-from data_prep.cleaning.init import global_cleaning
-from data_prep.fix_task import create_fix_tasks_datasets
-from data_prep.load.init import create_datasets_from_cognition
+from data_prep.add_variables.main import add_variables_global, add_variables_choice
+from data_prep.load.choice import load_choice_data
+from data_prep.cleaning.main import clean_data_global, clean_data_fix, clean_data_choice
+from data_prep.load.fix_task import load_fix_data
+from data_prep.load.main import create_datasets_from_cognition
+
+from data_prep.add_variables.fit_k.call_from_py import add_log_k
 
 
 def main(new_data=False):
@@ -23,18 +23,18 @@ def main(new_data=False):
 
 
 def prep_data():
-    global_add_variables_to_datasets()
-    global_cleaning()
+    add_variables_global()
+    clean_data_global()
 
-    create_fix_tasks_datasets()
-    clean_fix_task_datasets()
+    load_fix_data()
+    clean_data_fix()
     add_data_quality()
 
-    create_choice_data()
+    load_choice_data()
     # run_et_cluster_correction()
     add_variables_choice()
     add_log_k()
-    clean_choice_data()
+    clean_data_choice()
 
 
 def analyze():

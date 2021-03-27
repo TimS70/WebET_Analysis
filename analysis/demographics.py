@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from visualize.all_tasks import save_plot
-from utils.tables import write_csv
+from utils.save_data import write_csv
 
 
 def analyze_demographics():

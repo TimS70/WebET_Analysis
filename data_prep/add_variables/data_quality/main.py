@@ -3,8 +3,8 @@ import os
 from data_prep.add_variables.data_quality.offset import add_offset, add_hit_ratio, add_n_valid_dots
 from data_prep.add_variables.data_quality.precision import distance_from_xy_mean_square, \
     aggregate_precision_from_et_data
-from utils.data_frames import merge_mean_by_index, merge_mean_by_subject
-from utils.tables import load_all_three_datasets, save_all_three_datasets
+from utils.combine_frames import merge_mean_by_index, merge_mean_by_subject
+from utils.save_data import load_all_three_datasets, save_all_three_datasets
 
 
 def add_data_quality():

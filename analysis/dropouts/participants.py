@@ -1,17 +1,8 @@
-import os
-
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from pandas import MultiIndex
 
 from analysis.dropouts.runs import multi_participation_by_run
-from data_prep.cleaning.prolific_ids import drop_duplicate_ids
-from utils.add_next_trial import add_next_trial
-from utils.data_frames import merge_by_subject
-from visualize.all_tasks import save_plot
-from utils.tables import write_csv
-from visualize.dropouts import plot_incomplete_runs
+from data_prep.cleaning.drop_invalid_data.prolific_ids import drop_duplicate_ids
 
 
 def dropouts_participants(data_subject, data_trial):

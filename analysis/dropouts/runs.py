@@ -1,18 +1,12 @@
-import os
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import scipy
 
-from data_prep.cleaning.prolific_ids import drop_duplicate_ids
-from scipy import stats
-from utils.add_next_trial import add_next_trial
-from utils.data_frames import merge_by_subject
-from utils.inference import welch_dof, welch_ttest
+from data_prep.add_variables.both_tasks.trial import add_next_trial
+from utils.combine_frames import merge_by_subject
+from utils.inference import welch_ttest
 from visualize.all_tasks import save_plot
-from utils.tables import write_csv
-from visualize.dropouts import plot_incomplete_runs
+from utils.save_data import write_csv
 
 
 def report_incomplete_runs(data_trial):
@@ -27,7 +21,6 @@ def report_incomplete_runs(data_trial):
             how='left')
 
     max_trial_by_run = add_next_trial(max_trial_by_run, data_trial)
-
 
     data_incomplete_runs = max_trial_by_run[
         max_trial_by_run['trial_type_new'] != 'end']
@@ -65,8 +58,8 @@ def dropout_by_task_nr(data_trial):
         .merge(
             data_trial[['run_id', 'trial_index', 'prolificID',
                         'trial_type_nr', 'task_nr_new',
-                        'status']] \
-                .rename(columns={'trial_index': 'max_trial'}),
+                        'status']].rename(
+                columns={'trial_index': 'max_trial'}),
             on=['run_id', 'max_trial'],
             how='left')
 
@@ -201,8 +194,9 @@ def multi_participation_by_run(data_trial):
             max_trial=('trial_index', 'max')) \
         .merge(
             data_trial[['run_id', 'trial_index', 'prolificID',
-                        'trial_type_nr', 'trial_type_new', 'status']] \
-                .rename(columns={'trial_index': 'max_trial'}),
+                        'trial_type_nr', 'trial_type_new',
+                        'status']].rename(
+                columns={'trial_index': 'max_trial'}),
             on=['run_id', 'max_trial'],
             how='left')
 

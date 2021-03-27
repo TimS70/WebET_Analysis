@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from data_prep.cleaning.choice import filter_hit_ratio
+from data_prep.cleaning.find_invalid_runs.choice import filter_hit_ratio
 from data_prep.cleaning.find_invalid_runs.both_tasks import filter_runs_no_instruction, \
     filter_full_but_no_et_data, filter_runs_low_fps, \
     filter_wrong_glasses
@@ -9,8 +9,7 @@ from data_prep.cleaning.find_invalid_runs.choice import filter_runs_not_us, filt
     filter_biased_choices, filter_bad_log_k
 from data_prep.cleaning.find_invalid_runs.fix import runs_with_incomplete_fix_tasks, filter_runs_bad_time_measure, \
     missing_glasses
-from data_prep.cleaning.fix_task import show_empty_fix_trials, show_trials_high_t_task
-from utils.tables import write_csv
+from utils.save_data import write_csv
 
 
 def invalid_runs_global(data_trial, data_et, data_subject):
@@ -171,9 +170,6 @@ def invalid_runs_choice(data_trial, data_et, data_subject):
 
 
 def invalid_runs_fix(data_trial_fix, data_subject):
-    show_empty_fix_trials(data_trial_fix)
-    show_trials_high_t_task(data_trial_fix, max_t_task=5500)
-
     runs_incomplete_fix_task = runs_with_incomplete_fix_tasks(
         data_trial_fix)
     runs_bad_time_measure = filter_runs_bad_time_measure(

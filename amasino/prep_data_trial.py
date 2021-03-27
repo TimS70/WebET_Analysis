@@ -4,8 +4,8 @@ import subprocess
 import numpy as np
 import pandas as pd
 
-from utils.data_frames import merge_mean_by_subject
-from utils.tables import write_csv
+from utils.combine_frames import merge_mean_by_subject
+from utils.save_data import write_csv
 
 
 def load_data():
@@ -72,7 +72,7 @@ def add_choseTop(data):
 
 
 def add_log_k(data_subject, data_trial):
-    print('Fitting log(k) in Matlab. \n')
+    print('Fitting log(add_k) in Matlab. \n')
     os.chdir(os.path.join('amasino', 'fit_k'))
 
     write_csv(data_trial,

@@ -6,11 +6,11 @@ output = zeros(length(subjects), 3);
 
 for i = 1:length(subjects)
     data_thisSubject = data(data.run_id==subjects(i), :);
-    [k, negative_LogLikelihood] = fitK(data_thisSubject);
+    [add_k, negative_LogLikelihood] = fitK(data_thisSubject);
     
     output(i, :) = [
         unique(data_thisSubject.run_id), 
-        log(k), 
+        log(add_k),
         negative_LogLikelihood
         ];  
 end
