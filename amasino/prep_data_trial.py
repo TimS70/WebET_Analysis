@@ -4,12 +4,6 @@ import subprocess
 import numpy as np
 import pandas as pd
 
-from amasino.cleaning import invalid_choice_runs
-from analysis.choice_task.test_clusters import test_transition_clusters
-from data_prep.add_variables.aoi import add_aoi_et, match_remaining_et_trials, add_aoi_counts_on_trial_level, \
-    add_fixation_counter, count_fixations_on_trial_level
-from data_prep.add_variables.et_indices import add_et_indices
-from data_prep.cleaning.invalid_runs import clean_runs
 from utils.data_frames import merge_mean_by_subject
 from utils.tables import write_csv
 

@@ -1,9 +1,6 @@
 import os
 import subprocess
 
-import numpy as np
-import pandas as pd
-
 from amasino.cleaning import invalid_choice_runs
 from amasino.prep_data_et import transform_xy_coordinates
 from amasino.prep_data_trial import load_data, add_trial_index, \
@@ -12,10 +9,9 @@ from analysis.choice_task.test_clusters import test_transition_clusters
 from data_prep.add_variables.aoi import add_aoi_et, match_remaining_et_trials, add_aoi_counts_on_trial_level, \
     add_fixation_counter, count_fixations_on_trial_level, create_aoi_columns
 from data_prep.add_variables.et_indices import add_et_indices
-from data_prep.cleaning.invalid_runs import clean_runs
-from utils.data_frames import merge_mean_by_subject, merge_by_index
-from utils.tables import write_csv, save_all_three_datasets, load_all_three_datasets
-from visualize.choice import plot_example_eye_movement, plot_choice_task_heatmap
+from data_prep.cleaning.find_invalid_runs.invalid_runs import clean_runs
+from utils.data_frames import merge_by_index
+from utils.tables import save_all_three_datasets, load_all_three_datasets
 
 
 def prep_data():

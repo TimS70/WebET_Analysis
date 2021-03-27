@@ -2,83 +2,6 @@ import numpy as np
 import pandas as pd
 
 from utils.data_frames import merge_by_index
-from utils.tables import write_csv
-
-
-def find_invalid_runs(data_trial, data_et, data_subject):
-
-    print(
-        f"""\n"""
-        f"""Clean runs that are otherwise not valid: """)
-
-    # Not enough trials
-    subjects_full_trial = data_trial \
-        .loc[data_trial['trial_type_new'] == 'end', 'run_id'] \
-        .unique()
-    print(f'n={len(subjects_full_trial)} runs with full trials. ')
-
-    subjects_not_full_trial = np.setdiff1d(
-        data_trial['run_id'].unique(),
-        subjects_full_trial)
-
-    runs_not_follow_instructions = filter_runs_no_instruction(
-        data_subject)
-    runs_full_but_not_enough_et = \
-        filter_full_but_no_et_data(data_et, data_trial)
-    runs_low_fps = filter_runs_low_fps(data_trial, data_et, 3)
-    runs_cannot_see = filter_wrong_glasses(data_subject)
-
-    # Plotting saccades from the fix task showed no variance
-    runs_no_saccade = [144, 171, 380]
-
-    invalid_runs = list(
-        set(subjects_not_full_trial) |
-        set(runs_not_follow_instructions) |
-        set(runs_low_fps) |
-        set(runs_cannot_see) |
-        set(runs_no_saccade) |
-        set(runs_full_but_not_enough_et)
-    )
-
-    n_runs = len(data_trial['run_id'].unique())
-
-    summary = pd.DataFrame(
-       {'name': [
-                   'subjects_not_full_trial',
-                   'runs_noInstruction',
-                   'runs_lowFPS',
-                   'runs_cannotSee',
-                   'runs_no_saccade',
-                   'runs_full_but_not_enough_et',
-                   'total'],
-        'length': [
-                    len(subjects_not_full_trial),
-                    len(runs_not_follow_instructions),
-                    len(runs_low_fps),
-                    len(runs_cannot_see),
-                    len(runs_no_saccade),
-                    len(runs_full_but_not_enough_et),
-                    len(invalid_runs)],
-        'percent': [
-                    len(subjects_not_full_trial)/n_runs,
-                    len(runs_not_follow_instructions)/n_runs,
-                    len(runs_low_fps)/n_runs,
-                    len(runs_cannot_see)/n_runs,
-                    len(runs_no_saccade)/n_runs,
-                    len(runs_full_but_not_enough_et)/n_runs,
-                    len(invalid_runs)/n_runs]
-       })
-
-    print(
-        f"""\n n={n_runs} runs in total. Invalid_runs: \n"""
-        f"""{round(summary, 2)}""")
-
-    write_csv(
-        summary,
-        'global_invalid_runs.csv',
-        'results', 'tables')
-
-    return invalid_runs
 
 
 def filter_runs_no_instruction(data_subject):
@@ -128,8 +51,9 @@ def filter_full_but_no_et_data(data_et, data_trial):
         ['run_id', 'trial_index', 'x_count']
     ]
 
-    na_et_by_run = et_trials.loc[pd.isna(et_trials['x_count']), :
-                   ].groupby(['run_id'], as_index=False).count()
+    na_et_by_run = et_trials \
+        .loc[pd.isna(et_trials['x_count'])] \
+        .groupby(['run_id'], as_index=False).count()
 
     runs_not_enough_et_data = na_et_by_run.loc[
         na_et_by_run['trial_index'] > 10, 'run_id']
@@ -190,17 +114,3 @@ def filter_wrong_glasses(data_subject):
         f"""but do not wear visual aids. """)
 
     return runs_cannot_see
-
-
-def clean_runs(data, excluded_runs, name):
-
-    data_raw = data
-
-    data = data_raw.loc[~data_raw['run_id'].isin(excluded_runs), :]
-
-    print(
-        f"""Removing invalid runs from {name}: \n"""
-        f"""   Raw: {len(data_raw['run_id'].unique())} \n"""
-        f"""   Cleaned: {len(data['run_id'].unique())} \n""")
-
-    return data
