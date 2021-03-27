@@ -14,14 +14,6 @@ from data_prep.load.main import create_datasets_from_cognition
 from data_prep.add_variables.fit_k.call_from_py import add_log_k
 
 
-def main(new_data=False):
-    if new_data:
-        create_datasets_from_cognition()
-
-    prep_data()
-    analyze()
-
-
 def prep_data():
     add_variables_global()
     clean_data_global()
@@ -49,5 +41,16 @@ def analyze():
         shell=True)
 
 
+def main(new_data=False):
+    if new_data:
+        create_datasets_from_cognition()
+
+    prep_data()
+    analyze()
+
+
 if __name__ == '__main__':
-    main(new_data=False)
+    add_log_k()
+    clean_data_choice()
+    analyze()
+    # main(new_data=False)

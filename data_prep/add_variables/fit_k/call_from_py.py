@@ -10,7 +10,7 @@ from utils.save_data import write_csv
 def add_log_k():
 
     print('Fitting log(add_k) in Matlab. \n')
-    os.chdir(os.path.join('data_prep', 'fit_k'))
+    os.chdir(os.path.join('data_prep', 'add_variables', 'fit_k'))
 
     # noinspection SpellCheckingInspection
     run_matlab = \

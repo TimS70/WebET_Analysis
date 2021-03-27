@@ -1,6 +1,7 @@
 import os
 
-from data_prep.add_variables.data_quality.offset import add_offset, add_hit_ratio, add_n_valid_dots
+from data_prep.add_variables.data_quality.offset import add_offset, add_hit_ratio, add_n_valid_dots, \
+    add_grand_mean_offset
 from data_prep.add_variables.data_quality.precision import distance_from_xy_mean_square, \
     aggregate_precision_from_et_data
 from utils.combine_frames import merge_mean_by_index, merge_mean_by_subject
@@ -23,6 +24,9 @@ def add_data_quality():
     # Hit-ratio
     data_trial = add_hit_ratio(data_trial, data_et,
                                max_offset=0.13, min_hit_ratio=0.8)
+
+    data_trial = add_grand_mean_offset(data_trial)
+
     data_subject = add_n_valid_dots(data_subject, data_trial)
 
     data_subject = merge_mean_by_subject(data_subject, data_trial,

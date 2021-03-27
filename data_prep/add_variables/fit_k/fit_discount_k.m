@@ -14,7 +14,7 @@ function fit_discount_k()
 
 root = 'C:\Users\User\GitHub\WebET_Analysis';
 
-cd(fullfile(root, 'data_prep', 'fit_k'));
+cd(fullfile(root, 'data_prep', 'add_variables', 'fit_k'));
 
 f = waitbar(0,'Reading data');
 

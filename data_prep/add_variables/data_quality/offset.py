@@ -67,3 +67,10 @@ def add_offset(data_et):
           f"""{round(summary, 2)} \n""")
 
     return data_et
+
+
+def add_grand_mean_offset(data_trial, data_et):
+
+    data_et \
+        .groupby(['run_id', 'trial_index'], as_index=False) \
+        .agg()
