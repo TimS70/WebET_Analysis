@@ -6,6 +6,8 @@ from data_prep.add_variables.data_quality.precision import distance_from_xy_mean
     aggregate_precision_from_et_data
 from utils.combine_frames import merge_mean_by_index, merge_mean_by_subject
 from utils.save_data import load_all_three_datasets, save_all_three_datasets
+from visualize.distributions import plot_histogram
+from visualize.eye_tracking import plot_xy
 
 
 def add_data_quality(max_offset=0.13, min_hit_ratio=0.8):
@@ -26,6 +28,9 @@ def add_data_quality(max_offset=0.13, min_hit_ratio=0.8):
 
     data_subject = merge_mean_by_subject(
         data_subject, data_trial, 'offset', 'offset_px')
+
+    plot_xy(data_subject, data_et)
+
 
     # Hit-ratio
     data_trial = add_hit_ratio(

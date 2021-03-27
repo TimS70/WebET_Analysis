@@ -181,9 +181,3 @@ def save_plot(file_name, *args):
     print(f"""Plot {file_name} was saved to {path} \n""")
 
 
-def my_heatmap(x, y, s, bins=[np.arange(0, 1, 0.001),
-                              np.arange(0, 1, 0.002)]):
-    heatmap, x_edges, y_edges = np.histogram2d(x, y, bins=bins)
-    heatmap = gaussian_filter(heatmap, sigma=s)
-    extent = [x_edges[0], x_edges[-1], y_edges[-1], y_edges[0]]
-    return heatmap.T, extent

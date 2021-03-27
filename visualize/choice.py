@@ -6,7 +6,8 @@ import numpy as np
 import seaborn as sns
 
 from utils.combine_frames import merge_by_index
-from visualize.all_tasks import save_plot, my_heatmap
+from visualize.all_tasks import save_plot
+from visualize.eye_tracking import my_heatmap
 
 
 def plot_aoi_scatter(data_et):

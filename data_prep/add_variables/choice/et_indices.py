@@ -5,7 +5,6 @@ import pandas as pd
 def add_et_indices(data_trial, data_et,
                    min_gaze_points=3):
 
-
     data_trial['optionIndex'] = add_option_index(
         data_trial, min_gaze_points)
     data_trial['attributeIndex'] = add_attribute_index(
