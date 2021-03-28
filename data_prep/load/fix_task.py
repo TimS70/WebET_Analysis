@@ -5,14 +5,13 @@ from utils.combine_frames import merge_by_index, merge_mean_by_subject
 from utils.save_data import load_all_three_datasets, save_all_three_datasets
 
 
-def load_fix_data():
+def load_fix_data(origin_path):
 
     print('################################### \n'
           'Create fix task dataset \n'
           '################################### \n')
 
-    data_et, data_trial, data_subject = load_all_three_datasets(
-        os.path.join('data', 'all_trials', 'cleaned'))
+    data_et, data_trial, data_subject = load_all_three_datasets(origin_path)
 
     data_et = merge_by_index(data_et, data_trial,
                                  'task_nr', 'chin', 'chinFirst', 'trial_type',

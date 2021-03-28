@@ -42,7 +42,8 @@ def find_aoi_clusters(data, message, run):
                how='left')
 
     if (len(aoi_clusters) < 4) & message:
-        print(f'Run {run} does not have clusters in all 4 '
+        print(f'\n'
+              f'Run {run} does not have clusters in all 4 '
               f'corners and cannot be clustered')
 
     return aoi_clusters
@@ -78,13 +79,20 @@ def filter_clusters(aoi_clusters, min_ratio,
 
     if message:
         if not_enough_gaze_points | too_far_away:
-            print(f"""Run {run} could not be clustered: \n"""
-                  f"""{aoi_clusters}""")
-        if not_enough_gaze_points:
-            print(f"""   <{min_ratio}% gaze point within """
-                  f"""the AOIs for each corner""")
-        if too_far_away:
-            print(f"""   >{max_deviation}% from where the AOI """
-                  f"""is supposed to be \n""")
+            print(f"""\nRun {run} could not be clustered: """)
+            if not_enough_gaze_points:
+                print(f"""   <{min_ratio*100}% gaze point within """
+                      f"""the AOIs for each corner""")
+            if too_far_away:
+                print(f"""   >{max_deviation*100}% from where the AOI """
+                      f"""is supposed to be \n""")
+
+        else:
+            print(f"""\nRun {run} can be clustered: """)
+
+        print(f"""{aoi_clusters[[
+              'quadrant', 'n_cluster', 'cluster', 'n_ratio', 
+              'x_deviation', 'y_deviation']]} \n"""
+              f"""Notes: """)
 
     return realistic_clusters

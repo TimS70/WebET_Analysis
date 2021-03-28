@@ -38,7 +38,7 @@ def run_py_clustering(distance_threshold,
 
     data_et_corrected = []
 
-    for run in [48]: # tqdm(data_et['run_id'].unique(), desc='Run cluster correction: '):
+    for run in tqdm(data_et['run_id'].unique(), desc='Run cluster correction: '):
 
         data_plot = data_et[
             pd.notna(data_et['aoi']) &
@@ -77,6 +77,9 @@ def run_py_clustering(distance_threshold,
             file_name=str(round(run)) + '.png',
             path=os.path.join('results', 'plots', 'clustering',
                               'py_clusters', 'aoi_clusters'))
+
+        if len(aoi_clusters) < 4:
+            continue
 
         aoi_clusters = filter_clusters(
             run=run,
