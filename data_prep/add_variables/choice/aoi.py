@@ -18,7 +18,9 @@ def add_aoi_et(data_et, aoi_width=0.3, aoi_height=0.3):
     if (aoi_width >= 0.5) | (aoi_height >= 0.5):
         print(f"""Define the 4 quadrants of the screen """
               f"""as AOIs. \n""")
-        data_et = aoi_corners(data_et)
+        data_et = add_quadrant(data_et)
+        data_et['aoi'] = data_et['quadrant']
+
     else:
         print(f"""AOIs with width={aoi_width} and """
               f"""heigth={aoi_height}. \n""")
@@ -59,28 +61,22 @@ def add_aoi(data, aoi_width, aoi_height):
     return data
 
 
-def aoi_corners(data, aoi_width=0.5, aoi_height=0.5):
-    aoi_centers = pd.DataFrame(
-        [
-            [0.25, 0.25],
-            [0.75, 0.25],
-            [0.25, 0.75],
-            [0.75, 0.75]
-        ],
-        columns=['x', 'y'],
-        index=['TL', 'TR', 'BL', 'BR']
-    )
-
-    data['aoi'] = 0
-    for aoi in aoi_centers.index:
-        data.loc[
-            (data['x'] > (aoi_centers.loc[aoi, 'x'] - aoi_width / 2)) &
-            (data['x'] < (aoi_centers.loc[aoi, 'x'] + aoi_width / 2)) &
-            (data['y'] > (aoi_centers.loc[aoi, 'y'] - aoi_height / 2)) &
-            (data['y'] < (aoi_centers.loc[aoi, 'y'] + aoi_height / 2)),
-            'aoi'] = aoi
+def add_quadrant(data):
+    # x,y starts at top-left (0, 0)
+    data['quadrant'] = 0
+    data.loc[
+        (data['x'] < 0.5) & (data['y'] < 0.5),
+        'quadrant'] = 'TL'
+    data.loc[
+        (data['x'] > 0.5) & (data['y'] < 0.5),
+        'quadrant'] = 'TR'
+    data.loc[
+        (data['x'] < 0.5) & (data['y'] > 0.5),
+        'quadrant'] = 'BL'
+    data.loc[
+        (data['x'] > 0.5) & (data['y'] > 0.5),
+        'quadrant'] = 'BR'
     return data
-
 
 def match_remaining_et_trials(data_trial, data_et):
 

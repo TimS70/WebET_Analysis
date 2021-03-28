@@ -6,6 +6,7 @@ from analysis.dropouts.main import analyze_dropouts
 from analysis.main import analyze_fix_task, analyze_choice_task
 from data_prep.add_variables.data_quality.main import add_data_quality
 from data_prep.add_variables.main import add_variables_global, add_variables_choice
+from data_prep.cluster_py.main import run_py_clustering
 from data_prep.load.choice import load_choice_data
 from data_prep.cleaning.main import clean_global_data, clean_data_fix, clean_data_choice
 from data_prep.load.fix_task import load_fix_data
@@ -63,5 +64,5 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    analyze_fix_task()
+    run_py_clustering()
     # main(new_data=False)

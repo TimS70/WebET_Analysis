@@ -1,10 +1,40 @@
 import os
 
+import matplotlib.pyplot as plt
 import numpy as np
+
 from scipy.ndimage import gaussian_filter
 
 from utils.combine_frames import merge_mean_by_subject
+from visualize.all_tasks import save_plot
 from visualize.distributions import plot_histogram, plot_2d_histogram
+
+
+def plot_et_scatter(x, y, c=None,
+                    title='Scatter plot of eye-tracking coordinates',
+                    file_name='et_scatter.png',
+                    path='results'):
+    """
+
+    :type file_name: Name of file
+    """
+    plt.scatter(x, y, c=c, s=0.5, label='xy clusters')
+
+    plt.xlim(0, 1)
+    plt.ylim(1, 0)
+    plt.xticks(np.arange(0, 1, 0.1))
+    plt.yticks(np.arange(0, 1, 0.1))
+
+    plt.legend()
+    plt.xlabel('X [%]')
+    plt.ylabel('Y [%]')
+    plt.grid()
+    plt.tight_layout()
+    plt.box(False)
+    plt.title(title)
+
+    save_plot(file_name, path)
+    plt.close()
 
 
 def plot_grand_mean(data_subject, data_et):
