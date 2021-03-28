@@ -12,6 +12,7 @@ from data_prep.load.fix_task import load_fix_data
 from data_prep.load.main import create_datasets_from_cognition
 
 from data_prep.add_variables.fit_k.call_from_py import add_log_k
+from visualize.choice import plot_choice_task_heatmap
 
 
 def prep_data():
@@ -30,6 +31,7 @@ def prep_data():
         min_required_trials=5,
         min_gaze_points=3)
 
+    plot_choice_task_heatmap()
     add_log_k()
 
     clean_data_choice(
@@ -61,4 +63,5 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    main(new_data=False)
+    add_data_quality(max_offset=0.15, min_hits_per_dot=0.8)
+    # main(new_data=False)

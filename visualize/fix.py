@@ -1,10 +1,20 @@
-import numpy as np
-import matplotlib.pyplot as plt
+import os
+
 import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-
+from analysis.fix_task.positions import outcome_by_position_long
+from utils.path import makedir
 from visualize.all_tasks import save_plot
 from visualize.eye_tracking import my_heatmap
+
+
+# Correction
+# Robert Rosenthal. The hand-book of research synthesis, chapter
+# Parametric measures of effect size, pages 231–244.
+# New York, NY: Russel Sage Foundation, 1994.
+# t / sqrt n
 
 
 def hist_plots_quality(data_subject):
@@ -13,14 +23,13 @@ def hist_plots_quality(data_subject):
 
     for outcome in ['offset', 'precision', 'fps']:
         plt.hist(data_subject[outcome], bins=20)
-        plt.title(outcome + 'Histogram')
+        plt.title(outcome + ' Histogram')
         save_plot(outcome + '_histogram.png', 'results', 'plots',
                   'fix_task', outcome)
         plt.close()
-    
+
 
 def fix_heatmap(data_et_fix):
-
     for run in data_et_fix['run_id'].unique():
 
         data = data_et_fix[
@@ -37,10 +46,12 @@ def fix_heatmap(data_et_fix):
         s = 34
         img, extent = my_heatmap(x, y, s=s)
 
-        ax.imshow(img, extent=extent, origin='upper', cmap=cm.Greens, aspect=(9 / 16))
+        ax.imshow(img, extent=extent, origin='upper', cmap=cm.Greens,
+                  aspect=(9 / 16))
         ax.set_xlim(0, 1)
         ax.set_ylim(1, 0)
-        ax.set_title("Distribution of fixations after 1 second, $\sigma$ = %d" % s)
+        ax.set_title(
+            "Distribution of fixations after 1 second, $\sigma$ = %d" % s)
 
         x_pos = [0.2, 0.5, 0.8, 0.2, 0.5, 0.8, 0.2, 0.5, 0.8]
         y_pos = [0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8]
@@ -77,4 +88,26 @@ def visualize_exemplary_run(data_plot):
     run = data_plot['run_id'].unique()[0]
     save_plot(('exemplary_run_' + str(run) + '.png'),
               'results', 'plots', 'fix_task', 'individual_participants')
+    plt.close()
+
+
+def plot_top_vs_bottom_positions(data_trial_fix, outcome):
+    outcome_by_y_pos = outcome_by_position_long(
+        data_trial_fix, outcome) \
+        .groupby(
+        ['run_id', 'y_pos'],
+        as_index=False)[outcome].mean()
+    outcome_by_y_pos = outcome_by_y_pos.loc[
+                       outcome_by_y_pos['y_pos'] != 0.5, :]
+
+    fig, axes = plt.subplots(1, 1, sharey='none', figsize=(6, 6))
+    fig.suptitle((outcome + ' top vs. bottom '))
+
+    sns.violinplot(ax=axes,
+                   x='y_pos',
+                   y=outcome,
+                   data=outcome_by_y_pos)
+
+    save_plot((outcome + '_top_vs_bottom.png'),
+              'results', 'plots', 'fix_task', outcome)
     plt.close()

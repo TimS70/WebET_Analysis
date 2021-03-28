@@ -1,8 +1,9 @@
-import math
+import os
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
+import pandas as pd
 import seaborn as sns
 from matplotlib import patches
 
@@ -22,7 +23,10 @@ def plot_aoi_scatter(data_et):
     plt.close()
 
 
-def plot_choice_task_heatmap(data_et):
+def plot_choice_task_heatmap():
+    data_et = pd.read_csv(
+        os.path.join('data', 'choice_task', 'added_var',
+                     'data_et.csv'))
 
     for run in data_et['run_id'].unique():
 

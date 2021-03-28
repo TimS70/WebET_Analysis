@@ -17,8 +17,8 @@ def corr_analysis(data_trial_fix, data_subject):
 
     corr_columns = ['withinTaskIndex', 'age', 'fps', 'offset', 'precision']
     corr_plot_split(data_plot, corr_columns,
-              'corr_var_vs_chin', 'chin',
-              'results', 'plots', 'fix_task')
+              'corr_var_vs_chin.png', 'chin',
+              'results', 'plots', 'fix_task', 'correlations')
 
     corr_columns = np.append(['x_pos', 'y_pos'], corr_columns)
 

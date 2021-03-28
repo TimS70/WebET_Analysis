@@ -16,6 +16,10 @@ def add_hit_ratio(data_trial, data_et, max_offset=0.10,
         .groupby(['run_id', 'trial_index'], as_index=False) \
         .agg(hit_mean=('hit', 'mean'))
 
+    plot_histogram(variable=grouped['hit_mean'],
+                   file_name='prop_hits_per_dot.png',
+                   path=os.path.join('results', 'plots', 'fix_task', 'offset'))
+
     grouped = grouped.assign(
         hit_suffice=(grouped['hit_mean'] >= min_hit_ratio).astype(int))
 

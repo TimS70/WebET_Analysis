@@ -39,7 +39,7 @@ def outcome_over_trials(data_trial, outcome):
         )
 
     save_plot((outcome + '_vs_trials.png'),
-              'results', 'plots', 'fix_task')
+              'results', 'plots', 'fix_task', outcome)
     plt.close()
 
 

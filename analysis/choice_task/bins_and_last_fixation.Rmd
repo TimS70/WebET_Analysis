@@ -49,8 +49,7 @@ print(getwd())
 
 # Specific participants
 ```{r}
-choice_best_runs = c(7, 45, 48, 58, 63, 96, 103, 197, 212, 238, 344, 358, 
-					 376, 454)
+choice_best_runs = c(7,96,126,130,162,177,212,238,288,427)
 
 fix_best_runs = c(16,41,126,162,199,205,253,299,318,347,378,414,418,420,427,
 				  437,491)
@@ -80,7 +79,7 @@ summarize_datasets(data_et, data_trial, data_subject)
 
 ## Check AOI (optionally new AOIs)
 ```{r}
-# data_et = add_new_aoi(data_et, 0.40, 0.40)
+data_et = add_new_aoi(data_et, 0.40, 0.40)
 
 ggplot(data_et %>% filter(aoi != 0), aes(x=x, y=y)) +
     geom_point(size=2.5, aes(alpha=.5))+
@@ -95,15 +94,23 @@ ggplot(data_et %>% filter(aoi != 0), aes(x=x, y=y)) +
 
 ## Window
 ```{r}
-grouped_window = data_trial %>%
-	mutate(window_diagonal = sqrt(
-		window_width * window_width + 
-		window_height * window_height)) %>%
-	group_by(run_id) %>%
-	dplyr::summarise(
-		window = max(window_diagonal),
-		.groups = 'keep')
-data_subject = merge_by_subject(data_subject, grouped_window, 'window')
+add_window = function(data_subject, data_trial) {
+
+	grouped_window = data_trial %>%
+		mutate(window_diagonal = sqrt(
+			window_width * window_width + 
+			window_height * window_height)) %>%
+		group_by(run_id) %>%
+		dplyr::summarise(
+			window = max(window_diagonal),
+			.groups = 'keep')
+	
+	data_subject = merge_by_subject(data_subject, grouped_window, 'window')
+
+	return(data_subject)
+}
+
+data_subject = add_window(data_subject, data_trial)
 ```
 
 
@@ -541,11 +548,106 @@ ggsave(file.path(path_results, 'et', 'time_bins', 'bins_top_vs_bottom.png'),
 
 ## Only 'good participants'
 ```{r}
-plot_et_time_bins(data_time_bins %>% filter(
-	run_id %in% c(clustering_best_runs, choice_best_runs,fix_best_runs)))
-ggsave(file.path(path_results, 'et', 'time_bins', 'bins_best_participants.png'), 
+data_et_raw = read.csv(
+    file.path(root, 'data', 'choice_task', 'added_var', 'data_et.csv'))
+data_trial_raw = read.csv(
+    file.path(root, 'data', 'choice_task', 'added_var', 'data_trial.csv'))
+data_subject_raw = read.csv(
+    file.path(root, 'data', 'choice_task', 'added_var', 'data_subject.csv'))
+
+data_subject_raw = add_window(data_subject_raw, data_trial_raw)
+
+data_et_raw = createTimeBins(data_et_raw, 5)
+
+data_time_bins_raw =  data_et_raw %>%
+	merge_by_index(data_trial_raw, 'choseTop') %>%
+    filter(!is.na(aoi) & !aoi %in% c(0, '0')) %>%
+    mutate(
+        lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
+        lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
+    dplyr::group_by(run_id, choseTop, timeBin) %>%
+    dplyr::summarise(
+        n_trials = n(),
+        n_lookTop = sum(lookTop),
+        n_lookBottom = sum(lookBottom),    
+        p_lookTop = sum(lookTop)/n_trials,
+        p_lookBottom = sum(lookBottom)/n_trials,
+        .groups = 'keep') %>%
+	mutate(
+		choseTop = factor(choseTop, c('1', '0')), 
+		timeBin = factor(timeBin)) %>%
+	dplyr::select(
+		run_id, choseTop, timeBin, n_trials, 
+		n_lookTop, n_lookBottom, p_lookTop, p_lookBottom)
+
+# From heatmaps
+clear_aois = c(7, 45, 96, 197, 205, 212, 238, 344, 358)
+somewhat_clear_aois = c(5, 19, 48, 63, 81, 128, 130, 154, 160, 228, 376, 420)
+best_heatmaps = c(clear_aois, somewhat_clear_aois)
+print(length(best_heatmaps))
+
+plot_et_time_bins(data_time_bins_raw %>% filter(run_id %in% best_heatmaps))
+ggsave(file.path(path_results, 'et', 'time_bins', 'bins_best_heatmaps.png'), 
 			 width=5.5, height=5)
 ```
+
+
+## Compare the 'best heatmaps' to the others
+```{r}
+data_et %>%
+	mutate(best_heatmap = factor(
+		as.numeric(run_id %in% best_heatmaps), 
+		c('0', '1'))) %>%
+	group_by(run_id, best_heatmap) %>%
+	dplyr::summarise(
+		x_mean = mean(x),
+		y_mean = mean(y),
+		.groups = 'keep')
+
+compare_runs = data_subject_raw %>%
+	mutate(best_heatmap = as.numeric(run_id %in% best_heatmaps)) %>%
+	dplyr::select(run_id, best_heatmap, 
+				  glasses, glasses_binary, age, 
+				  chinFirst, choice_rt, window, browser, 
+				  fps, offset, precision, 
+				  hit_ratio, n_valid_dots) %>%
+	arrange(desc(best_heatmap))
+
+compare_runs %>% 
+	group_by(best_heatmap) %>%
+	summarise(
+		n = n(),
+		across(
+			c(glasses_binary, chinFirst, choice_rt, window, 
+			  fps, offset, precision, n_valid_dots), 
+			list(mean = mean, sd = sd))) %>%
+	round(2) %>%
+	t()
+```
+
+Try fps>15 & offset <0.11
+```{r}
+selected_runs = data_subject_raw %>%
+	filter(
+		fps > 15, 
+		offset < 0.11) %>%
+	dplyr::pull(run_id)
+
+print(paste('N:', length(selected_runs)))
+
+
+plot_et_time_bins(data_time_bins_raw %>% filter(run_id %in% selected_runs))
+```
+
+
+## Glasses
+```{r}
+data_trial_fix = read.csv(
+    file.path(root, 'data', 'fix_task', 'cleaned', 'data_trial.csv'))
+
+names(data_trial_fix)
+```
+
 
 ## Reduce bins
 ```{r}

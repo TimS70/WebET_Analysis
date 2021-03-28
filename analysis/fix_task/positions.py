@@ -240,25 +240,3 @@ def test_left_vs_right_positions(data_trial_fix, outcome):
     return output
 
 
-def plot_top_vs_bottom_positions(data_trial_fix, outcome):
-    outcome_by_y_pos = outcome_by_position_long(
-        data_trial_fix, outcome) \
-        .groupby(
-        ['run_id', 'y_pos'],
-        as_index=False)[outcome].mean()
-    outcome_by_y_pos = outcome_by_y_pos.loc[
-                       outcome_by_y_pos['y_pos'] != 0.5, :]
-
-    fig, axes = plt.subplots(1, 1, sharey='none', figsize=(6, 6))
-    fig.suptitle((outcome + ' top vs. bottom '))
-
-    sns.violinplot(ax=axes,
-                   x='y_pos',
-                   y=outcome,
-                   data=outcome_by_y_pos)
-
-    makedir('results', 'plots', 'fix_task')
-    plt.savefig(
-        os.path.join('results', 'plots', 'fix_task',
-                     (outcome + '_top_vs_bottom.png')))
-    plt.close()

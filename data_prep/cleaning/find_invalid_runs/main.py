@@ -6,7 +6,7 @@ from data_prep.cleaning.find_invalid_runs.both_tasks import filter_runs_no_instr
     filter_full_but_no_et_data, filter_runs_low_fps, \
     filter_wrong_glasses
 from data_prep.cleaning.find_invalid_runs.choice import filter_runs_not_us, filter_runs_precision, filter_runs_offset, \
-    filter_biased_choices, filter_bad_log_k
+    filter_bad_log_k
 from data_prep.cleaning.find_invalid_runs.fix import runs_with_incomplete_fix_tasks, filter_runs_bad_time_measure, \
     missing_glasses
 from utils.save_data import write_csv
