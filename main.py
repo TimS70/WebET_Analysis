@@ -64,7 +64,8 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    run_py_clustering(distance_threshold=0.2,
+     run_py_clustering(distance_threshold=0.2,
                       min_ratio=0.7,
-                      max_deviation=0.15)
+                      max_deviation=0.15,
+                      aoi_width=0.4, aoi_height=0.4)
     # main(new_data=False)

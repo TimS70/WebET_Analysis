@@ -44,7 +44,7 @@ def find_aoi_clusters(data):
     return largest_clusters
 
 
-def filter_clusters(largest_clusters, min_ratio,
+def filter_clusters(aoi_clusters, min_ratio,
                     max_deviation):
     """
         min_ratio: Has to have more than x % of
@@ -54,26 +54,22 @@ def filter_clusters(largest_clusters, min_ratio,
             of the screen size from the respective AOI
     """
 
-    largest_clusters = largest_clusters.sort_values(
+    aoi_clusters = aoi_clusters.sort_values(
         by='quadrant')
 
-    largest_clusters['n_ratio'] = \
-        largest_clusters['n_cluster'] / \
-        largest_clusters['n_total']
+    aoi_clusters['n_ratio'] = \
+        aoi_clusters['n_cluster'] / \
+        aoi_clusters['n_total']
 
-    largest_clusters['x_deviation'] = abs(largest_clusters['x'] - \
-        pd.Series([0.25, 0.75, 0.25, 0.75]))
+    aoi_clusters['x_deviation'] = \
+        aoi_clusters['x'] - pd.Series([0.25, 0.75, 0.25, 0.75])
 
-    largest_clusters['y_deviation'] = abs(largest_clusters['y'] - \
-        pd.Series([0.75, 0.75, 0.25, 0.25]))
+    aoi_clusters['y_deviation'] = \
+        aoi_clusters['y'] - pd.Series([0.75, 0.75, 0.25, 0.25])
 
-    largest_clusters = largest_clusters[
-        (largest_clusters['x_deviation'] < max_deviation) &
-        (largest_clusters['y_deviation'] < max_deviation)]
+    realistic_clusters = aoi_clusters[
+        (aoi_clusters['n_ratio'] > min_ratio) &
+        (abs(aoi_clusters['x_deviation']) < max_deviation) &
+        (abs(aoi_clusters['y_deviation']) < max_deviation)]
 
-    largest_clusters = largest_clusters[
-        largest_clusters['n_ratio'] > min_ratio]
-
-    print(round(largest_clusters, 2))
-
-    return largest_clusters
+    return realistic_clusters
