@@ -1,10 +1,9 @@
-import os
-
 import numpy as np
 import pandas as pd
 
-from utils.combine_frames import merge_by_index, merge_by_subject, merge_mean_by_subject
-from visualize.distributions import plot_histogram, plot_2d_histogram
+from utils.combine_frames import merge_by_index, merge_by_subject, \
+    merge_mean_by_subject
+from visualize.fix_task.main import plot_hit_means_per_dot
 
 
 def add_hit_ratio(data_trial, data_et, max_offset=0.10,
@@ -14,17 +13,29 @@ def add_hit_ratio(data_trial, data_et, max_offset=0.10,
 
     grouped = data_et \
         .groupby(['run_id', 'trial_index'], as_index=False) \
-        .agg(hit_mean=('hit', 'mean'))
+        .agg(n=('x', 'count'),
+             hit_mean=('hit', 'mean'))
 
-    plot_histogram(variable=grouped['hit_mean'],
-                   file_name='prop_hits_per_dot.png',
-                   path=os.path.join('results', 'plots', 'fix_task', 'offset'))
+    plot_hit_means_per_dot(grouped, max_offset)
 
     grouped = grouped.assign(
         hit_suffice=(grouped['hit_mean'] >= min_hit_ratio).astype(int))
 
     data_trial = merge_by_index(data_trial, grouped,
                                 'hit_mean', 'hit_suffice')
+
+    low_hits = grouped[grouped['hit_mean'] < 0.1]
+    grouped = low_hits \
+        .groupby(['run_id'], as_index=False) \
+        .agg(n_trials=('trial_index', 'count'))
+
+    print(f"""No gaze points at all: \n"""
+          f"""N={len(low_hits['run_id'].unique())} runs """
+          f"""with on average {grouped['n_trials'].mean()} """
+          f"""trials. \n"""
+          f"""{low_hits}""")
+
+    print(low_hits['run_id'].unique())
 
     return data_trial
 
@@ -77,7 +88,6 @@ def add_offset(data_et):
 
 
 def add_grand_mean_offset(data_subject, data_trial, data_et):
-
     grouped_mean = data_et \
         .groupby(['run_id', 'trial_index'], as_index=False) \
         .agg(x_mean=('x', 'mean'),
@@ -98,7 +108,7 @@ def add_grand_mean_offset(data_subject, data_trial, data_et):
         'grand_offset')
 
     summary = data_subject \
-        .loc[:, ['x_bias', 'y_bias', 'grand_offset']] \
+                  .loc[:, ['x_bias', 'y_bias', 'grand_offset']] \
         .describe()
 
     print(f"""Added grand mean offset: \n"""

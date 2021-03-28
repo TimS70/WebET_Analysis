@@ -8,23 +8,26 @@ import statsmodels.stats.multitest as smt
 
 from scipy import stats
 
-from analysis.fix_task.main_effects import t_test_ind_outcomes_vs_factor
+from inference.t_test import t_test_ind_outcomes_vs_factor
 from utils.path import makedir
 from visualize.all_tasks import save_plot
 from utils.save_data import write_csv
 
 
-def check_randomization(data_trial_fix):
-    plot_chin_first_vs_outcomes(data_trial_fix)
-    t_test_ind_outcomes_vs_factor(data_trial_fix, 'chinFirst', '',
-                                  'results', 'tables', 'fix_task',
-                                  'check_randomization')
+def check_randomization(data_trial):
+    plot_chin_first_vs_outcomes(data_trial)
 
-    plot_outcomes_by_task_order(data_trial_fix)
+    t_test_ind_outcomes_vs_factor(
+        data=data_trial, factor='chinFirst',
+        file_name='t_test_chinFirst_vs_outcomes.csv',
+        path=os.path.join('results', 'tables', 'fix_task',
+                          'check_randomization'))
+
+    plot_outcomes_by_task_order(data_trial)
 
     print(f"""Plots show a greater variance in the second run. \n""")
 
-    test_outcomes_by_task_order(data_trial_fix)
+    test_outcomes_by_task_order(data_trial)
 
     print('Tendency for lower overall precision for those who '
           'started with the chin-rest, not for Holm correction. \n')

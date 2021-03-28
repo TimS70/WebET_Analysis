@@ -41,18 +41,17 @@ def spaghetti_plot(data, x_var, y_var, highlighted_subject):
     return plt
 
 
-def violin_plot(data_trial_fix, outcome, factor):
+def violin_plot(data, outcome, factor, path):
 
     fig, axes = plt.subplots(1, 1, sharey='none', figsize=(15, 6))
     fig.suptitle('Offset and precision')
 
     sns.violinplot(ax=axes,
-                   x=factor,
-                   y=outcome,
-                   data=data_trial_fix)
+                   x=factor, y=outcome,
+                   data=data)
 
-    save_plot((factor + '_vs_' + outcome),
-              'results', 'plots', 'fix_task', 'main_effect')
+    save_plot((factor + '_vs_' + outcome + '.png'),
+              path)
     plt.close()
 
 

@@ -2,10 +2,8 @@ import os
 
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
-import seaborn as sns
+import numpy as np
 
-from analysis.fix_task.positions import outcome_by_position_long
-from utils.path import makedir
 from visualize.all_tasks import save_plot
 from visualize.eye_tracking import my_heatmap
 
@@ -91,23 +89,21 @@ def visualize_exemplary_run(data_plot):
     plt.close()
 
 
-def plot_top_vs_bottom_positions(data_trial_fix, outcome):
-    outcome_by_y_pos = outcome_by_position_long(
-        data_trial_fix, outcome) \
-        .groupby(
-        ['run_id', 'y_pos'],
-        as_index=False)[outcome].mean()
-    outcome_by_y_pos = outcome_by_y_pos.loc[
-                       outcome_by_y_pos['y_pos'] != 0.5, :]
+def plot_hit_means_per_dot(data_trial, min_hit_ratio):
+    plt.hist(data_trial['hit_mean'], bins=50)
 
-    fig, axes = plt.subplots(1, 1, sharey='none', figsize=(6, 6))
-    fig.suptitle((outcome + ' top vs. bottom '))
+    plt.xticks(np.arange(0, 1, 0.1))
 
-    sns.violinplot(ax=axes,
-                   x='y_pos',
-                   y=outcome,
-                   data=outcome_by_y_pos)
+    plt.legend()
+    plt.xlabel(f"""Number of gaze points within """
+               f"""{round(min_hit_ratio * 100)}% range of the dot [%]""")
+    plt.ylabel('Frequency')
+    plt.grid()
+    plt.tight_layout()
+    plt.box(False)
+    plt.title('Hits per dot histogram')
 
-    save_plot((outcome + '_top_vs_bottom.png'),
-              'results', 'plots', 'fix_task', outcome)
+    save_plot('prop_hits_per_dot.png',
+              os.path.join('results', 'plots', '',
+                           'offset'))
     plt.close()

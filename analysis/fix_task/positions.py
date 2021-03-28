@@ -1,14 +1,7 @@
-import os
-
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import statsmodels.stats.multitest as smt
-
 from scipy import stats
-
-from utils.path import makedir
 
 # Correction
 # Robert Rosenthal. The hand-book of research synthesis, chapter
@@ -45,20 +38,15 @@ def compare_positions(data_trial_fix, outcome):
         ['position_1', 'position_2', 'd', 't', 'p']]
 
     if len(significant_results) > 0:
-        print(
-            f"""Significant results for {outcome}: \n"""
-            f"""{significant_results} \n""")
+        print(f"""Significant results for {outcome}: \n"""
+              f"""{significant_results} \n""")
     else:
-        print(
-            f"""No significant results for {outcome}. \n"""
-        )
+        print(f"""No significant results for {outcome}. \n""")
 
     write_csv(
         position_tests,
         (outcome + '_position_t_test.csv'),
         'results', 'tables', 'fix_task')
-
-    plot_top_vs_bottom_positions(data_trial_fix, outcome)
 
 
 def outcome_by_position_long(data_trial_fix, outcome_var):
@@ -67,8 +55,8 @@ def outcome_by_position_long(data_trial_fix, outcome_var):
         as_index=False)[outcome_var].median()
     output_long['position'] = list(map(
         lambda x, y:
-            str(round(x * 100, 0)) + '%_' +
-            str(round(y * 100, 0)) + '%',
+        str(round(x * 100, 0)) + '%_' +
+        str(round(y * 100, 0)) + '%',
         output_long['x_pos'],
         output_long['y_pos']
     ))
@@ -98,9 +86,8 @@ def outcome_by_position_wide(data_trial_fix, outcome_var):
     # noinspection PyArgumentList
     null_data = output_wide.loc[output_wide.isnull().any(axis=1), :]
     if len(null_data) > 0:
-        print(
-            f"""! Attention: Missing values: \n"""
-            f"""{null_data} \n""")
+        print(f"""! Attention: Missing values: \n"""
+              f"""{null_data} \n""")
     else:
         print('Success: No missing values found. \n')
 
@@ -126,9 +113,9 @@ def pos_combinations():
                    combinations['col1'] != combinations['col2'], :] \
         .drop_duplicates() \
         .reset_index(drop=True)
-    print(
-        f"""There are add_k ={len(combinations)} """
-        f"""possible combinations of positions \n""")
+
+    print(f"""There are add_k ={len(combinations)} """
+          f"""possible combinations of positions \n""")
 
     return combinations
 
@@ -173,7 +160,6 @@ def test_top_vs_bottom_positions(data_trial_fix, outcome):
     outcome_by_y_long = outcome_by_y_long.loc[
                         outcome_by_y_long['y_pos'] != 0.5, :]
 
-    print(outcome_by_y_long)
     outcome_by_y_wide = pd.pivot_table(
         outcome_by_y_long,
         index='run_id',
@@ -238,5 +224,3 @@ def test_left_vs_right_positions(data_trial_fix, outcome):
     })
 
     return output
-
-

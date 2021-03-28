@@ -63,5 +63,5 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    add_data_quality(max_offset=0.15, min_hits_per_dot=0.8)
+    analyze_fix_task()
     # main(new_data=False)

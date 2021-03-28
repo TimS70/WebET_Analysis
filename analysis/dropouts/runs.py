@@ -4,7 +4,7 @@ import pandas as pd
 
 from data_prep.add_variables.both_tasks.trial import add_next_trial
 from utils.combine_frames import merge_by_subject
-from utils.inference import welch_ttest
+from inference.t_test import welch_ttest
 from visualize.all_tasks import save_plot
 from utils.save_data import write_csv
 
