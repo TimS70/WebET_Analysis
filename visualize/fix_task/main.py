@@ -40,13 +40,13 @@ def fix_heatmap(data_et_fix):
         x = data['x']
         y = data['y']
 
-        fig, ax = plt.subplots(figsize=(7, 7))
+        fig, ax = plt.subplots(figsize=(7, 7 * (9/16)))
 
         s = 34
         img, extent = my_heatmap(x, y, s=s)
 
-        ax.imshow(img, extent=extent, origin='upper', cmap=cm.Greens,
-                  aspect=(9 / 16))
+        ax.imshow(img, extent=extent, origin='upper',
+                  cmap=cm.Greens,  aspect=(9 / 16))
         ax.set_xlim(0, 1)
         ax.set_ylim(1, 0)
         ax.set_title(

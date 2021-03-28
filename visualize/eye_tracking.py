@@ -17,9 +17,10 @@ def plot_et_scatter(x, y, c=None,
                     path='results',
                     message=False):
     """
-
-    :type file_name: Name of file
+        Scatter plot for eye-tracking data
     """
+
+    plt.figure(figsize=(7, 7 * (9 / 16)))
     plt.scatter(x, y, c=c, s=0.5, label=label)
 
     plt.xlim(0, 1)

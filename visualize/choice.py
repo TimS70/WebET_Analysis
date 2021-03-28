@@ -32,7 +32,7 @@ def plot_choice_task_heatmap():
             y = data['y']
 
         # Create figure and axes
-        fig, ax = plt.subplots(figsize=(7, 7))
+        fig, ax = plt.subplots(figsize=(7, 7*(9/16)))
 
         s = 34
         img, extent = my_heatmap(x, y, s=s)
@@ -66,7 +66,7 @@ def plot_choice_task_heatmap():
                      '[attribute]', **text_params)
         ax.set_title("Distribution of fixations after 1 second, $\sigma$ = %d" % s)
 
-        save_plot(file_name=str(run) + '.png',
+        save_plot(file_name=str(round(run)) + '.png',
                   path=os.path.join('results', 'plots',
                                     'choice_task', 'et',
                                     'heatmaps'))

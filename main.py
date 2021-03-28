@@ -47,9 +47,8 @@ def prep_data(main_aoi_width=0.4, main_aoi_height=0.4,
                           aoi_height=main_aoi_height,
                           message=False)
 
-    add_choice_et_variables(
-        min_required_trials=5,
-        min_gaze_points=3)
+    add_choice_et_variables(min_required_trials=5,
+                            min_gaze_points=3)
 
     plot_choice_task_heatmap()
     add_log_k()
@@ -87,13 +86,19 @@ def main(new_data=False):
 if __name__ == '__main__':
     aoi_width = 0.4
     aoi_height = 0.4
-    add_aoi_et(aoi_width=aoi_width, aoi_height=aoi_height)
+    add_aoi_et(aoi_width=aoi_width,
+               aoi_height=aoi_height)
 
     run_py_clustering(distance_threshold=0.25,
                       min_ratio=0.3,
-                      max_deviation=0.2,
+                      max_deviation=0.25,
                       aoi_width=aoi_width,
                       aoi_height=aoi_height,
                       message=True)
+
+    add_choice_et_variables(min_required_trials=5,
+                            min_gaze_points=3)
+
+    plot_choice_task_heatmap()
 
     # main(new_data=False)
