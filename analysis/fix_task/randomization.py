@@ -8,7 +8,7 @@ import statsmodels.stats.multitest as smt
 
 from scipy import stats
 
-from inference.t_test import t_test_ind_outcomes_vs_factor
+from inference.t_test import t_test_outcomes_vs_factor
 from utils.path import makedir
 from visualize.all_tasks import save_plot
 from utils.save_data import write_csv

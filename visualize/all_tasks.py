@@ -55,7 +55,8 @@ def violin_plot(data, outcome, factor, path):
     plt.close()
 
 
-def split_violin_plot(data_trial, outcome, factor, split_factor):
+def split_violin_plot(data_trial, outcome, factor, split_factor,
+                      file_name, path):
     fig, axes = plt.subplots(1, 1, sharey='none', figsize=(6, 6))
     fig.suptitle(outcome)
 
@@ -65,9 +66,7 @@ def split_violin_plot(data_trial, outcome, factor, split_factor):
                    hue=split_factor,
                    split=True,
                    data=data_trial)
-    save_plot(('split_violin_' + factor + '_vs_' + outcome + '_vs_' +
-               split_factor),
-              'results', 'plots', 'fix_task', 'main_effect')
+    save_plot(file_name, path)
     plt.close()
 
 

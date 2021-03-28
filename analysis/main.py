@@ -109,17 +109,17 @@ def analyze_fix_task():
                                                 ]].describe()
     print(f"""FPS: \n{describe_data_quality}""")
 
-    hist_plots_quality(data_subject)
+    # hist_plots_quality(data_subject)
 
     # Design checks
-    check_randomization(data_trial)
+    # check_randomization(data_trial)
     # check_gaze_saccade()
 
     # Descriptives (not necessary)
     # compare_conditions_subject(data_subject, data_trial, 'offset')
     # compare_conditions_subject(data_subject, data_trial, 'precision')
 
-    test_chin_rest(data_trial, data_subject)
+    # test_chin_rest(data_trial, data_subject)
     test_glasses(data_trial, data_subject)
 
     outcome_over_trials_vs_chin(data_trial, 'offset')

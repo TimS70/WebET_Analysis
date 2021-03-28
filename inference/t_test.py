@@ -5,7 +5,7 @@ from scipy import stats
 # https://pythonfordatascienceorg.wordpress.com/welch-t-test-python-pandas/
 from statsmodels.compat import scipy
 
-from utils.rearrange import pivot_outcomes_by_factor
+from utils.rearrange import pivot_outcome_by_factor
 from utils.save_data import write_csv
 
 
@@ -32,89 +32,66 @@ def welch_dof(x, y):
 
 
 # noinspection DuplicatedCode,PyTypeChecker
-def t_test_dep_outcomes_vs_factor(data, factor, file_name):
-    outcomes_by_factor = pivot_outcomes_by_factor(
-        data, factor)
+def t_test_outcomes_vs_factor(data, dependent, factor,
+                              file_name, outcomes, path):
 
-    result_offset = t_test_rel('offset', outcomes_by_factor)
-    result_precision = t_test_rel('precision', outcomes_by_factor)
-    result_fps = t_test_rel('fps', outcomes_by_factor)
+    result_summary = []
+    describe_outcomes = pd.DataFrame(
+        columns=['outcome', factor, 'n', 'mean', 'SD'])
 
-    summary = summarize_t_test_results(
-        outcomes_by_factor,
-        result_offset, result_precision, result_fps, True)
+    for var in outcomes:
+        # t-test
+        outcome_by_factor = pivot_outcome_by_factor(
+            data, factor, var)
+        if dependent:
+            t_test_result = t_test_rel(
+                var, outcome_by_factor)
+        else:
+            t_test_result = t_test_ind(
+                var, outcome_by_factor)
 
-    write_csv(
-        summary,
-        file_name,
-        'results', 'tables', 'fix_task', 'main_effect')
+        result_summary.append(
+            [var,
+             t_test_result.statistic[0].astype(float),
+             t_test_result.pvalue[0].astype(float)])
 
+        # Descriptives
+        summary_this_outcome = data \
+            .groupby([factor], as_index=False) \
+            .agg(n=('run_id', 'nunique'),
+                 mean=(var, 'mean'),
+                 SD=(var, 'std')) \
+            .assign(outcome=var)
 
-def t_test_rel(outcome, data_outcome_by_factor):
-    return stats.ttest_rel(
-        data_outcome_by_factor.loc[:, [(outcome, 0.0)]],
-        data_outcome_by_factor.loc[:, [(outcome, 1.0)]])
+        describe_outcomes = describe_outcomes.append(
+            summary_this_outcome)
 
+    result_summary = pd.DataFrame(result_summary,
+                       columns=['outcome', 't', 'p'])
 
-def summarize_t_test_results(
-        outcomes_by_factor,
-        result_offset, result_precision, result_fps, dependent):
-    summary = outcomes_by_factor.mean().reset_index() \
-        .rename(columns={'level_0': 'measure', 0: 'mean'}) \
-        .assign(SD=outcomes_by_factor.std().reset_index(drop=True)) \
-        .assign(n=outcomes_by_factor.count().reset_index(drop=True))
-
-    chin_test = pd.DataFrame({
-        'measure': ['offset', 'precision', 'fps'],
-        't': [
-            result_offset.statistic,
-            result_precision.statistic,
-            result_fps.statistic
-        ],
-        'p': [
-            result_offset.pvalue,
-            result_precision.pvalue,
-            result_fps.pvalue
-        ]
-    })
-
-    chin_test['t'] = (chin_test['t']).astype(float)
     # Holm correction
-    chin_test['p'] = smt.multipletests(
-        chin_test['p'], method='holm')[1].astype(float)
+    result_summary['p'] = smt.multipletests(
+        result_summary['p'], method='holm')[1].astype(float)
 
-    summary = summary.merge(
-        chin_test,
-        on='measure',
-        how='left')
+    summary = describe_outcomes.merge(
+        result_summary, on='outcome', how='left')
 
-    if dependent:
-        dependent_str = 'dependent'
-    else:
-        dependent_str = 'independent'
+    note = 'dependent' if dependent else 'independent'
 
-    print(f"""Summary from {dependent_str} t tests (holm-corrected): \n"""
+    print(f"""Summary from {note} t tests """
+          f"""(holm-corrected): \n"""
           f"""{summary} \n""")
-
-    return summary
-
-
-# noinspection PyTypeChecker
-def t_test_ind_outcomes_vs_factor(data, factor, file_name, path):
-    outcomes_by_factor = pivot_outcomes_by_factor(data, factor)
-
-    result_offset = t_test_ind('offset', outcomes_by_factor)
-    result_precision = t_test_ind('precision', outcomes_by_factor)
-    result_fps = t_test_ind('fps', outcomes_by_factor)
-
-    summary = summarize_t_test_results(
-        outcomes_by_factor,
-        result_offset, result_precision, result_fps, False)
 
     write_csv(summary, file_name, path)
 
 
+def t_test_rel(outcome, data_outcome_by_factor):
+    return stats.ttest_rel(
+        data_outcome_by_factor[[0.0]],
+        data_outcome_by_factor[[1.0]])
+
+
 def t_test_ind(outcome, data_outcome_by_factor):
     return stats.ttest_ind(
-        data_outcome_by_factor.loc[:, [(outcome, 0.0)]].dropna(),
-        data_outcome_by_factor.loc[:, [(outcome, 1.0)]].dropna())
+        data_outcome_by_factor[[0.0]].dropna(),
+        data_outcome_by_factor[[1.0]].dropna())
