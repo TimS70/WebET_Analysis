@@ -17,7 +17,8 @@ from visualize.eye_tracking import plot_et_scatter
 def add_clusters(data, distance_threshold):
 
     # define the model
-    data = data[pd.notna(data['x']) & pd.notna(data['y'])]
+    data = data[pd.notna(data['x']) & pd.notna(data['y'])] \
+        .reset_index(drop=True)
 
     model = AgglomerativeClustering(
         n_clusters=None,

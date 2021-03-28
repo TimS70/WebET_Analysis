@@ -38,16 +38,22 @@ def run_py_clustering(distance_threshold,
 
     data_et_corrected = []
 
-    for run in tqdm(data_et['run_id'].unique()[:20],
-                    desc='Run cluster correction: '):
-
-        data_this = add_clusters(
-            data=data_et.loc[data_et['run_id'] == run, :],
-            distance_threshold=distance_threshold)
+    for run in [48]: # tqdm(data_et['run_id'].unique(), desc='Run cluster correction: '):
 
         data_plot = data_et[
             pd.notna(data_et['aoi']) &
             ~data_et['aoi'].isin([0, '0'])]
+
+        plot_et_scatter(
+            x=data_plot['x'], y=data_plot['y'],
+            title='Raw AOIs for run ' + str(run),
+            file_name=str(round(run)) + '.png',
+            path=os.path.join('results', 'plots', 'clustering',
+                              'py_clusters', 'aoi_raw'))
+
+        data_this = add_clusters(
+            data=data_et.loc[data_et['run_id'] == run, :],
+            distance_threshold=distance_threshold)
 
         plot_et_scatter(
             x=data_this['x'], y=data_this['y'], c=data_this['cluster'],
@@ -57,7 +63,8 @@ def run_py_clustering(distance_threshold,
             path=os.path.join('results', 'plots', 'clustering',
                               'py_clusters', 'all_clusters'))
 
-        aoi_clusters = find_aoi_clusters(data_this)
+        aoi_clusters = find_aoi_clusters(
+            data=data_this, message=message, run=run)
 
         data_plot = data_this[
             data_this['cluster'].isin(aoi_clusters['cluster'])]
@@ -72,9 +79,11 @@ def run_py_clustering(distance_threshold,
                               'py_clusters', 'aoi_clusters'))
 
         aoi_clusters = filter_clusters(
+            run=run,
             aoi_clusters=aoi_clusters,
             min_ratio=min_ratio,
-            max_deviation=max_deviation)
+            max_deviation=max_deviation,
+            message=message)
 
         data_plot = data_this[
             data_this['cluster'].isin(aoi_clusters['cluster'])]
@@ -92,14 +101,6 @@ def run_py_clustering(distance_threshold,
 
         # If clustering is not possible, skip this participant
         if len(aoi_clusters) < 4:
-            if message:
-                print(f"""Run {run} does not have clear AOIs """
-                      f"""and cannot be clustered: \n"""
-                      f""" - <{min_ratio}% gaze point within """
-                      f"""the AOIs for each corner \n"""
-                      f"""> {max_deviation}% from where the AOI """
-                      f"""is supposed to be \n""")
-
             continue
 
         corrected_data = correct_clusters(
