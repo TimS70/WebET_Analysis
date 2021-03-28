@@ -20,24 +20,29 @@ from visualize.eye_tracking import plot_et_scatter
 
 def run_py_clustering(distance_threshold,
                       min_ratio, max_deviation,
-                      aoi_width, aoi_height):
+                      aoi_width, aoi_height,
+                      message):
     """
         Clustering: AOIs with certain gaze points and
         close to the actual position
     """
 
-    data_et = pd.read_csv(os.path.join(
+    data_et = pd.read_csv(
+        os.path.join(
         'data', 'choice_task', 'added_var', 'data_et.csv'))
+
+    print(f"""Run clustering for n="""
+          f"""{len(data_et['run_id'].unique())} runs. \n""")
 
     data_et = data_et[data_et['t_task'] > 1000]
 
-    all_corrected_data = []
+    data_et_corrected = []
 
-    for run in tqdm(data_et['run_id'].unique(),
+    for run in tqdm(data_et['run_id'].unique()[:20],
                     desc='Run cluster correction: '):
 
         data_this = add_clusters(
-            data=data_et[data_et['run_id'] == run],
+            data=data_et.loc[data_et['run_id'] == run, :],
             distance_threshold=distance_threshold)
 
         data_plot = data_et[
@@ -48,7 +53,7 @@ def run_py_clustering(distance_threshold,
             x=data_this['x'], y=data_this['y'], c=data_this['cluster'],
             title='Clusters for run ' + str(run),
             label='distance=' + str(distance_threshold),
-            file_name=str(run) + '.png',
+            file_name=str(round(run)) + '.png',
             path=os.path.join('results', 'plots', 'clustering',
                               'py_clusters', 'all_clusters'))
 
@@ -62,7 +67,7 @@ def run_py_clustering(distance_threshold,
             c=data_plot['cluster'],
             title='Selected AOI clusters for run ' + str(run),
             label='distance=' + str(distance_threshold),
-            file_name=str(run) + '.png',
+            file_name=str(round(run)) + '.png',
             path=os.path.join('results', 'plots', 'clustering',
                               'py_clusters', 'aoi_clusters'))
 
@@ -81,18 +86,19 @@ def run_py_clustering(distance_threshold,
             label='distance=' + str(distance_threshold) + ' \n' +
                   'min_ratio=' + str(min_ratio) + ' \n' +
                   'max_deviation=' + str(max_deviation) + ' \n',
-            file_name=str(run) + '.png',
+            file_name=str(round(run)) + '.png',
             path=os.path.join('results', 'plots', 'clustering',
                               'py_clusters', 'aoi_clusters_filtered'))
 
         # If clustering is not possible, skip this participant
         if len(aoi_clusters) < 4:
-            print(f"""Run {run} does not have clear AOIs """
-                  f"""and cannot be clustered: \n"""
-                  f""" - <{min_ratio}% gaze point within """
-                  f"""the AOIs for each corner \n"""
-                  f"""> {max_deviation}% from where the AOI """
-                  f"""is supposed to be \n""")
+            if message:
+                print(f"""Run {run} does not have clear AOIs """
+                      f"""and cannot be clustered: \n"""
+                      f""" - <{min_ratio}% gaze point within """
+                      f"""the AOIs for each corner \n"""
+                      f"""> {max_deviation}% from where the AOI """
+                      f"""is supposed to be \n""")
 
             continue
 
@@ -103,14 +109,18 @@ def run_py_clustering(distance_threshold,
         plot_et_scatter(
             x=corrected_data['x'], y=corrected_data['y'],
             title='AOI with corrected clusters for run ' + str(run),
-            file_name=str(run) + '.png',
+            file_name=str(round(run)) + '.png',
             path=os.path.join('results', 'plots', 'clustering',
                               'py_clusters', 'aoi_corrected'))
 
-        all_corrected_data.append(corrected_data)
+        data_et_corrected.append(corrected_data)
 
-    all_corrected_data = pd.concat(all_corrected_data)
+    data_et_corrected = pd.concat(data_et_corrected)
 
-    write_csv(all_corrected_data, 'data_et.csv',
+    print(f"""n={len(data_et_corrected['run_id'].unique())} """
+          f"""runs could be clustered: \n"""
+          f"""{data_et_corrected['run_id'].unique()}""")
+
+    write_csv(data_et_corrected, 'data_et.csv',
               os.path.join('data', 'choice_task',
                            'added_var'))

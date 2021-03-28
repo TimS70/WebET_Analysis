@@ -4,6 +4,7 @@ from utils.save_data import summarize_datasets
 
 
 def clean_runs(data_raw, excluded_runs, name):
+
     data = data_raw.loc[~data_raw['run_id'].isin(excluded_runs), :]
 
     print(

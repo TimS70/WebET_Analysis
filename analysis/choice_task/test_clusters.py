@@ -9,22 +9,22 @@ from utils.save_data import write_csv
 
 def test_transition_clusters(data_trial):
     print('Testing transition clusters in a regression model...')
+
+    transition_columns = data_trial.columns.intersection([
+        'trans_type_0',
+        'trans_type_aLLtLL', 'trans_type_tLLaSS', 'trans_type_aLLaSS',
+        'trans_type_aSStSS', 'trans_type_tLLtSS'])
+
     data_cluster = data_trial.dropna(
-        subset=[
-            'trans_type_0',
-            'trans_type_aLLtLL', 'trans_type_tLLaSS', 'trans_type_aLLaSS',
-            'trans_type_aSStSS', 'trans_type_tLLtSS'],
+        subset=transition_columns,
         how='all')
 
     scaler = StandardScaler()
     scaled_features = scaler.fit_transform(
-        data_cluster.loc[:, [
-            'trans_type_0',
-            'trans_type_aLLtLL', 'trans_type_tLLaSS', 'trans_type_aLLaSS',
-            'trans_type_aSStSS', 'trans_type_tLLtSS']])
+        data_cluster[transition_columns])
 
     output = []
-    x = data_cluster[["run_id"]]  # , "withinTaskIndex"]]
+    x = data_cluster[["run_id"]]
     x_ = sm.add_constant(x)
     y = 1 - data_cluster[["choseLL"]]
     log_reg = sm.Logit(y, x_).fit()
@@ -42,16 +42,12 @@ def test_transition_clusters(data_trial):
     output = pd.DataFrame(output, columns=['n_clusters', 'BIC', 'AIC']) \
         .set_index('n_clusters')
 
-    print(
-        f"""\n"""
-        f"""Comparison of transition clusters: \n"""
-        f"""{output} \n"""
-    )
+    print(f"""Comparison of transition clusters: \n"""
+          f"""{output} \n""")
 
-    write_csv(
-        output,
-        'transition_clusters.csv',
-        'results', 'tables', 'transitions')
+    write_csv(output,
+              'transition_clusters.csv',
+              'results', 'tables', 'transitions')
 
     data_trial = data_trial.merge(
         data_cluster.loc[:, ['run_id', 'trial_index',

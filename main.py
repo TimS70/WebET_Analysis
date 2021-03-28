@@ -27,7 +27,6 @@ def prep_data(aoi_width=0.4, aoi_height=0.4,
     add_data_quality(max_offset=0.15, min_hits_per_dot=0.8)
 
     load_choice_data()
-    # run_et_cluster_correction()
 
     add_choice_behavioral_variables()
 
@@ -38,7 +37,8 @@ def prep_data(aoi_width=0.4, aoi_height=0.4,
                           min_ratio=0.7,
                           max_deviation=0.15,
                           aoi_width=aoi_width,
-                          aoi_height=aoi_height)
+                          aoi_height=aoi_height,
+                          message=False)
 
     add_choice_et_variables(
         min_required_trials=5,
@@ -79,9 +79,13 @@ if __name__ == '__main__':
 
     aoi_width = 0.4
     aoi_height = 0.4
+    add_aoi_et(aoi_width=aoi_width, aoi_height=aoi_height)
 
-    add_choice_et_variables(
-        min_required_trials=5,
-        min_gaze_points=3)
+    run_py_clustering(distance_threshold=0.2,
+                      min_ratio=0.5,
+                      max_deviation=0.15,
+                      aoi_width=aoi_width,
+                      aoi_height=aoi_height,
+                      message=True)
 
     # main(new_data=False)

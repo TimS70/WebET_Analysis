@@ -111,7 +111,7 @@ def et_data_transition_type(data):
 
 def add_transition_type(data, data_et):
     data_et = et_data_transition_type(data_et)
-    data_et.loc[:, 'transition_type'] = data_et.loc[:, 'transition_type']
+    data_et['transition_type'] = data_et['transition_type']
 
     transition_count = pd.pivot_table(
         data_et.loc[:, ['run_id', 'trial_index', 'transition_type']],
@@ -130,19 +130,12 @@ def add_transition_type(data, data_et):
             7: "trans_type_aLLtSS",
             8: "trans_type_0_tSS"})
 
-    print(transition_count)
-    
-    transition_columns = ["trans_type_0", "trans_type_aLLtLL",
-                          "trans_type_tLLaSS", "trans_type_aLLaSS",
-                          "trans_type_aSStSS", "trans_type_tLLtSS",
-                          "trans_type_aLLtSS"]
+    transition_columns = transition_count \
+        .drop(columns=['run_id', 'trial_index']) \
+        .columns
 
-    data = merge_by_index(
-        data, transition_count,
-        "trans_type_0", "trans_type_aLLtLL",
-        "trans_type_tLLaSS", "trans_type_aLLaSS",
-        "trans_type_aSStSS", "trans_type_tLLtSS",
-        "trans_type_aLLtSS")
+    for col in transition_columns:
+        data = merge_by_index(data, transition_count, col)
 
     data[transition_columns] = data[transition_columns].fillna(0)
 

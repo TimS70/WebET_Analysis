@@ -75,9 +75,28 @@ def add_choice_behavioral_variables():
           'Add variables for choice data \n'
           '################################### \n')
 
-    data_et, data_trial, data_subject = \
-        load_all_three_datasets(
-        os.path.join('data', 'choice_task', 'raw'))
+    data_trial = pd.read_csv(os.path.join(
+        'data', 'choice_task', 'raw',
+        'data_trial.csv'))
+
+    data_subject = pd.read_csv(os.path.join(
+        'data', 'choice_task', 'raw',
+        'data_subject.csv'))
+
+    summary = pd.DataFrame({
+        'dataset': [
+            'data_trial',
+            'data_subject'],
+        'prolific_ids': [
+            len(data_trial['prolificID'].unique()),
+            len(data_subject['prolificID'].unique())],
+        'runs': [
+            len(data_trial['run_id'].unique()),
+            len(data_subject['run_id'].unique())],
+        'n_trials': [
+            len(data_trial),
+            '-']})
+    print(f"""{summary} \n""")
 
     # Add data from fixation task
     data_subject_fix = pd.read_csv(
@@ -96,9 +115,6 @@ def add_choice_behavioral_variables():
                 data_trial['tLL']))
     data_trial = top_bottom_attributes(data_trial)
 
-    data_et = merge_by_index(
-        data_et, data_trial, 'amountLeft', 'LL_top')
-
     # Behavioral responses
     data_trial = choice_response_variables(data_trial)
 
@@ -109,17 +125,19 @@ def add_choice_behavioral_variables():
         data_subject, data_trial,
         'choseLL', 'choseTop', 'LL_top')
 
-    save_all_three_datasets(
-        data_et, data_trial, data_subject,
-        os.path.join('data', 'choice_task', 'added_var'))
+    write_csv(data_trial,
+              'data_trial.csv',
+              'data', 'choice_task', 'added_var')
+
+    write_csv(data_subject,
+              'data_subject.csv',
+              'data', 'choice_task', 'added_var')
 
 
 def add_aoi_et(aoi_width=0.3, aoi_height=0.3):
 
-    print(f"""AOI will be calculated. No cluster correction.""")
-
     data_et = pd.read_csv(os.path.join(
-        'data', 'choice_task', 'added_var', 'data_et.csv'))
+        'data', 'choice_task', 'raw', 'data_et.csv'))
 
     if (aoi_width >= 0.5) | (aoi_height >= 0.5):
         print(f"""Define the 4 quadrants of the screen """
@@ -146,6 +164,10 @@ def add_aoi_et(aoi_width=0.3, aoi_height=0.3):
         file_name='aoi_scatter.png',
         path=os.path.join('results', 'plots', 'choice_task',
                           'et'))
+
+    print(f"""Added AOIs to """
+          f"""{len(data_et['run_id'].unique())} """
+          f"""runs \n""")
 
     write_csv(data_et, 'data_et.csv',
               os.path.join('data', 'choice_task',

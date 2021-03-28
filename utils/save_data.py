@@ -69,6 +69,7 @@ def summarize_datasets(data_et, data_trial, data_subject):
 def write_csv(data_frame, file_name, *args):
     makedir(*args)
     path = os.path.join(*args)
-    data_frame.to_csv(os.path.join(path, file_name))
+    data_frame.to_csv(os.path.join(path, file_name),
+                      index=False)
     print(
         f"""File '{file_name}' saved in {path} \n""")

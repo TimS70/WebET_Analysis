@@ -40,7 +40,7 @@ def merge_by_index(data_et, source_data, *args):
             data_et = data_et.drop(columns=var)
 
         data_et = data_et.merge(
-            source_data.loc[:, ['run_id', 'trial_index', var]],
+            source_data[['run_id', 'trial_index', var]],
             on=['run_id', 'trial_index'], how='left')
 
     return data_et
