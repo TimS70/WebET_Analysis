@@ -83,8 +83,9 @@ def analyze_demographics():
         f"""Describe age: \n"""
         f"""{age.describe()}""")
 
-    save_plot('birthyear.png',
-              'results', 'plots', 'demographics')
+    save_plot(file_name='birthyear.png',
+              path=os.path.join('results', 'plots',
+                                'demographics'))
     plt.close()
 
 
@@ -133,8 +134,9 @@ def plot_pie_charts(data_subject, predictors):
         ax[i].axis('equal')
         ax[i].set_title(predictors[i], pad=20)
 
-    save_plot('pie_charts.png',
-              'results', 'plots', 'demographics')
+    save_plot(file_name='pie_charts.png',
+              path=os.path.join('results', 'plots',
+                                'demographics'))
     plt.close()
 
 

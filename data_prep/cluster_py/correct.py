@@ -13,7 +13,6 @@ import pandas as pd
 
 
 def correct_clusters(data, clusters, aoi_width, aoi_height):
-    print(clusters)
 
     corrected_data = []
 
@@ -42,6 +41,7 @@ def correct_clusters(data, clusters, aoi_width, aoi_height):
 
         data_this_aoi['x'] = data_this_aoi['x'] - x_deviation
         data_this_aoi['y'] = data_this_aoi['y'] - y_deviation
+        data_this_aoi['aoi'] = quadrant
 
         corrected_data.append(data_this_aoi)
 

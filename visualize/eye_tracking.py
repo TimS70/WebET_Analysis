@@ -12,20 +12,22 @@ from visualize.distributions import plot_histogram, plot_2d_histogram
 
 def plot_et_scatter(x, y, c=None,
                     title='Scatter plot of eye-tracking coordinates',
+                    label='xy clusters',
                     file_name='et_scatter.png',
-                    path='results'):
+                    path='results',
+                    message=False):
     """
 
     :type file_name: Name of file
     """
-    plt.scatter(x, y, c=c, s=0.5, label='xy clusters')
+    plt.scatter(x, y, c=c, s=0.5, label=label)
 
     plt.xlim(0, 1)
     plt.ylim(1, 0)
     plt.xticks(np.arange(0, 1, 0.1))
     plt.yticks(np.arange(0, 1, 0.1))
 
-    plt.legend()
+    plt.legend(loc='upper right')
     plt.xlabel('X [%]')
     plt.ylabel('Y [%]')
     plt.grid()
@@ -33,7 +35,7 @@ def plot_et_scatter(x, y, c=None,
     plt.box(False)
     plt.title(title)
 
-    save_plot(file_name, path)
+    save_plot(file_name, path, message)
     plt.close()
 
 

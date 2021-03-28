@@ -22,8 +22,9 @@ def hist_plots_quality(data_subject):
     for outcome in ['offset', 'precision', 'fps']:
         plt.hist(data_subject[outcome], bins=20)
         plt.title(outcome + ' Histogram')
-        save_plot(outcome + '_histogram.png', 'results', 'plots',
-                  'fix_task', outcome)
+        save_plot(file_name=outcome + '_histogram.png',
+                  path=os.path.join('results', 'plots',
+                                    'fix_task', outcome))
         plt.close()
 
 
@@ -56,9 +57,11 @@ def fix_heatmap(data_et_fix):
         for i in range(0, len(x_pos)):
             plt.text(x_pos[i], y_pos[i], '+', size=12, ha="center")
 
-        save_plot(str(run) + '.png', 'results', 'plots',
-                  'fix_task', 'individual_participants',
-                  'heatmaps')
+        save_plot(file_name=str(run) + '.png',
+                  path=os.path.join(
+                      'results', 'plots',
+                      'fix_task',
+                      'individual_participants', 'heatmaps'))
         plt.close()
 
 
@@ -84,8 +87,11 @@ def visualize_exemplary_run(data_plot):
     fig.colorbar(image, ax=axes)
 
     run = data_plot['run_id'].unique()[0]
-    save_plot(('exemplary_run_' + str(run) + '.png'),
-              'results', 'plots', 'fix_task', 'individual_participants')
+    save_plot(file_name='exemplary_run_' + str(run) +
+                        '.png',
+              path=os.path.join('results', 'plots',
+                                'fix_task',
+                                'individual_participants'))
     plt.close()
 
 
@@ -103,7 +109,7 @@ def plot_hit_means_per_dot(data_trial, min_hit_ratio):
     plt.box(False)
     plt.title('Hits per dot histogram')
 
-    save_plot('prop_hits_per_dot.png',
-              os.path.join('results', 'plots', '',
-                           'offset'))
+    save_plot(file_name='prop_hits_per_dot.png',
+              path=os.path.join('results', 'plots',
+                                'fix_task', 'offset'))
     plt.close()

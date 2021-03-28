@@ -1,4 +1,5 @@
 import datetime
+import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -14,7 +15,8 @@ def add_fps_subject_level(data_subject, data_trial):
 
     plt.hist(data_subject['fps'], bins=20)
     plt.rc('font', size=10)
-    save_plot('fps_participants.png', 'results', 'plots', 'fps')
+    save_plot(file_name='fps_participants.png',
+              path=os.path.join('results', 'plots', 'fps'))
     plt.close()
 
     return data_subject

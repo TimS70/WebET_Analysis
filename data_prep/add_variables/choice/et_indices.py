@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from utils.combine_frames import merge_by_index
+
 
 def add_et_indices(data_trial, data_et,
                    min_gaze_points=3):
@@ -128,18 +130,21 @@ def add_transition_type(data, data_et):
             7: "trans_type_aLLtSS",
             8: "trans_type_0_tSS"})
 
+    print(transition_count)
+    
     transition_columns = ["trans_type_0", "trans_type_aLLtLL",
                           "trans_type_tLLaSS", "trans_type_aLLaSS",
                           "trans_type_aSStSS", "trans_type_tLLtSS",
                           "trans_type_aLLtSS"]
 
-    for var in transition_columns:
-        if var in data:
-            data = data.drop(columns=[var])
+    data = merge_by_index(
+        data, transition_count,
+        "trans_type_0", "trans_type_aLLtLL",
+        "trans_type_tLLaSS", "trans_type_aLLaSS",
+        "trans_type_aSStSS", "trans_type_tLLtSS",
+        "trans_type_aLLtSS")
 
-    data = data.merge(transition_count, on=['run_id', 'trial_index'], how='left')
-    data.loc[:, transition_columns] = data.loc[:, transition_columns] \
-        .fillna(0)
+    data[transition_columns] = data[transition_columns].fillna(0)
 
     return data
 

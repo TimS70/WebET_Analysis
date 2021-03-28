@@ -6,9 +6,10 @@ from amasino.prep_data_et import transform_xy_coordinates
 from amasino.prep_data_trial import load_data, add_trial_index, \
     add_log_k, add_choseTop, add_choice_options
 from analysis.choice_task.test_clusters import test_transition_clusters
-from data_prep.add_variables.choice.aoi import add_aoi_et, match_remaining_et_trials, add_aoi_counts_on_trial_level, \
+from data_prep.add_variables.choice.aoi import match_remaining_et_trials, add_aoi_counts_on_trial_level, \
     add_fixation_counter, count_fixations_on_trial_level, create_aoi_columns
 from data_prep.add_variables.choice.et_indices import add_et_indices
+from data_prep.add_variables.main import add_aoi_et
 from data_prep.cleaning.drop_invalid_data.runs import clean_runs
 from utils.combine_frames import merge_by_index
 from utils.save_data import save_all_three_datasets, load_all_three_datasets

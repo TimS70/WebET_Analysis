@@ -52,8 +52,10 @@ def plot_chin_first_vs_outcomes(data_trial_fix):
         sns.violinplot(ax=axes[1], x='chinFirst', y=outcome,
                        data=data_plot.loc[data_plot['chin'] == 1, :])
 
-        save_plot(('chinFirst_vs_' + outcome),
-                  'results', 'plots', 'fix_task', 'check_randomization')
+        save_plot(file_name='chinFirst_vs_' + outcome,
+                  path=os.path.join('results', 'plots',
+                                    'fix_task',
+                                    'check_randomization'))
         plt.close()
 
 

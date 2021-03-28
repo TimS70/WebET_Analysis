@@ -1,3 +1,5 @@
+import os
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -22,6 +24,7 @@ def plot_top_vs_bottom_positions(data_trial_fix, outcome):
                    y=outcome,
                    data=outcome_by_y_pos)
 
-    save_plot((outcome + '_top_vs_bottom.png'),
-              'results', 'plots', 'fix_task', outcome)
+    save_plot(file_name=outcome + '_top_vs_bottom.png',
+              path=os.path.join('results', 'plots',
+                                'fix_task', outcome))
     plt.close()

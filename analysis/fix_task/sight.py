@@ -1,3 +1,5 @@
+import os
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 import statsmodels.api as sm
@@ -32,8 +34,10 @@ def plot_sight_vs_outcomes(data_subject):
                 verticalalignment='top',
                 horizontalalignment='center', size=13, weight='normal')
 
-        save_plot((outcome + '_vs_sight'),
-                  'results', 'plots', 'fix_task', 'main_effect', 'sight')
+        save_plot(file_name=outcome + '_vs_sight',
+                  path=os.path.join('results', 'plots',
+                                    'fix_task',
+                                    'main_effect', 'sight'))
 
 
 def anova_outcomes_sight(data_subject):

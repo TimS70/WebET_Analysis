@@ -1,3 +1,5 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -145,7 +147,9 @@ def dropout_by_type(data_trial):
     fig.autofmt_xdate(rotation=45)
 
     plt.tight_layout()
-    save_plot('dropouts.png', 'results', 'plots', 'dropouts')
+    save_plot(file_name='dropouts.png',
+              path=os.path.join('results', 'plots',
+                                'dropouts'))
     plt.close()
 
 

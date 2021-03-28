@@ -3,8 +3,10 @@ import os
 import pandas as pd
 
 from analysis.choice_task.test_clusters import test_transition_clusters
-from data_prep.add_variables.choice.aoi import add_aoi_et, create_aoi_columns, match_remaining_et_trials, \
-    add_aoi_counts_on_trial_level, add_fixation_counter, count_fixations_on_trial_level
+from data_prep.add_variables.choice.aoi import create_aoi_columns, \
+    match_remaining_et_trials, \
+    add_aoi_counts_on_trial_level, add_fixation_counter, \
+    count_fixations_on_trial_level, add_quadrant, add_aoi
 from data_prep.add_variables.choice.behavior import choice_response_variables, add_mean_choice_rt
 from data_prep.add_variables.choice.choice_options import identify_amount_left, add_choice_options_num, \
     reformat_attributes, \
@@ -17,7 +19,9 @@ from data_prep.add_variables.both_tasks.trial import add_fps_trial_level, merge_
     add_exact_trial_duration, add_new_task_nr, add_trial_type_new, add_fix_task, \
     add_within_task_index
 from utils.combine_frames import merge_mean_by_subject, merge_by_index
-from utils.save_data import load_all_three_datasets, save_all_three_datasets
+from utils.save_data import load_all_three_datasets, save_all_three_datasets, \
+    write_csv
+from visualize.eye_tracking import plot_et_scatter
 
 
 def add_variables_global():
@@ -66,10 +70,7 @@ def add_variables_global():
         os.path.join('data', 'all_trials', 'added_var'))
 
 
-def add_variables_choice(
-        aoi_width=0.3, aoi_height=0.3,
-        min_required_trials=5,
-        min_gaze_points=3):
+def add_choice_behavioral_variables():
     print('################################### \n'
           'Add variables for choice data \n'
           '################################### \n')
@@ -108,9 +109,58 @@ def add_variables_choice(
         data_subject, data_trial,
         'choseLL', 'choseTop', 'LL_top')
 
-    # AOIs
-    data_et = add_aoi_et(
-        data_et, aoi_width=aoi_width, aoi_height=aoi_height)
+    save_all_three_datasets(
+        data_et, data_trial, data_subject,
+        os.path.join('data', 'choice_task', 'added_var'))
+
+
+def add_aoi_et(aoi_width=0.3, aoi_height=0.3):
+
+    print(f"""AOI will be calculated. No cluster correction.""")
+
+    data_et = pd.read_csv(os.path.join(
+        'data', 'choice_task', 'added_var', 'data_et.csv'))
+
+    if (aoi_width >= 0.5) | (aoi_height >= 0.5):
+        print(f"""Define the 4 quadrants of the screen """
+              f"""as AOIs. \n""")
+        data_et = add_quadrant(data_et)
+        data_et['aoi'] = data_et['quadrant']
+
+    else:
+        print(f"""AOIs with width={aoi_width} and """
+              f"""heigth={aoi_height}. \n""")
+        data_et = add_aoi(data_et, aoi_width, aoi_height)
+
+    freq_table = pd.crosstab(
+        index=data_et['aoi'],
+        columns="count")
+
+    print(
+        f"""Gaze points across AOIs: \n"""
+        f"""{freq_table} \n""")
+
+    plot_et_scatter(
+        x=data_et['x'], y=data_et['y'],
+        title='AOI raw for all runs ',
+        file_name='aoi_scatter.png',
+        path=os.path.join('results', 'plots', 'choice_task',
+                          'et'))
+
+    write_csv(data_et, 'data_et.csv',
+              os.path.join('data', 'choice_task',
+                           'added_var'))
+
+    return data_et
+
+
+def add_choice_et_variables(min_required_trials,
+                            min_gaze_points):
+
+    data_et, data_trial, data_subject = \
+        load_all_three_datasets(
+        os.path.join('data', 'choice_task', 'added_var'))
+
     data_et = create_aoi_columns(data_et)
     data_trial = match_remaining_et_trials(
         data_trial, data_et)

@@ -1,3 +1,5 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -532,7 +534,8 @@ def plot_fps_over_trials(data_trial):
     plt.vlines(269, 45, 50, colors='k', linestyles='solid')
     plt.text(269 + 1, 50, s='choice Task')
 
-    save_plot('chin_first_0.png', 'results', 'plots', 'fps')
+    save_plot(file_name='chin_first_0.png',
+              path=os.path.join('results', 'plots', 'fps'))
     plt.close()
 
     spaghetti_plot(
@@ -552,6 +555,7 @@ def plot_fps_over_trials(data_trial):
     plt.vlines(482, 45, 50, colors='k', linestyles='solid')
     plt.text(482 + 1, 50, s='fix Task')
 
-    save_plot('chin_first_1.png', 'results', 'plots', 'fps')
+    save_plot(file_name='chin_first_1.png',
+              path=os.path.join('results', 'plots', 'fps'))
 
     plt.close()

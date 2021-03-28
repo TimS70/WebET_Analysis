@@ -5,7 +5,8 @@ from analysis.demographics import analyze_demographics
 from analysis.dropouts.main import analyze_dropouts
 from analysis.main import analyze_fix_task, analyze_choice_task
 from data_prep.add_variables.data_quality.main import add_data_quality
-from data_prep.add_variables.main import add_variables_global, add_variables_choice
+from data_prep.add_variables.main import add_variables_global, \
+    add_choice_behavioral_variables, add_choice_et_variables, add_aoi_et
 from data_prep.cluster_py.main import run_py_clustering
 from data_prep.load.choice import load_choice_data
 from data_prep.cleaning.main import clean_global_data, clean_data_fix, clean_data_choice
@@ -16,7 +17,8 @@ from data_prep.add_variables.fit_k.call_from_py import add_log_k
 from visualize.choice import plot_choice_task_heatmap
 
 
-def prep_data():
+def prep_data(aoi_width=0.4, aoi_height=0.4,
+              correct_clusters=True):
     # add_variables_global()
     clean_global_data(max_t_task=5500, min_fps=3)
 
@@ -27,8 +29,18 @@ def prep_data():
     load_choice_data()
     # run_et_cluster_correction()
 
-    add_variables_choice(
-        aoi_width=0.5, aoi_height=0.5,
+    add_choice_behavioral_variables()
+
+    add_aoi_et(aoi_width=aoi_width, aoi_height=aoi_height)
+
+    if correct_clusters:
+        run_py_clustering(distance_threshold=0.2,
+                          min_ratio=0.7,
+                          max_deviation=0.15,
+                          aoi_width=aoi_width,
+                          aoi_height=aoi_height)
+
+    add_choice_et_variables(
         min_required_trials=5,
         min_gaze_points=3)
 
@@ -64,8 +76,12 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-     run_py_clustering(distance_threshold=0.2,
-                      min_ratio=0.7,
-                      max_deviation=0.15,
-                      aoi_width=0.4, aoi_height=0.4)
+
+    aoi_width = 0.4
+    aoi_height = 0.4
+
+    add_choice_et_variables(
+        min_required_trials=5,
+        min_gaze_points=3)
+
     # main(new_data=False)

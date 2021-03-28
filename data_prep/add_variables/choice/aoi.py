@@ -8,34 +8,6 @@ from tqdm import tqdm
 from utils.combine_frames import merge_by_index
 from utils.path import makedir
 from utils.save_data import write_csv
-from visualize.choice import plot_aoi_scatter
-
-
-def add_aoi_et(data_et, aoi_width=0.3, aoi_height=0.3):
-
-    print(f"""AOI will be calculated. No cluster correction.""")
-
-    if (aoi_width >= 0.5) | (aoi_height >= 0.5):
-        print(f"""Define the 4 quadrants of the screen """
-              f"""as AOIs. \n""")
-        data_et = add_quadrant(data_et)
-        data_et['aoi'] = data_et['quadrant']
-
-    else:
-        print(f"""AOIs with width={aoi_width} and """
-              f"""heigth={aoi_height}. \n""")
-        data_et = add_aoi(data_et, aoi_width, aoi_height)
-
-    freq_table = pd.crosstab(
-        index=data_et['aoi'],
-        columns="count")
-
-    print(
-        f"""Gaze points across AOIs: \n"""
-        f"""{freq_table} \n""")
-    plot_aoi_scatter(data_et)
-
-    return data_et
 
 
 def add_aoi(data, aoi_width, aoi_height):
@@ -122,74 +94,96 @@ def match_remaining_et_runs(data, data_et, data_name):
 
 def create_aoi_columns(data):
     data['aoi_aLL'] = 0
+    data.loc[(data['amountLeft'] == 1) &
+             (data['LL_top'] == 1) &
+             (data['aoi'] == 'TL'),
+             'aoi_aLL'] = 1
+    data.loc[(data['amountLeft'] == 1) &
+             (data['LL_top'] == 0) &
+             (data['aoi'] == 'BL'),
+             'aoi_aLL'] = 1
+    data.loc[(data['amountLeft'] == 0) &
+             (data['LL_top'] == 1) &
+             (data['aoi'] == 'TR'),
+             'aoi_aLL'] = 1
+    data.loc[(data['amountLeft'] == 0) &
+              (data['LL_top'] == 0) &
+             (data['aoi'] == 'BR'),
+             'aoi_aLL'] = 1
+
     data['aoi_tLL'] = 0
+    data.loc[(data['amountLeft'] == 1) &
+             (data['LL_top'] == 1) &
+             (data['aoi'] == 'TR'),
+             'aoi_tLL'] = 1
+    data.loc[(data['amountLeft'] == 1) &
+             (data['LL_top'] == 0) &
+             (data['aoi'] == 'BR'),
+             'aoi_tLL'] = 1
+    data.loc[(data['amountLeft'] == 0) &
+             (data['LL_top'] == 1) &
+             (data['aoi'] == 'TL'),
+             'aoi_tLL'] = 1
+    data.loc[(data['amountLeft'] == 0) &
+              (data['LL_top'] == 0) &
+             (data['aoi'] == 'BL'),
+             'aoi_tLL'] = 1
+
     data['aoi_aSS'] = 0
+    data.loc[(data['amountLeft'] == 1) &
+             (data['LL_top'] == 1) &
+             (data['aoi'] == 'BL'),
+             'aoi_aSS'] = 1
+    data.loc[(data['amountLeft'] == 1) &
+             (data['LL_top'] == 0) &
+             (data['aoi'] == 'TL'),
+             'aoi_aSS'] = 1
+    data.loc[(data['amountLeft'] == 0) &
+             (data['LL_top'] == 1) &
+             (data['aoi'] == 'BR'),
+             'aoi_aSS'] = 1
+    data.loc[(data['amountLeft'] == 0) &
+             (data['LL_top'] == 0) &
+             (data['aoi'] == 'TR'),
+             'aoi_aSS'] = 1
+
     data['aoi_tSS'] = 0
-
-    # If amounts are on the left side
-    ## If the gaze point is in the top option
-    data.loc[((data['amountLeft'] == 1) & (data['LL_top'] == 1) & (data['aoi'] == 'TL')),
-             'aoi_aLL'] = 1
-    data.loc[((data['amountLeft'] == 1) & (data['LL_top'] == 1) & (data['aoi'] == 'TR')),
-             'aoi_tLL'] = 1
-    data.loc[((data['amountLeft'] == 1) & (data['LL_top'] == 1) & (data['aoi'] == 'BL')),
-             'aoi_aSS'] = 1
-    data.loc[((data['amountLeft'] == 1) & (data['LL_top'] == 1) & (data['aoi'] == 'BR')),
+    data.loc[(data['amountLeft'] == 1) &
+             (data['LL_top'] == 1) &
+             (data['aoi'] == 'BR'),
+             'aoi_tSS'] = 1
+    data.loc[(data['amountLeft'] == 1) &
+             (data['LL_top'] == 0) &
+             (data['aoi'] == 'TR'),
+             'aoi_tSS'] = 1
+    data.loc[(data['amountLeft'] == 0) &
+             (data['LL_top'] == 0) &
+             (data['aoi'] == 'TL'),
+             'aoi_tSS'] = 1
+    data.loc[(data['amountLeft'] == 0) &
+             (data['LL_top'] == 1) &
+             (data['aoi'] == 'BL'),
              'aoi_tSS'] = 1
 
-    ## If the gaze point is in the bottom option
-    data.loc[((data['amountLeft'] == 1) & (data['LL_top'] == 0) & (data['aoi'] == 'TL')),
-             'aoi_aSS'] = 1
-    data.loc[((data['amountLeft'] == 1) & (data['LL_top'] == 0) & (data['aoi'] == 'TR')),
-             'aoi_tSS'] = 1
-    data.loc[((data['amountLeft'] == 1) & (data['LL_top'] == 0) & (data['aoi'] == 'BL')),
-             'aoi_aLL'] = 1
-    data.loc[((data['amountLeft'] == 1) & (data['LL_top'] == 0) & (data['aoi'] == 'BR')),
-             'aoi_tLL'] = 1
-
-    # If amounts are on the right side
-    ## If the gaze point is in the top option
-    data.loc[((data['amountLeft'] == 0) & (data['LL_top'] == 1) & (data['aoi'] == 'TL')),
-             'aoi_tLL'] = 1
-    data.loc[((data['amountLeft'] == 0) & (data['LL_top'] == 1) & (data['aoi'] == 'TR')),
-             'aoi_aLL'] = 1
-    data.loc[((data['amountLeft'] == 0) & (data['LL_top'] == 1) & (data['aoi'] == 'BL')),
-             'aoi_tSS'] = 1
-    data.loc[((data['amountLeft'] == 0) & (data['LL_top'] == 1) & (data['aoi'] == 'BR')),
-             'aoi_aSS'] = 1
-
-    ## If the gaze point is in the bottom option
-    data.loc[((data['amountLeft'] == 0) & (data['LL_top'] == 0) & (data['aoi'] == 'TL')),
-             'aoi_tSS'] = 1
-    data.loc[((data['amountLeft'] == 0) & (data['LL_top'] == 0) & (data['aoi'] == 'TR')),
-             'aoi_aSS'] = 1
-    data.loc[((data['amountLeft'] == 0) & (data['LL_top'] == 0) & (data['aoi'] == 'BL')),
-             'aoi_tLL'] = 1
-    data.loc[((data['amountLeft'] == 0) & (data['LL_top'] == 0) & (data['aoi'] == 'BR')),
-             'aoi_aLL'] = 1
     return data
 
 
 def add_aoi_counts_on_trial_level(data_trial, data_et):
-    grouped = data_et.groupby(
-        ['run_id', 'trial_index'])[['aoi_aSS', 'aoi_aLL',
-                                    'aoi_tSS', 'aoi_tLL']].sum() \
-        .reset_index()
+    grouped = data_et \
+        .groupby(['run_id', 'trial_index'], as_index=False) \
+        [['aoi_aSS', 'aoi_aLL', 'aoi_tSS', 'aoi_tLL']].sum()
 
-    makedir('results', 'tables', 'aoi')
-    write_csv(
-        grouped,
-        'aoi_by_run_and_trial.csv',
-        'results', 'tables', 'aoi')
+    write_csv(grouped,
+              'aoi_by_run_and_trial.csv',
+              'results', 'tables', 'aoi')
 
     aoi_over_trials = grouped.assign(
-        aoi_n=grouped.loc[:, ['aoi_aSS', 'aoi_tSS', 'aoi_aLL', 'aoi_tLL']] \
+        aoi_n=grouped[['aoi_aSS', 'aoi_tSS', 'aoi_aLL',
+                       'aoi_tLL']] \
         .sum(axis=1)) \
         .loc[:, 'aoi_n']
 
     plt.hist(aoi_over_trials, bins=20)
-
-    makedir('results', 'plots', 'choice_task')
     plt.savefig(
         os.path.join('results', 'plots', 'choice_task', 'n_aoi_over_trials.png'))
     plt.close()
@@ -203,9 +197,7 @@ def add_aoi_counts_on_trial_level(data_trial, data_et):
         on=['run_id', 'trial_index'],
         how='left')
 
-    print(
-        f"""data_trial: Added AOI count on trial level."""
-    )
+    print("data_trial: Added AOI count on trial level.")
 
     return data_trial
 

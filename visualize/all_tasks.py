@@ -50,8 +50,8 @@ def violin_plot(data, outcome, factor, path):
                    x=factor, y=outcome,
                    data=data)
 
-    save_plot((factor + '_vs_' + outcome + '.png'),
-              path)
+    save_plot(file_name=factor + '_vs_' + outcome + '.png',
+              path=path)
     plt.close()
 
 
@@ -66,7 +66,7 @@ def split_violin_plot(data_trial, outcome, factor, split_factor,
                    hue=split_factor,
                    split=True,
                    data=data_trial)
-    save_plot(file_name, path)
+    save_plot(file_name=file_name, path=path)
     plt.close()
 
 
@@ -98,7 +98,8 @@ def get_box_plots(data_subject, outcome, predictors, file_name, *args):
                 verticalalignment='top',
                 horizontalalignment='center', size=13, weight='normal')
 
-    save_plot(file_name, *args)
+    save_plot(file_name=file_name,
+              path=os.path.join(*args))
     plt.close()
 
 
@@ -106,12 +107,12 @@ def corr_plot(data_plot, correlation_columns,
               file_name, factor='none', *args):
     sns.set()
 
-    sns.pairplot(
-        data_plot.loc[:, correlation_columns],
-        kind='reg',
-        corner=True)
+    sns.pairplot(data_plot[correlation_columns],
+                 kind='reg',
+                 corner=True)
 
-    save_plot(file_name, *args)
+    save_plot(file_name=file_name,
+              path=os.path.join(*args))
     plt.close()
 
 
@@ -124,7 +125,8 @@ def corr_plot_split(data_plot, correlation_columns, file_name, factor, *args):
         kind='reg',
         corner=True)
 
-    save_plot(file_name, *args)
+    save_plot(file_name=file_name,
+              path=os.path.join(*args))
     plt.close()
 
 
@@ -151,7 +153,8 @@ def corr_matrix(data_plot, corr_columns, option,
     if option == 'heatmap':
         smg.plot_corr(this_corr_matrix, xnames=corr_columns)
         makedir('results', 'plots', 'choice_task')
-        save_plot(file_name, *args)
+        save_plot(file_name=file_name,
+                  path=os.path.join(*args))
         plt.close()
 
 
@@ -168,14 +171,15 @@ def save_table_as_plot(data_frame, file_name, *args):
 
     fig.tight_layout()
 
-    save_plot(file_name, *args)
+    save_plot(file_name=file_name, path=os.path.join(*args))
     plt.close()
 
 
-def save_plot(file_name, *args):
-    makedir(*args)
-    path = os.path.join(*args)
+def save_plot(file_name, path, message=False):
+    makedir(path)
     plt.savefig(os.path.join(path, file_name))
-    print(f"""Plot {file_name} was saved to {path} \n""")
+
+    if message:
+        print(f"""Plot {file_name} was saved to {path} \n""")
 
 

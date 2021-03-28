@@ -12,17 +12,6 @@ from visualize.all_tasks import save_plot
 from visualize.eye_tracking import my_heatmap
 
 
-def plot_aoi_scatter(data_et):
-    data_plot = data_et.loc[data_et['aoi'] != 0, ['x', 'y']]
-    x = data_plot['x']
-    y = data_plot['y']
-    plt.scatter(x, y, s=0.1)
-    plt.ylim(1, 0)
-    plt.xlim(0, 1)
-    save_plot('aoi_scatter.png', 'results', 'plots', 'choice_task', 'et')
-    plt.close()
-
-
 def plot_choice_task_heatmap():
     data_et = pd.read_csv(
         os.path.join('data', 'choice_task', 'added_var',
@@ -77,9 +66,10 @@ def plot_choice_task_heatmap():
                      '[attribute]', **text_params)
         ax.set_title("Distribution of fixations after 1 second, $\sigma$ = %d" % s)
 
-        save_plot(
-            str(run) + '.png',
-            'results', 'plots', 'choice_task', 'et', 'heatmaps')
+        save_plot(file_name=str(run) + '.png',
+                  path=os.path.join('results', 'plots',
+                                    'choice_task', 'et',
+                                    'heatmaps'))
         plt.close()
 
 
@@ -140,8 +130,10 @@ def plot_example_eye_movement(data_et, data_trial, run):
 
     fig.colorbar(image, ax=axes)
 
-    save_plot(('example_' + str(round(run, 0)) + '.png'),
-              'results', 'plots', 'choice_task', 'et')
+    save_plot(file_name='example_' + str(round(run, 0)) +
+                        '.png',
+              path=os.path.join('results', 'plots',
+                                'choice_task', 'et'))
     plt.close()
 
 
@@ -178,4 +170,6 @@ def plot_categorical_confounders(data_subject):
                 horizontalalignment='center', size=13, weight='normal')
 
     plt.tight_layout()
-    save_plot('cat_variables.png', 'results', 'plots', 'choice_task')
+    save_plot(file_name='cat_variables.png',
+              path=os.path.join('results', 'plots',
+                                'choice_task'))

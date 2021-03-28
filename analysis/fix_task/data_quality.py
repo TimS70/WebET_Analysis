@@ -1,3 +1,5 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -38,8 +40,9 @@ def outcome_over_trials(data_trial, outcome):
             capsize=5
         )
 
-    save_plot((outcome + '_vs_trials.png'),
-              'results', 'plots', 'fix_task', outcome)
+    save_plot(file_name=outcome + '_vs_trials.png',
+              path=os.path.join('results', 'plots',
+                                'fix_task', outcome))
     plt.close()
 
 
@@ -65,8 +68,9 @@ def outcome_over_trials_vs_chin(data_trial, outcome):
             fmt='^k:',
             capsize=5)
 
-    save_plot((outcome + '_vs_chin_vs_trials.png'),
-              'results', 'plots', 'fix_task', outcome)
+    save_plot(file_name=outcome + '_vs_chin_vs_trials.png',
+              path=os.path.join('results', 'plots',
+                                'fix_task', outcome))
     plt.close()
 
 
@@ -147,8 +151,9 @@ def grand_mean_offset(data_et_fix, data_trial):
 
     plt.hist(data_trial['grand_deviation'], bins=20)
     plt.title('Grand mean deviation')
-    save_plot('grand_mean.png', 'results', 'plots',
-              'fix_task', 'offset')
+    save_plot(file_name='grand_mean.png',
+              path=os.path.join('results', 'plots',
+                                'fix_task', 'offset'))
     plt.close()
 
     return data_trial
