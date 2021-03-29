@@ -18,18 +18,17 @@ from tqdm import tqdm
 from visualize.eye_tracking import plot_et_scatter
 
 
-def run_py_clustering(distance_threshold, min_cluster_size,
-                      min_ratio, max_deviation,
-                      aoi_width, aoi_height,
-                      message):
+def init_cluster_correction(distance_threshold, min_cluster_size,
+                            min_ratio, max_deviation,
+                            aoi_width, aoi_height,
+                            message):
     """
         Clustering: AOIs with certain gaze points and
         close to the actual position
     """
 
-    data_et = pd.read_csv(
-        os.path.join(
-        'data', 'choice_task', 'added_var', 'data_et.csv'))
+    data_et, data_trial, data_subject = load_all_three_datasets(
+        path=os.path.join('data', 'choice_task', 'added_var'))
 
     print(f"""Run clustering for n="""
           f"""{len(data_et['run_id'].unique())} runs. \n""")
@@ -123,11 +122,17 @@ def run_py_clustering(distance_threshold, min_cluster_size,
     data_et_corrected = pd.concat(data_et_corrected)
 
     print(f"""n={len(data_et_corrected['run_id'].unique())} """
+          f"""runs of n={len(data_et['run_id'].unique())} """
           f"""runs could be clustered: \n"""
           f"""{data_et_corrected['run_id'].unique()}""")
 
-    write_csv(data_et_corrected, 'data_et.csv',
-              os.path.join('data', 'choice_task',
-                           'added_var'))
+    data_trial = data_trial[
+        data_trial['run_id'].isin(data_et_corrected['run_id'].unique())]
+    data_subject = data_subject[
+        data_subject['run_id'].isin(data_et_corrected['run_id'].unique())]
+
+    save_all_three_datasets(
+        data_et_corrected, data_trial, data_subject,
+        path=os.path.join('data', 'choice_task', 'added_var'))
 
     return data_et_corrected

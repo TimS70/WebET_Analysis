@@ -240,6 +240,7 @@ def add_fixation_counter(data):
 
 def fix_counter(aoi_vector):
     aoi_numbers = aoi_vector \
+        .fillna(0) \
         .replace(['TL', 'TR', 'BL', 'BR'], np.arange(1, 5)) \
         .astype(int) \
         .reset_index(drop=True)

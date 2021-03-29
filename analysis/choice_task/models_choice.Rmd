@@ -24,6 +24,8 @@ source(file.path(root, 'utils', 'r', 'add_log_k.R'))
 source(file.path(root, 'utils', 'r', 'remove_na_et_indices.R'))
 source(file.path(root, 'utils', 'r', 'add_x_count.R'))
 source(file.path(root, 'utils', 'r', 'identify_bad_choice_runs.R'))
+source(file.path(root, 'utils', 'r', 'create_time_bins.R'))
+source(file.path(root, 'utils', 'r', 'plot_et_time_bins.R'))
 
 get_packages(c('broom',
               'car', 
@@ -141,7 +143,7 @@ ggpairs(
     lower = list(continuous = wrap("smooth", alpha = 0.3, size=0.1)),
     progress = F) + 
 	theme_bw(base_size = 8)
-ggsave(file.path(path_results, 'correlations', 'corr_plot_subject.pdf'), 
+ggsave(file.path(path_results, 'correlations', 'participant.png'), 
 	   width=5.5, height=5)
 
 
@@ -154,7 +156,7 @@ ggpairs(
     lower = list(continuous = wrap("smooth", alpha = 0.3, size=0.1)),
     progress = F) +
 	theme_bw()
-ggsave(file.path(path_results, 'correlations', 'corr_plot_trial.pdf'),
+ggsave(file.path(path_results, 'correlations', 'trial.png'),
 	   width=5.5, height=5)
 ```
 

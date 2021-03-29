@@ -1,26 +1,26 @@
 import os
 import subprocess
 
-from amasino.main import prep_data
 from analysis.demographics import analyze_demographics
 from analysis.dropouts.main import analyze_dropouts
 from analysis.main import analyze_fix_task, analyze_choice_task
 from data_prep.add_variables.data_quality.main import add_data_quality
 from data_prep.add_variables.fit_k.call_from_py import add_log_k
 from data_prep.add_variables.main import add_choice_behavioral_variables, \
-    add_choice_et_variables, add_aoi_et
+    add_choice_et_variables, add_aoi_et, add_variables_global
 from data_prep.cleaning.main import clean_global_data, clean_data_fix, \
     clean_data_choice
-from data_prep.cluster_py.main import run_py_clustering
+from data_prep.cluster_py.main import init_cluster_correction
 from data_prep.load.choice import load_choice_data
 from data_prep.load.fix_task import load_fix_data
 from data_prep.load.main import create_datasets_from_cognition
 from visualize.choice import plot_choice_task_heatmap
 
 
-def prep_data(main_aoi_width=0.4, main_aoi_height=0.4,
-              correct_clusters=True):
-    # add_variables_global()
+def prepare_datasets(main_aoi_width=0.35, main_aoi_height=0.35,
+                     correct_clusters=True):
+
+    add_variables_global()
     clean_global_data(max_t_task=5500,
                       min_fps=3)
 
@@ -45,17 +45,17 @@ def prep_data(main_aoi_width=0.4, main_aoi_height=0.4,
                                  'heatmaps_all'))
 
     add_aoi_et(aoi_width=main_aoi_width,
-               aoi_height=main_aoi_width)
+               aoi_height=main_aoi_height)
 
     if correct_clusters:
-        data_et_corrected = run_py_clustering(
+        data_et_corrected = init_cluster_correction(
             distance_threshold=0.25,
             min_cluster_size=50,
             min_ratio=0.5,
             max_deviation=0.25,
             aoi_width=main_aoi_width,
-            aoi_height=main_aoi_width,
-            message=True)
+            aoi_height=main_aoi_height,
+            message=False)
 
         plot_choice_task_heatmap(
             path_origin=os.path.join('data', 'choice_task',
@@ -71,13 +71,19 @@ def prep_data(main_aoi_width=0.4, main_aoi_height=0.4,
     add_log_k()
 
     clean_data_choice(
-        min_hit_ratio=0.6,
-        max_precision=0.15,
-        max_offset=0.5,
+        us_sample=False,
+        min_hit_ratio=None,  # 0.6,
+        max_precision=None,  # 0.15,
+        max_offset=None,  # 0.5,
         min_fps=5,
         min_rt=400, max_rt=10000,
-        min_choice_percentage=0.01,
-        max_choice_percentage=0.99)
+        min_choice_percentage=None,  # 0.01,
+        max_choice_percentage=None,  # 0.99,
+        exclude_runs=[
+            12, 23, 93, 144, 243, 258, 268, 343, 356, 373, 384, 386, 387,
+            393, 404, 379, 410, 411, 417, 410, 417, 425, 429, 440, 441, 445,
+            449, 458, 462, 475, 425, 488, 493],
+        filter_log_k=False)
 
 
 def analyze():
@@ -96,20 +102,9 @@ def main(new_data=False):
     if new_data:
         create_datasets_from_cognition()
 
-    prep_data()
+    prepare_datasets()
     analyze()
 
 
 if __name__ == '__main__':
-    add_log_k()
-
-    clean_data_choice(
-        min_hit_ratio=0.6,
-        max_precision=0.15,
-        max_offset=0.5,
-        min_fps=5,
-        min_rt=400, max_rt=10000,
-        min_choice_percentage=0.01,
-        max_choice_percentage=0.99)
-
-    # main(new_data=False)
+    main(new_data=False)
