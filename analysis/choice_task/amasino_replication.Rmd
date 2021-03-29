@@ -819,23 +819,57 @@ runs_na_pi = data_subject %>%
 t.test(rt ~ errorTrial,
        data=grouped %>% filter(
            LLexpected==1),
-       paired=TRUE, na.action=na.pass)
+       paired=TRUE, na.action=na.omit)
 
-t.test(
-	optionIndex ~ errorTrial,
-    data=grouped %>% 
-		filter(LLexpected==1 & !run_id %in% runs_na_oi),
-    paired=TRUE, na.action=na.pass)
+runs_na_error_oi = grouped %>% filter(
+		   	!is.na(optionIndex) &
+		   	LLexpected==1 & 
+	   		!run_id %in% c(runs_na_oi)) %>%
+	group_by(run_id) %>%
+	dplyr::summarise(
+		n=n(),
+		.groups='keep') %>%
+	filter(n<2) %>%
+	dplyr::pull(run_id)
+
+t.test(optionIndex ~ errorTrial,
+       data=grouped %>% filter(
+		   	!is.na(optionIndex) &
+		   	LLexpected==1 & 
+	   		!run_id %in% c(runs_na_oi, runs_na_error_oi)),
+       paired=TRUE, na.action=na.omit)
+
+runs_na_error_ai = grouped %>% 
+	filter(!is.na(attributeIndex) &
+   	   	   LLexpected==1 & 
+   		   !run_id %in% c(runs_na_ai)) %>%
+	group_by(run_id) %>%
+	dplyr::summarise(
+		n=n(),
+		.groups='keep') %>%
+	filter(n<2) %>%
+	dplyr::pull(run_id)
 
 t.test(attributeIndex ~ errorTrial,
        data=grouped %>% filter(
-           LLexpected==1 & !run_id %in% runs_na_ai),
-       paired=TRUE, na.action=na.pass)
+           LLexpected==1 & !run_id %in% c(runs_na_ai, runs_na_error_ai)),
+       paired=TRUE, na.action=na.omit)
 
-t.test(payneIndex ~ errorTrial,
-       data=grouped %>% filter(
-           LLexpected==1 & !run_id %in% runs_na_pi),
-       paired=TRUE, na.action=na.pass)
+runs_na_error_pi = grouped %>% 
+	filter(!is.na(payneIndex) &
+		 	LLexpected==1 & 
+      		!run_id %in% c(runs_na_pi)) %>%
+	group_by(run_id) %>%
+	dplyr::summarise(
+		n=n(),
+		.groups='keep') %>%
+	filter(n<2) %>%
+	dplyr::pull(run_id)
+# 
+# t.test(payneIndex ~ errorTrial,
+#        data=grouped %>% filter(
+#            LLexpected==1 & !run_id %in% c(runs_na_pi, runs_na_error_pi)),
+#        paired=TRUE, na.action=na.omit)
 ````
 
 
@@ -858,23 +892,57 @@ runs_na_pi = data_subject %>%
 t.test(rt ~ errorTrial,
        data=grouped %>% filter(
            LLexpected==0),
-       paired=TRUE, na.action=na.pass)
+       paired=TRUE, na.action=na.omit)
 
-t.test(
-	optionIndex ~ errorTrial,
-    data=grouped %>% 
-		filter(LLexpected==0 & !run_id %in% runs_na_oi),
-    paired=TRUE, na.action=na.pass)
+runs_na_error_oi = grouped %>% filter(
+		   	!is.na(optionIndex) &
+		   	LLexpected==0 & 
+	   		!run_id %in% c(runs_na_oi)) %>%
+	group_by(run_id) %>%
+	dplyr::summarise(
+		n=n(),
+		.groups='keep') %>%
+	filter(n<2) %>%
+	dplyr::pull(run_id)
+
+t.test(optionIndex ~ errorTrial,
+       data=grouped %>% filter(
+		   	!is.na(optionIndex) &
+		   	LLexpected==0 & 
+	   		!run_id %in% c(runs_na_oi, runs_na_error_oi)),
+       paired=TRUE, na.action=na.omit)
+
+runs_na_error_ai = grouped %>% 
+	filter(!is.na(attributeIndex) &
+   	   	   LLexpected==0 & 
+   		   !run_id %in% c(runs_na_ai)) %>%
+	group_by(run_id) %>%
+	dplyr::summarise(
+		n=n(),
+		.groups='keep') %>%
+	filter(n<2) %>%
+	dplyr::pull(run_id)
 
 t.test(attributeIndex ~ errorTrial,
        data=grouped %>% filter(
-           LLexpected==0 & !run_id %in% runs_na_ai),
-       paired=TRUE, na.action=na.pass)
+           LLexpected==0 & !run_id %in% c(runs_na_ai, runs_na_error_ai)),
+       paired=TRUE, na.action=na.omit)
 
-t.test(payneIndex ~ errorTrial,
-       data=grouped %>% filter(
-           LLexpected==0 & !run_id %in% runs_na_pi),
-       paired=TRUE, na.action=na.pass)
+runs_na_error_pi = grouped %>% 
+	filter(!is.na(payneIndex) &
+		 	LLexpected==0 & 
+      		!run_id %in% c(runs_na_pi)) %>%
+	group_by(run_id) %>%
+	dplyr::summarise(
+		n=n(),
+		.groups='keep') %>%
+	filter(n<2) %>%
+	dplyr::pull(run_id)
+
+# t.test(payneIndex ~ errorTrial,
+#        data=grouped %>% filter(
+#            LLexpected==0 & !run_id %in% c(runs_na_pi, runs_na_error_pi)),
+#        paired=TRUE, na.action=na.omit)
 ```
 
 
@@ -885,8 +953,7 @@ data_plot = grouped %>%
             factor(errorTrial), 
             from = c(0, 1), 
             to = c("Correct", "Error")),
-        LLexpected = factor(LLexpected)
-        )
+        LLexpected = factor(LLexpected))
 
 ggplot(data_plot, aes(x=LLexpected, y=rt, fill=errorTrial)) +
   geom_split_violin(alpha=.6, size=0, position=position_dodge(0)) +
