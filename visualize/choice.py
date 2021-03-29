@@ -12,12 +12,13 @@ from visualize.all_tasks import save_plot
 from visualize.eye_tracking import my_heatmap
 
 
-def plot_choice_task_heatmap():
-    data_et = pd.read_csv(
-        os.path.join('data', 'choice_task', 'added_var',
-                     'data_et.csv'))
+def plot_choice_task_heatmap(path_origin, path_target, runs='all'):
+    data_et = pd.read_csv(path_origin)
 
-    for run in data_et['run_id'].unique():
+    if runs == 'all':
+        runs = data_et['run_id'].unique()
+
+    for run in runs:
 
         # Define data
         if 't_task' in data_et.columns:
@@ -67,9 +68,7 @@ def plot_choice_task_heatmap():
         ax.set_title("Distribution of fixations after 1 second, $\sigma$ = %d" % s)
 
         save_plot(file_name=str(round(run)) + '.png',
-                  path=os.path.join('results', 'plots',
-                                    'choice_task', 'et',
-                                    'heatmaps'))
+                  path=path_target)
         plt.close()
 
 

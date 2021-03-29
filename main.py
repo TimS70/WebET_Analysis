@@ -84,21 +84,40 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    aoi_width = 0.4
-    aoi_height = 0.4
-    add_aoi_et(aoi_width=aoi_width,
-               aoi_height=aoi_height)
+    # aoi_width = 0.4
+    # aoi_height = 0.4
+    # add_aoi_et(aoi_width=aoi_width,
+    #            aoi_height=aoi_height)
+    #
+    # run_py_clustering(distance_threshold=0.25,
+    #                   min_ratio=0.3,
+    #                   max_deviation=0.25,
+    #                   aoi_width=aoi_width,
+    #                   aoi_height=aoi_height,
+    #                   message=True)
 
-    run_py_clustering(distance_threshold=0.25,
-                      min_ratio=0.3,
-                      max_deviation=0.25,
-                      aoi_width=aoi_width,
-                      aoi_height=aoi_height,
-                      message=True)
+    # add_choice_et_variables(min_required_trials=5,
+    #                         min_gaze_points=3)
+    #
+    plot_choice_task_heatmap(
+        path_origin=os.path.join('data', 'choice_task',
+                                 'raw', 'data_et.csv'),
+        path_target=os.path.join('results', 'plots',
+                                 'choice_task', 'et',
+                                 'heatmaps', 'all'))
 
-    add_choice_et_variables(min_required_trials=5,
-                            min_gaze_points=3)
-
-    plot_choice_task_heatmap()
+    plot_choice_task_heatmap(
+        path_origin=os.path.join('data', 'choice_task',
+                                 'raw', 'data_et.csv'),
+        path_target=os.path.join('results', 'plots',
+                                 'choice_task', 'et',
+                                 'heatmaps', 'eligible_for_clustering'),
+        runs=[
+                 103,  11, 119, 126, 128,  13, 130, 150, 154, 160, 162, 166, 176, 177,
+                 189,  19, 197, 199, 205, 209, 211, 212, 230, 237, 238, 244, 246, 258,
+                 264, 275, 278, 280, 288, 291, 304,  32, 326, 327, 333, 336, 344, 350,
+                 358, 361,  37, 376, 378, 389, 390, 396, 401, 407, 414, 420, 421, 422,
+                 427, 430, 433, 434, 435,  45, 454, 477,  48, 481,  58,  63,   7,  96
+             ])
 
     # main(new_data=False)
