@@ -36,21 +36,38 @@ def prep_data(main_aoi_width=0.4, main_aoi_height=0.4,
 
     add_choice_behavioral_variables()
 
+    # eye-tracking
+    plot_choice_task_heatmap(
+        path_origin=os.path.join('data', 'choice_task',
+                                 'raw', 'data_et.csv'),
+        path_target=os.path.join('results', 'plots',
+                                 'clustering', 'py_clusters',
+                                 'heatmaps_all'))
+
     add_aoi_et(aoi_width=main_aoi_width,
-               aoi_height=main_aoi_height)
+               aoi_height=main_aoi_width)
 
     if correct_clusters:
-        run_py_clustering(distance_threshold=0.2,
-                          min_ratio=0.7,
-                          max_deviation=0.15,
-                          aoi_width=main_aoi_width,
-                          aoi_height=main_aoi_height,
-                          message=False)
+        data_et_corrected = run_py_clustering(
+            distance_threshold=0.25,
+            min_cluster_size=50,
+            min_ratio=0.5,
+            max_deviation=0.25,
+            aoi_width=main_aoi_width,
+            aoi_height=main_aoi_width,
+            message=True)
+
+        plot_choice_task_heatmap(
+            path_origin=os.path.join('data', 'choice_task',
+                                     'raw', 'data_et.csv'),
+            path_target=os.path.join('results', 'plots',
+                                     'clustering', 'py_clusters',
+                                     'heatmaps_selected'),
+            runs=data_et_corrected['run_id'].unique())
 
     add_choice_et_variables(min_required_trials=5,
                             min_gaze_points=3)
 
-    plot_choice_task_heatmap()
     add_log_k()
 
     clean_data_choice(
@@ -84,40 +101,15 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    # aoi_width = 0.4
-    # aoi_height = 0.4
-    # add_aoi_et(aoi_width=aoi_width,
-    #            aoi_height=aoi_height)
-    #
-    # run_py_clustering(distance_threshold=0.25,
-    #                   min_ratio=0.3,
-    #                   max_deviation=0.25,
-    #                   aoi_width=aoi_width,
-    #                   aoi_height=aoi_height,
-    #                   message=True)
+    add_log_k()
 
-    # add_choice_et_variables(min_required_trials=5,
-    #                         min_gaze_points=3)
-    #
-    plot_choice_task_heatmap(
-        path_origin=os.path.join('data', 'choice_task',
-                                 'raw', 'data_et.csv'),
-        path_target=os.path.join('results', 'plots',
-                                 'choice_task', 'et',
-                                 'heatmaps', 'all'))
-
-    plot_choice_task_heatmap(
-        path_origin=os.path.join('data', 'choice_task',
-                                 'raw', 'data_et.csv'),
-        path_target=os.path.join('results', 'plots',
-                                 'choice_task', 'et',
-                                 'heatmaps', 'eligible_for_clustering'),
-        runs=[
-                 103,  11, 119, 126, 128,  13, 130, 150, 154, 160, 162, 166, 176, 177,
-                 189,  19, 197, 199, 205, 209, 211, 212, 230, 237, 238, 244, 246, 258,
-                 264, 275, 278, 280, 288, 291, 304,  32, 326, 327, 333, 336, 344, 350,
-                 358, 361,  37, 376, 378, 389, 390, 396, 401, 407, 414, 420, 421, 422,
-                 427, 430, 433, 434, 435,  45, 454, 477,  48, 481,  58,  63,   7,  96
-             ])
+    clean_data_choice(
+        min_hit_ratio=0.6,
+        max_precision=0.15,
+        max_offset=0.5,
+        min_fps=5,
+        min_rt=400, max_rt=10000,
+        min_choice_percentage=0.01,
+        max_choice_percentage=0.99)
 
     # main(new_data=False)

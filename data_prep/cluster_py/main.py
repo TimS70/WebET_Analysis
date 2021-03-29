@@ -18,7 +18,7 @@ from tqdm import tqdm
 from visualize.eye_tracking import plot_et_scatter
 
 
-def run_py_clustering(distance_threshold,
+def run_py_clustering(distance_threshold, min_cluster_size,
                       min_ratio, max_deviation,
                       aoi_width, aoi_height,
                       message):
@@ -57,14 +57,15 @@ def run_py_clustering(distance_threshold,
 
         plot_et_scatter(
             x=data_this['x'], y=data_this['y'], c=data_this['cluster'],
-            title='Clusters for run ' + str(run),
+            title='Clusters for run #' + str(round(run)),
             label='distance=' + str(distance_threshold),
             file_name=str(round(run)) + '.png',
             path=os.path.join('results', 'plots', 'clustering',
                               'py_clusters', 'all_clusters'))
 
         aoi_clusters = find_aoi_clusters(
-            data=data_this, message=message, run=run)
+            data=data_this, message=message,
+            min_cluster_size=min_cluster_size, run=run)
 
         data_plot = data_this[
             data_this['cluster'].isin(aoi_clusters['cluster'])]
@@ -72,7 +73,7 @@ def run_py_clustering(distance_threshold,
         plot_et_scatter(
             x=data_plot['x'], y=data_plot['y'],
             c=data_plot['cluster'],
-            title='Selected AOI clusters for run ' + str(run),
+            title='Selected AOI clusters for run #' + str(round(run)),
             label='distance=' + str(distance_threshold),
             file_name=str(round(run)) + '.png',
             path=os.path.join('results', 'plots', 'clustering',
@@ -94,7 +95,7 @@ def run_py_clustering(distance_threshold,
         plot_et_scatter(
             x=data_plot['x'], y=data_plot['y'],
             c=data_plot['cluster'],
-            title='Filtered clusters for run ' + str(run),
+            title='Filtered clusters for run #' + str(round(run)),
             label='distance=' + str(distance_threshold) + ' \n' +
                   'min_ratio=' + str(min_ratio) + ' \n' +
                   'max_deviation=' + str(max_deviation) + ' \n',
@@ -112,7 +113,7 @@ def run_py_clustering(distance_threshold,
 
         plot_et_scatter(
             x=corrected_data['x'], y=corrected_data['y'],
-            title='AOI with corrected clusters for run ' + str(run),
+            title='AOI with corrected clusters for run #' + str(round(run)),
             file_name=str(round(run)) + '.png',
             path=os.path.join('results', 'plots', 'clustering',
                               'py_clusters', 'aoi_corrected'))
@@ -128,3 +129,5 @@ def run_py_clustering(distance_threshold,
     write_csv(data_et_corrected, 'data_et.csv',
               os.path.join('data', 'choice_task',
                            'added_var'))
+
+    return data_et_corrected

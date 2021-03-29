@@ -22,7 +22,7 @@ def add_aoi(data, aoi_width, aoi_height):
         index=['TL', 'TR', 'BL', 'BR']
     )
 
-    data['aoi'] = 0
+    data['aoi'] = np.nan
     for aoi in aoi_centers.index:
         data.loc[
             (data['x'] > (aoi_centers.loc[aoi, 'x'] - aoi_width / 2)) &

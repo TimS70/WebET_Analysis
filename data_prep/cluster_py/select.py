@@ -4,7 +4,7 @@ import pandas as pd
 from data_prep.add_variables.choice.aoi import add_quadrant
 
 
-def find_aoi_clusters(data, message, run):
+def find_aoi_clusters(data, message, min_cluster_size, run):
     grouped_clusters = data \
         .groupby(['cluster'], as_index=False) \
         .agg(n_cluster=('x', 'count'),
@@ -31,9 +31,13 @@ def find_aoi_clusters(data, message, run):
                on='quadrant',
                how='left')
 
+    aoi_clusters = aoi_clusters[
+        aoi_clusters['n_cluster'] > min_cluster_size]
+
     if (len(aoi_clusters) < 4) & message:
         print(f'\n'
-              f'Run {run} does not have clusters in all 4 '
+              f'Run {run} does not have large enough '
+              f'clusters (n>{min_cluster_size}) in all 4 '
               f'corners and cannot be clustered')
 
     return aoi_clusters

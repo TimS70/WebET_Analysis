@@ -138,7 +138,7 @@ def add_choice_behavioral_variables():
               'data', 'choice_task', 'added_var')
 
 
-def add_aoi_et(aoi_width=0.3, aoi_height=0.3):
+def add_aoi_et(aoi_width, aoi_height):
     data_et = pd.read_csv(os.path.join(
         'data', 'choice_task', 'raw', 'data_et.csv'))
 
@@ -161,8 +161,9 @@ def add_aoi_et(aoi_width=0.3, aoi_height=0.3):
         f"""Gaze points across AOIs: \n"""
         f"""{freq_table} \n""")
 
+    data_plot = data_et[pd.notna(data_et['aoi'])]
     plot_et_scatter(
-        x=data_et['x'], y=data_et['y'],
+        x=data_plot['x'], y=data_plot['y'],
         title='AOI raw for all runs ',
         file_name='aoi_scatter.png',
         path=os.path.join('results', 'plots', 'choice_task',

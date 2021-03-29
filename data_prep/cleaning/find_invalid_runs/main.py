@@ -107,11 +107,8 @@ def invalid_runs_global(
 
 def invalid_runs_choice(
         data_trial, data_et, data_subject,
-        min_hit_ratio=0.8, max_precision=0.15,
-        max_offset=0.5, min_fps=5,
-        min_choice_percentage=0.01,
-        max_choice_percentage=0.99
-):
+        min_hit_ratio, max_precision, max_offset, min_fps,
+        min_choice_percentage, max_choice_percentage):
 
     filter_runs_not_us(data_subject)
 

@@ -10,15 +10,17 @@ from matplotlib import patches
 from utils.combine_frames import merge_by_index
 from visualize.all_tasks import save_plot
 from visualize.eye_tracking import my_heatmap
+from tqdm import tqdm
 
+def plot_choice_task_heatmap(path_origin, path_target,
+                             data_et=None, runs='all'):
 
-def plot_choice_task_heatmap(path_origin, path_target, runs='all'):
     data_et = pd.read_csv(path_origin)
 
     if runs == 'all':
         runs = data_et['run_id'].unique()
 
-    for run in runs:
+    for run in tqdm(runs, desc='Plot heatmaps'):
 
         # Define data
         if 't_task' in data_et.columns:
@@ -65,7 +67,8 @@ def plot_choice_task_heatmap(path_origin, path_target, runs='all'):
         for i in range(0, len(x_pos)):
             plt.text(x_pos[i], y_pos[i],
                      '[attribute]', **text_params)
-        ax.set_title("Distribution of fixations after 1 second, $\sigma$ = %d" % s)
+        ax.set_title("# " + str(round(run)) +
+                     ", $\sigma$ = %d" % s)
 
         save_plot(file_name=str(round(run)) + '.png',
                   path=path_target)
