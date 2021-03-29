@@ -17,7 +17,7 @@ from data_prep.load.main import create_datasets_from_cognition
 from visualize.choice import plot_choice_task_heatmap
 
 
-def prepare_datasets(main_aoi_width=0.35, main_aoi_height=0.35,
+def prepare_datasets(main_aoi_width=0.4, main_aoi_height=0.4,
                      correct_clusters=True):
 
     add_variables_global()

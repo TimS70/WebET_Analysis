@@ -51,7 +51,7 @@ def init_cluster_correction(distance_threshold, min_cluster_size,
                               'py_clusters', 'aoi_raw'))
 
         data_this = add_clusters(
-            data=data_et.loc[data_et['run_id'] == run, :],
+            data=data_et[data_et['run_id'] == run],
             distance_threshold=distance_threshold)
 
         plot_et_scatter(

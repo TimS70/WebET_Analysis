@@ -637,11 +637,18 @@ ggsave(file.path(path_results, 'et', 'last_fix_ll_vs_choice_ll.png'),
 # Error Analyis
 Error trials are those that are not predicted based on the subjective values, 
 which themselves are based on individual's fitted add_k value
-## Find Error trials
+
+## Filter for missing logK
 ```{r}
 data_trial = data_trial %>% 
 	filter(!is.na(logK))
 
+data_subject = data_subject %>% 
+	filter(!is.na(logK))
+```
+
+## Find Error trials
+```{r}
 identify_error_trials = function(data) {
     data$predictLL = as.integer(data$svLL > data$svSS)
     data$errorTrial = as.integer((data$choseLL != data$predictLL))
