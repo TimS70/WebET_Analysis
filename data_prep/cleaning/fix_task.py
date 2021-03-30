@@ -19,8 +19,6 @@ def clean_data_fix(max_t_task, path_origin, path_target):
     data_trial = clean_trial_duration(data_trial, 0, max_t_task, 'data_trial')
     data_et = clean_trial_duration(data_et, 0, max_t_task, 'data_et')
 
-    data_trial = data_trial[pd.notna(data_trial['x_count'])]
-
     save_all_three_datasets(data_et, data_trial, data_subject, path_target)
 
 
@@ -40,7 +38,7 @@ def show_empty_fix_trials(data_trial_fix):
             f"""n = {len(null_data)} fixation trials with no et_data: """
             f"""{null_data} \n""")
     else:
-        print(f"""No fixation trials without et_data found. \n""")
+        print(f"""No fixation trials without et_data found """)
 
 
 def show_trials_high_t_task(data_trial, max_t_task):
@@ -50,5 +48,8 @@ def show_trials_high_t_task(data_trial, max_t_task):
                                 .reset_index() \
                                 .loc[:, ['run_id', 'trial_index', 'trial_duration_exact']]
 
-    print(f"""add_k={len(grouped_time_by_trial)} very long trials: \n"""
-          f"""{grouped_time_by_trial} \n""")
+    if len(grouped_time_by_trial) > 0:
+        print(f"""{len(grouped_time_by_trial)} very long trials: \n"""
+              f"""{grouped_time_by_trial} \n""")
+    else:
+        print(f"""All trials are shorter than {max_t_task}ms """)

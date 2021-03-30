@@ -13,7 +13,7 @@ def load_all_three_datasets(path):
     data_subject = pd.read_csv(
         os.path.join(path, 'data_subject.csv'))
 
-    print('Imported data from ' + path + ':')
+    print('\nImported data from ' + path + ':')
 
     if 'prolificID' in data_trial.columns:
         summarize_datasets(data_et, data_trial, data_subject)
@@ -22,7 +22,7 @@ def load_all_three_datasets(path):
 
 
 def save_all_three_datasets(data_et, data_trial, data_subject, path):
-    print('Save data to ' + path + ':')
+    print('\nSave data to ' + path + ':')
 
     makedir(path)
 
