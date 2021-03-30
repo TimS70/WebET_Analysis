@@ -8,21 +8,18 @@ from tqdm import tqdm
 
 from utils.combine import merge_by_index
 from utils.path import makedir
+from visualize.all_tasks import save_plot
 
 
-def check_gaze_saccade():
+def check_gaze_saccade(path_origin, path_target):
 
-    data_et = pd.read_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_et.csv'))
+    data_et = pd.read_csv(os.path.join(path_origin, 'data_et.csv'))
+    data_trial = pd.read_csv(os.path.join(path_origin, 'data_trial.csv'))
 
-    data_trial = pd.read_csv(
-        os.path.join('data', 'fix_task', 'added_var', 'data_trial.csv'))
-
-    data_et = merge_by_index(
-        data_et, data_trial,
-        'task_nr_new', 'chinFirst',
-        'trial_duration', 'trial_duration_exact',
-        'fixTask')
+    data_et = merge_by_index(data_et, data_trial,
+                             'task_nr_new', 'chinFirst',
+                             'trial_duration', 'trial_duration_exact',
+                             'fixTask')
 
     data_et_cross_and_task = select_fix_cross_and_fix_task(data_et)
 
@@ -36,27 +33,19 @@ def check_gaze_saccade():
         data_et_cross_and_task['new_y_pos']
     )
 
-    plot_gaze_saccade(
-        data_et_cross_and_task,
-        ('offset_all_gaze_shift.png'))
-
-    # for subject in tqdm(
-    #         data_et_cross_and_task['run_id'].unique(),
-    #         desc='Plotting fix task saccade: '):
-    #     plot_gaze_saccade(
-    #         data_et_cross_and_task.loc[
-    #             data_et_cross_and_task['run_id'] == subject, :],
-    #         ('offset' + str(subject) + '_gaze_shift.png'))
+    plot_gaze_saccade(data=data_et_cross_and_task,
+                      file_name='offset_all_gaze_shift.png',
+                      path=path_target)
 
 
-def plot_gaze_saccade(data_et_cross_and_task, file_name):
+def plot_gaze_saccade(data, file_name, path):
     average_line_no_chin = create_median_line(
-        data_et_cross_and_task.loc[
-            data_et_cross_and_task['chin'] == 0, :])
+        data.loc[
+        data['chin'] == 0, :])
 
     average_line_chin = create_median_line(
-        data_et_cross_and_task.loc[
-            data_et_cross_and_task['chin'] == 1, :])
+        data.loc[
+        data['chin'] == 1, :])
 
     # noinspection PyTypeChecker
     fig, axes = plt.subplots(
@@ -69,8 +58,8 @@ def plot_gaze_saccade(data_et_cross_and_task, file_name):
     axes[1].set_title("Chin==1")
 
     sns.scatterplot(ax=axes[0],
-                    data=data_et_cross_and_task.loc[
-                         data_et_cross_and_task['chin'] == 0, :],
+                    data=data.loc[
+                         data['chin'] == 0, :],
                     x="t_task",
                     y="offset")
 
@@ -80,8 +69,8 @@ def plot_gaze_saccade(data_et_cross_and_task, file_name):
                  color='r')
 
     sns.scatterplot(ax=axes[1],
-                    data=data_et_cross_and_task.loc[
-                         data_et_cross_and_task['chin'] == 1, :],
+                    data=data.loc[
+                         data['chin'] == 1, :],
                     x="t_task",
                     y="offset")
 
@@ -93,10 +82,7 @@ def plot_gaze_saccade(data_et_cross_and_task, file_name):
     plt.setp(axes, xlim=(-1500, 5000))
     plt.xlabel("t_task")
 
-    makedir('results', 'plots', 'fix_task', 'saccade')
-    plt.savefig(
-        os.path.join('results', 'plots', 'fix_task', 'saccade',
-                     file_name))
+    save_plot(file_name=file_name, path=path)
     plt.close()
 
 

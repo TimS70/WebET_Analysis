@@ -44,16 +44,14 @@ def t_test_outcomes_vs_factor(data, dependent, factor,
         outcome_by_factor = pivot_outcome_by_factor(
             data, factor, var)
         if dependent:
-            t_test_result = t_test_rel(
-                var, outcome_by_factor)
+            t_test_result = t_test_rel(outcome_by_factor)
         else:
-            t_test_result = t_test_ind(
-                var, outcome_by_factor)
+            t_test_result = t_test_ind(outcome_by_factor)
 
         result_summary.append(
             [var,
-             t_test_result.statistic[0].astype(float),
-             t_test_result.pvalue[0].astype(float)])
+             t_test_result.statistic.astype(float),
+             t_test_result.pvalue.astype(float)])
 
         # Descriptives
         summary_this_outcome = data \
@@ -85,13 +83,13 @@ def t_test_outcomes_vs_factor(data, dependent, factor,
     write_csv(summary, file_name, path)
 
 
-def t_test_rel(outcome, data_outcome_by_factor):
+def t_test_rel(data_outcome_by_factor):
     return stats.ttest_rel(
-        data_outcome_by_factor[[0.0]],
-        data_outcome_by_factor[[1.0]])
+        data_outcome_by_factor.loc[:, 1],
+        data_outcome_by_factor.loc[:, 2])
 
 
-def t_test_ind(outcome, data_outcome_by_factor):
+def t_test_ind(data_outcome_by_factor):
     return stats.ttest_ind(
         data_outcome_by_factor[[0.0]].dropna(),
         data_outcome_by_factor[[1.0]].dropna())
