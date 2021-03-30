@@ -63,10 +63,9 @@ def plot_grand_mean(data_subject, data_et):
     # Regardless of trials
     grouped = data_et \
         .groupby(['run_id'], as_index=False) \
-        .agg(x_mean=('x', 'mean'),
-             y_mean=('y', 'mean'))
-    data_subject = merge_by_subject(data_subject, grouped,
-                                    'x_mean', 'y_mean')
+        .agg(x=('x', 'mean'),
+             y=('y', 'mean'))
+    data_subject = merge_by_subject(data_subject, grouped, 'x', 'y')
 
     plot_histogram(
         data_subject['x'],

@@ -47,10 +47,10 @@ def add_data_quality(max_offset, min_hits_per_dot, path_origin, path_target):
     data_et = distance_from_xy_mean_square(data_et)
     data_trial = aggregate_precision_from_et_data(data_trial, data_et)
 
-    grouped = data_et \
+    grouped = data_trial \
         .groupby(['run_id'], as_index=False) \
-        .agg(offset=('precision', 'mean'),
-             offset_px=('precision_px', 'mean'))
+        .agg(precision=('precision', 'mean'),
+             precision_px=('precision_px', 'mean'))
     data_subject = merge_by_subject(data_subject, grouped,
                                          'precision', 'precision_px')
 

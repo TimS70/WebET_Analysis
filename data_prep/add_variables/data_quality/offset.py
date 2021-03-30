@@ -102,13 +102,16 @@ def add_grand_mean_offset(data_subject, data_trial, data_et):
         data_trial['x_mean'], data_trial['x_pos'],
         data_trial['y_mean'], data_trial['y_pos'])
 
-    data_subject = merge_mean_by_subject(
-        data_subject, data_trial, 'x_bias', 'y_bias',
-        'grand_offset')
+    grouped = data_trial \
+        .groupby(['run_id', 'trial_index'], as_index=False) \
+        .agg(x_bias=('x_bias', 'mean'),
+             y_bias=('y_bias', 'mean'),
+             grand_offset=('grand_offset', 'mean'))
 
-    summary = data_subject \
-                  .loc[:, ['x_bias', 'y_bias', 'grand_offset']] \
-        .describe()
+    data_subject = merge_by_subject(data_subject, grouped,
+                                    'x_bias', 'y_bias', 'grand_offset')
+
+    summary = data_subject[['x_bias', 'y_bias', 'grand_offset']].describe()
 
     print(f"""Added grand mean offset: \n"""
           f"""{summary} \n""")

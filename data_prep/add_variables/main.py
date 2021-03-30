@@ -5,8 +5,7 @@ import pandas as pd
 from analysis.choice_task.test_clusters import test_transition_clusters
 from data_prep.add_variables.both_tasks.subject import add_fps_subject_level, \
     add_max_trials, \
-    add_glasses_binary, add_recorded_date, add_employment_status, \
-    add_full_time_binary
+    add_glasses_binary, add_recorded_date
 from data_prep.add_variables.both_tasks.trial import add_fps_trial_level, \
     add_window_size, \
     add_exact_trial_duration, add_new_task_nr, add_trial_type_new, \
@@ -22,7 +21,7 @@ from data_prep.add_variables.choice.choice_options import \
     reformat_attributes, add_k, top_bottom_attributes
 from data_prep.add_variables.choice.et_indices import add_et_indices
 from data_prep.add_variables.choice.eye_tracking import add_et_indices_subject
-from utils.combine import merge_by_index
+from utils.combine import merge_by_index, merge_by_subject
 from utils.save_data import load_all_three_datasets, save_all_three_datasets, \
     write_csv
 from visualize.eye_tracking import plot_et_scatter
@@ -85,7 +84,8 @@ def add_choice_behavioral_variables(path_origin, path_target, path_fix_subject):
     # Add data from fixation task
     data_subject_fix = pd.read_csv(os.path.join(path_fix_subject,
                                                 'data_subject.csv'))
-    data_subject = merge_mean_by_subject(data_subject, data_subject_fix,
+
+    data_subject = merge_by_subject(data_subject, data_subject_fix,
                                          'offset', 'precision', 'hit_ratio',
                                          'n_valid_dots')
 
@@ -100,8 +100,15 @@ def add_choice_behavioral_variables(path_origin, path_target, path_fix_subject):
     # Behavioral responses
     data_trial = choice_response_variables(data_trial)
     data_subject = add_mean_choice_rt(data_subject, data_trial)
-    data_subject = merge_mean_by_subject(data_subject, data_trial,
-                                         'choseLL', 'choseTop', 'LL_top')
+
+    grouped = data_trial \
+        .groupby(['run_id'], as_index=False) \
+        .agg(choseLL=('choseLL', 'mean'),
+             choseTop=('choseTop', 'mean'),
+             LL_top=('LL_top', 'mean'))
+
+    data_subject = merge_by_subject(data_subject, grouped,
+                                    'choseLL', 'choseTop', 'LL_top')
 
     write_csv(data_trial, 'data_trial.csv', path_target)
     write_csv(data_subject, 'data_subject.csv', path_target)
@@ -118,7 +125,7 @@ def add_aoi_et(aoi_width, aoi_height, path_origin, path_target):
 
     else:
         print(f"""AOIs with width={aoi_width} and """
-              f"""heigth={aoi_height}. \n""")
+              f"""height={aoi_height}. \n""")
         data_et = add_aoi(data_et, aoi_width, aoi_height)
 
     freq_table = pd.crosstab(index=data_et['aoi'],

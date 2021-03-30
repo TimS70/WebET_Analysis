@@ -50,13 +50,15 @@ def distance_from_xy_mean_square(data):
 
 
 def aggregate_precision_from_et_data(data_trial, data_et):
-    data_trial = merge_mean_by_index(
-        data_trial, data_et,
-        'distance_from_xy_mean_square', 'distance_from_xy_mean_square_px')
-    data_trial['precision'] = np.sqrt(
-        data_trial['distance_from_xy_mean_square'])
-    data_trial['precision_px'] = np.sqrt(
-        data_trial['distance_from_xy_mean_square_px'])
+    grouped = data_et.groupby(['run_id', 'trial_index'], as_index=False)[[
+        'distance_from_xy_mean_square',
+        'distance_from_xy_mean_square_px']].mean()
+    grouped = grouped.assign(
+        precision=np.sqrt(grouped['distance_from_xy_mean_square']),
+        precision_px=np.sqrt(grouped['distance_from_xy_mean_square_px']))
+
+    data_trial = merge_by_index(data_trial, grouped,
+                                'precision', 'precision_px')
 
     missing_values = data_trial.loc[
         pd.notna(data_trial['x_pos']) &
