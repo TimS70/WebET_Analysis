@@ -72,7 +72,6 @@ def clean_data_choice(
                         len(runs_low_hit_ratio),
                         len(runs_low_hit_ratio) / n_runs])
 
-    # These runs have barely have any variation in gaze points
     if exclude_runs is not None:
         runs_no_variance = np.intersect1d(
             data_subject['run_id'].unique(), exclude_runs)
@@ -104,26 +103,30 @@ def clean_data_choice(
             invalid_runs,
             runs_missing_log_k, runs_noisy_log_k,
             runs_pos_log_k)
+
         summary.append([
-            [
-                'runs_missing_log_k',
-                len(runs_missing_log_k),
-                len(runs_missing_log_k) / n_runs],
-            [
-                'runs_noisy_log_k',
-                len(runs_noisy_log_k),
-                len(runs_noisy_log_k) / n_runs],
-            [
-                'runs_pos_log_k',
-                len(runs_pos_log_k),
-                len(runs_pos_log_k) / n_runs]])
+            'runs_missing_log_k',
+            len(runs_missing_log_k),
+            len(runs_missing_log_k) / n_runs])
+
+        summary.append([
+            'runs_noisy_log_k',
+            len(runs_noisy_log_k),
+            len(runs_noisy_log_k) / n_runs])
+
+        summary.append([
+            'runs_pos_log_k',
+            len(runs_pos_log_k),
+            len(runs_pos_log_k) / n_runs])
 
     summary.append(['total',
                     len(invalid_runs),
                     len(invalid_runs) / n_runs])
 
-    summary = pd.DataFrame(summary, columns=['name', 'n', 'percent']) \
-        .sort_values(by='n')
+    summary = pd.DataFrame(summary, columns=['name', 'n', 'percent'])
+    print(summary)\
+
+    summary = summary.sort_values(by='n')
 
     print(f"""In total, n={len(invalid_runs)} have to be """
           f"""removed from n={n_runs} runs: \n"""

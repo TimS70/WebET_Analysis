@@ -92,7 +92,8 @@ def filter_bad_log_k(data_subject, max_noise=40):
     runs_noisy_log_k = data_subject.loc[
         pd.notna(data_subject['logK']) &
         (data_subject['noise'] > max_noise), 'run_id']
-    print(f"""runs_noisy_logK means noise > {max_noise}. \n""")
+    print(f"""Max allowed noise parameter (based on neg. log-likelihood): """
+          f"""{max_noise}""")
 
     runs_pos_log_k = data_subject.loc[
         data_subject['logK'] > 0, 'run_id']

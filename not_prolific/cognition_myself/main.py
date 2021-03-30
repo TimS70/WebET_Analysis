@@ -92,28 +92,27 @@ def prep_choice(main_aoi_width=0.4, main_aoi_height=0.4):
     #     path_target=os.path.join('data', 'cognition_myself',
     #                              'choice_task', 'added_var'))
 
-    add_log_k(path=os.path.join('data', 'cognition_myself', 'choice_task',
-                                'added_var'),
-              file_trial_input='data_trial.csv',
-              file_subjects_to_merge='data_subject.csv')
+    # add_log_k(path=os.path.join('data', 'cognition_myself', 'choice_task',
+    #                             'added_var'),
+    #           file_trial_input='data_trial.csv',
+    #           file_subjects_to_merge='data_subject.csv')
     #
-    # clean_data_choice(
-    #     us_sample=False,
-    #     min_hit_ratio=None,  # 0.6,
-    #     max_precision=None,  # 0.15,
-    #     max_offset=None,  # 0.5,
-    #     min_fps=5,
-    #     min_rt=400, max_rt=10000,
-    #     min_choice_percentage=None,  # 0.01,
-    #     max_choice_percentage=None,  # 0.99,
-    #     exclude_runs=[
-    #         12, 23, 93, 144, 243, 258, 268, 343, 356, 373, 384, 386, 387,
-    #         393, 404, 379, 410, 411, 417, 410, 417, 425, 429, 440, 441, 445,
-    #         449, 458, 462, 475, 425, 488, 493],
-    #     exclude_runs_reason='No clear aois',
-    #     filter_log_k=False,
-    #     path_origin=os.path.join('data', 'choice_task', 'added_var'),
-    #     path_target=os.path.join('data', 'choice_task', 'cleaned'))
+    clean_data_choice(
+        us_sample=False,
+        min_hit_ratio=None,  # 0.6,
+        max_precision=None,  # 0.15,
+        max_offset=None,  # 0.5,
+        min_fps=5,
+        min_rt=400, max_rt=10000,
+        min_choice_percentage=None,  # 0.01,
+        max_choice_percentage=None,  # 0.99,
+        exclude_runs=None,
+        exclude_runs_reason=None,
+        filter_log_k=True,
+        path_origin=os.path.join('data', 'cognition_myself', 'choice_task',
+                                 'added_var'),
+        path_target=os.path.join('data', 'cognition_myself', 'choice_task',
+                                 'cleaned'))
 
 
 def analyze_choice():
