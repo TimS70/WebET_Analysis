@@ -21,7 +21,6 @@ def clean_data_fix(max_t_task, path_origin, path_target):
 
     save_all_three_datasets(data_et, data_trial, data_subject, path_target)
 
-
 def euclidean_distance(x, x_target, y, y_target):
     x_diff = x - x_target
     y_diff = y - y_target

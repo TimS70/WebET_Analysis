@@ -101,7 +101,6 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
           '################################### \n')
 
     data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
-
     # print(f"""Describe data quality: \n"""
     #       f"""{data_subject[['fps', 'offset', 'offset_px', 'precision',
     #                          'precision_px']].describe()} \n""")
@@ -110,7 +109,6 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
 
     # Design checks
     check_randomization(data_trial, path_plots, path_tables)
-    # check_gaze_saccade(path_origin=path_origin, path_target=path_plots)
 
     # Descriptives (not necessary)
     # compare_conditions_subject(data_subject, data_trial, 'offset')
