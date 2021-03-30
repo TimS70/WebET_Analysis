@@ -21,22 +21,23 @@ def check_gaze_saccade(path_origin, path_target):
                              'trial_duration', 'trial_duration_exact',
                              'fixTask', 'x_pos', 'y_pos', 'chin')
 
-    data_et_cross_and_task = select_fix_cross_and_fix_task(data_et)
+    data_cross_dots = select_fix_cross_and_fix_task(data_et)
 
-    data_et_cross_and_task = add_new_position(data_et_cross_and_task)
+    data_cross_dots = add_new_position(data_cross_dots)
 
-    data_et_cross_and_task = shift_t_task_for_fix_cross(data_et_cross_and_task)
+    data_cross_dots = shift_t_task_for_fix_cross(data_cross_dots)
 
-    data_et_cross_and_task['offset'] = euclidean_distance(
-        data_et_cross_and_task['x'],
-        data_et_cross_and_task['new_x_pos'],
-        data_et_cross_and_task['y'],
-        data_et_cross_and_task['new_y_pos']
+    data_cross_dots['offset'] = euclidean_distance(
+        data_cross_dots['x'],
+        data_cross_dots['new_x_pos'],
+        data_cross_dots['y'],
+        data_cross_dots['new_y_pos']
     )
 
-    plot_gaze_saccade(data=data_et_cross_and_task,
-                      file_name='offset_saccades_all_runs.png',
-                      path=path_target)
+    for run in data_cross_dots['run_id'].unique():
+        plot_gaze_saccade(data=data_cross_dots,
+                          file_name=str(round(run)) + '.png',
+                          path=path_target)
 
 
 def plot_gaze_saccade(data, file_name, path):
