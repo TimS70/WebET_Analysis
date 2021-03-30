@@ -124,8 +124,9 @@ def add_aoi_et(aoi_width, aoi_height, path_origin, path_target):
         data_et['aoi'] = data_et['quadrant']
 
     else:
-        print(f"""AOIs with width={aoi_width} and """
-              f"""height={aoi_height}. \n""")
+        print(f"""Added AOIs with width={aoi_width} and """
+              f"""height={aoi_height} to """
+              f"""n={len(data_et['run_id'].unique())} runs""")
         data_et = add_aoi(data_et, aoi_width, aoi_height)
 
     freq_table = pd.crosstab(index=data_et['aoi'],
@@ -133,16 +134,6 @@ def add_aoi_et(aoi_width, aoi_height, path_origin, path_target):
 
     print(f"""Gaze points across AOIs: \n"""
           f"""{freq_table} \n""")
-
-    data_plot = data_et[pd.notna(data_et['aoi'])]
-    plot_et_scatter(x=data_plot['x'], y=data_plot['y'],
-                    title='AOI raw for all runs ',
-                    file_name='aoi_scatter.png',
-                    path=os.path.join('results', 'plots', 'choice_task', 'et'))
-
-    print(f"""Added AOIs to """
-          f"""{len(data_et['run_id'].unique())} """
-          f"""runs \n""")
 
     write_csv(data_et, 'data_et.csv', path_target)
 

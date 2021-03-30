@@ -1,6 +1,8 @@
 import os
 import subprocess
 
+import pandas as pd
+
 from analysis.demographics import analyze_demographics
 from analysis.dropouts.main import analyze_dropouts
 from analysis.main import analyze_fix_task, analyze_choice_task
@@ -19,11 +21,10 @@ from data_prep.load.main import create_datasets_from_cognition, \
     integrate_prolific_data
 from not_prolific.cognition_myself.main import prep_data_cognition_myself
 from visualize.choice import plot_choice_task_heatmap
+from visualize.eye_tracking import plot_et_scatter
 
 
-def prepare_datasets(main_aoi_width=0.4, main_aoi_height=0.4,
-                     correct_clusters=False):
-
+def prep_global():
     add_variables_global(
         path_origin=os.path.join('data', 'all_trials', 'combined'),
         path_target=os.path.join('data', 'all_trials', 'added_var'))
@@ -44,6 +45,8 @@ def prepare_datasets(main_aoi_width=0.4, main_aoi_height=0.4,
         follow_instruction=True, correct_webgazer_clock=True,
         complete_fix_task=True)
 
+
+def prep_fix():
     load_fix_data(path_origin=os.path.join('data', 'all_trials', 'cleaned'),
                   path_target=os.path.join('data', 'fix_task', 'raw'))
 
@@ -56,6 +59,8 @@ def prepare_datasets(main_aoi_width=0.4, main_aoi_height=0.4,
                      path_origin=os.path.join('data', 'fix_task', 'cleaned'),
                      path_target=os.path.join('data', 'fix_task', 'added_var'))
 
+
+def prep_choice(main_aoi_width=0.4, main_aoi_height=0.4, correct_clusters=False):
     load_choice_data(path_origin=os.path.join('data', 'all_trials', 'cleaned'),
                      path_target=os.path.join('data', 'choice_task', 'raw'))
 
@@ -75,6 +80,14 @@ def prepare_datasets(main_aoi_width=0.4, main_aoi_height=0.4,
     add_aoi_et(aoi_width=main_aoi_width, aoi_height=main_aoi_height,
                path_origin=os.path.join('data', 'choice_task', 'raw'),
                path_target=os.path.join('data', 'choice_task', 'added_var'))
+
+    data_plot = pd.read_csv(os.path.join(
+        'data', 'choice_task', 'added_var', 'data_et.csv'))
+    data_plot = data_plot[pd.notna(data_plot['aoi'])]
+    plot_et_scatter(x=data_plot['x'], y=data_plot['y'],
+                    title='AOI raw for all runs ',
+                    file_name='aoi_scatter.png',
+                    path=os.path.join('results', 'plots', 'choice_task', 'et'))
 
     if correct_clusters:
         data_et_corrected = init_cluster_correction(
@@ -125,16 +138,17 @@ def prepare_datasets(main_aoi_width=0.4, main_aoi_height=0.4,
         path_target=os.path.join('data', 'choice_task', 'cleaned'))
 
 
-def analyze():
-    analyze_dropouts()
-    analyze_demographics()
-    analyze_fix_task()
+def analyze_choice():
     analyze_choice_task()
 
-    # Render R markdowns
-    subprocess.call(
-        ['Rscript', '--vanilla', 'analysis/run_r_markdowns.R'],
-        shell=True)
+
+def analyze_global():
+    analyze_dropouts()
+    analyze_demographics()
+
+
+def analyze_fix():
+    analyze_fix_task()
 
 
 def main(new_data=False):
@@ -147,8 +161,17 @@ def main(new_data=False):
             path_origin=os.path.join('data', 'all_trials', 'cognition_run'),
             path_target=os.path.join('data', 'all_trials', 'combined'))
 
-    prepare_datasets()
-    analyze()
+    prep_global()
+    prep_fix()
+    prep_choice()
+    analyze_global()
+    analyze_choice()
+    analyze_fix()
+
+    # Render R markdowns
+    subprocess.call(
+        ['Rscript', '--vanilla', 'analysis/run_r_markdowns.R'],
+        shell=True)
 
 
 if __name__ == '__main__':
