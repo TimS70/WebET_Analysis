@@ -4,6 +4,7 @@ from analysis.fix_task.chin_rest import test_chin_rest
 from analysis.fix_task.correlations import corr_analysis
 from analysis.fix_task.data_quality import outcome_over_trials_vs_chin, \
     outcome_over_trials
+from analysis.fix_task.gaze_saccade import check_gaze_saccade
 from analysis.fix_task.glasses import test_glasses
 from analysis.fix_task.positions import compare_positions
 from analysis.fix_task.randomization import check_randomization
@@ -14,7 +15,7 @@ from visualize.all_tasks import corr_matrix, corr_plot_split
 from visualize.all_tasks import get_box_plots
 from visualize.choice import plot_example_eye_movement, \
     plot_categorical_confounders
-from visualize.fix_task.main import visualize_exemplary_run, fix_heatmap, \
+from visualize.fix_task.main import visualize_exemplary_run, fix_heatmaps, \
     hist_plots_quality
 from visualize.fix_task.positions import plot_top_vs_bottom_positions
 
@@ -94,22 +95,18 @@ def analyze_choice_task():
                 'results', 'plots', 'choice_task', 'correlations')
 
 
-def analyze_fix_task():
+def analyze_fix_task(path_origin, path_plots):
     print('################################### \n'
           'Analyze fix task data \n'
           '################################### \n')
 
-    data_et, data_trial, data_subject = load_all_three_datasets(
-        os.path.join('data', 'fix_task', 'added_var'))
+    data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
-    describe_data_quality = data_subject.loc[:, [
-                                                    'fps', 'offset',
-                                                    'offset_px', 'precision',
-                                                    'precision_px'
-                                                ]].describe()
-    print(f"""FPS: \n{describe_data_quality}""")
-
-    # hist_plots_quality(data_subject)
+    # print(f"""Describe data quality: \n"""
+    #       f"""{data_subject[['fps', 'offset', 'offset_px', 'precision',
+    #                          'precision_px']].describe()} \n""")
+    #
+    # hist_plots_quality(data_subject, path_plots)
 
     # Design checks
     # check_randomization(data_trial)
@@ -120,39 +117,43 @@ def analyze_fix_task():
     # compare_conditions_subject(data_subject, data_trial, 'precision')
 
     # test_chin_rest(data_trial, data_subject)
-    test_glasses(data_trial, data_subject)
+    # test_glasses(data_trial, data_subject)
 
-    outcome_over_trials_vs_chin(data_trial, 'offset')
-    compare_positions(data_trial, 'offset')
-    plot_top_vs_bottom_positions(data_trial, 'offset')
-
-    outcome_over_trials_vs_chin(data_trial, 'precision')
-    compare_positions(data_trial, 'precision')
-    plot_top_vs_bottom_positions(data_trial, 'precision')
-
-    outcome_over_trials(data_trial, 'offset')
-    compare_positions(data_trial, 'offset')
-
-    outcome_over_trials(data_trial, 'precision')
-    compare_positions(data_trial, 'precision')
-
-    # Categorical confounders analysis
-    for outcome in ['offset', 'precision', 'fps']:
-        get_box_plots(
-            data_subject, outcome,
-            ['vertPosition', 'gender', 'ethnic',
-             'degree', 'browser', 'glasses', 'sight', 'sight'],
-            ('box_plots_confounders_vs_' + outcome),
-            'results', 'plots', 'fix_task', outcome)
+    # outcome_over_trials_vs_chin(data_trial, 'offset')
+    # compare_positions(data_trial, 'offset')
+    # plot_top_vs_bottom_positions(data_trial, 'offset')
+    #
+    # outcome_over_trials_vs_chin(data_trial, 'precision')
+    # compare_positions(data_trial, 'precision')
+    # plot_top_vs_bottom_positions(data_trial, 'precision')
+    #
+    # outcome_over_trials(data_trial, 'offset')
+    # compare_positions(data_trial, 'offset')
+    #
+    # outcome_over_trials(data_trial, 'precision')
+    # compare_positions(data_trial, 'precision')
 
     # Correlations
-    corr_analysis(data_trial, data_subject)
+    # corr_analysis(data_trial, data_subject)
 
-    # Visualize_exemplary_run
-    data_plot = merge_by_index(data_et, data_trial, 'chin')
-    visualize_exemplary_run(data_plot.loc[
-                            (data_plot['run_id'] == 43) & (
-                                        data_plot['chin'] == 0), :])
+    # Categorical confounders analysis
+    # for outcome in ['offset', 'precision', 'fps']:
+    #     get_box_plots(
+    #         data=data_subject,
+    #         outcome=outcome,
+    #         predictors=['vertPosition', 'gender', 'ethnic',
+    #                     'degree', 'browser', 'glasses', 'sight', 'sight'],
+    #         file_name='box_plots_confounders_vs_' + outcome + '.png',
+    #         path_target=os.path.join(path_plots, outcome))
+    #
+    # # Visualize_exemplary_run
+    # data_plot = merge_by_index(data_et, data_trial, 'chin')
+    # visualize_exemplary_run(
+    #     data=data_plot[(data_plot['run_id'] == data_plot['run_id'].unique()[0]) &
+    #                    (data_plot['chin'] == 0)],
+    #     path_target=os.path.join(path_plots, 'exemplary_runs'))
 
     # Heatmap for all gaze points
-    fix_heatmap(data_et)
+    fix_heatmaps(
+        data=data_et,
+        path_target=os.path.join(path_plots, 'fix_heatmaps'))

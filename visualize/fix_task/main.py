@@ -7,6 +7,7 @@ import numpy as np
 from visualize.all_tasks import save_plot
 from visualize.eye_tracking import my_heatmap
 
+from tqdm import tqdm
 
 # Correction
 # Robert Rosenthal. The hand-book of research synthesis, chapter
@@ -15,7 +16,7 @@ from visualize.eye_tracking import my_heatmap
 # t / sqrt n
 
 
-def hist_plots_quality(data_subject):
+def hist_plots_quality(data_subject, path_plots):
     font_size = 15
     plt.rcParams.update({'font.size': font_size})
 
@@ -23,22 +24,23 @@ def hist_plots_quality(data_subject):
         plt.hist(data_subject[outcome], bins=20)
         plt.title(outcome + ' Histogram')
         save_plot(file_name=outcome + '_histogram.png',
-                  path=os.path.join('results', 'plots',
-                                    'fix_task', outcome))
+                  path=os.path.join(path_plots, outcome),
+                  message=True)
         plt.close()
 
 
-def fix_heatmap(data_et_fix):
-    for run in data_et_fix['run_id'].unique():
+def fix_heatmaps(data, path_target):
 
-        data = data_et_fix[
-            (data_et_fix['run_id'] == run) &
-            (data_et_fix['t_task'] > 1000) &
-            (data_et_fix['x'] > 0) & (data_et_fix['x'] < 1) &
-            (data_et_fix['y'] > 0) & (data_et_fix['y'] < 1)]
+    data = data[(data['t_task'] > 1000) &
+                (data['x'] > 0) & (data['x'] < 1) &
+                (data['y'] > 0) & (data['y'] < 1)]
 
-        x = data['x']
-        y = data['y']
+    for run in tqdm(data['run_id'].unique(),
+                    desc='Plot fix task heatmaps: '):
+
+        data_this = data[data['run_id'] == run]
+        x = data_this['x']
+        y = data_this['y']
 
         fig, ax = plt.subplots(figsize=(7, 7 * (9/16)))
 
@@ -49,32 +51,31 @@ def fix_heatmap(data_et_fix):
                   cmap=cm.Greens,  aspect=(9 / 16))
         ax.set_xlim(0, 1)
         ax.set_ylim(1, 0)
-        ax.set_title(
-            "Distribution of fixations after 1 second, $\sigma$ = %d" % s)
+        ax.set_title('Fix task heatmap for run #' + str(round(run)))
+        ax.text(0.0, 1.15,
+                f'Distribution of gaze points after 1 second, $\sigma$ = {s}')
+        plt.gcf().subplots_adjust(bottom=0.15)
 
         x_pos = [0.2, 0.5, 0.8, 0.2, 0.5, 0.8, 0.2, 0.5, 0.8]
         y_pos = [0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8]
         for i in range(0, len(x_pos)):
             plt.text(x_pos[i], y_pos[i], '+', size=12, ha="center")
 
-        save_plot(file_name=str(run) + '.png',
-                  path=os.path.join(
-                      'results', 'plots',
-                      'fix_task',
-                      'individual_participants', 'heatmaps'))
+        save_plot(file_name=str(round(run)) + '.png',
+                  path=path_target)
         plt.close()
 
 
 # noinspection PyUnboundLocalVariable
-def visualize_exemplary_run(data_plot):
+def visualize_exemplary_run(data, path_target):
     fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(18, 12))
     axes = axes.ravel()
     x_pos = [0.2, 0.5, 0.8, 0.2, 0.5, 0.8, 0.2, 0.5, 0.8]
     y_pos = [0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8]
     for i in range(0, 9):
-        axes_data = data_plot.loc[
-                    (data_plot['x_pos'] == x_pos[i]) &
-                    (data_plot['y_pos'] == y_pos[i]), :]
+        axes_data = data.loc[
+                    (data['x_pos'] == x_pos[i]) &
+                    (data['y_pos'] == y_pos[i]), :]
         image = axes[i].scatter(
             axes_data['x'],
             axes_data['y'],
@@ -86,12 +87,11 @@ def visualize_exemplary_run(data_plot):
 
     fig.colorbar(image, ax=axes)
 
-    run = data_plot['run_id'].unique()[0]
-    save_plot(file_name='exemplary_run_' + str(run) +
+    run = data['run_id'].unique()[0]
+    save_plot(file_name='exemplary_run_' + str(round(run)) +
                         '.png',
-              path=os.path.join('results', 'plots',
-                                'fix_task',
-                                'individual_participants'))
+              path=path_target,
+              message=True)
     plt.close()
 
 
@@ -111,5 +111,6 @@ def plot_hit_means_per_dot(data_trial, min_hit_ratio):
 
     save_plot(file_name='prop_hits_per_dot.png',
               path=os.path.join('results', 'plots',
-                                'fix_task', 'offset'))
+                                'fix_task', 'offset'),
+              message=True)
     plt.close()

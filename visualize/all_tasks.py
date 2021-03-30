@@ -70,7 +70,7 @@ def split_violin_plot(data_trial, outcome, factor, split_factor,
     plt.close()
 
 
-def get_box_plots(data_subject, outcome, predictors, file_name, *args):
+def get_box_plots(data, outcome, predictors, file_name, path_target):
     fig, ax = plt.subplots(nrows=2, ncols=4, figsize=(16, 10))
     fig.suptitle(outcome + ' for various categorical predictors', fontsize=20)
     plt.subplots_adjust(hspace=0.5)
@@ -78,18 +78,18 @@ def get_box_plots(data_subject, outcome, predictors, file_name, *args):
     ax = ax.ravel()
 
     for i in range(0, 8):
-        sns.boxplot(ax=ax[i], x=predictors[i], y=outcome, data=data_subject)
+        sns.boxplot(ax=ax[i], x=predictors[i], y=outcome, data=data)
 
         ax[i].tick_params(labelrotation=45, labelsize=13)
         ax[i].tick_params(axis='y', labelrotation=None)
 
-        nobs = data_subject[predictors[i]].value_counts().values
+        nobs = data[predictors[i]].value_counts().values
         nobs = [str(x) for x in nobs.tolist()]
         nobs = ["n: " + i for i in nobs]
         # Add it to the plot
         pos = range(len(nobs))
 
-        max_value = data_subject[outcome].max()
+        max_value = data[outcome].max()
         y_pos = max_value + max_value * 0.1
 
         for tick, label in zip(pos, ax[i].get_xticklabels()):
@@ -99,7 +99,7 @@ def get_box_plots(data_subject, outcome, predictors, file_name, *args):
                 horizontalalignment='center', size=13, weight='normal')
 
     save_plot(file_name=file_name,
-              path=os.path.join(*args))
+              path=path_target)
     plt.close()
 
 
@@ -180,6 +180,6 @@ def save_plot(file_name, path, message=False):
     plt.savefig(os.path.join(path, file_name))
 
     if message:
-        print(f"""Plot {file_name} was saved to {path} \n""")
+        print(f"""Plot {file_name} was saved to {path} """)
 
 

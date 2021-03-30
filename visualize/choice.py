@@ -21,7 +21,7 @@ def plot_choice_task_heatmap(path_origin, path_target,
     if runs == 'all':
         runs = data_et['run_id'].unique()
 
-    for run in tqdm(runs, desc='Plot heatmaps'):
+    for run in tqdm(runs, desc='Plot choice task heatmaps'):
 
         # Define data
         if 't_task' in data_et.columns:

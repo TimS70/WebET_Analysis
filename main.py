@@ -19,7 +19,7 @@ from data_prep.load.choice import load_choice_data
 from data_prep.load.fix_task import load_fix_data
 from data_prep.load.main import create_datasets_from_cognition, \
     integrate_prolific_data
-from not_prolific.cognition_myself.main import prep_data_cognition_myself
+from not_prolific.cognition_myself.main import prep_and_analyze_data_cognition_myself
 from visualize.choice import plot_choice_task_heatmap
 from visualize.eye_tracking import plot_et_scatter
 
@@ -147,7 +147,10 @@ def analyze_global():
 
 
 def analyze_fix():
-    analyze_fix_task()
+    analyze_fix_task(
+        path_origin=os.path.join('data', 'fix_task', 'added_var'),
+        path_plots=os.path.join('results', 'plots', 'fix_task'))
+
 
 
 def main(new_data=False):
@@ -174,5 +177,5 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    prep_data_cognition_myself()
+    prep_and_analyze_data_cognition_myself()
     # main(new_data=False)

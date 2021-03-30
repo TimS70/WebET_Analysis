@@ -2,6 +2,7 @@ import os
 
 import pandas as pd
 
+from analysis.main import analyze_fix_task
 from data_prep.add_variables.data_quality.main import add_data_quality
 from data_prep.add_variables.fit_k.call_from_py import add_log_k
 from data_prep.add_variables.main import add_variables_global, \
@@ -113,9 +114,17 @@ def analyze_choice():
                                  'heatmaps_choice'))
 
 
-def prep_data_cognition_myself():
-    prep_global()
-    prep_fix()
-    prep_choice()
+def analyze_fix():
+    analyze_fix_task(
+        path_origin=os.path.join('data', 'cognition_myself', 'fix_task',
+                                 'added_var'),
+        path_plots=os.path.join('results', 'plots', 'fix_task'))
 
+
+def prep_and_analyze_data_cognition_myself():
+    # prep_global()
+    # prep_fix()
+    # prep_choice()
+
+    analyze_fix()
     # analyze_choice()
