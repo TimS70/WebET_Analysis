@@ -36,30 +36,28 @@ def create_survey_data(data, show_notes=False):
             .reset_index()
 
         if len(df_this_subject) > 0:
-            survey_data = \
-                survey_data.append(
-                    survey_data_this_run(
-                        df_this_subject
-                    )
-                )
+            survey_data = survey_data.append(
+                survey_data_this_run(df_this_subject))
 
     survey_data = survey_data.rename(columns={'age': 'birthyear'})
     survey_data = clean_binary_survey_data(survey_data)
-    survey_data['prolificID'] = survey_data['prolificID'].str.strip()
+    survey_data['prolificID'] = survey_data['prolificID'] \
+        .astype(str).str.strip()
 
-    # That is me
-    survey_data.loc[
-        survey_data['prolificID'] == 'Tim', 'prolificID'] = np.nan
     # Participant indicates that they accidentally copy pasted the
     # text from another study
-    survey_data.loc[
-        survey_data['prolificID'].isin([
-            """I'm moving to London.I'm looking for an apartment to rent.""",
-            '55b237e6fdf99b19ea79d2f']), 'prolificID'] = \
-        [
-            '5ee2916b70aa643be19c0036',
-            '55b237e6fdf99b19ea79d2f7'
-        ]
+    survey_data['prolificID'] = survey_data['prolificID'] \
+        .replace(
+            [
+                'Tim',     # That is me
+                """I'm moving to London.I'm looking for an apartment to rent.""",
+                '55b237e6fdf99b19ea79d2f'
+            ],
+            [
+                np.nan,
+                '5ee2916b70aa643be19c0036',
+                '55b237e6fdf99b19ea79d2f7'
+            ])
 
     if show_notes:
         show_optional_notes(survey_data)

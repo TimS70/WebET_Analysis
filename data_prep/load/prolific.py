@@ -15,8 +15,8 @@ else:
 from tqdm import tqdm
 
 
-def combine_cognition_data(n_files='all'):
-    data_raw = concat_csv_files(n_files)
+def combine_cognition_data(path, n_files='all'):
+    data_raw = concat_csv_files(n_files, path)
     data_raw['chinFirst'] = data_raw['chinFirst'] \
         .replace({'no': 0, 'yes': 1})
 
@@ -25,8 +25,7 @@ def combine_cognition_data(n_files='all'):
     return data_raw
 
 
-def concat_csv_files(n_files):
-    path = os.path.join('data', 'all_trials', 'cognition_run')
+def concat_csv_files(n_files, path):
     subject_files = os.listdir(path)
 
     if n_files == 'all':

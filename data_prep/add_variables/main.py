@@ -28,13 +28,13 @@ from utils.save_data import load_all_three_datasets, save_all_three_datasets, \
 from visualize.eye_tracking import plot_et_scatter
 
 
-def add_variables_global():
+def add_variables_global(path_origin, path_target):
     print('################################### \n'
           'Create global variables \n'
           '################################### \n')
 
     data_et, data_trial, data_subject = load_all_three_datasets(
-        os.path.join('data', 'all_trials', 'combined'))
+        path_origin)
 
     n_approved_unique = len(
         data_subject.loc[data_subject['status'] == 'APPROVED',
@@ -71,7 +71,7 @@ def add_variables_global():
 
     save_all_three_datasets(
         data_et, data_trial, data_subject,
-        os.path.join('data', 'all_trials', 'added_var'))
+        path_target)
 
 
 def add_choice_behavioral_variables():

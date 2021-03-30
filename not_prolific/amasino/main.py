@@ -1,9 +1,9 @@
 import os
 import subprocess
 
-from amasino.cleaning import invalid_choice_runs
-from amasino.prep_data_et import transform_xy_coordinates
-from amasino.prep_data_trial import load_data, add_trial_index, \
+from not_prolific.amasino.cleaning import invalid_choice_runs
+from not_prolific.amasino.prep_data_et import transform_xy_coordinates
+from not_prolific.amasino.prep_data_trial import load_data, add_trial_index, \
     add_log_k, add_choseTop, add_choice_options
 from analysis.choice_task.test_clusters import test_transition_clusters
 from data_prep.add_variables.choice.aoi import match_remaining_et_trials, add_aoi_counts_on_trial_level, \

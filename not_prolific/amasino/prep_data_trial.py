@@ -85,7 +85,7 @@ def add_log_k(data_subject, data_trial):
 
     subprocess.run(run_matlab, shell=True, check=True)
 
-    os.chdir(os.path.join('..', '..'))
+    os.chdir(os.path.join('../..', '..'))
 
     root = "C:/Users/User/GitHub/WebET_Analysis"
     log_k = pd.read_csv(os.path.join(root, 'data', 'amasino', 'logK.csv'))

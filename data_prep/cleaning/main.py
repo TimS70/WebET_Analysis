@@ -22,13 +22,12 @@ from utils.save_data import summarize_datasets, save_all_three_datasets, \
     load_all_three_datasets
 
 
-def clean_global_data(max_t_task=5500, min_fps=3):
+def clean_global_data(path_origin, path_target, max_t_task=5500, min_fps=3):
     print('################################### \n'
           'Clean global datasets \n'
           '################################### \n')
 
-    data_et, data_trial, data_subject = load_all_three_datasets(
-        os.path.join('data', 'all_trials', 'added_var'))
+    data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
     data_et = drop_na_data_et(data_et)
     data_subject = replace_subject_variables(data_subject)
@@ -84,8 +83,7 @@ def clean_global_data(max_t_task=5500, min_fps=3):
     data_trial = clean_runs(data_trial, excluded_runs, 'data_trial')
     data_subject = clean_runs(data_subject, excluded_runs, 'data_subject')
 
-    save_all_three_datasets(data_et, data_trial, data_subject,
-                            os.path.join('data', 'all_trials', 'cleaned'))
+    save_all_three_datasets(data_et, data_trial, data_subject, path_target)
 
 
 def clean_data_fix(max_t_task=5500):

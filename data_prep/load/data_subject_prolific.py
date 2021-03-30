@@ -27,14 +27,6 @@ def create_data_subject(data_raw):
             how='left') \
         .rename(columns={'age': 'birthyear'})
 
-    data_subject = add_and_filter_prolific(data_subject)
-
-    makedir('data', 'all_trials', 'combined')
-    data_subject.to_csv(
-        os.path.join('data', 'all_trials', 'combined', 'data_subject.csv'),
-        index=False, header=True)
-    print('data_subject saved!')
-
     return data_subject
 
 
@@ -53,12 +45,7 @@ def create_data_prolific(data_subject):
         on='prolificID',
         how='left')
 
-    makedir('data', 'all_trials', 'combined')
-    data_prolific.to_csv(
-        os.path.join('data', 'all_trials', 'combined', 'data_prolific.csv'),
-        index=False, header=True)
-
-    print('data_prolific saved!')
+    return data_prolific
 
 
 def read_prolific_data():

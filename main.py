@@ -13,16 +13,23 @@ from data_prep.cleaning.main import clean_global_data, clean_data_fix, \
 from data_prep.cluster_py.main import init_cluster_correction
 from data_prep.load.choice import load_choice_data
 from data_prep.load.fix_task import load_fix_data
-from data_prep.load.main import create_datasets_from_cognition
+from data_prep.load.main import create_datasets_from_cognition, \
+    integrate_prolific_data
+from not_prolific.cognition_myself.main import prep_data_cognition_myself
 from visualize.choice import plot_choice_task_heatmap
 
 
 def prepare_datasets(main_aoi_width=0.4, main_aoi_height=0.4,
                      correct_clusters=True):
 
-    add_variables_global()
-    clean_global_data(max_t_task=5500,
-                      min_fps=3)
+    add_variables_global(
+        path_origin=os.path.join('data', 'all_trials', 'combined'),
+        path_target=os.path.join('data', 'all_trials', 'added_var'))
+
+    clean_global_data(
+        path_origin=os.path.join('data', 'all_trials', 'added_var'),
+        path_target=os.path.join('data', 'all_trials', 'cleaned'),
+        max_t_task=5500, min_fps=3)
 
     load_fix_data(
         origin_path=os.path.join('data', 'all_trials', 'cleaned'))
@@ -100,11 +107,18 @@ def analyze():
 
 def main(new_data=False):
     if new_data:
-        create_datasets_from_cognition()
+        create_datasets_from_cognition(
+            path_origin=os.path.join('data', 'all_trials', 'cognition_run'),
+            path_target=os.path.join('data', 'all_trials', 'combined'))
+
+        integrate_prolific_data(
+            path_origin=os.path.join('data', 'all_trials', 'cognition_run'),
+            path_target=os.path.join('data', 'all_trials', 'combined'))
 
     prepare_datasets()
     analyze()
 
 
 if __name__ == '__main__':
-    main(new_data=False)
+    prep_data_cognition_myself()
+    # main(new_data=False)
