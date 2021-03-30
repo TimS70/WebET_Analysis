@@ -18,20 +18,20 @@ from data_prep.cleaning.choice import clean_data_choice
 from data_prep.clustering.main import init_cluster_correction
 from data_prep.load.choice import load_choice_data
 from data_prep.load.fix_task import load_fix_data
-from data_prep.load.main import create_datasets_from_cognition, \
-    integrate_prolific_data
-from not_prolific.cognition_myself.main import prep_and_analyze_data_cognition_myself
+from data_prep.load.main import create_datasets_from_cognition
+from data_prep.load.prolific import integrate_prolific_data
 from visualize.choice import plot_choice_task_heatmap
 from visualize.eye_tracking import plot_et_scatter
 
 
 def prep_global():
+
     add_variables_global(
         path_origin=os.path.join('data', 'all_trials', 'combined'),
         path_target=os.path.join('data', 'all_trials', 'added_var'))
 
     add_prolific_variables(
-        path_origin=os.path.join('data', 'all_trials', 'combined'),
+        path_origin=os.path.join('data', 'all_trials', 'added_var'),
         path_target=os.path.join('data', 'all_trials', 'added_var'))
 
     runs_no_saccade = [144, 171, 380]
@@ -61,7 +61,9 @@ def prep_fix():
                      path_target=os.path.join('data', 'fix_task', 'added_var'))
 
 
-def prep_choice(main_aoi_width=0.4, main_aoi_height=0.4, correct_clusters=False):
+def prep_choice(main_aoi_width=0.4,
+                main_aoi_height=0.4,
+                correct_clusters=False):
     load_choice_data(path_origin=os.path.join('data', 'all_trials', 'cleaned'),
                      path_target=os.path.join('data', 'choice_task', 'raw'))
 
@@ -132,7 +134,7 @@ def prep_choice(main_aoi_width=0.4, main_aoi_height=0.4, correct_clusters=False)
             12, 23, 93, 144, 243, 258, 268, 343, 356, 373, 384, 386, 387,
             393, 404, 379, 410, 411, 417, 410, 417, 425, 429, 440, 441, 445,
             449, 458, 462, 475, 425, 488, 493],
-        exclude_runs_reason='No clear aois',
+        exclude_runs_reason='No clear AOIs',
         filter_log_k=False,
         path_origin=os.path.join('data', 'choice_task', 'added_var'),
         path_target=os.path.join('data', 'choice_task', 'cleaned'))
@@ -143,6 +145,7 @@ def analyze_choice():
         path_origin=os.path.join('data', 'choice_task', 'cleaned'),
         path_plots=os.path.join('results', 'plots', 'choice_task'),
         path_tables=os.path.join('results', 'tables', 'choice_task'))
+
 
 def analyze_global():
     analyze_dropouts()
@@ -168,7 +171,9 @@ def main(new_data=False):
             path_target=os.path.join('data', 'all_trials', 'combined'))
 
         integrate_prolific_data(
-            path_origin=os.path.join('data', 'all_trials', 'cognition_run'),
+            file_origin=os.path.join('data', 'all_trials', 'combined',
+                                     'data_subject.csv'),
+            path_prolific=os.path.join('data', 'prolific'),
             path_target=os.path.join('data', 'all_trials', 'combined'))
 
     prep_global()
@@ -185,5 +190,4 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    prep_and_analyze_data_cognition_myself()
-    # main(new_data=False)
+    main(new_data=True)

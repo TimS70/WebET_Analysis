@@ -130,9 +130,9 @@ def analyze_fix():
 
 
 def prep_and_analyze_data_cognition_myself():
-    # prep_global()
-    # prep_fix()
-    # prep_choice()
+    prep_global()
+    prep_fix()
+    prep_choice()
 
     analyze_fix()
-    # analyze_choice()
+    analyze_choice()

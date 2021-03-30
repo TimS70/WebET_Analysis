@@ -1,107 +1,100 @@
 import os
-import re
-import sys
 
+import numpy as np
 import pandas as pd
 
 from data_prep.load.survey_data import create_survey_data
-
-if sys.version_info[0] < 3:
-    # noinspection PyUnresolvedReferences
-    from StringIO import StringIO
-else:
-    from io import StringIO
-
-from tqdm import tqdm
+from utils.path import makedir
+from utils.save_data import write_csv
 
 
-def combine_cognition_data(path, n_files='all'):
-    data_raw = concat_csv_files(n_files, path)
-    data_raw['chinFirst'] = data_raw['chinFirst'] \
-        .replace({'no': 0, 'yes': 1})
+def create_data_prolific(data_subject, path_origin):
+    data_prolific = read_prolific_data(path_origin=path_origin)
 
-    data_raw = add_survey_data(data_raw, 'prolificID')
+    data_subject = data_subject.rename(columns={
+        'chosenAmount': 'bonus_USD',
+        'chosenDelay': 'bonus_delay'})
 
-    return data_raw
+    data_prolific = data_prolific.merge(
+        data_subject.loc[:, np.append(
+                ['prolificID'],
+                data_subject.columns.difference(data_prolific.columns))],
+        on='prolificID',
+        how='left')
 
-
-def concat_csv_files(n_files, path):
-    subject_files = os.listdir(path)
-
-    if n_files == 'all':
-        n_files = len(subject_files)
-
-    all_subjects = []
-
-    for i in tqdm(range(0, n_files),
-                  desc="Combining data from cognition.run: "):
-        this_csv = open(
-            path + "/" + subject_files[i]).read()
-        this_csv = clean_html(this_csv)
-        this_csv = clean_et_text(this_csv)
-        this_csv = clean_survey_text(this_csv)
-        this_df = pd.read_csv(StringIO(this_csv))
-        if len(this_df) > 0:
-            all_subjects.append(this_df)
-
-    data_raw = pd.concat(all_subjects).reset_index(drop=True)
-
-    return data_raw
+    return data_prolific
 
 
-def clean_html(raw_html):
-    # https://stackoverflow.com/questions/9662346/python-code-to-remove-html-tags-from-a-string
-    clean_r = re.compile('<.*?>')
-    clean_text = re.sub(clean_r, '', raw_html)
+def read_prolific_data(path_origin):
 
-    return clean_text
+    data_prolific_free = pd.read_csv(
+        os.path.join(path_origin, 'prolific_export_free.csv')) \
+        .rename(columns={'participant_id': 'prolificID'})
 
+    data_prolific_int = pd.read_csv(
+        os.path.join(path_origin, 'prolific_export_int.csv')) \
+        .rename(columns={'participant_id': 'prolificID'})
 
-def clean_et_text(text):
-    text_within_brackets = re.findall(re.compile('\[.*?\]'), text)
-    output = text
-    for i in range(0, len(text_within_brackets)):
-        old = text_within_brackets[i]
-        new = re.sub(",", "$", old)
-        output = output.replace(old, new)
+    data_prolific_us = pd.read_csv(
+        os.path.join(path_origin, 'prolific_export_us.csv')) \
+        .rename(columns={'participant_id': 'prolificID'})
 
-    return output
+    data_prolific = data_prolific_int \
+        .append(data_prolific_us) \
+        .append(data_prolific_free)
 
-
-def clean_survey_text(text):
-    output = text
-    text_within_brackets = re.findall(re.compile('\{.*?\}'), text)
-    for i in range(0, len(text_within_brackets)):
-        old = text_within_brackets[i]
-        new = old.replace(',', '§')
-        output = output.replace(old, new)
-
-    return output
+    return data_prolific
 
 
-def add_survey_data(data_raw, var_name):
+def integrate_prolific_data(file_origin, path_prolific, path_target):
+    data_subject = pd.read_csv(file_origin)
 
-    survey_data = create_survey_data(data_raw)
+    print(f"""n={sum(pd.isna(data_subject['prolificID']))} """
+          f"""runs without Prolific ID """)
 
-    if var_name in data_raw.columns:
-        data_raw = data_raw.drop(columns=var_name)
+    data_prolific = read_prolific_data(path_origin=path_prolific)
 
-    data_raw = data_raw \
-        .merge(
-            survey_data.loc[:, ['run_id', var_name]],
-            on='run_id',
-            how='left')
+    id_prolific = data_prolific['prolificID'].unique()
+    id_cognition = data_subject.loc[
+        pd.notna(data_subject['prolificID']), 'prolificID'].unique()
 
-    return data_raw
+    id_prolific_but_not_cognition = np.setdiff1d(
+        id_prolific, id_cognition, assume_unique=True)
 
+    print(f"""n={len(id_prolific_but_not_cognition)} prolific IDs """
+          f"""are in Prolific but not in cognition.run: \n"""
+          f"""{id_prolific_but_not_cognition} \n""")
 
-def find_prolific_id_in_raw(this_id):
-    """
-        Search for specific subjects
-    """
-    path = os.path.join('data', 'all_trials', 'cognition_run')
-    subject_files = os.listdir(path)
-    for i in range(0, len(subject_files)):
-        this_subject_txt = open(path + "/" + subject_files[i]).read()
-        if this_subject_txt.find(this_id) > (-1):
-            print(f'ID {this_id} is in {subject_files[i]} \n')
+    id_cognition_but_not_prolific = np.setdiff1d(
+        id_cognition, id_prolific, assume_unique=True)
+
+    print(f"""n={len(id_cognition_but_not_prolific)} prolific IDs """
+          f"""are in cognition.run but not in Prolific: \n"""
+          f"""{id_cognition_but_not_prolific} \n""")
+
+    print(f"""ID '5c670a430d80fd00014264f9' was asked via Prolific """
+          f"""but have not responded yet.""")
+
+    data_subject = data_subject.merge(
+        data_prolific, on='prolificID', how='left')
+
+    data_subject = data_subject.append(data_prolific[
+            data_prolific['prolificID'].isin(id_prolific_but_not_cognition)])
+
+    ids_approved = data_subject.loc[
+        data_subject['status'] == 'APPROVED', 'prolificID'].unique()
+
+    print(f"""Unique approved IDs: {len(ids_approved)} \n"""
+          f"""ID '5c670a430d80fd00014264f9' was asked via Prolific """
+          f"""but have not responded yet.""")
+
+    summary_na = data_subject.loc[
+        pd.isna(data_subject['status']),
+        ['run_id', 'prolificID', 'session_id', 'status']]
+
+    print(f"""Runs with missing status: \n {summary_na}""")
+
+    write_csv(data_subject, 'data_subject.csv', path_target)
+
+    data_prolific = create_data_prolific(data_subject, path_prolific)
+    write_csv(data_prolific, 'data_prolific.csv', path_target)
