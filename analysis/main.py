@@ -3,7 +3,7 @@ import os
 from analysis.fix_task.chin_rest import test_chin_rest
 from analysis.fix_task.correlations import corr_analysis
 from analysis.fix_task.data_quality import outcome_over_trials_vs_chin, \
-    outcome_over_trials
+    outcome_over_trials, compare_conditions_subject
 from analysis.fix_task.gaze_saccade import check_gaze_saccade
 from analysis.fix_task.glasses import test_glasses
 from analysis.fix_task.positions import compare_positions
@@ -109,9 +109,8 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
 
     check_randomization(data_trial, path_plots, path_tables)
 
-    # Descriptives (not necessary)
-    # compare_conditions_subject(data_subject, data_trial, 'offset')
-    # compare_conditions_subject(data_subject, data_trial, 'precision')
+    # Probably not necessary, already have in R
+    # corr_analysis(data_trial, data_subject)
 
     test_chin_rest(data_trial=data_trial,
                    data_subject=data_subject,
@@ -128,28 +127,25 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
         compare_positions(data_trial, outcome, path_tables)
         plot_top_vs_bottom_positions(data_trial, outcome, path_tables)
 
-    # Correlations
-    # corr_analysis(data_trial, data_subject)
-
     # Categorical confounders analysis
-    # for outcome in ['offset', 'precision', 'fps']:
-    #     get_box_plots(
-    #         data=data_subject,
-    #         outcome=outcome,
-    #         predictors=['vertPosition', 'gender', 'ethnic',
-    #                     'degree', 'browser', 'glasses', 'sight', 'sight'],
-    #         file_name='box_plots_confounders_vs_' + outcome + '.png',
-    #         path_target=os.path.join(path_plots, outcome))
-    #
-    # # Visualize_exemplary_run
-    # data_plot = merge_by_index(data_et, data_trial, 'chin')
-    # visualize_exemplary_run(
-    #     data=data_plot[
-    #         (data_plot['run_id'] == data_plot['run_id'].unique()[0]) &
-    #         (data_plot['chin'] == 0)],
-    #     path_target=os.path.join(path_plots, 'exemplary_runs'))
-    #
-    # # Heatmap for all gaze points
-    # fix_heatmaps(
-    #     data=data_et,
-    #     path_target=os.path.join(path_plots, 'fix_heatmaps'))
+    for outcome in ['offset', 'precision', 'fps']:
+        get_box_plots(
+            data=data_subject,
+            outcome=outcome,
+            predictors=['vertPosition', 'gender', 'ethnic',
+                        'degree', 'browser', 'glasses', 'sight', 'sight'],
+            file_name='box_plots_confounders_vs_' + outcome + '.png',
+            path_target=os.path.join(path_plots, outcome))
+
+    # Visualize_exemplary_run
+    data_plot = merge_by_index(data_et, data_trial, 'chin')
+    visualize_exemplary_run(
+        data=data_plot[
+            (data_plot['run_id'] == data_plot['run_id'].unique()[0]) &
+            (data_plot['chin'] == 0)],
+        path_target=os.path.join(path_plots, 'exemplary_runs'))
+
+    # Heatmap for all gaze points
+    fix_heatmaps(
+        data=data_et,
+        path_target=os.path.join(path_plots, 'fix_heatmaps'))
