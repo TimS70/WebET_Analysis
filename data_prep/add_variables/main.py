@@ -36,17 +36,6 @@ def add_variables_global(path_origin, path_target):
     data_et, data_trial, data_subject = load_all_three_datasets(
         path_origin)
 
-    n_approved_unique = len(
-        data_subject.loc[data_subject['status'] == 'APPROVED',
-                         'prolificID'].unique())
-
-    n_approved = len(data_subject.loc[
-                     data_subject['status'] == 'APPROVED', :])
-
-    print(f"""Number of approved runs: """
-          f"""n={n_approved_unique} unique participants """
-          f"""({n_approved} approved IDs, incl. duplicates). \n""")
-
     data_trial = merge_count_by_index(data_trial, data_et, 'x')
 
     # Bug
