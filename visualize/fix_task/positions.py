@@ -7,7 +7,7 @@ from analysis.fix_task.positions import outcome_by_position_long
 from visualize.all_tasks import save_plot
 
 
-def plot_top_vs_bottom_positions(data_trial_fix, outcome):
+def plot_top_vs_bottom_positions(data_trial_fix, outcome, path_target):
     outcome_by_y_pos = outcome_by_position_long(
         data_trial_fix, outcome) \
         .groupby(
@@ -25,6 +25,5 @@ def plot_top_vs_bottom_positions(data_trial_fix, outcome):
                    data=outcome_by_y_pos)
 
     save_plot(file_name=outcome + '_top_vs_bottom.png',
-              path=os.path.join('results', 'plots',
-                                'fix_task', outcome))
+              path=os.path.join(path_target, outcome))
     plt.close()

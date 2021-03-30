@@ -9,7 +9,7 @@ from visualize.all_tasks import save_plot
 from utils.save_data import write_csv
 
 
-def outcome_over_trials(data_trial, outcome):
+def outcome_over_trials(data_trial, outcome, path_target):
     data_plot = data_trial.copy()
 
     print(data_trial.loc[
@@ -19,9 +19,7 @@ def outcome_over_trials(data_trial, outcome):
         .replace([1, 2, 3], [0, 1, 1])
 
     data_plot = group_within_task_index(
-        data_plot.loc[data_plot['fixTask'] == 1, :],
-        'task_nr',
-        outcome)
+        data_plot[data_plot['fixTask'] == 1], 'task_nr', outcome)
 
     plt.style.use('seaborn-whitegrid')
     fig, ax = plt.subplots(1, 2, sharey=True, figsize=(15, 6))
@@ -41,16 +39,13 @@ def outcome_over_trials(data_trial, outcome):
         )
 
     save_plot(file_name=outcome + '_vs_trials.png',
-              path=os.path.join('results', 'plots',
-                                'fix_task', outcome))
+              path=os.path.join(path_target, outcome))
     plt.close()
 
 
-def outcome_over_trials_vs_chin(data_trial, outcome):
+def outcome_over_trials_vs_chin(data_trial, outcome, path_target):
     data_plot = group_within_task_index(
-        data_trial.loc[data_trial['fixTask'] == 1, :],
-        'chin',
-        outcome)
+        data_trial[data_trial['fixTask'] == 1], 'chin', outcome)
 
     plt.style.use('seaborn-whitegrid')
     fig, ax = plt.subplots(1, 2, sharey=True, figsize=(15, 6))
@@ -69,8 +64,7 @@ def outcome_over_trials_vs_chin(data_trial, outcome):
             capsize=5)
 
     save_plot(file_name=outcome + '_vs_chin_vs_trials.png',
-              path=os.path.join('results', 'plots',
-                                'fix_task', outcome))
+              path=os.path.join(path_target, outcome))
     plt.close()
 
 

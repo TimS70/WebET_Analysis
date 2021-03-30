@@ -101,41 +101,32 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
           '################################### \n')
 
     data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
-    # print(f"""Describe data quality: \n"""
-    #       f"""{data_subject[['fps', 'offset', 'offset_px', 'precision',
-    #                          'precision_px']].describe()} \n""")
+    print(f"""Describe data quality: \n"""
+          f"""{data_subject[['fps', 'offset', 'offset_px', 'precision',
+                             'precision_px']].describe()} \n""")
 
-    # hist_plots_quality(data_subject, path_plots)
+    hist_plots_quality(data_subject, path_plots)
 
-    # Design checks
     check_randomization(data_trial, path_plots, path_tables)
 
     # Descriptives (not necessary)
     # compare_conditions_subject(data_subject, data_trial, 'offset')
     # compare_conditions_subject(data_subject, data_trial, 'precision')
 
-    # test_chin_rest(data_trial=data_trial,
-    #                data_subject=data_subject,
-    #                path_plots=os.path.join(path_plots, 'chin_rest'),
-    #                path_tables=os.path.join(path_tables, 'chin_rest'))
-    # test_glasses(data_trial=data_trial,
-    #              data_subject=data_subject,
-    #              path_plots=os.path.join(path_plots, 'glasses'),
-    #              path_tables=os.path.join(path_tables, 'glasses'))
+    test_chin_rest(data_trial=data_trial,
+                   data_subject=data_subject,
+                   path_plots=os.path.join(path_plots, 'chin_rest'),
+                   path_tables=os.path.join(path_tables, 'chin_rest'))
+    test_glasses(data_trial=data_trial,
+                 data_subject=data_subject,
+                 path_plots=os.path.join(path_plots, 'glasses'),
+                 path_tables=os.path.join(path_tables, 'glasses'))
 
-    # outcome_over_trials_vs_chin(data_trial, 'offset')
-    # compare_positions(data_trial, 'offset')
-    # plot_top_vs_bottom_positions(data_trial, 'offset')
-    #
-    # outcome_over_trials_vs_chin(data_trial, 'precision')
-    # compare_positions(data_trial, 'precision')
-    # plot_top_vs_bottom_positions(data_trial, 'precision')
-    #
-    # outcome_over_trials(data_trial, 'offset')
-    # compare_positions(data_trial, 'offset')
-    #
-    # outcome_over_trials(data_trial, 'precision')
-    # compare_positions(data_trial, 'precision')
+    for outcome in ['offset', 'precision']:
+        outcome_over_trials(data_trial, outcome, path_plots)
+        outcome_over_trials_vs_chin(data_trial, outcome, path_plots)
+        compare_positions(data_trial, outcome, path_tables)
+        plot_top_vs_bottom_positions(data_trial, outcome, path_tables)
 
     # Correlations
     # corr_analysis(data_trial, data_subject)

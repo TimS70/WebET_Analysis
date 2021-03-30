@@ -11,7 +11,7 @@ from scipy import stats
 from utils.save_data import write_csv
 
 
-def compare_positions(data_trial_fix, outcome):
+def compare_positions(data_trial_fix, outcome, path_target):
     position_tests = test_all_positions(data_trial_fix, outcome)
 
     test_top_vs_bottom = test_top_vs_bottom_positions(
@@ -43,10 +43,9 @@ def compare_positions(data_trial_fix, outcome):
     else:
         print(f"""No significant results for {outcome}. \n""")
 
-    write_csv(
-        position_tests,
-        (outcome + '_position_t_test.csv'),
-        'results', 'tables', 'fix_task')
+    write_csv(position_tests,
+              outcome + '_position_t_test.csv',
+              path_target)
 
 
 def outcome_by_position_long(data_trial_fix, outcome_var):

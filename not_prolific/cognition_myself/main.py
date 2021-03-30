@@ -118,15 +118,15 @@ def analyze_choice():
 def analyze_fix():
     path_plots = os.path.join('results', 'plots', 'fix_task')
 
-    check_gaze_saccade(path_origin=os.path.join('data', 'cognition_myself',
-                                                'added_var'),
-                       path_target=os.path.join(path_plots))
+    # check_gaze_saccade(path_origin=os.path.join('data', 'cognition_myself',
+    #                                             'added_var'),
+    #                    path_target=os.path.join(path_plots))
 
-    # analyze_fix_task(
-    #     path_origin=os.path.join('data', 'cognition_myself', 'fix_task',
-    #                              'added_var'),
-    #     path_plots=os.path.join('results', 'plots', 'fix_task'),
-    #     path_tables=path_plots)
+    analyze_fix_task(
+        path_origin=os.path.join('data', 'cognition_myself', 'fix_task',
+                                 'added_var'),
+        path_plots=os.path.join('results', 'plots', 'fix_task'),
+        path_tables=path_plots)
 
 
 def prep_and_analyze_data_cognition_myself():
