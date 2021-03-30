@@ -6,7 +6,6 @@ import pandas as pd
 
 from tqdm import tqdm
 
-from utils.combine import merge_mean_by_subject
 from visualize.all_tasks import save_plot
 
 
@@ -23,20 +22,19 @@ def add_fps_subject_level(data_subject, data_trial):
 
 
 def add_max_trials(data_subject, data_trial):
+    grouped_max_trial = data_trial \
+        .groupby(['run_id'], as_index=False) \
+        .agg(max_trial=('trial_index', 'max'))
+
     data_subject = data_subject \
-        .merge(
-        data_trial.groupby(['run_id'], as_index=False)['trial_index'].max(),
-        on=['run_id'],
-        how='left') \
-        .rename(columns={'trial_index': 'max_trial'})
+        .merge(grouped_max_trial,
+               on=['run_id'],
+               how='left')
 
-    example = data_subject.loc[
-        :, ['run_id', 'prolificID', 'max_trial']
-    ].head(5)
+    example = data_subject[['run_id', 'prolificID', 'max_trial']].head(5)
 
-    print(
-        f"""data_subject: Added max_trial: \n """
-        f"""{example} \n""")
+    print(f"""data_subject: Added max_trial: \n """
+          f"""{example} \n""")
 
     return data_subject
 

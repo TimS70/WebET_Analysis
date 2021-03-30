@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from analysis.fix_task.data_quality import euclidean_distance
-from utils.combine import merge_mean_by_index, merge_by_index
+from utils.combine import merge_by_index
 
 
 def merge_xy_means(data):
@@ -19,7 +19,8 @@ def merge_xy_means(data):
 def distance_from_xy_mean_square(data):
     data = merge_xy_means(data)
     data['distance_from_xy_mean_square'] = np.power(
-        euclidean_distance(data['x'], data['x_mean'], data['y'], data['y_mean']),
+        euclidean_distance(data['x'], data['x_mean'],
+                           data['y'], data['y_mean']),
         2)
 
     data['distance_from_xy_mean_square_px'] = np.power(euclidean_distance(
@@ -63,7 +64,8 @@ def aggregate_precision_from_et_data(data_trial, data_et):
         ['run_id', 'trial_index', 'x_pos', 'y_pos', 'precision']]
 
     print(f"""Precision: \n"""
-          f"""{round(data_trial[['precision', 'precision_px']].describe(), 2)} \n""")
+          f"""{round(data_trial[['precision', 'precision_px']].describe(), 
+                     2)} \n""")
 
     if len(missing_values) > 0:
         print(f"""! Attention: Missing values: \n"""
