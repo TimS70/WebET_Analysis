@@ -15,7 +15,8 @@ from tqdm import tqdm
 def plot_choice_task_heatmap(path_origin, path_target,
                              data_et=None, runs='all'):
 
-    data_et = pd.read_csv(path_origin)
+    if data_et is None:
+        data_et = pd.read_csv(path_origin)
 
     if runs == 'all':
         runs = data_et['run_id'].unique()
