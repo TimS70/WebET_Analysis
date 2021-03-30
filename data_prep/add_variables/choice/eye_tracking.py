@@ -3,13 +3,13 @@ import subprocess
 
 import numpy as np
 
+from utils.combine import merge_by_subject
+
 
 def add_et_indices_subject(data_subject, data_trial,
                            min_required_trials=5):
 
-    grouped = data_trial.groupby(
-        ['run_id'],
-        as_index=False).agg(
+    grouped = data_trial.groupby(['run_id'], as_index=False).agg(
         attributeIndex=('attributeIndex', 'mean'),
         attributeIndex_n=('attributeIndex', 'count'),
 
@@ -17,25 +17,20 @@ def add_et_indices_subject(data_subject, data_trial,
         optionIndex_n=('optionIndex', 'count'),
 
         payneIndex=('payneIndex', 'mean'),
-        payneIndex_n=('payneIndex', 'count'),
-    )
+        payneIndex_n=('payneIndex', 'count'),)
 
-    print(
-        f"""Aggregate ET indices on subject level. \n"""
-        f"""Require >= {min_required_trials} valid trials to aggregate """
-        f"""on subject level. \n""")
+    print(f"""Aggregate ET indices on subject level. \n"""
+          f"""Require >= {min_required_trials} valid trials to aggregate """
+          f"""on subject level. \n""")
 
-    grouped.loc[
-        grouped['attributeIndex_n'] < min_required_trials,
-        'attributeIndex'] = np.nan
-    grouped.loc[
-        grouped['optionIndex_n'] < min_required_trials,
-        'optionIndex'] = np.nan
-    grouped.loc[
-        grouped['payneIndex_n'] < min_required_trials,
-        'payneIndex'] = np.nan
+    grouped.loc[grouped['attributeIndex_n'] < min_required_trials,
+                'attributeIndex'] = np.nan
+    grouped.loc[grouped['optionIndex_n'] < min_required_trials,
+                'optionIndex'] = np.nan
+    grouped.loc[grouped['payneIndex_n'] < min_required_trials,
+                'payneIndex'] = np.nan
 
-    data_subject = merge_mean_by_subject(
+    data_subject = merge_by_subject(
         data_subject, grouped,
         'attributeIndex', 'optionIndex', 'payneIndex')
 

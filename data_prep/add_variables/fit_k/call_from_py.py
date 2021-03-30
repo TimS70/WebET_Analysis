@@ -7,42 +7,48 @@ from utils.combine import merge_by_subject
 from utils.save_data import write_csv
 
 
-def add_log_k(file_origin, file_merge_to):
+def add_log_k(file_trial_input, file_subjects_to_merge, path):
 
-    print('Fitting discounting parameter log(k) in Matlab. \n')
     path_matlab_fit_k = os.path.join('data_prep', 'add_variables', 'fit_k')
-    os.chdir(path_matlab_fit_k)
+    path_input = os.path.join(path, file_trial_input)
+    path_to_merge = os.path.join(path, file_subjects_to_merge)
 
     # noinspection SpellCheckingInspection
     run_matlab = \
-        'matlab -wait -nojvm -nosplash -nodesktop -r "fit_discount_k(' + \
-        file_origin + '); exit"'
+        f"""matlab -wait -nojvm -nosplash -nodesktop -r "fit_discount_k('""" + \
+        path_input + """', '""" + path + """'); exit"""
 
+    print(f"""Fitting discounting parameter log(k) in Matlab. \n"""
+          f"""Run Matlab from console: \n"""
+          f"""{run_matlab} \n""")
+
+    os.chdir(path_matlab_fit_k)
     subprocess.run(run_matlab, shell=True, check=True)
-
     os.chdir(os.path.join('../..', '..'))
 
     root = "C:/Users/User/GitHub/WebET_Analysis"
-    log_k = pd.read_csv(os.path.join(path_matlab_fit_k, 'log_k.csv'))
+    log_k = pd.read_csv(os.path.join(path, 'log_k.csv'))
 
-    print('Imported data from ' + file_merge_to + ':')
-    data_subject = pd.read_csv(file_merge_to)
+    print('Imported data from ' + path_to_merge + ':')
+    data_subject = pd.read_csv(path_to_merge)
 
     data_subject = merge_by_subject(data_subject, log_k, 'logK', 'noise')
-    os.remove(os.path.join(path_matlab_fit_k, 'log_k.csv'))
 
     missing_values = data_subject.loc[
         pd.isna(data_subject['logK']),
-        ['run_id', 'prolificID', 'num_approvals', 'choice_rt', 'choseLL', 'choseTop', 'logK', 'noise']
-    ]
+        ['run_id', 'prolificID', 'choice_rt', 'choseLL', 'choseTop', 'logK',
+         'noise']]
 
-    write_csv(missing_values, 'missing_log_k.csv', path_matlab_fit_k)
+    if len(missing_values) > 0:
+        print(f"""n={len(data_subject)} participants. """
+              f"""{len(missing_values)} missing logK values. \n"""
+              f"""{missing_values}""")
 
-    print(f"""n={len(data_subject)} participants. """
-          f"""{len(missing_values)} missing logK values. \n"""
-          f"""{missing_values}""")
+        write_csv(missing_values, 'missing_log_k.csv', path)
+    else:
+        print('All participants could be fitted to hyperbolic discounting')
 
-    print('Data saved to ' + file_merge_to + ':')
-    data_subject.to_csv(os.path.join(file_merge_to), index=False, header=True)
+    print('Data saved to ' + path_to_merge + ':')
+    data_subject.to_csv(os.path.join(path_to_merge), index=False, header=True)
 
     return data_subject

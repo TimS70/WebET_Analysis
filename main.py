@@ -114,10 +114,9 @@ def prep_choice(main_aoi_width=0.4, main_aoi_height=0.4, correct_clusters=False)
         path_origin=os.path.join('data', 'choice_task', 'added_var'),
         path_target=os.path.join('data', 'choice_task', 'added_var'))
 
-    add_log_k(file_origin=os.path.join('data', 'choice_task', 'added_var',
-                                       'data_trial.csv'),
-              file_merge_to=os.path.join('data', 'choice_task', 'added_var',
-                                         'data_subject.csv'))
+    add_log_k(path=os.path.join('data', 'choice_task', 'added_var'),
+              file_trial_input='data_trial.csv',
+              file_subjects_to_merge='data_subject.csv')
 
     clean_data_choice(
         us_sample=False,

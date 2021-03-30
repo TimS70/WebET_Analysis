@@ -1,4 +1,4 @@
-function fit_discount_k(path)
+function fit_discount_k(path, path_log_k)
 %Fits hyperbolic discount rate
 
 %REVISION HISTORY:
@@ -10,7 +10,6 @@ function fit_discount_k(path)
 %     choice_prob and discount
 %     khoi 06.26.09 simplified
 %     schneegans 08.01.2021 simplified 
-
 
 root = 'C:\Users\User\GitHub\WebET_Analysis';
 cd(fullfile(root, 'data_prep', 'add_variables', 'fit_k'));
@@ -53,7 +52,7 @@ waitbar(1,f,'Writing data');
 
 output = array2table(output);
 output.Properties.VariableNames(1:3) = {'run_id', 'logK', 'noise'};
-writetable(output, 'log_k.csv');
+writetable(output, fullfile(root, path_log_k, 'log_k.csv'));
 cd(root);
 
 close(f)
