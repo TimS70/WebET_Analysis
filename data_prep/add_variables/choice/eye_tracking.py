@@ -3,8 +3,6 @@ import subprocess
 
 import numpy as np
 
-from utils.combine import merge_mean_by_subject
-
 
 def add_et_indices_subject(data_subject, data_trial,
                            min_required_trials=5):

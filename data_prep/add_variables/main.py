@@ -9,8 +9,8 @@ from data_prep.add_variables.both_tasks.subject import add_fps_subject_level, \
     add_full_time_binary
 from data_prep.add_variables.both_tasks.trial import add_fps_trial_level, \
     add_window_size, \
-    add_exact_trial_duration, add_new_task_nr, add_trial_type_new, add_fix_task, \
-    add_within_task_index
+    add_exact_trial_duration, add_new_task_nr, add_trial_type_new, \
+    add_fix_task, add_within_task_index
 from data_prep.add_variables.choice.aoi import create_aoi_columns, \
     match_remaining_et_trials, \
     add_aoi_counts_on_trial_level, add_fixation_counter, \
@@ -22,7 +22,7 @@ from data_prep.add_variables.choice.choice_options import \
     reformat_attributes, add_k, top_bottom_attributes
 from data_prep.add_variables.choice.et_indices import add_et_indices
 from data_prep.add_variables.choice.eye_tracking import add_et_indices_subject
-from utils.combine import merge_mean_by_subject, merge_by_index
+from utils.combine import merge_by_index
 from utils.save_data import load_all_three_datasets, save_all_three_datasets, \
     write_csv
 from visualize.eye_tracking import plot_et_scatter

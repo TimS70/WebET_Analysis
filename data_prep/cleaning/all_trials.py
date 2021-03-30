@@ -18,7 +18,8 @@ from utils.save_data import summarize_datasets, save_all_three_datasets, \
 def clean_global_data(path_origin, path_target,
                       prolific=False, approved=False, one_attempt=False,
                       max_t_task=None, min_fps=None,
-                      exclude_runs=None, max_missing_et=None,
+                      exclude_runs=None, exclude_runs_reason=None,
+                      max_missing_et=None,
                       full_runs=False, valid_sight=False,
                       follow_instruction=False, correct_webgazer_clock=False,
                       complete_fix_task=False):
@@ -142,7 +143,7 @@ def clean_global_data(path_origin, path_target,
         runs_no_variance = np.intersect1d(
             data_subject['run_id'].unique(), exclude_runs)
         invalid_runs = combine_runs(invalid_runs, runs_no_variance)
-        summary.append(['runs_no_variance',
+        summary.append([exclude_runs_reason,
                         len(runs_no_variance),
                         len(runs_no_variance) / n_runs])
 

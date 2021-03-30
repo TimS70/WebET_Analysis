@@ -19,7 +19,8 @@ def prep_data_cognition_myself():
         path_target=os.path.join('data', 'cognition_myself', 'cleaned'),
         prolific=False, approved=False, one_attempt=False,
         max_t_task=5500, min_fps=3,
-        exclude_runs=None, max_missing_et=10,
+        exclude_runs=None, exclude_runs_reason=None,
+        max_missing_et=10,
         full_runs=True, valid_sight=True,
         follow_instruction=True, correct_webgazer_clock=True,
         complete_fix_task=True)

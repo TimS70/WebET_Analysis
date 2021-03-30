@@ -19,7 +19,8 @@ def clean_data_choice(
         min_hit_ratio, max_precision,
         max_offset, min_fps, min_rt, max_rt,
         min_choice_percentage, max_choice_percentage,
-        exclude_runs=None, filter_log_k=True):
+        exclude_runs=None, exclude_runs_reason=None,
+        filter_log_k=True):
     print('################################### \n'
           'Clean choice data \n'
           '################################### \n')
@@ -76,7 +77,7 @@ def clean_data_choice(
         runs_no_variance = np.intersect1d(
             data_subject['run_id'].unique(), exclude_runs)
         invalid_runs = combine_runs(invalid_runs, runs_no_variance)
-        summary.append(['runs_no_variance',
+        summary.append([exclude_runs_reason,
                         len(runs_no_variance),
                         len(runs_no_variance) / n_runs])
 

@@ -12,8 +12,7 @@ def missing_glasses(data_subject):
             f"""participants were excluded because we did not provide """
             f"""information about their sight. \n""")
     else:
-        print('Checked sight-information of subjects and found no '
-              'missing data. \n')
+        print('No participants with missing sight-info found ')
 
     return runs_na_glasses
 
@@ -37,10 +36,12 @@ def filter_runs_bad_time_measure(data_trial, max_t_task):
             as_index=False)['trial_index'].count() \
         .rename(columns={'trial_index': 'n_long_trials'})
 
-    print(
-        f"""n={len(runs_with_long_trials)} runs with long trials """
-        f"""(> {max_t_task}ms): \n"""
-        f"""{summary_1} \n""")
+    if len(runs_with_long_trials) > 0:
+        print(f"""n={len(runs_with_long_trials)} runs with long trials """
+              f"""(> {max_t_task}ms): \n"""
+              f"""{summary_1} \n""")
+    else:
+        print('No runs with long trials found ')
 
     runs_bad_time_measure = runs_with_long_trials.loc[
         runs_with_long_trials['n'] > 3,
@@ -53,10 +54,13 @@ def filter_runs_bad_time_measure(data_trial, max_t_task):
             as_index=False)['trial_index'].count() \
         .rename(columns={'trial_index': 'n_long_trials'})
 
-    print(
-        f"""n={len(runs_bad_time_measure)} runs with bad time measure """
-        f"""(>3 trials longer than {max_t_task}ms): \n"""
-        f"""{summary_2} \n""")
+    if len(runs_bad_time_measure) > 0:
+        print(f"""n={len(runs_bad_time_measure)} runs with bad time measure """
+              f"""(>3 trials longer than {max_t_task}ms): \n"""
+              f"""{summary_2} \n""")
+    else:
+        print(f"""No runs with bad time measure (>3 trials longer than """
+              f"""{max_t_task}ms) found """)
 
     return runs_bad_time_measure
 
@@ -78,6 +82,6 @@ def runs_with_incomplete_fix_tasks(data_trial_fix):
             f"""Runs without the full number of trials: \n"""
             f"""{summary} \n""")
     else:
-        print(f"""No runs without the full number of trials found. \n""")
+        print(f"""No runs without the full number of trials found """)
 
     return runs_incomplete_fix_task
