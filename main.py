@@ -12,7 +12,7 @@ from data_prep.add_variables.prolific import add_prolific_variables
 from data_prep.cleaning.all_trials import clean_global_data
 from data_prep.cleaning.fix_task import clean_data_fix
 from data_prep.cleaning.choice import clean_data_choice
-from data_prep.cluster_py.main import init_cluster_correction
+from data_prep.clustering.main import init_cluster_correction
 from data_prep.load.choice import load_choice_data
 from data_prep.load.fix_task import load_fix_data
 from data_prep.load.main import create_datasets_from_cognition, \

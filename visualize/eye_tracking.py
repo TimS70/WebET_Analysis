@@ -5,7 +5,7 @@ import numpy as np
 
 from scipy.ndimage import gaussian_filter
 
-from utils.combine import merge_mean_by_subject
+from utils.combine import merge_by_subject
 from visualize.all_tasks import save_plot
 from visualize.distributions import plot_histogram, plot_2d_histogram
 
@@ -61,8 +61,12 @@ def plot_grand_mean(data_subject, data_et):
                      'grand_mean'))
 
     # Regardless of trials
-    data_subject = merge_mean_by_subject(
-        data_subject, data_et, 'x', 'y')
+    grouped = data_et \
+        .groupby(['run_id'], as_index=False) \
+        .agg(x_mean=('x', 'mean'),
+             y_mean=('y', 'mean'))
+    data_subject = merge_by_subject(data_subject, grouped,
+                                    'x_mean', 'y_mean')
 
     plot_histogram(
         data_subject['x'],

@@ -1,8 +1,8 @@
 import os
 
 from data_prep.add_variables.choice.aoi import add_quadrant
-from data_prep.cluster_py.create import add_clusters
-from data_prep.cluster_py.select import find_aoi_clusters, filter_clusters
+from data_prep.clustering.create import add_clusters
+from data_prep.clustering.select import find_aoi_clusters, filter_clusters
 from utils.save_data import load_all_three_datasets, save_all_three_datasets
 # agglomerative clustering
 from numpy import unique
