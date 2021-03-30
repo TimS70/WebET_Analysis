@@ -58,61 +58,51 @@ def prep_fix():
 
 
 def prep_choice(main_aoi_width=0.4, main_aoi_height=0.4):
-    # load_choice_data(path_origin=os.path.join('data', 'cognition_myself',
-    #                                           'cleaned'),
-    #                  path_target=os.path.join('data', 'cognition_myself',
-    #                                           'choice_task', 'raw'))
-    #
-    # add_choice_behavioral_variables(
-    #     path_origin=os.path.join('data', 'cognition_myself', 'choice_task',
-    #                              'raw'),
-    #     path_target=os.path.join('data', 'cognition_myself', 'choice_task',
-    #                              'added_var'),
-    #     path_fix_subject=os.path.join('data', 'cognition_myself', 'fix_task',
-    #                                   'added_var'))
-    #
-    # add_aoi_et(aoi_width=main_aoi_width, aoi_height=main_aoi_height,
-    #            path_origin=os.path.join('data', 'cognition_myself',
-    #                                     'choice_task', 'raw'),
-    #            path_target=os.path.join('data', 'cognition_myself',
-    #                                     'choice_task', 'added_var'))
-    #
-    # data_plot = pd.read_csv(os.path.join(
-    #     'data', 'cognition_myself', 'choice_task', 'added_var', 'data_et.csv'))
-    # data_plot = data_plot[pd.notna(data_plot['aoi'])]
-    # plot_et_scatter(x=data_plot['x'], y=data_plot['y'],
-    #                 title='AOI raw for all runs ',
-    #                 file_name='aoi_scatter.png',
-    #                 path=os.path.join('results', 'plots', 'cognition_myself'))
+    path = os.path.join('data', 'cognition_myself', 'choice_task')
+    load_choice_data(path_origin=os.path.join('data', 'cognition_myself',
+                                              'cleaned'),
+                     path_target=os.path.join(path, 'raw'))
 
-    # add_choice_et_variables(
-    #     min_required_trials=5, min_gaze_points=3,
-    #     path_origin=os.path.join('data', 'cognition_myself',
-    #                              'choice_task', 'added_var'),
-    #     path_target=os.path.join('data', 'cognition_myself',
-    #                              'choice_task', 'added_var'))
+    add_choice_behavioral_variables(
+        path_origin=os.path.join(path, 'raw'),
+        path_target=os.path.join(path, 'added_var'),
+        path_fix_subject=os.path.join('data', 'cognition_myself', 'fix_task',
+                                      'added_var'))
 
-    # add_log_k(path=os.path.join('data', 'cognition_myself', 'choice_task',
-    #                             'added_var'),
-    #           file_trial_input='data_trial.csv',
-    #           file_subjects_to_merge='data_subject.csv')
-    #
-    clean_data_choice(
-        us_sample=False,
-        min_hit_ratio=None,  # 0.6,
-        max_precision=None,  # 0.15,
-        max_offset=None,  # 0.5,
-        min_fps=5,
-        min_rt=400, max_rt=10000,
-        min_choice_percentage=None,  # 0.01,
-        max_choice_percentage=None,  # 0.99,
-        exclude_runs=None,
-        exclude_runs_reason=None,
-        filter_log_k=True,
-        path_origin=os.path.join('data', 'cognition_myself', 'choice_task',
-                                 'added_var'),
-        path_target=os.path.join('data', 'cognition_myself', 'choice_task',
-                                 'cleaned'))
+    add_aoi_et(aoi_width=main_aoi_width, aoi_height=main_aoi_height,
+               path_origin=os.path.join(path, 'raw'),
+               path_target=os.path.join(path, 'added_var'))
+
+    data_plot = pd.read_csv(os.path.join(path, 'added_var', 'data_et.csv'))
+    data_plot = data_plot[pd.notna(data_plot['aoi'])]
+    plot_et_scatter(x=data_plot['x'], y=data_plot['y'],
+                    title='AOI raw for all runs ',
+                    file_name='aoi_scatter.png',
+                    path=os.path.join('results', 'plots', 'cognition_myself'))
+
+    add_choice_et_variables(
+        min_required_trials=5, min_gaze_points=3,
+        path_origin=os.path.join(path, 'added_var'),
+        path_target=os.path.join(path, 'added_var'))
+
+    add_log_k(path=os.path.join(path,
+                                'added_var'),
+              file_trial_input='data_trial.csv',
+              file_subjects_to_merge='data_subject.csv')
+
+    clean_data_choice(us_sample=False,
+                      min_hit_ratio=None,  # 0.6,
+                      max_precision=None,  # 0.15,
+                      max_offset=None,  # 0.5,
+                      min_fps=5,
+                      min_rt=400, max_rt=10000,
+                      min_choice_percentage=None,  # 0.01,
+                      max_choice_percentage=None,  # 0.99,
+                      exclude_runs=None,
+                      exclude_runs_reason=None,
+                      filter_log_k=True,
+                      path_origin=os.path.join(path, 'added_var'),
+                      path_target=os.path.join(path, 'cleaned'))
 
 
 def analyze_choice():
