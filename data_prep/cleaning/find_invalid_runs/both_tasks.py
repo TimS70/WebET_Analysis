@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from utils.combine_frames import merge_by_index
+from utils.combine import merge_by_index
 
 
 def filter_runs_no_instruction(data_subject):
@@ -30,7 +30,7 @@ def filter_runs_no_instruction(data_subject):
     return no_instruct
 
 
-def filter_full_but_no_et_data(data_et, data_trial):
+def filter_full_but_no_et_data(data_et, data_trial, max_missing_et):
     runs_no_et_data = data_trial.loc[
         (~data_trial['run_id'].isin(data_et['run_id'].unique())) &
         (data_trial['trial_type_new'] == 'end'),
@@ -56,7 +56,7 @@ def filter_full_but_no_et_data(data_et, data_trial):
         .groupby(['run_id'], as_index=False).count()
 
     runs_not_enough_et_data = na_et_by_run.loc[
-        na_et_by_run['trial_index'] > 10, 'run_id']
+        na_et_by_run['trial_index'] > max_missing_et, 'run_id']
 
     runs_full_but_few_et = np.intersect1d(
         runs_not_enough_et_data,
@@ -68,7 +68,7 @@ def filter_full_but_no_et_data(data_et, data_trial):
     )
 
     print(
-        f"""n={len(runs_full_but_few_et)} runs have >10 trials """
+        f"""n={len(runs_full_but_few_et)} runs have >{max_missing_et} trials """
         f"""with no et data. """)
 
     return runs_full_but_not_enough_et

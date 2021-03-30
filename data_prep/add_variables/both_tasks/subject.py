@@ -6,7 +6,7 @@ import pandas as pd
 
 from tqdm import tqdm
 
-from utils.combine_frames import merge_mean_by_subject
+from utils.combine import merge_mean_by_subject
 from visualize.all_tasks import save_plot
 
 

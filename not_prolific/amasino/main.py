@@ -11,7 +11,7 @@ from data_prep.add_variables.choice.aoi import match_remaining_et_trials, add_ao
 from data_prep.add_variables.choice.et_indices import add_et_indices
 from data_prep.add_variables.main import add_aoi_et
 from data_prep.cleaning.drop_invalid_data.runs import clean_runs
-from utils.combine_frames import merge_by_index
+from utils.combine import merge_by_index
 from utils.save_data import save_all_three_datasets, load_all_three_datasets
 
 

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from utils.combine_frames import merge_by_index, merge_by_subject, \
+from utils.combine import merge_by_index, merge_by_subject, \
     merge_mean_by_subject
 from visualize.fix_task.main import plot_hit_means_per_dot
 

@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from utils.combine_frames import merge_by_index
+from utils.combine import merge_by_index
 from utils.path import makedir
 from utils.save_data import write_csv
 

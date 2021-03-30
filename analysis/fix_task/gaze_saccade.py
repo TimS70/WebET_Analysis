@@ -6,7 +6,7 @@ import pandas as pd
 import seaborn as sns
 from tqdm import tqdm
 
-from utils.combine_frames import merge_by_index
+from utils.combine import merge_by_index
 from utils.path import makedir
 
 

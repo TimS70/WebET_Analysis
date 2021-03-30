@@ -20,8 +20,9 @@ f = waitbar(0,'Reading data');
 data = readtable(fullfile(root, path));
 data = data(:, {'run_id', 'aSS', 'aLL', 'tSS', 'tLL', 'choseLL'});
 
-subject = unique(data.run_id);
 
+repelem
+subject = unique(data.run_id);
 output=repelem(NaN, length(subject), 3);
 
 for i = 1:length(subject)  %loop over all subjects
@@ -38,11 +39,11 @@ for i = 1:length(subject)  %loop over all subjects
     add_k = info.b(2);
     
     if add_k<.0001 && mean(data_thisSubject.choseLL)>.95 %Extremely patient
-        output(i, :)=[subject(i), -9.5, noise];
+        output=[output; subject(i), -9.5, noise];
     elseif add_k<0 %Inconsistent choice, can't properly fit
-        output(i, :)=[subject(i), NaN, noise];
+        output=[output; subject(i), NaN, noise];
     else %Fit within typical range, keep fit
-        output(i, :)=[subject(i), log(add_k), noise]; %Save log(add_k) as output
+        output=[output; subject(i), log(add_k), noise]; %Save log(add_k) as output
     end
     
     waitbar(i/length(subject),f,'Looping over subjects');
@@ -53,7 +54,7 @@ waitbar(1,f,'Writing data');
 
 output = array2table(output);
 output.Properties.VariableNames(1:3) = {'run_id', 'logK', 'noise'};
-writetable(output, 'log_k.csv');
+writetable(output, 'log_temp.csv');
 cd(root);
 
 close(f)

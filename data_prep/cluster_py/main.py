@@ -21,14 +21,13 @@ from visualize.eye_tracking import plot_et_scatter
 def init_cluster_correction(distance_threshold, min_cluster_size,
                             min_ratio, max_deviation,
                             aoi_width, aoi_height,
-                            message):
+                            message, path_origin, path_target):
     """
         Clustering: AOIs with certain gaze points and
         close to the actual position
     """
 
-    data_et, data_trial, data_subject = load_all_three_datasets(
-        path=os.path.join('data', 'choice_task', 'added_var'))
+    data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
     print(f"""Run clustering for n="""
           f"""{len(data_et['run_id'].unique())} runs. \n""")
@@ -131,8 +130,7 @@ def init_cluster_correction(distance_threshold, min_cluster_size,
     data_subject = data_subject[
         data_subject['run_id'].isin(data_et_corrected['run_id'].unique())]
 
-    save_all_three_datasets(
-        data_et_corrected, data_trial, data_subject,
-        path=os.path.join('data', 'choice_task', 'added_var'))
+    save_all_three_datasets(data_et_corrected, data_trial, data_subject,
+                            path_target)
 
     return data_et_corrected

@@ -5,7 +5,7 @@ import pandas as pd
 from analysis.dropouts.participants import dropouts_participants
 from analysis.dropouts.runs import report_incomplete_runs, dropout_by_task_nr, dropout_by_type, check_calibration, \
     multi_participation_by_type, check_et_initialization
-from utils.combine_frames import merge_by_subject
+from utils.combine import merge_by_subject
 
 
 def load_data():

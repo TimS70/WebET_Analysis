@@ -1,21 +1,20 @@
 import os
 
-from utils.combine_frames import merge_by_index
+from utils.combine import merge_by_index
 from utils.save_data import load_all_three_datasets, save_all_three_datasets
 
 
-def load_choice_data(origin_path):
+def load_choice_data(path_origin, path_target):
     print('################################### \n'
           'Create choice data \n'
           '################################### \n')
 
-    data_et, data_trial, data_subject = load_all_three_datasets(origin_path)
+    data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
     data_trial = init_choice_data_trial(data_trial)
     data_et = init_choice_data_et(data_et, data_trial)
 
-    save_all_three_datasets(data_et, data_trial, data_subject,
-                            os.path.join('data', 'choice_task', 'raw'))
+    save_all_three_datasets(data_et, data_trial, data_subject, path_target)
 
 
 def init_choice_data_trial(data_trial):

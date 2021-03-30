@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from analysis.fix_task.data_quality import euclidean_distance
-from utils.combine_frames import merge_mean_by_index, merge_by_index
+from utils.combine import merge_mean_by_index, merge_by_index
 
 
 def merge_xy_means(data):

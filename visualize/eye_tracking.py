@@ -5,7 +5,7 @@ import numpy as np
 
 from scipy.ndimage import gaussian_filter
 
-from utils.combine_frames import merge_mean_by_subject
+from utils.combine import merge_mean_by_subject
 from visualize.all_tasks import save_plot
 from visualize.distributions import plot_histogram, plot_2d_histogram
 

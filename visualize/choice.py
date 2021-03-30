@@ -7,7 +7,7 @@ import pandas as pd
 import seaborn as sns
 from matplotlib import patches
 
-from utils.combine_frames import merge_by_index
+from utils.combine import merge_by_index
 from visualize.all_tasks import save_plot
 from visualize.eye_tracking import my_heatmap
 from tqdm import tqdm

@@ -1,16 +1,16 @@
 import os
 
-from utils.combine_frames import merge_by_index, merge_mean_by_subject
+from utils.combine import merge_by_index, merge_mean_by_subject
 from utils.save_data import load_all_three_datasets, save_all_three_datasets
 
 
-def load_fix_data(origin_path):
+def load_fix_data(path_origin, path_target):
 
     print('################################### \n'
           'Create fix task dataset \n'
           '################################### \n')
 
-    data_et, data_trial, data_subject = load_all_three_datasets(origin_path)
+    data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
     data_et = merge_by_index(data_et, data_trial,
                                  'task_nr', 'chin', 'chinFirst', 'trial_type',
@@ -38,5 +38,4 @@ def load_fix_data(origin_path):
             'x_count', 'fps', 'glasses_binary'
         ]]
 
-    save_all_three_datasets(data_et, data_trial, data_subject,
-                            os.path.join('data', 'fix_task', 'raw'))
+    save_all_three_datasets(data_et, data_trial, data_subject, path_target)

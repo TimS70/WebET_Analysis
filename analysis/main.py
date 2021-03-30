@@ -8,7 +8,7 @@ from analysis.fix_task.glasses import test_glasses
 from analysis.fix_task.positions import compare_positions
 from analysis.fix_task.randomization import check_randomization
 from data_prep.cleaning.corr_data import clean_corr_data
-from utils.combine_frames import merge_by_index
+from utils.combine import merge_by_index
 from utils.save_data import load_all_three_datasets
 from visualize.all_tasks import corr_matrix, corr_plot_split
 from visualize.all_tasks import get_box_plots

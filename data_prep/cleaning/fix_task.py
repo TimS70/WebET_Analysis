@@ -1,6 +1,28 @@
 import numpy as np
 import pandas as pd
 
+from data_prep.cleaning.drop_invalid_data.trials import clean_trial_duration
+from utils.save_data import load_all_three_datasets, save_all_three_datasets
+
+
+def clean_data_fix(max_t_task, path_origin, path_target):
+    print('################################### \n'
+          'Clean fix task datasets \n'
+          '################################### \n')
+
+    data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
+
+    # Screening
+    show_empty_fix_trials(data_trial)
+    show_trials_high_t_task(data_trial, max_t_task=max_t_task)
+
+    data_trial = clean_trial_duration(data_trial, 0, max_t_task, 'data_trial')
+    data_et = clean_trial_duration(data_et, 0, max_t_task, 'data_et')
+
+    data_trial = data_trial[pd.notna(data_trial['x_count'])]
+
+    save_all_three_datasets(data_et, data_trial, data_subject, path_target)
+
 
 def euclidean_distance(x, x_target, y, y_target):
     x_diff = x - x_target

@@ -4,7 +4,7 @@ import subprocess
 import numpy as np
 import pandas as pd
 
-from utils.combine_frames import merge_mean_by_subject
+from utils.combine import merge_mean_by_subject
 from utils.save_data import write_csv
 
 

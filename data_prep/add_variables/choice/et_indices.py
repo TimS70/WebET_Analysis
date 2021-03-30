@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from utils.combine_frames import merge_by_index
+from utils.combine import merge_by_index
 
 
 def add_et_indices(data_trial, data_et,

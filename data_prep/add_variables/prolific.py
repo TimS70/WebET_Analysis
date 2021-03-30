@@ -22,7 +22,7 @@ from data_prep.add_variables.choice.choice_options import \
     reformat_attributes, add_k, top_bottom_attributes
 from data_prep.add_variables.choice.et_indices import add_et_indices
 from data_prep.add_variables.choice.eye_tracking import add_et_indices_subject
-from utils.combine_frames import merge_mean_by_subject, merge_by_index
+from utils.combine import merge_mean_by_subject, merge_by_index
 from utils.save_data import load_all_three_datasets, save_all_three_datasets, \
     write_csv
 
