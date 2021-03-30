@@ -6,11 +6,15 @@ import pandas as pd
 
 from tqdm import tqdm
 
+from utils.combine import merge_by_subject
 from visualize.all_tasks import save_plot
 
 
 def add_fps_subject_level(data_subject, data_trial):
-    data_subject = merge_mean_by_subject(data_subject, data_trial, 'fps')
+    grouped = data_trial \
+        .groupby(['run_id'], as_index=False) \
+        .agg(fps=('fps', 'mean'))
+    data_subject = merge_by_subject(data_subject, grouped, 'fps')
 
     plt.hist(data_subject['fps'], bins=20)
     plt.rc('font', size=10)
@@ -95,11 +99,13 @@ def add_recorded_date(data_subject, data_trial):
 
 
 def add_employment_status(data_subject):
-    data_subject['employment_status'] = data_subject['Employment Status'].replace({
-        """Not in paid work (e.g. homemaker', 'retired or disabled)""": 'not_in_paid_work',
-        'DATA EXPIRED': 'Other',
-        'Unemployed (and job seeking)': 'not_in_paid_work',
-        'Due to start a new job within the next month': 'Other'})
+    data_subject['employment_status'] = data_subject['Employment Status'] \
+        .replace({
+            """Not in paid work (e.g. homemaker', 'retired or disabled)""":
+                'not_in_paid_work',
+            'DATA EXPIRED': 'Other',
+            'Unemployed (and job seeking)': 'not_in_paid_work',
+            'Due to start a new job within the next month': 'Other'})
 
     example = pd.crosstab(
         index=data_subject['employment_status'],
@@ -113,15 +119,13 @@ def add_employment_status(data_subject):
 
 
 def add_full_time_binary(data_subject):
-    data_subject['fullTime_binary'] = data_subject['Employment Status'].replace({
-        'Other': 0,
-        'Full-Time': 1,
-        'Part-Time': 0,
-        "Not in paid work (e.g. homemaker', 'retired or disabled)": 0,
-        'Unemployed (and job seeking)': 0,
-        'DATA EXPIRED': 0,
-        'Due to start a new job within the next month': 0
-    })
+    data_subject['fullTime_binary'] = data_subject['Employment Status'] \
+        .replace([
+            'Other', 'Part-Time',
+            "Not in paid work (e.g. homemaker', 'retired or disabled)",
+            'Unemployed (and job seeking)', 'DATA EXPIRED',
+            'Due to start a new job within the next month'], 0) \
+        .replace(['Full-Time'], 1)
 
     example = pd.crosstab(
         index=data_subject['fullTime_binary'],

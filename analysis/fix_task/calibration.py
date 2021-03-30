@@ -3,9 +3,10 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from data_prep.add_variables.data_quality.offset import add_offset, distance_from_xy_mean_square, \
-    aggregate_precision_from_et_data
-from utils.combine import merge_mean_by_index
+from data_prep.add_variables.data_quality.offset import add_offset
+from data_prep.add_variables.data_quality.precision import \
+    distance_from_xy_mean_square, aggregate_precision_from_et_data
+from utils.combine import merge_by_index
 from visualize.all_tasks import spaghetti_plot, save_plot
 
 
@@ -30,16 +31,19 @@ def analyze_calibration():
         os.path.join('data', 'fix_task', 'added_var', 'data_trial.csv'))
 
     data_et = add_offset(data_et)
-    data_trial = merge_mean_by_index(
-        data_trial, data_et, 'offset', 'offset_px')
+    grouped = data_et \
+        .groupby(['run_id', 'trial_index'], as_index=False) \
+        .agg(offset=('offset', 'mean')) \
+        .agg(offset_px=('offset_px', 'mean'))
+
+    data_trial = merge_by_index(data_trial, grouped, 'offset', 'offset_px')
     data_et = distance_from_xy_mean_square(data_et)
     data_trial = aggregate_precision_from_et_data(data_trial, data_et)
 
-
-    data_et_calibration = data_et.loc[
-                          data_et['trial_type'] == 'eyetracking-calibration', :]
-    data_trial_calibration = data_trial.loc[
-                             data_trial['trial_type'] == 'eyetracking-calibration', :]
+    data_et_calibration = data_et[
+        data_et['trial_type'] == 'eyetracking-calibration']
+    data_trial_calibration = data_trial[
+        data_trial['trial_type'] == 'eyetracking-calibration']
 
     # Add median offset
     grouped = data_et_calibration \

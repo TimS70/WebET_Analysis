@@ -4,7 +4,7 @@ import subprocess
 import numpy as np
 import pandas as pd
 
-from utils.combine import merge_mean_by_subject
+from utils.combine import merge_by_subject
 from utils.save_data import write_csv
 
 
@@ -90,7 +90,7 @@ def add_log_k(data_subject, data_trial):
     root = "C:/Users/User/GitHub/WebET_Analysis"
     log_k = pd.read_csv(os.path.join(root, 'data', 'amasino', 'logK.csv'))
 
-    data_subject = merge_mean_by_subject(
+    data_subject = merge_by_subject(
         data_subject, log_k, 'logK', 'noise')
 
     missing_values = data_subject.loc[

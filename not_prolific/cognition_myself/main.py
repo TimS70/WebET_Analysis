@@ -114,8 +114,8 @@ def analyze_choice():
 
 
 def prep_data_cognition_myself():
-    # prep_global()
-    # prep_fix()
+    prep_global()
+    prep_fix()
     prep_choice()
 
     # analyze_choice()
