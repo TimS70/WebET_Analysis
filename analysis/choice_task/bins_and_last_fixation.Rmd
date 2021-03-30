@@ -69,17 +69,11 @@ clustering_best_runs = c(7,32,45,48,63,96,126,128,130,197,205,212,238,275,
 # Prep data 
 ## Load data
 ```{r, load_datasets}
-data_subject = read.csv(
-    file.path(root, 'data', 'choice_task', 'cleaned', 
-              'data_subject.csv'))
+path = file.path('data', 'cognition_myself', 'choice_task', 'cleaned')
 
-data_trial = read.csv(
-    file.path(root, 'data', 'choice_task', 'cleaned', 
-              'data_trial.csv'))
-
-data_et = read.csv(
-    file.path(root, 'data', 'choice_task', 'cleaned', 
-              'data_et.csv'))
+data_subject = read.csv(file.path(root, path, 'data_subject.csv'))
+data_trial = read.csv(file.path(root, path, 'data_trial.csv'))
+data_et = read.csv(file.path(root, path, 'data_et.csv'))
 
 summarize_datasets(data_et, data_trial, data_subject)
 ```
@@ -88,7 +82,7 @@ summarize_datasets(data_et, data_trial, data_subject)
 ```{r}
 # data_et = add_new_aoi(data_et, 0.40, 0.40)
 
-ggplot(data_et %>% filter(aoi != 0), aes(x=x, y=y)) +
+ggplot(data_et %>% filter(aoi %in% c('TL', 'TR', 'BL', 'BR')), aes(x=x, y=y)) +
     geom_point(size=2.5, aes(alpha=.5))+
     guides(alpha=FALSE,color=FALSE, shape=FALSE)+
     theme_bw() + 
@@ -124,53 +118,56 @@ data_subject = add_window(data_subject, data_trial)
 
 # Gaze points ~ choice
 ```{r}
-grouped = data_et %>% 
+grouped_trial = data_et %>% 
 	merge_by_index(data_trial, 'choseTop') %>%
 	merge_by_index(data_trial, 'choseLL') %>%
 	merge_by_index(data_trial, 'LL_top') %>%
-	filter(!is.na(aoi) & !aoi %in% c(0, '0')) %>%
+	merge_by_index(data_trial, 'amountLeft') %>%
+	filter(aoi %in% c('TL', 'TR', 'BL', 'BR')) %>% 
 	dplyr::group_by(run_id, trial_index) %>%
 	dplyr::summarise(
 		n = n(),
-		n_bottom = sum(aoi %in% c('BL', 'BR')), 
-		p_look_bottom = n_bottom / n,
+		n_look_top = sum(aoi %in% c('TL', 'TR')), 
+		p_look_top = n_look_top / n,
+		n_look_ll = sum(
+			(aoi %in% c('TL', 'TR') & LL_top==1) |
+			(aoi %in% c('BL', 'BR') & LL_top==0)),	
+		p_look_ll = n_look_ll / n,
+		n_look_amount = sum(
+			(aoi %in% c('TL', 'BL') & amountLeft == 1)  |
+			(aoi %in% c('TR', 'BR') & amountLeft == 0)),
+		p_look_amount = n_look_amount / n,
 		choseTop = mean(choseTop), 
-		n_SS = sum(
-			(LL_top==1 & aoi %in% c('BL', 'BR')) |
-			(LL_top==0 & aoi %in% c('TL', 'TR'))),	
-		p_SS = n_SS / n,
-		choseLL = mean(choseLL),
-		.groups = 'keep') %>%
-	dplyr::group_by(run_id) %>%
-	dplyr::summarise(
-		n_look_bottom = sum(n_bottom),
-		p_look_bottom = mean(p_look_bottom),
-		choseTop = mean(choseTop), 
-		n_SS = mean(n_SS), 
-		p_SS = mean(p_SS), 
 		choseLL = mean(choseLL),
 		.groups = 'keep')
 
-# grouped = data_et %>% 
-# 	merge_by_index(data_trial, 'choseTop') %>%
-# 	merge_by_index(data_trial, 'choseLL') %>%
-# 	merge_by_index(data_trial, 'LL_top') %>%
-# 	filter(!is.na(aoi) & !aoi %in% c(0, '0')) %>%
-# 	dplyr::group_by(run_id) %>%
-# 	dplyr::summarise(
-# 		n = n(),
-# 		n_bottom = sum(aoi %in% c('BL', 'BR')), 
-# 		p_look_bottom = n_bottom / n,
-# 		choseTop = mean(choseTop), 
-# 		n_SS = sum(
-# 			(LL_top==1 & aoi %in% c('BL', 'BR')) |
-# 			(LL_top==0 & aoi %in% c('TL', 'TR'))),	
-# 		p_SS = n_SS / n, 
-# 		choseLL = mean(choseLL),
-# 		.groups = 'keep')
+grouped_run = grouped_trial %>%
+	dplyr::group_by(run_id) %>%
+	dplyr::summarise(
+		n_look_top = mean(n_look_top),
+		p_look_top = mean(p_look_top),
+		n_look_ll = mean(n_look_ll), 
+		p_look_ll = mean(p_look_ll), 
+		n_look_amount = mean(n_look_amount),
+		p_look_amount = mean(p_look_amount),
+		choseTop = mean(choseTop), 
+		choseLL = mean(choseLL),
+		.groups = 'keep')
 
-cor.test(grouped$p_look_bottom, grouped$choseTop) 
-cor.test(grouped$p_SS, grouped$choseLL) 
+grouped_run
+
+cor.test(grouped_run$p_look_top, grouped_run$choseTop) 
+cor.test(grouped_run$p_look_ll, grouped_run$choseLL) 
+cor.test(grouped_run$p_look_amount, grouped_run$choseLL) 
+
+data_subject %>%
+	dplyr::select(run_id, optionIndex, attributeIndex, payneIndex, 
+				  choseLL) %>%
+	arrange(choseLL)
+
+ggplot(grouped_trial, aes(x=factor(choseLL), y=p_look_amount)) + 
+    geom_boxplot() +
+	ggtitle(('Looking at amount vs. time information and choosing LL vs. SS'))
 ```
 
 
@@ -190,10 +187,10 @@ lastGaze_long <- data_trial %>%
     	choseTop=mean(choseTop),
         .groups = 'keep') 
 
-lastGaze_long %>% filter(run_id %in% fix_best_runs)
+lastGaze_long
 
 # plot
-ggplot(lastGaze_long %>% filter(run_id %in% c(choice_best_runs, fix_best_runs)), 
+ggplot(lastGaze_long, 
 	   aes(x=last_fix_top, y=choseTop)) +
     geom_violin(fill="gray", size=0) +
     stat_summary(fun=mean,geom="point",shape=45,size=10, color="white") +
@@ -209,7 +206,7 @@ ggsave(file.path(path_results, 'et', 'last_fix', 'top_vs_choice.png'),
 
 ## Last fix Bottom
 ```{r}
-last_fix_long_bottom <- data_trial %>%
+last_fix_long_bottom = data_trial %>%
     dplyr::group_by(run_id, last_fix_bottom, withinTaskIndex) %>%
     dplyr::summarise(
     	choseTop=mean(choseTop),
@@ -220,7 +217,7 @@ last_fix_long_bottom <- data_trial %>%
     	choseTop=mean(choseTop),
         .groups = 'keep') 
 
-ggplot(last_fix_long_bottom %>% filter(run_id %in% choice_best_runs), 
+ggplot(last_fix_long_bottom, 
 	   aes(x=last_fix_bottom, y=choseTop)) +
     geom_violin(fill="gray", size=0) +
     stat_summary(fun=mean,geom="point",shape=45,size=10, color="white") +
@@ -250,8 +247,6 @@ lastGaze_long <- data_trial %>%
         n = n(),
         choseLL = mean(choseLL),
         .groups = 'keep') 
-
-lastGaze_long %>% head(25)
 
 subjects_noGaze = lastGaze_long %>% 
     group_by(run_id) %>%
@@ -296,8 +291,6 @@ lastGaze_long <- data_trial %>%
         choseLL = mean(choseLL),
         .groups = 'keep') 
 
-lastGaze_long %>% head(5)
-
 subjects_noGaze = lastGaze_long %>% 
     group_by(run_id) %>%
     dplyr::summarise(
@@ -307,7 +300,6 @@ subjects_noGaze = lastGaze_long %>%
     arrange(run_id) %>%
     dplyr::pull(run_id)
 
-lastGaze_long$last_fix_amount = factor(lastGaze_long$last_fix_amount, c('1', '0'))
 t.test(
     choseLL ~ last_fix_amount,
     data=lastGaze_long %>% filter(!(run_id %in% subjects_noGaze)), 
@@ -371,7 +363,7 @@ ggsave(file.path(path_results, 'et', 'time_bins', 'top_vs_bottom.png'),
 ## Reduce bins
 ```{r}
 grouped_less_bins = data_et %>%
-	createtime_bins(3) %>%
+	create_time_bins(3) %>%
 	merge_by_index(data_trial, 'choseTop') %>%
     filter(!is.na(aoi) & aoi!=0) %>%
     mutate(

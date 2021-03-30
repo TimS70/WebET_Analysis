@@ -1,7 +1,7 @@
 add_last_fix_top_bottom = function(data_trial, data_et) {
 	
     grouped_last_coordinate = data_et %>%
-    	filter(!aoi %in% c(0, '0') & !is.na(aoi)) %>%
+    	filter(aoi %in% c('TL', 'TR', 'BL', 'BR')) %>%
         dplyr::group_by(run_id, trial_index) %>%
         slice(n()) %>%
     	mutate(
