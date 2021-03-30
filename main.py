@@ -138,8 +138,10 @@ def prep_choice(main_aoi_width=0.4, main_aoi_height=0.4, correct_clusters=False)
 
 
 def analyze_choice():
-    analyze_choice_task()
-
+    analyze_choice_task(
+        path_origin=os.path.join('data', 'choice_task', 'cleaned'),
+        path_plots=os.path.join('results', 'plots', 'choice_task'),
+        path_tables=os.path.join('results', 'tables', 'choice_task'))
 
 def analyze_global():
     analyze_dropouts()
@@ -149,8 +151,8 @@ def analyze_global():
 def analyze_fix():
     analyze_fix_task(
         path_origin=os.path.join('data', 'fix_task', 'added_var'),
-        path_plots=os.path.join('results', 'plots', 'fix_task'))
-
+        path_plots=os.path.join('results', 'plots', 'fix_task'),
+        path_tables=os.path.join('results', 'tables', 'fix_task'))
 
 
 def main(new_data=False):

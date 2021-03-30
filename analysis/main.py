@@ -20,13 +20,12 @@ from visualize.fix_task.main import visualize_exemplary_run, fix_heatmaps, \
 from visualize.fix_task.positions import plot_top_vs_bottom_positions
 
 
-def analyze_choice_task():
+def analyze_choice_task(path_origin, path_plots, path_tables):
     print('################################### \n'
           'Analyze choice data \n'
           '################################### \n')
 
-    data_et, data_trial, data_subject = load_all_three_datasets(
-        os.path.join('data', 'choice_task', 'cleaned'))
+    data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
     plot_categorical_confounders(data_subject)
     plot_example_eye_movement(data_et, data_trial,
