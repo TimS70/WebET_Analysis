@@ -67,7 +67,7 @@ def t_test_outcomes_vs_factor(data, dependent, factor,
             summary_this_outcome)
 
     result_summary = pd.DataFrame(result_summary,
-                       columns=['outcome', 't', 'p'])
+                                  columns=['outcome', 't', 'p'])
 
     # Holm correction
     result_summary['p'] = smt.multipletests(

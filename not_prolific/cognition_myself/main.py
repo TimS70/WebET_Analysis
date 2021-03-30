@@ -118,7 +118,9 @@ def analyze_fix():
     analyze_fix_task(
         path_origin=os.path.join('data', 'cognition_myself', 'fix_task',
                                  'added_var'),
-        path_plots=os.path.join('results', 'plots', 'fix_task'))
+        path_plots=os.path.join('results', 'plots', 'fix_task'),
+        path_tables=os.path.join('results', 'tables', 'fix_task')
+    )
 
 
 def prep_and_analyze_data_cognition_myself():

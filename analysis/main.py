@@ -95,18 +95,18 @@ def analyze_choice_task():
                 'results', 'plots', 'choice_task', 'correlations')
 
 
-def analyze_fix_task(path_origin, path_plots):
+def analyze_fix_task(path_origin, path_plots, path_tables):
     print('################################### \n'
           'Analyze fix task data \n'
           '################################### \n')
 
     data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
-    # print(f"""Describe data quality: \n"""
-    #       f"""{data_subject[['fps', 'offset', 'offset_px', 'precision',
-    #                          'precision_px']].describe()} \n""")
-    #
-    # hist_plots_quality(data_subject, path_plots)
+    print(f"""Describe data quality: \n"""
+          f"""{data_subject[['fps', 'offset', 'offset_px', 'precision',
+                             'precision_px']].describe()} \n""")
+
+    hist_plots_quality(data_subject, path_plots)
 
     # Design checks
     # check_randomization(data_trial)
@@ -116,8 +116,14 @@ def analyze_fix_task(path_origin, path_plots):
     # compare_conditions_subject(data_subject, data_trial, 'offset')
     # compare_conditions_subject(data_subject, data_trial, 'precision')
 
-    # test_chin_rest(data_trial, data_subject)
-    # test_glasses(data_trial, data_subject)
+    test_chin_rest(data_trial=data_trial,
+                   data_subject=data_subject,
+                   path_plots=os.path.join(path_plots, 'chin_rest'),
+                   path_tables=os.path.join(path_tables, 'chin_rest'))
+    test_glasses(data_trial=data_trial,
+                 data_subject=data_subject,
+                 path_plots=os.path.join(path_plots, 'glasses'),
+                 path_tables=os.path.join(path_tables, 'glasses'))
 
     # outcome_over_trials_vs_chin(data_trial, 'offset')
     # compare_positions(data_trial, 'offset')
@@ -149,11 +155,12 @@ def analyze_fix_task(path_origin, path_plots):
     # # Visualize_exemplary_run
     # data_plot = merge_by_index(data_et, data_trial, 'chin')
     # visualize_exemplary_run(
-    #     data=data_plot[(data_plot['run_id'] == data_plot['run_id'].unique()[0]) &
-    #                    (data_plot['chin'] == 0)],
+    #     data=data_plot[
+    #         (data_plot['run_id'] == data_plot['run_id'].unique()[0]) &
+    #         (data_plot['chin'] == 0)],
     #     path_target=os.path.join(path_plots, 'exemplary_runs'))
-
-    # Heatmap for all gaze points
-    fix_heatmaps(
-        data=data_et,
-        path_target=os.path.join(path_plots, 'fix_heatmaps'))
+    #
+    # # Heatmap for all gaze points
+    # fix_heatmaps(
+    #     data=data_et,
+    #     path_target=os.path.join(path_plots, 'fix_heatmaps'))
