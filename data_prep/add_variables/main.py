@@ -8,7 +8,7 @@ from data_prep.add_variables.both_tasks.subject import add_fps_subject_level, \
     add_glasses_binary, add_recorded_date, add_employment_status, \
     add_full_time_binary
 from data_prep.add_variables.both_tasks.trial import add_fps_trial_level, \
-    merge_count_by_index, add_window_size, \
+    add_window_size, \
     add_exact_trial_duration, add_new_task_nr, add_trial_type_new, add_fix_task, \
     add_within_task_index
 from data_prep.add_variables.choice.aoi import create_aoi_columns, \
@@ -36,7 +36,11 @@ def add_variables_global(path_origin, path_target):
     data_et, data_trial, data_subject = load_all_three_datasets(
         path_origin)
 
-    data_trial = merge_count_by_index(data_trial, data_et, 'x')
+    # Add Counts
+    grouped = data_et\
+        .groupby(['run_id', 'trial_index'], as_index=False) \
+        .agg(x_count=('x', 'count'))
+    data_trial = merge_by_index(data_trial, grouped, 'x_count')
 
     # Bug
     data_trial = add_window_size(data_trial)
@@ -51,12 +55,8 @@ def add_variables_global(path_origin, path_target):
     data_subject = add_max_trials(data_subject, data_trial)
     data_subject = add_glasses_binary(data_subject)
     data_subject = add_recorded_date(data_subject, data_trial)
-    data_subject = add_employment_status(data_subject)
-    data_subject = add_full_time_binary(data_subject)
 
-    save_all_three_datasets(
-        data_et, data_trial, data_subject,
-        path_target)
+    save_all_three_datasets(data_et, data_trial, data_subject, path_target)
 
 
 def add_choice_behavioral_variables():

@@ -1,6 +1,5 @@
 import os
 
-from data_prep.add_variables.both_tasks.trial import merge_count_by_index
 from utils.combine_frames import merge_by_index, merge_mean_by_subject
 from utils.save_data import load_all_three_datasets, save_all_three_datasets
 
@@ -16,8 +15,8 @@ def load_fix_data(origin_path):
     data_et = merge_by_index(data_et, data_trial,
                                  'task_nr', 'chin', 'chinFirst', 'trial_type',
                                  'trial_duration', 'trial_duration_exact', 'x_pos', 'y_pos',
-                                 'window_width', 'window_height')
-    data_trial = merge_count_by_index(data_trial, data_et, 'x')
+                                 'window_width', 'window_height', 'x_count')
+
     data_trial = merge_mean_by_subject(data_trial, data_subject, 'glasses_binary')
 
     print('for the fixation task, gaze points after 1000ms were selected. \n')

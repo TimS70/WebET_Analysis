@@ -505,17 +505,6 @@ def add_fps_trial_level(data_trial):
     return data_trial
 
 
-def merge_count_by_index(data, large_data, var_name):
-    if var_name + '_count' in data.columns:
-        data = data.drop(columns=[var_name + '_count'])
-    grouped = large_data.groupby(["run_id", "trial_index"])[var_name].count() \
-        .reset_index() \
-        .rename(columns={var_name: var_name + '_count'})
-    data = data.merge(grouped, on=["run_id", "trial_index"], how='left')
-
-    return data
-
-
 def plot_fps_over_trials(data_trial):
     spaghetti_plot(
         data_trial.loc[(data_trial['chinFirst'] == 0) & pd.notna(data_trial['fps']), :],

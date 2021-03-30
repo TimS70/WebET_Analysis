@@ -8,6 +8,7 @@ from data_prep.add_variables.data_quality.main import add_data_quality
 from data_prep.add_variables.fit_k.call_from_py import add_log_k
 from data_prep.add_variables.main import add_choice_behavioral_variables, \
     add_choice_et_variables, add_aoi_et, add_variables_global
+from data_prep.add_variables.prolific import add_prolific_variables
 from data_prep.cleaning.main import clean_global_data, clean_data_fix, \
     clean_data_choice
 from data_prep.cluster_py.main import init_cluster_correction
@@ -23,6 +24,10 @@ def prepare_datasets(main_aoi_width=0.4, main_aoi_height=0.4,
                      correct_clusters=True):
 
     add_variables_global(
+        path_origin=os.path.join('data', 'all_trials', 'combined'),
+        path_target=os.path.join('data', 'all_trials', 'added_var'))
+
+    add_prolific_variables(
         path_origin=os.path.join('data', 'all_trials', 'combined'),
         path_target=os.path.join('data', 'all_trials', 'added_var'))
 
