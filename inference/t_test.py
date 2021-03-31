@@ -35,6 +35,7 @@ def welch_dof(x, y):
 def t_test_outcomes_vs_factor(data, dependent, factor,
                               file_name, outcomes, path):
 
+    print(f"""t-test for {factor}: """)
     result_summary = []
     describe_outcomes = pd.DataFrame(
         columns=['outcome', factor, 'n', 'mean', 'SD'])
@@ -85,11 +86,11 @@ def t_test_outcomes_vs_factor(data, dependent, factor,
 
 def t_test_rel(data_outcome_by_factor):
     return stats.ttest_rel(
-        data_outcome_by_factor.loc[:, 1],
-        data_outcome_by_factor.loc[:, 2])
+        data_outcome_by_factor.iloc[:, 0],
+        data_outcome_by_factor.iloc[:, 1])
 
 
 def t_test_ind(data_outcome_by_factor):
     return stats.ttest_ind(
-        data_outcome_by_factor[[0.0]].dropna(),
-        data_outcome_by_factor[[1.0]].dropna())
+        data_outcome_by_factor.iloc[:, 0].dropna(),
+        data_outcome_by_factor.iloc[:, 1].dropna())

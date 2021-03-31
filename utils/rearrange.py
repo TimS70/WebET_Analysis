@@ -11,9 +11,9 @@ def pivot_outcome_by_factor(data, factor, outcome):
             np.append(['run_id', factor], outcome)] \
             .drop_duplicates()
 
-    outcomes_by_factor = outcomes_by_factor.pivot(
-        index='run_id',
-        columns=factor,
-        values=outcome)
+    outcomes_by_factor = outcomes_by_factor.pivot(index='run_id',
+                                                  columns=factor,
+                                                  values=outcome) \
+        .reset_index(drop=True)
 
     return outcomes_by_factor

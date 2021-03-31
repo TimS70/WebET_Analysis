@@ -110,20 +110,20 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
 
     # hist_plots_quality(data_subject, path_plots)
 
-    check_randomization(data_trial, path_plots, path_tables)
+    # check_randomization(data_trial, path_plots, path_tables)
 
     # Probably not necessary, already have in R
     # corr_analysis(data_trial, data_subject)
 
-    test_chin_rest(data_trial=data_trial,
-                   data_subject=data_subject,
-                   path_plots=os.path.join(path_plots, 'chin_rest'),
-                   path_tables=os.path.join(path_tables, 'chin_rest'))
+    # test_chin_rest(data_trial=data_trial,
+    #                data_subject=data_subject,
+    #                path_plots=os.path.join(path_plots, 'chin_rest'),
+    #                path_tables=os.path.join(path_tables, 'chin_rest'))
     test_glasses(data_trial=data_trial,
                  data_subject=data_subject,
                  path_plots=os.path.join(path_plots, 'glasses'),
                  path_tables=os.path.join(path_tables, 'glasses'))
-
+    exit()
     # Over the trials
     for outcome in ['offset', 'precision']:
         outcome_over_trials(data_trial, outcome, path_plots)

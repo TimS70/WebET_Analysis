@@ -22,8 +22,7 @@ def add_data_quality(max_offset, min_hits_per_dot, path_origin, path_target):
         .groupby(['run_id', 'trial_index'], as_index=False) \
         .agg(offset=('offset', 'mean'),
              offset_px=('offset_px', 'mean'))
-    data_trial = merge_by_index(data_trial, grouped,
-                                     'offset', 'offset_px')
+    data_trial = merge_by_index(data_trial, grouped, 'offset', 'offset_px')
 
     data_subject, data_trial = add_grand_mean_offset(data_subject, data_trial,
                                                      data_et)
@@ -52,6 +51,6 @@ def add_data_quality(max_offset, min_hits_per_dot, path_origin, path_target):
         .agg(precision=('precision', 'mean'),
              precision_px=('precision_px', 'mean'))
     data_subject = merge_by_subject(data_subject, grouped,
-                                         'precision', 'precision_px')
+                                    'precision', 'precision_px')
 
     save_all_three_datasets(data_et, data_trial, data_subject, path_target)

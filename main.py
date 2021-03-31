@@ -208,5 +208,9 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
+    add_data_quality(max_offset=0.15,
+                     min_hits_per_dot=0.8,
+                     path_origin=os.path.join('data', 'fix_task', 'cleaned'),
+                     path_target=os.path.join('data', 'fix_task', 'added_var'))
     analyze_fix()
-    # main(new_data=False)
+    # main(new_data=True)

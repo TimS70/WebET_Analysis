@@ -49,7 +49,6 @@ def check_gaze_saccade(path_origin, path_target, individual=False):
             path=path_target)
 
 
-
 def plot_gaze_saccade(data, file_name, path):
     average_line_no_chin = create_median_line(data[data['chin'] == 0])
     average_line_chin = create_median_line(data[data['chin'] == 1])
@@ -86,7 +85,7 @@ def plot_gaze_saccade(data, file_name, path):
                  y=average_line_chin['offset'],
                  color='r')
 
-    plt.setp(axes, xlim=(-1500, 5000))
+    plt.setp(axes, xlim=(-1500, 5000), ylim=(1, 0))
     plt.xlabel("t_task")
 
     save_plot(file_name=file_name, path=path, message=True)
@@ -128,7 +127,7 @@ def plot_gaze_saccade_by_position(data, file_name, path):
                      label='x=' + str(x) + ', y=' + str(y))
 
     plt.legend(loc='upper right')
-    plt.setp(axes, xlim=(-1500, 5000))
+    plt.setp(axes, xlim=(-1500, 5000), ylim=(0, 1))
     plt.xlabel("t_task")
     fig.suptitle('Median local offset for all subjects across a '
                  'fixation task trial', fontsize=14)

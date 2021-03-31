@@ -85,6 +85,7 @@ def add_offset(data_et):
 
 
 def add_grand_mean_offset(data_subject, data_trial, data_et):
+
     grouped_mean = data_et \
         .groupby(['run_id', 'trial_index'], as_index=False) \
         .agg(x_mean=('x', 'mean'),
@@ -101,7 +102,7 @@ def add_grand_mean_offset(data_subject, data_trial, data_et):
         data_trial['y_mean'], data_trial['y_pos'])
 
     grouped = data_trial \
-        .groupby(['run_id', 'trial_index'], as_index=False) \
+        .groupby(['run_id'], as_index=False) \
         .agg(x_bias=('x_bias', 'mean'),
              y_bias=('y_bias', 'mean'),
              grand_offset=('grand_offset', 'mean'))

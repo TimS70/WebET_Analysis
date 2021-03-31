@@ -13,11 +13,13 @@ from utils.save_data import write_csv
 
 def test_glasses(data_trial, data_subject, path_plots, path_tables):
 
+    print(len(data_subject))
+    print(data_subject)
     for var in ['glasses', 'sight', 'glasses_binary']:
         freq_table = pd.crosstab(index=data_subject[var], columns="count")
         print(f"""{freq_table} \n""")
         write_csv(freq_table,
-                  'glasses_freq_table_' + var,
+                  'glasses_freq_table_' + var + '.csv',
                   os.path.join(path_plots, 'glasses'))
 
     plot_sight_vs_outcomes(data=data_subject, path=path_plots)
@@ -43,7 +45,7 @@ def test_glasses(data_trial, data_subject, path_plots, path_tables):
     data_t_test = data_subject[
         data_subject['fps'] > data_subject['fps'].median()]
 
-    if data_t_test['glasses_binary'].unique() > 1:
+    if len(data_t_test['glasses_binary'].unique()) > 1:
         t_test_outcomes_vs_factor(
             data=data_subject[
                 data_subject['fps'] > data_subject['fps'].median()],

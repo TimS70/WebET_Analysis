@@ -6,12 +6,9 @@ from utils.path import makedir
 
 
 def load_all_three_datasets(path):
-    data_et = pd.read_csv(
-        os.path.join(path, 'data_et.csv'))
-    data_trial = pd.read_csv(
-        os.path.join(path, 'data_trial.csv'))
-    data_subject = pd.read_csv(
-        os.path.join(path, 'data_subject.csv'))
+    data_et = pd.read_csv(os.path.join(path, 'data_et.csv'))
+    data_trial = pd.read_csv(os.path.join(path, 'data_trial.csv'))
+    data_subject = pd.read_csv(os.path.join(path, 'data_subject.csv'))
 
     print('\nImported data from ' + path + ':')
 

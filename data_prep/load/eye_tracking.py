@@ -42,7 +42,7 @@ def create_et_data_2(data, n_bins=5):
     return data_et
 
 
-def create_et_data(data):
+def create_et_data_1(data):
     data["et_data"] = data['et_data'].apply(str)
 
     df_et_data = data.loc[(pd.notna(data['et_data'])) &
@@ -75,7 +75,4 @@ def create_et_data(data):
             pd.DataFrame(np.concatenate([indices, et], axis=1)))
 
     output.columns = np.append(meta_data.columns.values, ['x', 'y', 't'])
-    print(output)
-    print(output['run_id'].unique())
-    exit()
     return output

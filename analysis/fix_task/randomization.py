@@ -33,7 +33,9 @@ def check_randomization(data_trial, path_tables, path_plots):
                                 file_name='outcomes_by_task_order.png',
                                 path_target=path_plots)
 
-    compare_variances(data_trial, 'fix_order', ['offset', 'precision'])
+    compare_variances(data=data_trial,
+                      factor='fix_order',
+                      outcome=['offset', 'precision'])
 
     t_test_outcomes_vs_factor(
         data=data_trial,
@@ -45,7 +47,7 @@ def check_randomization(data_trial, path_tables, path_plots):
 
     print('Tendency for lower overall precision for those who '
           'started with the chin-rest, not for Holm correction \n')
-
+    exit()
 
 # noinspection PyTypeChecker
 def plot_chin_first_vs_outcomes(data, path_target):
