@@ -83,7 +83,8 @@ def add_choice_behavioral_variables(path_origin, path_target, path_fix_subject):
     # Add data from fixation task
     data_subject_fix = pd.read_csv(os.path.join(path_fix_subject,
                                                 'data_subject.csv'))
-
+    print(data_subject_fix.iloc[:, 23])
+    print(data_subject_fix.iloc[:, 23].dtypes)
     data_subject = merge_by_subject(data_subject, data_subject_fix,
                                     'offset', 'precision', 'hit_ratio',
                                     'n_valid_dots')

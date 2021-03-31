@@ -195,4 +195,6 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    main(new_data=False)
+    prep_fix()
+    prep_choice()
+    # main(new_data=False)

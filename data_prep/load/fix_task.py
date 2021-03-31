@@ -35,7 +35,24 @@ def load_fix_data(path_origin, path_target):
             't_startTrial', 'trial_duration', 'trial_duration_exact',
             'task_nr_new',
             'trial_type_new', 'trial_type_nr', 'fixTask', 'withinTaskIndex',
-            'x_count', 'fps', 'glasses_binary'
-        ]]
+            'x_count', 'fps', 'glasses_binary']]
+
+    data_subject = data_subject[[
+        # Raw data
+        # 'Employment Status', 'chosenAmount', 'chosenDelay',
+        # Already analyzed in global
+        # 'optionalNote', 'triedChin', 'keptHead',
+        # 'num_approvals', 'num_rejections', 'status', 'recorded_date',
+        # 'Country of Birth', 'Current Country of Residence', 'max_trial',
+        'run_id', 'prolificID',
+        'chinFirst', 'choiceTask_amountLeftFirst',
+        'webcam_fps', 'webcam_height', 'webcam_width',
+        'birthyear', 'gender', 'ethnic', 'degree',
+        'First Language', 'Nationality', 'Sex',
+        'Student Status', 'employment_status', 'fullTime_binary',
+        'sight', 'glasses', 'glasses_binary',
+        'vertPosition', 'browser',
+        'eyeshadow', 'masquara', 'eyeliner', 'browliner',
+        'Autistic Spectrum Disorder', 'fps']]
 
     save_all_three_datasets(data_et, data_trial, data_subject, path_target)
