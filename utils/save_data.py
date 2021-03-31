@@ -26,24 +26,22 @@ def save_all_three_datasets(data_et, data_trial, data_subject, path):
 
     makedir(path)
 
-    data_et.to_csv(
-        os.path.join(path, 'data_et.csv'),
-        index=False, header=True)
-    data_trial.to_csv(
-        os.path.join(path, 'data_trial.csv'),
-        index=False, header=True)
-    data_subject.to_csv(
-        os.path.join(path, 'data_subject.csv'),
-        index=False, header=True)
+    data_et.to_csv(os.path.join(path, 'data_et.csv'),
+                   index=False, header=True)
+    data_trial.to_csv(os.path.join(path, 'data_trial.csv'),
+                      index=False, header=True)
+    data_subject.to_csv(os.path.join(path, 'data_subject.csv'),
+                        index=False, header=True)
 
     if 'prolificID' in data_trial.columns:
         summarize_datasets(data_et, data_trial, data_subject)
 
 
 def summarize_datasets(data_et, data_trial, data_subject):
-    et_trial_count = data_et.groupby(
-        ['run_id', 'trial_index'], as_index=False)['x'].count() \
-                         .loc[:, 'trial_index'].count()
+    et_trial_count = data_et \
+        .groupby(['run_id', 'trial_index'], as_index=False) \
+        .agg(x=('x', 'count')) \
+        .loc[:, 'trial_index'].count()
 
     summary = pd.DataFrame({
         'dataset': [
@@ -69,7 +67,6 @@ def summarize_datasets(data_et, data_trial, data_subject):
 def write_csv(data_frame, file_name, *args):
     makedir(*args)
     path = os.path.join(*args)
-    data_frame.to_csv(os.path.join(path, file_name),
-                      index=False)
+    data_frame.to_csv(os.path.join(path, file_name), index=False)
     print(
         f"""File '{file_name}' saved in {path} \n""")

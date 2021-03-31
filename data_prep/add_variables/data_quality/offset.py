@@ -30,11 +30,9 @@ def add_hit_ratio(data_trial, data_et, max_offset=0.10,
 
     print(f"""No gaze points at all: \n"""
           f"""N={len(low_hits['run_id'].unique())} runs """
-          f"""with on average {grouped['n_trials'].mean()} """
+          f"""with on average {round(grouped['n_trials'].mean(), 2)} """
           f"""trials. \n"""
-          f"""{low_hits}""")
-
-    print(low_hits['run_id'].unique())
+          f"""{low_hits} \n""")
 
     return data_trial
 

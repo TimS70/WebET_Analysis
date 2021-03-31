@@ -96,7 +96,7 @@ def visualize_exemplary_run(data, path_target):
 
 
 def plot_hit_means_per_dot(data_trial, min_hit_ratio):
-    plt.hist(data_trial['hit_mean'], bins=50)
+    plt.hist(data_trial['hit_mean'], bins=50, label='bins=50')
 
     plt.xticks(np.arange(0, 1, 0.1))
 

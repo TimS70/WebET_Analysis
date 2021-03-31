@@ -67,9 +67,6 @@ def analyze_demographics():
     write_csv(demo_table, 'demographics_us.csv',
               'results', 'tables', 'demographics')
 
-
-
-
     plot_pie_charts(data_subject, predictors)
 
     n_bins = 10
@@ -79,13 +76,11 @@ def analyze_demographics():
     plt.ylabel('Frequency')
 
     age = 2021 - data_subject['birthyear']
-    print(
-        f"""Describe age: \n"""
-        f"""{age.describe()}""")
+    print(f"""Describe age: \n"""
+          f"""{age.describe()}""")
 
     save_plot(file_name='birthyear.png',
-              path=os.path.join('results', 'plots',
-                                'demographics'))
+              path=os.path.join('results', 'plots', 'demographics'))
     plt.close()
 
 

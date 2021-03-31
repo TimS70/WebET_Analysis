@@ -11,10 +11,11 @@ from data_prep.add_variables.data_quality.main import add_data_quality
 from data_prep.add_variables.fit_k.call_from_py import add_log_k
 from data_prep.add_variables.main import add_choice_behavioral_variables, \
     add_choice_et_variables, add_aoi_et, add_variables_global
-from data_prep.add_variables.prolific import add_prolific_variables
+from data_prep.add_variables.prolific import add_prolific_demographic_variables
 from data_prep.cleaning.all_trials import clean_global_data
 from data_prep.cleaning.fix_task import clean_data_fix
 from data_prep.cleaning.choice import clean_data_choice
+from data_prep.cleaning.replace import clean_subject_variables
 from data_prep.clustering.main import init_cluster_correction
 from data_prep.load.choice import load_choice_data
 from data_prep.load.fix_task import load_fix_data
@@ -30,7 +31,11 @@ def prep_global():
         path_origin=os.path.join('data', 'all_trials', 'combined'),
         path_target=os.path.join('data', 'all_trials', 'added_var'))
 
-    add_prolific_variables(
+    add_prolific_demographic_variables(
+        path_origin=os.path.join('data', 'all_trials', 'added_var'),
+        path_target=os.path.join('data', 'all_trials', 'added_var'))
+
+    clean_subject_variables(
         path_origin=os.path.join('data', 'all_trials', 'added_var'),
         path_target=os.path.join('data', 'all_trials', 'added_var'))
 
@@ -40,7 +45,7 @@ def prep_global():
         path_target=os.path.join('data', 'all_trials', 'cleaned'),
         prolific=True, approved=True, one_attempt=True,
         max_t_task=5500, min_fps=3,
-        exclude_runs=runs_no_saccade, exclude_runs_reason='No saccade',
+        additionally_bad_runs=runs_no_saccade, exclude_runs_reason='No saccade',
         max_missing_et=10,
         full_runs=True, valid_sight=True,
         follow_instruction=True, correct_webgazer_clock=True,
@@ -175,7 +180,7 @@ def main(new_data=False):
                                      'data_subject.csv'),
             path_prolific=os.path.join('data', 'prolific'),
             path_target=os.path.join('data', 'all_trials', 'combined'))
-    exit()
+
     prep_global()
     prep_fix()
     prep_choice()
@@ -190,4 +195,4 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    main(new_data=True)
+    main(new_data=False)

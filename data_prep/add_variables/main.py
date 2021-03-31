@@ -32,8 +32,7 @@ def add_variables_global(path_origin, path_target):
           'Create global variables \n'
           '################################### \n')
 
-    data_et, data_trial, data_subject = load_all_three_datasets(
-        path_origin)
+    data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
     # Add Counts
     grouped = data_et\
@@ -86,9 +85,8 @@ def add_choice_behavioral_variables(path_origin, path_target, path_fix_subject):
                                                 'data_subject.csv'))
 
     data_subject = merge_by_subject(data_subject, data_subject_fix,
-                                         'offset', 'precision', 'hit_ratio',
-                                         'n_valid_dots')
-
+                                    'offset', 'precision', 'hit_ratio',
+                                    'n_valid_dots')
     # Information attributes
     data_trial = identify_amount_left(data_trial)
     data_trial = add_choice_options_num(data_trial)
@@ -142,6 +140,7 @@ def add_aoi_et(aoi_width, aoi_height, path_origin, path_target):
 
 def add_choice_et_variables(min_required_trials, min_gaze_points,
                             path_origin, path_target):
+
     data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
     data_et = merge_by_index(data_et, data_trial, 'amountLeft', 'LL_top')

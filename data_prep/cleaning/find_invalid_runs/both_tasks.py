@@ -34,8 +34,7 @@ def filter_full_but_no_et_data(data_et, data_trial, max_missing_et):
     runs_no_et_data = data_trial.loc[
         (~data_trial['run_id'].isin(data_et['run_id'].unique())) &
         (data_trial['trial_type_new'] == 'end'),
-        'run_id'
-    ].unique()
+        'run_id'].unique()
 
     if len(runs_no_et_data) > 0:
         print(f"""n={len(runs_no_et_data)} are complete but have no et data """)
