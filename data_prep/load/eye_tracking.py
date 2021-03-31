@@ -11,20 +11,46 @@ else:
 from tqdm import tqdm
 
 
-def text_to_data_frame(text):
-    text = text.replace('$', ',')
-    dataframe = pd.read_json(text, orient='records')
-    return dataframe
+def create_et_data_2(data, n_bins=5):
+    data["et_data"] = data['et_data'] \
+        .apply(str) \
+        .str.replace('$', ',', regex=False)
+
+    et_indices = data[(pd.notna(data['et_data'])) &
+                      ~(data['et_data'].isin(['"', '[]', 'nan']))].index
+    index_bins = pd.cut(et_indices, bins=n_bins, labels=np.arange(n_bins))
+
+    data_et = pd.DataFrame([], columns=['x', 'y', 't'])
+
+    for index_bin in index_bins.unique():
+        sub_index = et_indices[index_bins == index_bin]
+
+        sub_data = pd.DataFrame([], columns=['x', 'y', 't'])
+
+        for i in tqdm(sub_index, desc='Create eye-tracking data for bin ' +
+                                      str(index_bin)):
+
+            df = pd.read_json(data.loc[i, 'et_data'], orient='records')
+            df["t_task"] = (df.loc[:, "t"] - df.loc[0, "t"])
+            df[['run_id', 'trial_index']] = data.loc[i,
+                                                     ['run_id', 'trial_index']]
+
+            sub_data = sub_data.append(df)
+
+        data_et = data_et.append(sub_data)
+
+    return data_et
 
 
 def create_et_data(data):
-    data["et_data"] = data['et_data'].apply(str).replace('$', ',')
+    data["et_data"] = data['et_data'].apply(str)
 
     df_et_data = data.loc[(pd.notna(data['et_data'])) &
                           ~(data['et_data'].isin(['"', '[]', 'nan'])),
                           ['run_id', 'trial_index', 'et_data']]
 
-    my_list = json.loads('[' + ','.join(df_et_data['et_data'].to_list()) + ']')
+    text = '[' + '$'.join(df_et_data['et_data'].to_list()) + ']'
+    my_list = json.loads(text.replace('$', ','))
 
     # b = []
     # for trial in my_list:

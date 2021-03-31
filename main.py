@@ -175,7 +175,7 @@ def main(new_data=False):
                                      'data_subject.csv'),
             path_prolific=os.path.join('data', 'prolific'),
             path_target=os.path.join('data', 'all_trials', 'combined'))
-
+    exit()
     prep_global()
     prep_fix()
     prep_choice()
