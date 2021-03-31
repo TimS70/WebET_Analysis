@@ -49,7 +49,8 @@ def prep_global():
         max_missing_et=10,
         full_runs=True, valid_sight=True,
         follow_instruction=True, correct_webgazer_clock=True,
-        complete_fix_task=True)
+        complete_fix_task=True,
+        approval_rate=0.5)
 
 
 def prep_fix():
@@ -153,15 +154,27 @@ def analyze_choice():
 
 
 def analyze_global():
-    analyze_dropouts()
+    analyze_dropouts(
+        path_origin=os.path.join('data', 'all_trials', 'added_var'))
+
     analyze_demographics()
 
 
 def analyze_fix():
+
+    print('################################### \n'
+          'Analyze fix task data \n'
+          '################################### \n')
+
     path_plots = os.path.join('results', 'plots', 'fix_task')
-    check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',
-                                                'added_var'),
-                       path_target=os.path.join(path_plots, 'saccades'))
+    # check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',                                                'added_var'),
+    #                    path_target=os.path.join(path_plots, 'saccades'),
+    #                    individual=True)
+
+    # check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',
+    #                                             'cleaned'),
+    #                    path_target=os.path.join(path_plots),
+    #                    individual=False)
 
     analyze_fix_task(
         path_origin=os.path.join('data', 'fix_task', 'added_var'),
@@ -185,8 +198,8 @@ def main(new_data=False):
     prep_fix()
     prep_choice()
     analyze_global()
-    analyze_choice()
     analyze_fix()
+    analyze_choice()
 
     # Render R markdowns
     subprocess.call(
@@ -195,8 +208,5 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    analyze_global()
-    analyze_choice()
     analyze_fix()
-
     # main(new_data=False)

@@ -22,7 +22,8 @@ def clean_global_data(path_origin, path_target,
                       max_missing_et=None,
                       full_runs=False, valid_sight=False,
                       follow_instruction=False, correct_webgazer_clock=False,
-                      complete_fix_task=False):
+                      complete_fix_task=False,
+                      approval_rate=None):
     print('################################### \n'
           'Clean global datasets \n'
           '################################### \n')
@@ -122,6 +123,19 @@ def clean_global_data(path_origin, path_target,
         summary.append(['runs_cannot_see',
                         len(runs_cannot_see),
                         len(runs_cannot_see) / n_runs])
+
+    if approval_rate is not None:
+        print(data_subject[['num_approvals', 'num_rejections', 'prolific_score']])
+        data_subject['approval_rate'] = \
+            data_subject['num_approvals'] / (data_subject['num_approvals'] +
+                                             data_subject['num_rejections'])
+        approval_summary = data_subject[[
+            'num_approvals', 'num_rejections', 'approval_rate',
+            'prolific_score']].describe()
+
+        print(f"""Approval rate and Prolific Score: \n"""
+              f"""{approval_summary} \n""")
+
 
     if max_missing_et is not None:
         runs_full_but_not_enough_et = filter_full_but_no_et_data(

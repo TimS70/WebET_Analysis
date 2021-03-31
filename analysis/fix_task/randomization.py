@@ -12,9 +12,12 @@ from inference.t_test import t_test_outcomes_vs_factor
 from utils.path import makedir
 from visualize.all_tasks import save_plot
 from utils.save_data import write_csv
+from visualize.fix_task.main import split_violin_plots_outcomes
 
 
 def check_randomization(data_trial, path_tables, path_plots):
+
+    print('\nChecking randomization \n')
     plot_chin_first_vs_outcomes(data=data_trial, path_target=path_plots)
 
     t_test_outcomes_vs_factor(
@@ -25,15 +28,40 @@ def check_randomization(data_trial, path_tables, path_plots):
         file_name='t_test_chinFirst_vs_outcomes.csv',
         path=os.path.join(path_tables, 'randomization'))
 
-    plot_outcomes_by_task_order(data=data_trial,
-                                file_name='outcomes_by_task_order.png',
-                                path_target=path_plots)
 
     print(f"""Plots show a greater variance in the second run. \n""")
 
     data_trial['fix_order'] = data_trial['task_nr'] \
         .replace({3.0: 2.0}) \
         .astype(int)
+
+    split_violin_plots_outcomes(data=data_trial,
+                                split_factor='chin',
+                                factor='fix_order',
+                                file_name='outcomes_by_task_order.png',
+                                path_target=path_plots)
+
+    # Compare the variances
+    summary = []
+    for outcome in ['offset', 'precision']:
+        grouped = data_trial \
+            .groupby(['fix_order'], as_index=False) \
+            .agg(n=('trial_index', 'count'),
+                 mean=(outcome, 'mean'),
+                 var=(outcome, 'var'))
+        grouped['df'] = grouped['n'] - 1
+        grouped['measure'] = outcome
+
+        # Test that
+        F, p_value = scipy.stats.levene(
+            data_trial.loc[data_trial['fix_order'] == 1, outcome],
+            data_trial.loc[data_trial['fix_order'] == 2, outcome])
+
+        grouped[['F', 'p']] = [F, p_value]
+
+        print(grouped)
+
+    exit()
 
     t_test_outcomes_vs_factor(
         data=data_trial,
@@ -66,32 +94,3 @@ def plot_chin_first_vs_outcomes(data, path_target):
         save_plot(file_name='chinFirst_vs_' + outcome + 'png',
                   path=path_target)
         plt.close()
-
-
-def plot_outcomes_by_task_order(data, file_name, path_target):
-    outcomes_by_fix_order = data \
-        .rename(columns={'task_nr': 'fix_order'}) \
-        .groupby(
-            ['run_id', 'chin', 'fix_order'],
-            as_index=False)[['offset', 'precision', 'fps']] \
-        .mean()
-
-    outcomes_by_fix_order['fix_order'] = \
-        outcomes_by_fix_order['fix_order'] \
-        .replace({3.0: 2.0}) \
-        .astype(int)
-
-    fig, axes = plt.subplots(1, 2, sharey='none', figsize=(15, 6))
-    fig.suptitle('Offset and precision')
-
-    sns.violinplot(
-        ax=axes[0], x='fix_order', y='offset',
-        hue='chin', split=True,
-        data=outcomes_by_fix_order)
-    sns.violinplot(
-        ax=axes[1], x='fix_order', y='precision',
-        hue='chin', split=True,
-        data=outcomes_by_fix_order)
-
-    save_plot(file_name=file_name, path=path_target)
-    plt.close()

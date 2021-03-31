@@ -3,6 +3,7 @@ import os
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 
 from visualize.all_tasks import save_plot
 from visualize.eye_tracking import my_heatmap
@@ -113,4 +114,26 @@ def plot_hit_means_per_dot(data_trial, min_hit_ratio):
               path=os.path.join('results', 'plots',
                                 'fix_task', 'offset'),
               message=True)
+    plt.close()
+
+
+def split_violin_plots_outcomes(data, split_factor, factor, file_name,
+                                path_target):
+    outcomes_by_fix_order = data \
+        .groupby(['run_id', split_factor, factor], as_index=False) \
+        [['offset', 'precision', 'fps']].mean()
+
+    fig, axes = plt.subplots(1, 2, sharey='none', figsize=(15, 6))
+    fig.suptitle('Offset and precision')
+
+    sns.violinplot(
+        ax=axes[0], x=factor, y='offset',
+        hue=split_factor, split=True,
+        data=outcomes_by_fix_order)
+    sns.violinplot(
+        ax=axes[1], x=factor, y='precision',
+        hue=split_factor, split=True,
+        data=outcomes_by_fix_order)
+
+    save_plot(file_name=file_name, path=path_target)
     plt.close()

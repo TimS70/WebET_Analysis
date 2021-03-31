@@ -14,8 +14,11 @@ def analyze_demographics():
           'Analyze demographics \n'
           '################################### \n')
 
+
+
     data_subject = pd.read_csv(
         os.path.join('data', 'all_trials', 'cleaned', 'data_subject.csv'))
+
     data_subject['kind_of_correction'] = data_subject['glasses']
 
     data_subject = add_demographic_grouped_variable(
@@ -70,16 +73,15 @@ def analyze_demographics():
     plot_pie_charts(data_subject, predictors)
 
     n_bins = 10
-    plt.hist(data_subject['birthyear'], bins=n_bins)
-    plt.title('Birthyear histogram (bins=' + str(n_bins) + ')')
-    plt.xlabel('Birthyear')
+    plt.hist(data_subject['age'], bins=n_bins)
+    plt.title('Age histogram (bins=' + str(n_bins) + ')')
+    plt.xlabel('Age')
     plt.ylabel('Frequency')
 
-    age = 2021 - data_subject['birthyear']
     print(f"""Describe age: \n"""
-          f"""{age.describe()}""")
+          f"""{data_subject['age'].describe()}""")
 
-    save_plot(file_name='birthyear.png',
+    save_plot(file_name='age.png',
               path=os.path.join('results', 'plots', 'demographics'))
     plt.close()
 

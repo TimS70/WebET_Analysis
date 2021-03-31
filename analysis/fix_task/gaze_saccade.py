@@ -11,7 +11,7 @@ from utils.path import makedir
 from visualize.all_tasks import save_plot
 
 
-def check_gaze_saccade(path_origin, path_target):
+def check_gaze_saccade(path_origin, path_target, individual=False):
 
     data_et = pd.read_csv(os.path.join(path_origin, 'data_et.csv'))
     data_trial = pd.read_csv(os.path.join(path_origin, 'data_trial.csv'))
@@ -31,13 +31,23 @@ def check_gaze_saccade(path_origin, path_target):
         data_cross_dots['x'],
         data_cross_dots['new_x_pos'],
         data_cross_dots['y'],
-        data_cross_dots['new_y_pos']
-    )
+        data_cross_dots['new_y_pos'])
 
-    for run in data_cross_dots['run_id'].unique():
-        plot_gaze_saccade(data=data_cross_dots,
-                          file_name=str(round(run)) + '.png',
-                          path=path_target)
+    if individual:
+        print(f"""Plot individual saccades for """
+              f"""n={len(data_cross_dots['run_id'].unique())} """
+              f"""runs """)
+        for run in data_cross_dots['run_id'].unique():
+            plot_gaze_saccade(
+                data=data_cross_dots[data_cross_dots['run_id'] == run],
+                file_name=str(round(run)) + '.png',
+                path=path_target)
+    else:
+        plot_gaze_saccade_by_position(
+            data=data_cross_dots,
+            file_name='saccades_all.png',
+            path=path_target)
+
 
 
 def plot_gaze_saccade(data, file_name, path):
@@ -78,6 +88,50 @@ def plot_gaze_saccade(data, file_name, path):
 
     plt.setp(axes, xlim=(-1500, 5000))
     plt.xlabel("t_task")
+
+    save_plot(file_name=file_name, path=path, message=True)
+    plt.close()
+
+
+def plot_gaze_saccade_by_position(data, file_name, path):
+
+    # noinspection PyTypeChecker
+    fig, axes = plt.subplots(nrows=1, ncols=1, sharey=True, figsize=(7, 7))
+
+    sns.scatterplot(ax=axes, data=data,
+                    x="t_task", y="offset",
+                    s=0.5)
+
+    xy_positions = [
+        (0.2, 0.2),
+        (0.5, 0.2),
+        (0.8, 0.2),
+        (0.2, 0.5),
+        (0.5, 0.5),
+        (0.8, 0.5),
+        (0.2, 0.8),
+        (0.5, 0.8),
+        (0.8, 0.8)]
+
+    # Get list into an iterable number
+    # (x, y) are the parameters ('rows') of the tuple
+    for i, (x, y) in enumerate(xy_positions):
+        data_this_pos = data[(data['new_x_pos'] == x) &
+                             (data['new_y_pos'] == y)]
+
+        median_line = create_median_line(data_this_pos)
+
+        sns.lineplot(ax=axes,
+                     x=median_line['t_task'],
+                     y=median_line['offset'],
+                     legend='brief',
+                     label='x=' + str(x) + ', y=' + str(y))
+
+    plt.legend(loc='upper right')
+    plt.setp(axes, xlim=(-1500, 5000))
+    plt.xlabel("t_task")
+    fig.suptitle('Median local offset for all subjects across a '
+                 'fixation task trial', fontsize=14)
 
     save_plot(file_name=file_name, path=path, message=True)
     plt.close()
@@ -132,8 +186,7 @@ def euclidean_distance(x, x_target, y, y_target):
 def create_median_line(data):
     bin_array = np.arange(-1500, 5000, 100)
     bins = pd.cut(data['t_task'], bin_array)
-    output = data.groupby(bins) \
-        .agg({"offset": "median"}).reset_index()
+    output = data.groupby(bins).agg(offset=("offset", "median")).reset_index()
     output['t_task'] = bin_array[0:len(output)]
 
     return output

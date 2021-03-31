@@ -10,25 +10,29 @@ def clean_subject_variables(path_origin, path_target):
     data_subject = clean_degree(data_subject)
 
     data_subject['optionalNote'] = data_subject[['optionalNote']].astype(str)
+    data_subject['age'] = 2021 - data_subject['birthyear']
 
     data_subject = data_subject[[
-        'run_id', 'prolificID', 'chinFirst', 'choiceTask_amountLeftFirst',
-        'browser',
+        # Raw data
+        # 'Employment Status', 'birthyear',
         # Unnecessary technical details
         # 'browser_version', 'device', 'platform', 'platform_version',
         # 'user_agent', 'webcam_label',
+        # Unnecessary Prolific details
+        # 'session_id', 'reviewed_at_datetime',
+        # 'entered_code', 'Webcam',
+        'run_id', 'prolificID', 'chinFirst', 'choiceTask_amountLeftFirst',
+        'browser',
         'chosenAmount', 'chosenDelay',
         'webcam_fps', 'webcam_height', 'webcam_width',
-        'birthyear', 'gender', 'ethnic',
+        'age', 'gender', 'ethnic',
         'sight', 'glasses', 'degree',
         'eyeshadow', 'masquara', 'eyeliner', 'browliner',
         'vertPosition', 'triedChin', 'keptHead', 'optionalNote',
-        # Unnecessary Prolific details
-        # 'session_id', 'age', 'prolific_score', 'reviewed_at_datetime',
-        # 'entered_code', 'Webcam',
-        'num_approvals', 'num_rejections', 'status', 'recorded_date',
+        'num_approvals', 'num_rejections', 'prolific_score',
+        'status', 'recorded_date',
         'Country of Birth', 'Current Country of Residence',
-        'Employment Status', 'First Language',
+        'First Language',
         'Nationality', 'Sex', 'Student Status',
         'Autistic Spectrum Disorder', 'fps', 'max_trial', 'glasses_binary',
         'employment_status', 'fullTime_binary']]

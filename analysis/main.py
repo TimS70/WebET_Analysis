@@ -95,16 +95,20 @@ def analyze_choice_task(path_origin, path_plots, path_tables):
 
 
 def analyze_fix_task(path_origin, path_plots, path_tables):
-    print('################################### \n'
-          'Analyze fix task data \n'
-          '################################### \n')
 
     data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
-    print(f"""Describe data quality: \n"""
-          f"""{data_subject[['fps', 'offset', 'offset_px', 'precision',
-                             'precision_px']].describe()} \n""")
+    # print(f"""Describe data quality: \n"""
+    #       f"""{data_subject[['fps', 'offset', 'offset_px', 'precision',
+    #                          'precision_px', 'hit_ratio']].describe()} \n""")
 
-    hist_plots_quality(data_subject, path_plots)
+    # print(data_subject.loc[
+    #           (data_subject['eyeshadow'] == 1) |
+    #           (data_subject['masquara'] == 1) |
+    #           (data_subject['eyeliner'] == 1) |
+    #           (data_subject['browliner'] == 1),
+    #       ['eyeshadow', 'masquara', 'eyeliner', 'browliner']])
+
+    # hist_plots_quality(data_subject, path_plots)
 
     check_randomization(data_trial, path_plots, path_tables)
 
@@ -120,6 +124,7 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
                  path_plots=os.path.join(path_plots, 'glasses'),
                  path_tables=os.path.join(path_tables, 'glasses'))
 
+    # Over the trials
     for outcome in ['offset', 'precision']:
         outcome_over_trials(data_trial, outcome, path_plots)
         outcome_over_trials_vs_chin(data_trial, outcome, path_plots)

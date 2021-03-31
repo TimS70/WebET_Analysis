@@ -47,7 +47,7 @@ def load_fix_data(path_origin, path_target):
         'run_id', 'prolificID',
         'chinFirst', 'choiceTask_amountLeftFirst',
         'webcam_fps', 'webcam_height', 'webcam_width',
-        'birthyear', 'gender', 'ethnic', 'degree',
+        'age', 'gender', 'ethnic', 'degree',
         'First Language', 'Nationality', 'Sex',
         'Student Status', 'employment_status', 'fullTime_binary',
         'sight', 'glasses', 'glasses_binary',

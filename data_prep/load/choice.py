@@ -41,7 +41,7 @@ def load_choice_data(path_origin, path_target):
         # 'webcam_fps', 'webcam_height', 'webcam_width',
         # 'browser', 'vertPosition',
         'run_id', 'prolificID', 'chinFirst', 'choiceTask_amountLeftFirst',
-        'birthyear', 'gender', 'ethnic',
+        'age', 'gender', 'ethnic',
         'degree',
         'Country of Birth', 'Current Country of Residence',
         'First Language', 'Nationality', 'Sex',
