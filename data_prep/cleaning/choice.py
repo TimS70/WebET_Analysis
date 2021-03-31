@@ -124,13 +124,12 @@ def clean_data_choice(
                     len(invalid_runs) / n_runs])
 
     summary = pd.DataFrame(summary, columns=['name', 'n', 'percent'])
-    print(summary)\
 
     summary = summary.sort_values(by='n')
 
-    print(f"""In total, n={len(invalid_runs)} have to be """
+    print(f"""\nIn total, n={len(invalid_runs)} have to be """
           f"""removed from n={n_runs} runs: \n"""
-          f"""{summary}""")
+          f"""{summary} \n""")
 
     # Remove invalid runs
     data_subject = clean_runs(data_subject, invalid_runs, 'data_subject')

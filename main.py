@@ -128,7 +128,7 @@ def prep_choice(main_aoi_width=0.4,
 
     clean_data_choice(
         us_sample=False,
-        min_hit_ratio=None,  # 0.6,
+        min_hit_ratio= 0.6,
         max_precision=None,  # 0.15,
         max_offset=None,  # 0.5,
         min_fps=5,
@@ -195,6 +195,8 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    prep_fix()
-    prep_choice()
+    analyze_global()
+    analyze_choice()
+    analyze_fix()
+
     # main(new_data=False)

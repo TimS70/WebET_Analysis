@@ -29,7 +29,6 @@ def load_choice_data(path_origin, path_target):
     data_et = data_et[['run_id', 'trial_index', 'withinTaskIndex', 'x', 'y',
                        't_task']]
 
-    print(data_subject.columns)
     data_subject = data_subject[[
         # Raw data
         # 'Employment Status', 'chosenAmount', 'chosenDelay',
@@ -48,6 +47,5 @@ def load_choice_data(path_origin, path_target):
         'First Language', 'Nationality', 'Sex',
         'Autistic Spectrum Disorder', 'fps',
         'Student Status', 'employment_status', 'fullTime_binary']]
-    exit()
 
     save_all_three_datasets(data_et, data_trial, data_subject, path_target)
