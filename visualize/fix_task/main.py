@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
+from analysis.fix_task.data_quality import group_within_task_index
 from visualize.all_tasks import save_plot
 from visualize.eye_tracking import my_heatmap
 
@@ -136,4 +137,59 @@ def split_violin_plots_outcomes(data, split_factor, factor, file_name,
         data=outcomes_by_fix_order)
 
     save_plot(file_name=file_name, path=path_target)
+    plt.close()
+
+
+def plot_outcome_over_trials(data_trial, outcome, path_target):
+    data_plot = data_trial.copy()
+
+    data_plot['task_nr'] = data_plot['task_nr'] \
+        .replace([1, 2, 3], [0, 1, 1])
+
+    data_plot = group_within_task_index(
+        data_plot[data_plot['fixTask'] == 1], 'task_nr', outcome)
+
+    plt.style.use('seaborn-whitegrid')
+    fig, ax = plt.subplots(1, 2, sharey=True, figsize=(15, 6))
+    fig.suptitle('Task 1 vs. Task 2')
+
+    ax[0].set_ylim(0, 1)
+
+    for i in [0, 1]:
+        data = data_plot.loc[data_plot['task_nr'] == i, :]
+        ax[i].errorbar(
+            x=data['withinTaskIndex'],
+            y=data[(outcome + '_median')],
+            yerr=[data[(outcome + '_std_lower')],
+                  data[(outcome + '_std_upper')]],
+            fmt='^k:',
+            capsize=5)
+
+    save_plot(file_name=outcome + '_vs_trials.png',
+              path=os.path.join(path_target, outcome))
+    plt.close()
+
+
+def plot_outcome_over_trials_vs_chin(data_trial, outcome, path_target):
+    data_plot = group_within_task_index(
+        data_trial[data_trial['fixTask'] == 1], 'chin', outcome)
+
+    plt.style.use('seaborn-whitegrid')
+    fig, ax = plt.subplots(1, 2, sharey=True, figsize=(15, 6))
+    fig.suptitle('chin==0 vs. chin==1')
+
+    ax[0].set_ylim(0, 1)
+
+    for i in [0, 1]:
+        data = data_plot.loc[data_plot['chin'] == i, :]
+        ax[i].errorbar(
+            x=data['withinTaskIndex'],
+            y=data[(outcome + '_median')],
+            yerr=[data[(outcome + '_std_lower')],
+                  data[(outcome + '_std_upper')]],
+            fmt='^k:',
+            capsize=5)
+
+    save_plot(file_name=outcome + '_vs_chin_vs_trials.png',
+              path=os.path.join(path_target, outcome))
     plt.close()

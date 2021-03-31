@@ -38,13 +38,3 @@ def plot_sight_vs_outcomes(data, path):
                   path=os.path.join(path))
 
 
-def anova_outcomes_sight(data, path):
-    for var in ['offset', 'precision', 'fps']:
-        sight_lm = ols((var + ' ~ sight'), data=data).fit()
-        outcome_table = sm.stats.anova_lm(sight_lm, typ=2)  # Type 2 ANOVA DataFrame
-
-        print(f"""{var} vs sight ANOVA: \n"""
-              f"""{outcome_table} \n""")
-
-        write_csv(outcome_table, ('anova_' + var + '_vs_sight.csv'),
-                  os.path.join(path))

@@ -2,8 +2,7 @@ import os
 
 from analysis.fix_task.chin_rest import test_chin_rest
 from analysis.fix_task.correlations import corr_analysis
-from analysis.fix_task.data_quality import outcome_over_trials_vs_chin, \
-    outcome_over_trials, compare_conditions_subject
+from analysis.fix_task.data_quality import compare_conditions_subject
 from analysis.fix_task.gaze_saccade import check_gaze_saccade
 from analysis.fix_task.glasses import test_glasses
 from analysis.fix_task.positions import compare_positions
@@ -16,7 +15,8 @@ from visualize.all_tasks import get_box_plots
 from visualize.choice import plot_example_eye_movement, \
     plot_categorical_confounders
 from visualize.fix_task.main import visualize_exemplary_run, fix_heatmaps, \
-    hist_plots_quality
+    hist_plots_quality, plot_outcome_over_trials, \
+    plot_outcome_over_trials_vs_chin
 from visualize.fix_task.positions import plot_top_vs_bottom_positions
 
 
@@ -119,18 +119,18 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
     #                data_subject=data_subject,
     #                path_plots=os.path.join(path_plots, 'chin_rest'),
     #                path_tables=os.path.join(path_tables, 'chin_rest'))
-    test_glasses(data_trial=data_trial,
-                 data_subject=data_subject,
-                 path_plots=os.path.join(path_plots, 'glasses'),
-                 path_tables=os.path.join(path_tables, 'glasses'))
-    exit()
+    # test_glasses(data_trial=data_trial,
+    #              data_subject=data_subject,
+    #              path_plots=os.path.join(path_plots, 'glasses'),
+    #              path_tables=os.path.join(path_tables, 'glasses'))
+
     # Over the trials
     for outcome in ['offset', 'precision']:
-        outcome_over_trials(data_trial, outcome, path_plots)
-        outcome_over_trials_vs_chin(data_trial, outcome, path_plots)
+        plot_outcome_over_trials(data_trial, outcome, path_plots)
+        plot_outcome_over_trials_vs_chin(data_trial, outcome, path_plots)
         compare_positions(data_trial, outcome, path_tables)
         plot_top_vs_bottom_positions(data_trial, outcome, path_tables)
-
+    exit()
     # Categorical confounders analysis
     for outcome in ['offset', 'precision', 'fps']:
         get_box_plots(

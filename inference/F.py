@@ -1,6 +1,11 @@
-import scipy
+import os
 
+import scipy
+import statsmodels.api as sm
 from scipy import stats
+from statsmodels.formula.api import ols
+
+from utils.save_data import write_csv
 
 
 def compare_variances(data, factor, outcome):
@@ -23,3 +28,17 @@ def compare_variances(data, factor, outcome):
         grouped[['F', 'p']] = [F, p_value]
 
         print(f"""{grouped} \n""")
+
+
+def anova_outcomes_factor(data, factor, path):
+    for var in ['offset', 'precision', 'fps']:
+        linear_model = ols((var + ' ~' + factor), data=data).fit()
+        # Type 2 ANOVA DataFrame
+        outcome_table = sm.stats.anova_lm(linear_model, typ=2)
+
+        print(f"""{var} vs {factor} ANOVA: \n"""
+              f"""{outcome_table} \n""")
+
+        write_csv(outcome_table,
+                  'anova_' + var + '_vs_' + factor + '.csv',
+                  os.path.join(path))

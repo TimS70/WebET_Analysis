@@ -13,12 +13,8 @@ from utils.save_data import write_csv
 
 def compare_positions(data_trial_fix, outcome, path_target):
     position_tests = test_all_positions(data_trial_fix, outcome)
-
-    test_top_vs_bottom = test_top_vs_bottom_positions(
-        data_trial_fix, outcome)
-
-    test_left_vs_right = test_left_vs_right_positions(
-        data_trial_fix, outcome)
+    test_top_vs_bottom = test_top_vs_bottom_positions(data_trial_fix, outcome)
+    test_left_vs_right = test_left_vs_right_positions(data_trial_fix, outcome)
 
     position_tests = pd.concat(
         [position_tests, test_top_vs_bottom, test_left_vs_right],
@@ -35,7 +31,7 @@ def compare_positions(data_trial_fix, outcome, path_target):
 
     significant_results = position_tests.loc[
         position_tests['Sig'] != 'np',
-        ['position_1', 'position_2', 'd', 't', 'p']]
+        ['pos_1', 'pos_2', 'd', 't', 'p']]
 
     if len(significant_results) > 0:
         print(f"""Significant results for {outcome}: \n"""
@@ -113,7 +109,7 @@ def pos_combinations():
         .drop_duplicates() \
         .reset_index(drop=True)
 
-    print(f"""There are add_k ={len(combinations)} """
+    print(f"""There are {len(combinations)} """
           f"""possible combinations of positions \n""")
 
     return combinations
@@ -137,6 +133,8 @@ def test_all_positions(data_trial_fix, outcome):
             combinations.loc[i, 'col2'],
             np.mean(positions_wide[combinations.loc[i, 'col1']]),
             np.mean(positions_wide[combinations.loc[i, 'col2']]),
+            np.std(positions_wide[combinations.loc[i, 'col1']]),
+            np.std(positions_wide[combinations.loc[i, 'col2']]),
             (result.statistic / np.sqrt(n)),
             n,
             result.statistic,
@@ -145,17 +143,15 @@ def test_all_positions(data_trial_fix, outcome):
     position_tests = pd.DataFrame(
         all_results,
         columns=[
-            'position_1', 'position_2', 'position_1_mean', 'position_2_mean',
-            'd', 'n', 't', 'p'])
+            'pos_1', 'pos_2', 'pos_1_mean', 'pos_2_mean',
+            'pos_1_std', 'pos_2_std', 'd', 'n', 't', 'p'])
 
     return position_tests
 
 
 def test_top_vs_bottom_positions(data_trial_fix, outcome):
     outcome_by_y_long = outcome_by_position_long(data_trial_fix, outcome) \
-        .groupby(
-        ['run_id', 'y_pos'],
-        as_index=False)[outcome].mean()
+        .groupby(['run_id', 'y_pos'], as_index=False)[outcome].mean()
     outcome_by_y_long = outcome_by_y_long.loc[
                         outcome_by_y_long['y_pos'] != 0.5, :]
 
@@ -175,10 +171,12 @@ def test_top_vs_bottom_positions(data_trial_fix, outcome):
     d = t_test_result.statistic / np.sqrt(n)
 
     output = pd.DataFrame({
-        'position_1': ['bottom'],
-        'position_2': ['top'],
-        'position_1_mean': np.mean(outcome_by_y_wide['20%']),
-        'position_2_mean': np.mean(outcome_by_y_wide['80%']),
+        'pos_1': ['bottom'],
+        'pos_2': ['top'],
+        'pos_1_mean': np.mean(outcome_by_y_wide['20%']),
+        'pos_2_mean': np.mean(outcome_by_y_wide['80%']),
+        'pos_1_std': np.std(outcome_by_y_wide['20%']),
+        'pos_2_std': np.std(outcome_by_y_wide['80%']),
         'd': [d],
         'n': [n],
         't': [t_test_result.statistic],
@@ -212,10 +210,12 @@ def test_left_vs_right_positions(data_trial_fix, outcome):
     d = t_test_result.statistic / np.sqrt(n)
 
     output = pd.DataFrame({
-        'position_1': ['left'],
-        'position_2': ['right'],
-        'position_1_mean': np.mean(outcome_by_x_wide['20%']),
-        'position_2_mean': np.mean(outcome_by_x_wide['80%']),
+        'pos_1': ['left'],
+        'pos_2': ['right'],
+        'pos_1_mean': np.mean(outcome_by_x_wide['20%']),
+        'pos_2_mean': np.mean(outcome_by_x_wide['80%']),
+        'pos_1_std': np.std(outcome_by_x_wide['20%']),
+        'pos_2_std': np.std(outcome_by_x_wide['80%']),
         'd': [d],
         'n': [n],
         't': [t_test_result.statistic],
