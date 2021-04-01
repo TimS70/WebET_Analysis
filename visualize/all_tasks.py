@@ -8,6 +8,8 @@ import seaborn as sns
 import statsmodels.graphics.api as smg
 
 from scipy.ndimage.filters import gaussian_filter
+
+from inference.F import anova_outcomes_factor
 from utils.path import makedir
 from utils.save_data import write_csv
 
@@ -41,32 +43,23 @@ def spaghetti_plot(data, x_var, y_var, highlighted_subject):
     return plt
 
 
-def violin_plot(data, outcome, factor, path):
+def violin_plot(data, outcome, factor, path, split_factor=None):
 
-    fig, axes = plt.subplots(1, 1, sharey='none', figsize=(15, 6))
+    fig, axes = plt.subplots(1, 1, sharey='none', figsize=(6, 6))
     fig.suptitle('Offset and precision')
 
-    sns.violinplot(ax=axes,
-                   x=factor, y=outcome,
-                   data=data)
+    if split_factor is None:
+        sns.violinplot(ax=axes,
+                       x=factor, y=outcome,
+                       data=data)
+    else:
+        sns.violinplot(ax=axes,
+                       x=factor, y=outcome, hue=split_factor,
+                       split=True,
+                       data=data)
 
     save_plot(file_name=factor + '_vs_' + outcome + '.png',
               path=path)
-    plt.close()
-
-
-def split_violin_plot(data_trial, outcome, factor, split_factor,
-                      file_name, path):
-    fig, axes = plt.subplots(1, 1, sharey='none', figsize=(6, 6))
-    fig.suptitle(outcome)
-
-    sns.violinplot(ax=axes,
-                   x=factor,
-                   y=outcome,
-                   hue=split_factor,
-                   split=True,
-                   data=data_trial)
-    save_plot(file_name=file_name, path=path)
     plt.close()
 
 
@@ -99,34 +92,28 @@ def get_box_plots(data, outcome, predictors, file_name, path_target):
                 horizontalalignment='center', size=13, weight='normal')
 
     save_plot(file_name=file_name,
-              path=path_target)
+              path=path_target,
+              message=True)
     plt.close()
 
 
-def corr_plot(data_plot, correlation_columns,
-              file_name, factor='none', *args):
+def scatter_matrix(data, corr_variables, file_name, path_target, factor=None):
     sns.set()
 
-    sns.pairplot(data_plot[correlation_columns],
-                 kind='reg',
-                 corner=True)
+    if factor is None:
+        sns.pairplot(data[corr_variables],
+                     kind='reg',
+                     corner=True)
+    else:
+        sns.pairplot(
+            data[np.append(corr_variables, [factor])],
+            hue=factor,
+            kind='reg',
+            corner=True)
 
     save_plot(file_name=file_name,
-              path=os.path.join(*args))
-    plt.close()
-
-
-def corr_plot_split(data_plot, correlation_columns, file_name, factor, *args):
-
-    sns.set()
-    sns.pairplot(
-        data_plot.loc[:, np.append(correlation_columns, [factor])],
-        hue=factor,
-        kind='reg',
-        corner=True)
-
-    save_plot(file_name=file_name,
-              path=os.path.join(*args))
+              path=path_target,
+              message=True)
     plt.close()
 
 

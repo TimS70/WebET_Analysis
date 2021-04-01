@@ -166,7 +166,8 @@ def plot_outcome_over_trials(data_trial, outcome, path_target):
             capsize=5)
 
     save_plot(file_name=outcome + '_vs_trials.png',
-              path=os.path.join(path_target, outcome))
+              path=os.path.join(path_target, outcome),
+              message=True)
     plt.close()
 
 
@@ -191,5 +192,6 @@ def plot_outcome_over_trials_vs_chin(data_trial, outcome, path_target):
             capsize=5)
 
     save_plot(file_name=outcome + '_vs_chin_vs_trials.png',
-              path=os.path.join(path_target, outcome))
+              path=os.path.join(path_target, outcome),
+              message=True)
     plt.close()

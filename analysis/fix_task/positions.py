@@ -40,7 +40,7 @@ def compare_positions(data_trial_fix, outcome, path_target):
         print(f"""No significant results for {outcome}. \n""")
 
     write_csv(position_tests,
-              outcome + '_position_t_test.csv',
+              'positions_' + outcome + '_t_test.csv',
               path_target)
 
 

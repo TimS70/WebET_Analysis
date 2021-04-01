@@ -25,5 +25,6 @@ def plot_top_vs_bottom_positions(data_trial_fix, outcome, path_target):
                    data=outcome_by_y_pos)
 
     save_plot(file_name=outcome + '_top_vs_bottom.png',
-              path=os.path.join(path_target, outcome))
+              path=os.path.join(path_target, outcome),
+              message=True)
     plt.close()

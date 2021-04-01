@@ -8,6 +8,7 @@ from analysis.fix_task.glasses import test_glasses
 from analysis.fix_task.positions import compare_positions
 from analysis.fix_task.randomization import check_randomization
 from data_prep.cleaning.corr_data import clean_corr_data
+from inference.F import anova_outcomes_factor
 from utils.combine import merge_by_index
 from utils.save_data import load_all_three_datasets
 from visualize.all_tasks import corr_matrix, corr_plot_split
@@ -18,7 +19,7 @@ from visualize.fix_task.main import visualize_exemplary_run, fix_heatmaps, \
     hist_plots_quality, plot_outcome_over_trials, \
     plot_outcome_over_trials_vs_chin
 from visualize.fix_task.positions import plot_top_vs_bottom_positions
-
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
 
 def analyze_choice_task(path_origin, path_plots, path_tables):
     print('################################### \n'
@@ -101,36 +102,35 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
     #       f"""{data_subject[['fps', 'offset', 'offset_px', 'precision',
     #                          'precision_px', 'hit_ratio']].describe()} \n""")
 
-    # print(data_subject.loc[
-    #           (data_subject['eyeshadow'] == 1) |
-    #           (data_subject['masquara'] == 1) |
-    #           (data_subject['eyeliner'] == 1) |
-    #           (data_subject['browliner'] == 1),
-    #       ['eyeshadow', 'masquara', 'eyeliner', 'browliner']])
-
+    # data_subject['makeup'] = 0
+    # data_subject.loc[
+    #     (data_subject['eyeshadow'] == 1) |
+    #     (data_subject['masquara'] == 1) |
+    #     (data_subject['eyeliner'] == 1) |
+    #     (data_subject['browliner'] == 1), 'makeup'] = 1
+    #
     # hist_plots_quality(data_subject, path_plots)
-
+    #
     # check_randomization(data_trial, path_plots, path_tables)
 
-    # Probably not necessary, already have in R
-    # corr_analysis(data_trial, data_subject)
+    corr_analysis(data_trial, data_subject)
 
-    # test_chin_rest(data_trial=data_trial,
-    #                data_subject=data_subject,
-    #                path_plots=os.path.join(path_plots, 'chin_rest'),
-    #                path_tables=os.path.join(path_tables, 'chin_rest'))
-    # test_glasses(data_trial=data_trial,
-    #              data_subject=data_subject,
-    #              path_plots=os.path.join(path_plots, 'glasses'),
-    #              path_tables=os.path.join(path_tables, 'glasses'))
+    test_chin_rest(data_trial=data_trial,
+                   data_subject=data_subject,
+                   path_plots=os.path.join(path_plots, 'chin_rest'),
+                   path_tables=os.path.join(path_tables, 'chin_rest'))
+    test_glasses(data_trial=data_trial,
+                 data_subject=data_subject,
+                 path_plots=os.path.join(path_plots, 'glasses'),
+                 path_tables=os.path.join(path_tables, 'glasses'))
 
     # Over the trials
     for outcome in ['offset', 'precision']:
         plot_outcome_over_trials(data_trial, outcome, path_plots)
         plot_outcome_over_trials_vs_chin(data_trial, outcome, path_plots)
         compare_positions(data_trial, outcome, path_tables)
-        plot_top_vs_bottom_positions(data_trial, outcome, path_tables)
-    exit()
+        plot_top_vs_bottom_positions(data_trial, outcome, path_plots)
+
     # Categorical confounders analysis
     for outcome in ['offset', 'precision', 'fps']:
         get_box_plots(
@@ -141,15 +141,29 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
             file_name='box_plots_confounders_vs_' + outcome + '.png',
             path_target=os.path.join(path_plots, outcome))
 
-    # Visualize_exemplary_run
-    data_plot = merge_by_index(data_et, data_trial, 'chin')
-    visualize_exemplary_run(
-        data=data_plot[
-            (data_plot['run_id'] == data_plot['run_id'].unique()[0]) &
-            (data_plot['chin'] == 0)],
-        path_target=os.path.join(path_plots, 'exemplary_runs'))
+    for predictor in ['vertPosition', 'gender', 'ethnic',
+                     'degree', 'browser', 'glasses', 'sight', 'makeup']:
+        anova_outcomes_factor(data=data_subject,
+                              factor=predictor,
+                              path=os.path.join(path_tables, 'confounders'))
 
-    # Heatmap for all gaze points
-    fix_heatmaps(
-        data=data_et,
-        path_target=os.path.join(path_plots, 'fix_heatmaps'))
+    print('Test vertical position')
+    for outcome in ['offset', 'precision', 'fps']:
+        print(outcome)
+        tukey = pairwise_tukeyhsd(endog=data_subject[outcome],
+                                  groups=data_subject['vertPosition'],
+                                  alpha=0.05)
+        print(tukey)
+
+    # Visualize_exemplary_run
+    # data_plot = merge_by_index(data_et, data_trial, 'chin')
+    # visualize_exemplary_run(
+    #     data=data_plot[
+    #         (data_plot['run_id'] == data_plot['run_id'].unique()[0]) &
+    #         (data_plot['chin'] == 0)],
+    #     path_target=os.path.join(path_plots, 'exemplary_runs'))
+    #
+    # # Heatmap for all gaze points
+    # fix_heatmaps(
+    #     data=data_et,
+    #     path_target=os.path.join(path_plots, 'fix_heatmaps'))

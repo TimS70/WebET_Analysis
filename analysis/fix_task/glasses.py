@@ -6,7 +6,7 @@ from analysis.fix_task.sight import plot_sight_vs_outcomes
 from inference.F import anova_outcomes_factor
 from inference.t_test import t_test_outcomes_vs_factor
 from utils.save_data import write_csv
-from visualize.all_tasks import split_violin_plot
+from visualize.all_tasks import violin_plot
 
 
 def test_glasses(data_trial, data_subject, path_plots, path_tables):
@@ -34,7 +34,7 @@ def test_glasses(data_trial, data_subject, path_plots, path_tables):
         path=path_tables)
 
     for outcome in ['offset', 'precision', 'fps', 'hit_mean']:
-        split_violin_plot(
+        violin_plot(
             data_trial=data_trial,
             outcome=outcome,
             factor='chin', split_factor='glasses_binary',

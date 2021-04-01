@@ -146,7 +146,7 @@ ggpairs(
     progress = F) +
 	theme_bw()
 
-ggsave(file.path(path_results, 'correlations', 'corr_plot.pdf'), 
+ggsave(file.path(path_results, 'correlations', 'scatter_matrix.pdf'),
 	   width=5.5, height=5)
 
 
