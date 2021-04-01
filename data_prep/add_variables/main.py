@@ -7,7 +7,6 @@ from data_prep.add_variables.both_tasks.subject import add_fps_subject_level, \
     add_max_trials, \
     add_glasses_binary, add_recorded_date, add_window
 from data_prep.add_variables.both_tasks.trial import add_fps_trial_level, \
-    add_window_size, \
     add_exact_trial_duration, add_new_task_nr, add_trial_type_new, \
     add_fix_task, add_within_task_index
 from data_prep.add_variables.choice.aoi import create_aoi_columns, \

@@ -361,14 +361,11 @@ def add_next_trial(data, data_trial):
 
 
 def add_fix_task(data_trial):
-    print('data_trial: Add fixation task. \n')
     data_trial['fixTask'] = 0
-
     data_trial.loc[
         (data_trial['trial_type'] == 'eyetracking-fix-object') &
         (data_trial['trial_duration'] == 5000),
-        'fixTask'
-    ] = 1
+        'fixTask'] = 1
 
     return data_trial
 

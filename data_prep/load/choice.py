@@ -42,7 +42,7 @@ def load_choice_data(path_origin, path_target):
         # 'browser', 'vertPosition',
         'run_id', 'prolificID', 'chinFirst', 'choiceTask_amountLeftFirst',
         'age', 'gender', 'ethnic',
-        'degree', 'window',
+        'degree', 'window', 'window_x', 'window_y',
         'Country of Birth', 'Current Country of Residence',
         'First Language', 'Nationality', 'Sex',
         'Autistic Spectrum Disorder', 'fps',

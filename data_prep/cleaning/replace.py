@@ -22,7 +22,7 @@ def clean_subject_variables(path_origin, path_target):
         # 'session_id', 'reviewed_at_datetime',
         # 'entered_code', 'Webcam',
         'run_id', 'prolificID', 'chinFirst', 'choiceTask_amountLeftFirst',
-        'browser', 'window',
+        'browser', 'window', 'window_x', 'window_y',
         'chosenAmount', 'chosenDelay',
         'webcam_fps', 'webcam_height', 'webcam_width',
         'age', 'gender', 'ethnic',

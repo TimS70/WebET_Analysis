@@ -30,8 +30,7 @@ def load_fix_data(path_origin, path_target):
             'run_id', 'prolificID', 'subject', 'chinFirst',
             'trial_index', 'task_nr', 'rt', 'stimulus', 'key_press',
             'time_elapsed', 'recorded_at', 'window_width', 'window_height',
-            'success', 'chin', 'x_pos', 'y_pos', 'window_width_max',
-            'window_height_max', 'window_diagonal_max', 'window_diagonal',
+            'success', 'chin', 'x_pos', 'y_pos',
             't_startTrial', 'trial_duration', 'trial_duration_exact',
             'task_nr_new',
             'trial_type_new', 'trial_type_nr', 'fixTask', 'withinTaskIndex',
@@ -51,7 +50,7 @@ def load_fix_data(path_origin, path_target):
         'First Language', 'Nationality', 'Sex',
         'Student Status', 'employment_status', 'fullTime_binary',
         'sight', 'glasses', 'glasses_binary',
-        'vertPosition', 'browser', 'window',
+        'vertPosition', 'browser', 'window', 'window_x', 'window_y',
         'eyeshadow', 'masquara', 'eyeliner', 'browliner',
         'Autistic Spectrum Disorder', 'fps']]
 

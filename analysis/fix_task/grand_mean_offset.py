@@ -10,7 +10,6 @@ from visualize.all_tasks import save_plot
 from utils.save_data import write_csv, load_all_three_datasets
 
 
-
 def grand_mean_offset(path_origin, path_plots, path_tables):
     data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
@@ -22,14 +21,15 @@ def grand_mean_offset(path_origin, path_plots, path_tables):
     data_subject = merge_by_subject(data_subject, grouped, 'x_mean', 'y_mean')
 
     data_subject = data_subject.assign(
-        x_mean_px=data_subject['x_mean'] * data_subject['window'],
-        y_mean_px=data_subject['y_mean'] * data_subject['window'])
+        x_mean_px=data_subject['x_mean'] * data_subject['window_x'],
+        y_mean_px=data_subject['y_mean'] * data_subject['window_y'])
 
     data_subject = data_subject.assign(
         grand_offset=euclidean_distance(data_subject['x_mean'], 0.5,
                                         data_subject['y_mean'], 0.5),
-        grand_offset_px=euclidean_distance(data_subject['x_mean_px'], 0.5,
-                                           data_subject['y_mean_px'], 0.5))
+        grand_offset_px=euclidean_distance(
+            data_subject['x_mean_px'], data_subject['window_x'] / 2,
+            data_subject['y_mean_px'], data_subject['window_y'] / 2))
 
     summary = data_subject[['x_mean', 'y_mean',
                             'grand_offset', 'grand_offset_px']].describe()
