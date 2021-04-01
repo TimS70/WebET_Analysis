@@ -16,35 +16,6 @@ def invert_y_pos(data_trial):
     return data_trial
 
 
-def add_window_size(data):
-    grouped = data.groupby(["run_id"], as_index=False)[[
-        "window_width", "window_height"]].apply(max)
-
-    grouped.columns = ["run_id", "window_width_max", "window_height_max"]
-
-    grouped['window_diagonal_max'] = np.sqrt(
-        grouped['window_width_max'] ** 2 + grouped['window_height_max'] ** 2)
-
-    if "window_width_max" in data.columns:
-        data = data.drop(columns=['window_width_max'])
-    if "window_height_max" in data.columns:
-        data = data.drop(columns=['window_height_max'])
-    if "window_diagonal_max" in data.columns:
-        data = data.drop(columns=['window_diagonal_max'])
-
-    data = data.merge(grouped, on=['run_id'], how='left')
-
-    data['window_diagonal'] = np.sqrt(
-        data['window_width'] ** 2 + data['window_height'] ** 2)
-
-    print(
-        f"""data_trial: Added window height, width, and """
-        f"""diagonal variables. \n"""
-    )
-
-    return data
-
-
 def add_exact_trial_duration(data):
     data["t_startTrial"] = pd.concat(
         [pd.Series([0]), data["time_elapsed"]],

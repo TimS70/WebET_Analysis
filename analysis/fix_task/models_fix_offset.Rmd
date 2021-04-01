@@ -54,9 +54,9 @@ get_packages(c( 'boot',
 ```{r}
 path = file.path(root, 'data', 'fix_task', 'added_var')
 
-data_subject = read.csv(file.path(root, path, 'data_subject.csv'))
-data_trial = read.csv(file.path(root, path, 'data_trial.csv'))
-data_et = read.csv(file.path(root, path, 'data_et.csv'))
+data_subject = read.csv(file.path(path, 'data_subject.csv'))
+data_trial = read.csv(file.path(path, 'data_trial.csv'))
+data_et = read.csv(file.path(path, 'data_et.csv'))
 
 summarize_datasets(data_et, data_trial, data_subject)
 ```
@@ -70,18 +70,6 @@ data_subject$ethnic = factor(
 	data_subject$ethnic,
 	levels = c("caucasian", "hispanic", "asian", "black"), # Faktorstufen
 	labels = c("caucasian", "hispanic", "asian", "black"))
-
-# Window
-grouped = data_trial %>%
-	group_by(run_id) %>%
-	dplyr::summarise(
-		window_diagonal = mean(window_diagonal_max), 
-		.groups = 'keep')
-
-if ('window_diagonal' %in% names(data_subject)) {
-        data_subject = data_subject %>% dplyr::select(!'window_diagonal')
-    }
-data_subject = merge(data_subject, grouped, by='run_id')
 
 data_trial = merge_mean_by_subject(data_trial, data_subject, 'age')
 ```
@@ -175,23 +163,6 @@ summary(aov(data_subject$offset ~ data_subject$degree))
 summary(aov(data_subject$offset ~ data_subject$ethnic))
 ```
 
-
-# Linear model (Fixed Effects, no MLA)
-Average offset=0.17 = 17%
-```{r}
-lm_null = lm(offset ~ 1, data = data_trial %>% filter(!is.na(offset)))
-summary(lm_null)
-
-lm_sub_0_control = lm(offset ~ window_diagonal + fps + age + ethnic, 
-					  data = data_subject)
-
-summary(lm_sub_0_control)
-
-lm_sub_1 = lm(offset ~ window_diagonal + fps + age + ethnic + glasses_binary,
-			  data = data_subject)
-summary(lm_sub_1)
-anova(lm_sub_0_control, lm_sub_1)
-```
 
 # MLA
 
@@ -445,3 +416,22 @@ https://cran.rstudio.com/web/packages/HLMdiag/index.html
 
 #mdffits() #calculate measures of the change in the fixed effects estimates based on the deletetion of an observation, or group of observations
 ```
+
+
+# Linear model (Fixed Effects, no MLA)
+Average offset=0.17 = 17%
+```{r}
+lm_null = lm(offset ~ 1, data = data_trial %>% filter(!is.na(offset)))
+summary(lm_null)
+
+lm_sub_0_control = lm(offset ~ window_diagonal + fps + age + ethnic, 
+					  data = data_subject)
+
+summary(lm_sub_0_control)
+
+lm_sub_1 = lm(offset ~ window_diagonal + fps + age + ethnic + glasses_binary,
+			  data = data_subject)
+summary(lm_sub_1)
+anova(lm_sub_0_control, lm_sub_1)
+```
+

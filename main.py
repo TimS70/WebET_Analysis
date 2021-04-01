@@ -6,6 +6,7 @@ import pandas as pd
 from analysis.demographics import analyze_demographics
 from analysis.dropouts.main import analyze_dropouts
 from analysis.fix_task.gaze_saccade import check_gaze_saccade
+from analysis.fix_task.grand_mean_offset import grand_mean_offset
 from analysis.main import analyze_fix_task, analyze_choice_task
 from data_prep.add_variables.data_quality.main import add_data_quality
 from data_prep.add_variables.fit_k.call_from_py import add_log_k
@@ -160,6 +161,9 @@ def analyze_fix():
           '################################### \n')
 
     path_plots = os.path.join('results', 'plots', 'fix_task')
+    path_tables = os.path.join('results', 'tables', 'fix_task')
+    path_origin = os.path.join('data', 'fix_task', 'added_var')
+
     # check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',
     #                    'added_var'),
     #                    path_target=os.path.join(path_plots, 'saccades'),
@@ -170,10 +174,13 @@ def analyze_fix():
     #                    path_target=os.path.join(path_plots),
     #                    individual=False)
 
-    analyze_fix_task(
-        path_origin=os.path.join('data', 'fix_task', 'added_var'),
-        path_plots=os.path.join(path_plots),
-        path_tables=os.path.join('results', 'tables', 'fix_task'))
+    grand_mean_offset(path_origin=path_origin,
+                      path_plots=path_plots,
+                      path_tables=path_tables)
+
+    analyze_fix_task(path_origin=path_origin,
+                     path_plots=path_plots,
+                     path_tables=path_tables)
 
 
 def analyze_choice():

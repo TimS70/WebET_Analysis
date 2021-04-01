@@ -7,6 +7,7 @@ import seaborn as sns
 from tqdm import tqdm
 
 from utils.combine import merge_by_index
+from utils.euclidean import euclidean_distance
 from utils.path import makedir
 from visualize.all_tasks import save_plot
 
@@ -175,13 +176,6 @@ def shift_t_task_for_fix_cross(data):
     return data
 
 
-def euclidean_distance(x, x_target, y, y_target):
-    x_diff = x - x_target
-    y_diff = y - y_target
-
-    return np.sqrt(x_diff ** 2 + y_diff ** 2)
-
-
 def create_median_line(data):
     bin_array = np.arange(-1500, 5000, 100)
     bins = pd.cut(data['t_task'], bin_array)
@@ -228,13 +222,6 @@ def create_new_pos_datasets(data_et_fix):
                              'new_x_pos', 'new_y_pos']]
 
     return data_trial
-
-
-def euclidean_distance(x, x_target, y, y_target):
-    x_diff = x - x_target
-    y_diff = y - y_target
-
-    return np.sqrt(x_diff ** 2 + y_diff ** 2)
 
 
 def create_median_line(data):

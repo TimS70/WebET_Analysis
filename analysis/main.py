@@ -111,11 +111,12 @@ def analyze_choice_task(path_origin, path_plots, path_tables):
 def analyze_fix_task(path_origin, path_plots, path_tables):
 
     data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
+
     descriptives = round(data_subject[['offset', 'offset_px',
                                        'precision', 'precision_px',
                                        'fps', 'hit_ratio']].describe(), 4)
 
-    write_csv(data_frame=descriptives, file_name='descriptives.csv',
+    write_csv(data=descriptives, file_name='descriptives.csv',
               path=path_tables, index=True)
 
     print(f"""Describe data quality: \n"""
@@ -185,14 +186,14 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
         print(tukey)
 
     # Visualize_exemplary_run
-    # data_plot = merge_by_index(data_et, data_trial, 'chin')
-    # visualize_exemplary_run(
-    #     data=data_plot[
-    #         (data_plot['run_id'] == data_plot['run_id'].unique()[0]) &
-    #         (data_plot['chin'] == 0)],
-    #     path_target=os.path.join(path_plots, 'exemplary_runs'))
-    #
-    # # Heatmap for all gaze points
-    # fix_heatmaps(
-    #     data=data_et,
-    #     path_target=os.path.join(path_plots, 'fix_heatmaps'))
+    data_plot = merge_by_index(data_et, data_trial, 'chin')
+    visualize_exemplary_run(
+        data=data_plot[
+            (data_plot['run_id'] == data_plot['run_id'].unique()[0]) &
+            (data_plot['chin'] == 0)],
+        path_target=os.path.join(path_plots, 'exemplary_runs'))
+
+    # Heatmap for all gaze points
+    fix_heatmaps(
+        data=data_et,
+        path_target=os.path.join(path_plots, 'fix_heatmaps'))

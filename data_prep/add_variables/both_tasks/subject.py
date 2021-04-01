@@ -8,6 +8,7 @@ from tqdm import tqdm
 
 from utils.combine import merge_by_subject
 from visualize.all_tasks import save_plot
+import numpy as np
 
 
 def add_fps_subject_level(data_subject, data_trial):
@@ -26,17 +27,13 @@ def add_fps_subject_level(data_subject, data_trial):
 
 
 def add_max_trials(data_subject, data_trial):
-    grouped_max_trial = data_trial \
+    grouped = data_trial \
         .groupby(['run_id'], as_index=False) \
         .agg(max_trial=('trial_index', 'max'))
 
-    data_subject = data_subject \
-        .merge(grouped_max_trial,
-               on=['run_id'],
-               how='left')
+    data_subject = merge_by_subject(data_subject, grouped, 'max_trial')
 
     example = data_subject[['run_id', 'prolificID', 'max_trial']].head(5)
-
     print(f"""data_subject: Added max_trial: \n """
           f"""{example} \n""")
 
@@ -45,9 +42,15 @@ def add_max_trials(data_subject, data_trial):
 
 def add_window(data_subject, data_trial):
     grouped = data_trial \
-        .groupby(['run_id'], as_index=False) \
-        .agg(window=('window_diagonal', 'max'))
-    data_subject = merge_by_subject(data_subject, grouped, 'window')
+        .groupby(["run_id"], as_index=False) \
+        .agg(window_x=('window_width', 'max'),
+             window_y=('window_height', 'max'))
+
+    grouped['window'] = np.sqrt(
+        grouped['window_x'] ** 2 + grouped['window_y'] ** 2)
+
+    data_subject = merge_by_subject(data_subject, grouped,
+                                    'window', 'window_x', 'window_y')
 
     return data_subject
 
@@ -57,8 +60,7 @@ def add_glasses_binary(data_subject):
         .replace({'contactLenses': 0,
                   'glasses': 1,
                   'notCorrected': 0,
-                  'perfectSight': 0}
-                 )
+                  'perfectSight': 0})
 
     n_missing = len(data_subject.loc[
                     pd.isna(data_subject['glasses_binary']), :])

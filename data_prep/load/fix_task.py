@@ -51,7 +51,7 @@ def load_fix_data(path_origin, path_target):
         'First Language', 'Nationality', 'Sex',
         'Student Status', 'employment_status', 'fullTime_binary',
         'sight', 'glasses', 'glasses_binary',
-        'vertPosition', 'browser',
+        'vertPosition', 'browser', 'window',
         'eyeshadow', 'masquara', 'eyeliner', 'browliner',
         'Autistic Spectrum Disorder', 'fps']]
 

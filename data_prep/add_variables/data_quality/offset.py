@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from utils.combine import merge_by_index, merge_by_subject
+from utils.euclidean import euclidean_distance
 from visualize.fix_task.main import plot_hit_means_per_dot
 
 
@@ -55,14 +56,6 @@ def add_n_valid_dots(data_subject, data_trial):
           f"""{freq_table} \n\n"""
           f"""{data_subject[['run_id', 'fps', 'n_valid_dots']]}""")
     return data_subject
-
-
-def euclidean_distance(x, x_target, y, y_target):
-    x_diff = x - x_target
-    y_diff = y - y_target
-    output = np.sqrt(x_diff ** 2 + y_diff ** 2)
-
-    return output
 
 
 def add_offset(data_et):

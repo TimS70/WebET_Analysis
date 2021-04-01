@@ -34,7 +34,7 @@ def corr_analysis(data_trial, data_subject, path_plots, path_tables):
     plt.close()
 
     matrix = combine_corr_matrix(data=data_plot, variables=corr_columns)
-    write_csv(data_frame=matrix.reset_index(),
+    write_csv(data=matrix.reset_index(),
               file_name='corr_matrix_trial.csv',
               path=path_tables)
 
@@ -59,7 +59,7 @@ def corr_analysis(data_trial, data_subject, path_plots, path_tables):
     plt.close()
 
     matrix = combine_corr_matrix(data=data_plot, variables=corr_columns)
-    write_csv(data_frame=matrix.reset_index(),
+    write_csv(data=matrix.reset_index(),
               file_name='corr_matrix_subject.csv',
               path=path_tables)
 

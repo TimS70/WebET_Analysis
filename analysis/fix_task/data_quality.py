@@ -39,68 +39,6 @@ def group_within_task_index(data, group_var, var_name):
     return output
 
 
-def grand_mean_offset(data_et_fix, data_trial):
-    grouped = data_et_fix.groupby(
-        ['run_id', 'trial_index'],
-        as_index=False)[['x', 'y']].mean() \
-        .rename(columns={'x': 'x_mean', 'y': 'y_mean'})
-
-    data_trial = merge_by_index(data_trial, grouped, 'x_mean')
-    data_trial = merge_by_index(data_trial, grouped, 'y_mean')
-
-    data_trial['x_mean_px'] = \
-        data_trial['x_mean'] * data_trial['window_width']
-    data_trial['y_mean_px'] = \
-        data_trial['y_mean'] * data_trial['window_height']
-
-    data_trial['grand_deviation'] = euclidean_distance(
-        data_trial['x_mean'], data_trial['x_pos'],
-        data_trial['y_mean'], data_trial['y_pos'])
-
-    summary = data_trial['grand_deviation'].describe()
-
-    write_csv(
-        summary,
-        'grand_mean.csv',
-        'results', 'tables', 'fix_task')
-
-    print(
-        f"""Grand mean deviation: \n"""
-        f"""{summary} \n""")
-
-    grand_mean_positions = data_trial \
-        .loc[data_trial['fixTask'] == 1, :] \
-        .groupby(
-            ['x_pos', 'y_pos'],
-            as_index=False).agg(
-            grand_dev=('grand_deviation', 'mean'),
-            grand_dev_std=('grand_deviation', 'std'))
-
-    write_csv(
-        grand_mean_positions,
-        'grand_mean_positions.csv',
-        'results', 'tables', 'fix_task')
-
-    font_size = 15
-    plt.rcParams.update({'font.size': font_size})
-
-    plt.hist(data_trial['grand_deviation'], bins=20)
-    plt.title('Grand mean deviation')
-    save_plot(file_name='grand_mean.png',
-              path=os.path.join('results', 'plots',
-                                'fix_task', 'offset'))
-    plt.close()
-
-    return data_trial
-
-
-def euclidean_distance(x, x_target, y, y_target):
-    x_diff = x - x_target
-    y_diff = y - y_target
-    output = np.sqrt(x_diff ** 2 + y_diff ** 2)
-
-    return output
-
 
 def compare_conditions_subject(data_subject, data_trial_fix, outcome):
     data_subject = separate_outcomes_by_condition(

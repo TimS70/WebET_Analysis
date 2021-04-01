@@ -11,7 +11,7 @@ else:
 from tqdm import tqdm
 
 
-def create_et_data_2(data, n_bins=5):
+def create_et_data(data, n_bins=5):
     data["et_data"] = data['et_data'] \
         .apply(str) \
         .str.replace('$', ',', regex=False)
@@ -42,7 +42,7 @@ def create_et_data_2(data, n_bins=5):
     return data_et
 
 
-def create_et_data_1(data):
+def create_et_data_2(data):
     data["et_data"] = data['et_data'].apply(str)
 
     df_et_data = data.loc[(pd.notna(data['et_data'])) &

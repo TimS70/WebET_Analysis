@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from analysis.fix_task.data_quality import euclidean_distance
 from utils.combine import merge_by_index
+from utils.euclidean import euclidean_distance
 
 
 def merge_xy_means(data):

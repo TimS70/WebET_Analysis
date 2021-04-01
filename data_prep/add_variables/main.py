@@ -40,8 +40,6 @@ def add_variables_global(path_origin, path_target):
         .agg(x_count=('x', 'count'))
     data_trial = merge_by_index(data_trial, grouped, 'x_count')
 
-    # Bug
-    data_trial = add_window_size(data_trial)
     data_trial = add_exact_trial_duration(data_trial)
     data_trial = add_new_task_nr(data_trial)
     data_trial = add_trial_type_new(data_trial)
