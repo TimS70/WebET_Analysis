@@ -208,16 +208,21 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    runs_no_saccade = [144, 171, 380]
-    clean_global_data(
-        path_origin=os.path.join('data', 'all_trials', 'added_var'),
-        path_target=os.path.join('data', 'all_trials', 'cleaned'),
-        prolific=True, approved=True, one_attempt=True,
-        max_t_task=5500, min_fps=3,
-        additionally_bad_runs=runs_no_saccade, exclude_runs_reason='No saccade',
-        max_missing_et=10,
-        full_runs=True, valid_sight=True,
-        follow_instruction=True, correct_webgazer_clock=True,
-        complete_fix_task=True,
-        approval_rate=0.5)
+    clean_data_choice(
+        us_sample=False,
+        min_hit_ratio=0.6,
+        max_precision=None,  # 0.15,
+        max_offset=None,  # 0.5,
+        min_fps=5,
+        min_rt=400, max_rt=10000,
+        min_choice_percentage=None,  # 0.01,
+        max_choice_percentage=None,  # 0.99,
+        # exclude_runs=[
+        #     12, 23, 93, 144, 243, 258, 268, 343, 356, 373, 384, 386, 387,
+        #     393, 404, 379, 410, 411, 417, 410, 417, 425, 429, 440, 441, 445,
+        #     449, 458, 462, 475, 425, 488, 493],
+        # exclude_runs_reason='No clear AOIs',
+        filter_log_k=False,
+        path_origin=os.path.join('data', 'choice_task', 'added_var'),
+        path_target=os.path.join('data', 'choice_task', 'cleaned'))
     # main(new_data=True)
