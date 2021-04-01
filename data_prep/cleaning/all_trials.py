@@ -62,8 +62,9 @@ def clean_global_data(path_origin, path_target,
         summarize_datasets(data_et, data_trial, data_subject)
 
         print('Match runs: ')
-        data_subject, data_trial, data_et = match_runs(
-            data_subject, data_trial, data_et)
+
+    data_subject, data_trial, data_et, n_missing_trial, n_missing_et = \
+        match_runs(data_subject, data_trial, data_et)
 
     invalid_runs = []
     n_runs = len(data_trial['run_id'].unique())
@@ -71,17 +72,26 @@ def clean_global_data(path_origin, path_target,
 
     if full_runs:
         # Not enough trials
-        runs_full_trial = data_trial \
-            .loc[data_trial['trial_type_new'] == 'end', 'run_id'] \
-            .unique()
+        runs_full_trial = data_trial.loc[
+            data_trial['trial_type_new'] == 'end', 'run_id'].unique()
 
         runs_not_full_trial = np.setdiff1d(data_trial['run_id'].unique(),
                                            runs_full_trial)
 
         invalid_runs = combine_runs(invalid_runs, runs_not_full_trial)
+
         summary.append(['incomplete',
-                        len(runs_not_full_trial),
-                        len(runs_not_full_trial) / n_runs])
+                        len(runs_not_full_trial) + n_missing_trial,
+                        (len(runs_not_full_trial) + n_missing_trial) / n_runs])
+
+    if max_missing_et is not None:
+        runs_full_but_not_enough_et = filter_full_but_no_et_data(
+            data_et, data_trial, max_missing_et)
+        invalid_runs = combine_runs(invalid_runs, runs_full_but_not_enough_et)
+        summary.append(
+            ['runs_not_enough_et',
+             len(runs_full_but_not_enough_et) + n_missing_et,
+             (len(runs_full_but_not_enough_et) + n_missing_et) / n_runs])
 
     if complete_fix_task:
         # Fixation task. No validation possible
@@ -136,14 +146,6 @@ def clean_global_data(path_origin, path_target,
         print(f"""Approval rate and Prolific Score: \n"""
               f"""{approval_summary} \n""")
 
-
-    if max_missing_et is not None:
-        runs_full_but_not_enough_et = filter_full_but_no_et_data(
-            data_et, data_trial, max_missing_et)
-        invalid_runs = combine_runs(invalid_runs, runs_full_but_not_enough_et)
-        summary.append(['runs_full_but_not_enough_et',
-                        len(runs_full_but_not_enough_et),
-                        len(runs_full_but_not_enough_et) / n_runs])
 
     if min_fps is not None:
         runs_low_fps = filter_runs_low_fps(data_trial, data_et, min_fps)

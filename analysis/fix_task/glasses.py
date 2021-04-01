@@ -35,10 +35,9 @@ def test_glasses(data_trial, data_subject, path_plots, path_tables):
 
     for outcome in ['offset', 'precision', 'fps', 'hit_mean']:
         violin_plot(
-            data_trial=data_trial,
+            data=data_trial,
             outcome=outcome,
             factor='chin', split_factor='glasses_binary',
-            file_name='split_violin_chin_vs_' + outcome + '_vs_glasses.png',
             path=path_plots)
 
     print('Check only those with high fps (Semmelmann & Weigelt, 2019)')

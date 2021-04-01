@@ -9,9 +9,10 @@ from analysis.fix_task.positions import compare_positions
 from analysis.fix_task.randomization import check_randomization
 from data_prep.cleaning.corr_data import clean_corr_data
 from inference.F import anova_outcomes_factor
+from inference.t_test import t_test_outcomes_vs_factor
 from utils.combine import merge_by_index
 from utils.save_data import load_all_three_datasets
-from visualize.all_tasks import corr_matrix, corr_plot_split
+from visualize.all_tasks import save_plot
 from visualize.all_tasks import get_box_plots
 from visualize.choice import plot_example_eye_movement, \
     plot_categorical_confounders
@@ -20,6 +21,9 @@ from visualize.fix_task.main import visualize_exemplary_run, fix_heatmaps, \
     plot_outcome_over_trials_vs_chin
 from visualize.fix_task.positions import plot_top_vs_bottom_positions
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 
 def analyze_choice_task(path_origin, path_plots, path_tables):
     print('################################### \n'
@@ -45,9 +49,17 @@ def analyze_choice_task(path_origin, path_plots, path_tables):
         'attributeIndex', 'optionIndex', 'payneIndex',
         'choice_rt']
 
-    corr_plot_split(data_plot, corr_columns,
-                    'corr_vars_vs_chinFirst_trial.png', 'chinFirst',
-                    'results', 'plots', 'choice_task', 'correlations')
+    sns.set()
+    sns.pairplot(data=data_plot,
+                 vars=[...],
+                 hue='chinFirst',
+                 kind='reg',
+                 corner=True,
+                 plot_kws=dict(scatter_kws=dict(s=0.1)))
+    save_plot(file_name='corr_vars_vs_chinFirst_trial.png',
+              path=path_plots,
+              message=True)
+    plt.close()
 
     corr_columns = [
         'choseLL', 'choice_rt',
@@ -76,7 +88,7 @@ def analyze_choice_task(path_origin, path_plots, path_tables):
         'choseLL', 'k', 'attributeIndex',
         'optionIndex', 'payneIndex', 'trial_duration_exact']
 
-    corr_plot_split(data_plot, corr_columns,
+    scatter_matrix(data_plot, corr_columns,
                     'corr_vars_vs_chinFirst_trial.png', 'chinFirst',
                     'results', 'plots', 'choice_task', 'correlations')
 
@@ -113,7 +125,17 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
     #
     # check_randomization(data_trial, path_plots, path_tables)
 
-    corr_analysis(data_trial, data_subject)
+    corr_analysis(data_trial, data_subject, path_plots, path_tables)
+    exit()
+    # t-test for glasses vs. age
+    t_test_outcomes_vs_factor(
+        data=data_subject,
+        factor='glasses_binary',
+        dependent=False,
+        outcomes=['age'],
+        file_name='t_test_glasses_vs_age.csv',
+        path=path_tables)
+
 
     test_chin_rest(data_trial=data_trial,
                    data_subject=data_subject,

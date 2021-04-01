@@ -16,38 +16,35 @@ def clean_runs(data_raw, excluded_runs, name='data'):
 
 
 def match_runs(data_subject, data_trial, data_et):
+
     # match data_trial
     runs_subject_but_not_trial = data_subject.loc[
         ~data_subject['run_id'].isin(data_trial['run_id']),
         'run_id'].unique()
+    n_missing_trial = len(runs_subject_but_not_trial)
 
-    print(
-        f"""n={len(runs_subject_but_not_trial)} approved runs """
-        f"""had no data on cognition_run.""")
+    print(f"""n={n_missing_trial} approved runs """
+          f"""had no trial data on cognition_run.""")
 
-    data_subject = data_subject.loc[
-                   data_subject['run_id'].isin(data_trial['run_id']), :]
+    data_subject = data_subject[
+        data_subject['run_id'].isin(data_trial['run_id'])]
 
     # Match data_et
     runs_subject_but_not_et = data_subject.loc[
         ~data_subject['run_id'].isin(data_et['run_id']),
         'run_id'].unique()
+    n_missing_et = len(runs_subject_but_not_et)
 
-    print(
-        f"""n={len(runs_subject_but_not_et)} approved runs """
-        f"""had no eye-tracking data on cognition_run. \n""")
+    print(f"""n={n_missing_et} approved runs """
+          f"""had no eye-tracking data on cognition_run. \n""")
 
-    data_subject = data_subject.loc[
-                   data_subject['run_id'].isin(data_et['run_id']), :]
-
-    data_trial = data_trial.loc[
-                 data_trial['run_id'].isin(data_subject['run_id']), :]
-    data_et = data_et.loc[
-              data_et['run_id'].isin(data_subject['run_id']), :]
+    data_subject = data_subject[data_subject['run_id'].isin(data_et['run_id'])]
+    data_trial = data_trial[data_trial['run_id'].isin(data_subject['run_id'])]
+    data_et = data_et[data_et['run_id'].isin(data_subject['run_id'])]
 
     summarize_datasets(data_et, data_trial, data_subject)
 
-    return data_subject, data_trial, data_et
+    return data_subject, data_trial, data_et, n_missing_trial, n_missing_et
 
 
 def filter_approved_runs(data_subject, data_trial, data_et):

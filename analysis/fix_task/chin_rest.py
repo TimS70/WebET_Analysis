@@ -12,13 +12,13 @@ def test_chin_rest(data_trial, data_subject, path_plots, path_tables):
                     outcome=outcome, factor='chin',
                     path=os.path.join(path_plots))
 
-    t_test_outcomes_vs_factor(
-        data=data_trial,
-        dependent=True,
-        factor='chin',
-        outcomes=['offset', 'precision', 'fps', 'hit_mean'],
-        file_name='t_test_chin_vs_outcomes.csv',
-        path=os.path.join(path_tables))
+    t_test_outcomes_vs_factor(data=data_trial,
+                              dependent=True,
+                              factor='chin',
+                              outcomes=['offset', 'precision', 'fps',
+                                        'hit_mean'],
+                              file_name='t_test_chin_vs_outcomes.csv',
+                              path=os.path.join(path_tables))
 
     # Check only those with high fps (Semmelmann & Weigelt, 2019)
     run_high_fps = data_subject.loc[
