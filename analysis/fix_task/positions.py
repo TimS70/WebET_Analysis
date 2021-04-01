@@ -48,13 +48,12 @@ def outcome_by_position_long(data_trial_fix, outcome_var):
     output_long = data_trial_fix.groupby(
         ['run_id', 'x_pos', 'y_pos'],
         as_index=False)[outcome_var].median()
-    output_long['position'] = list(map(
-        lambda x, y:
-        str(round(x * 100, 0)) + '%_' +
-        str(round(y * 100, 0)) + '%',
-        output_long['x_pos'],
-        output_long['y_pos']
-    ))
+
+    output_long['position'] = list(map(lambda x, y:
+                                       str(round(x * 100, 0)) + '%_' +
+                                       str(round(y * 100, 0)) + '%',
+                                       output_long['x_pos'],
+                                       output_long['y_pos']))
 
     output_long['position_nr'] = output_long['position'] \
         .replace(
@@ -69,17 +68,16 @@ def outcome_by_position_long(data_trial_fix, outcome_var):
 
 
 def outcome_by_position_wide(data_trial_fix, outcome_var):
-    output_long = outcome_by_position_long(
-        data_trial_fix, outcome_var)
+    output_long = outcome_by_position_long(data_trial_fix, outcome_var)
 
-    output_wide = pd.pivot_table(
-        output_long,
-        index='run_id',
-        columns='position',
-        values=outcome_var).reset_index()
+    output_wide = pd.pivot_table(output_long,
+                                 index='run_id',
+                                 columns='position',
+                                 values=outcome_var).reset_index()
 
     # noinspection PyArgumentList
-    null_data = output_wide.loc[output_wide.isnull().any(axis=1), :]
+    null_data = output_wide[output_wide.isnull().any(axis=1)]
+
     if len(null_data) > 0:
         print(f"""! Attention: Missing values: \n"""
               f"""{null_data} \n""")
@@ -101,11 +99,9 @@ def pos_combinations():
     for i in range(0, len(combinations)):
         combinations[i] = np.sort(combinations[i], axis=None)
 
-    combinations = pd.DataFrame(
-        combinations, columns=['col1', 'col2'])
+    combinations = pd.DataFrame(combinations, columns=['col1', 'col2'])
 
-    combinations = combinations.loc[
-                   combinations['col1'] != combinations['col2'], :] \
+    combinations = combinations[combinations['col1'] != combinations['col2']] \
         .drop_duplicates() \
         .reset_index(drop=True)
 

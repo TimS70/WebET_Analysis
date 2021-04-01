@@ -43,6 +43,15 @@ def add_max_trials(data_subject, data_trial):
     return data_subject
 
 
+def add_window(data_subject, data_trial):
+    grouped = data_trial \
+        .groupby(['run_id'], as_index=False) \
+        .agg(window=('window_diagonal', 'max'))
+    data_subject = merge_by_subject(data_subject, grouped, 'window')
+
+    return data_subject
+
+
 def add_glasses_binary(data_subject):
     data_subject['glasses_binary'] = data_subject['sight'] \
         .replace({'contactLenses': 0,

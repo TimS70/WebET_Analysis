@@ -5,7 +5,7 @@ import pandas as pd
 from analysis.choice_task.test_clusters import test_transition_clusters
 from data_prep.add_variables.both_tasks.subject import add_fps_subject_level, \
     add_max_trials, \
-    add_glasses_binary, add_recorded_date
+    add_glasses_binary, add_recorded_date, add_window
 from data_prep.add_variables.both_tasks.trial import add_fps_trial_level, \
     add_window_size, \
     add_exact_trial_duration, add_new_task_nr, add_trial_type_new, \
@@ -53,6 +53,9 @@ def add_variables_global(path_origin, path_target):
     data_subject = add_max_trials(data_subject, data_trial)
     data_subject = add_glasses_binary(data_subject)
     data_subject = add_recorded_date(data_subject, data_trial)
+    data_subject = add_window(data_subject, data_trial)
+
+
 
     save_all_three_datasets(data_et, data_trial, data_subject, path_target)
 

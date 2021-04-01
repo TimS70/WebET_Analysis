@@ -146,13 +146,6 @@ def prep_choice(main_aoi_width=0.4,
         path_target=os.path.join('data', 'choice_task', 'cleaned'))
 
 
-def analyze_choice():
-    analyze_choice_task(
-        path_origin=os.path.join('data', 'choice_task', 'cleaned'),
-        path_plots=os.path.join('results', 'plots', 'choice_task'),
-        path_tables=os.path.join('results', 'tables', 'choice_task'))
-
-
 def analyze_global():
     analyze_dropouts(
         path_origin=os.path.join('data', 'all_trials', 'added_var'))
@@ -167,7 +160,8 @@ def analyze_fix():
           '################################### \n')
 
     path_plots = os.path.join('results', 'plots', 'fix_task')
-    # check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',                                                'added_var'),
+    # check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',
+    #                    'added_var'),
     #                    path_target=os.path.join(path_plots, 'saccades'),
     #                    individual=True)
 
@@ -180,6 +174,15 @@ def analyze_fix():
         path_origin=os.path.join('data', 'fix_task', 'added_var'),
         path_plots=os.path.join(path_plots),
         path_tables=os.path.join('results', 'tables', 'fix_task'))
+
+
+def analyze_choice():
+    analyze_choice_task(
+        path_origin=os.path.join('data', 'choice_task', 'cleaned'),
+        path_plots=os.path.join('results', 'plots', 'choice_task'),
+        path_tables=os.path.join('results', 'tables', 'choice_task'))
+
+
 
 
 def main(new_data=False):
@@ -208,21 +211,4 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    clean_data_choice(
-        us_sample=False,
-        min_hit_ratio=0.6,
-        max_precision=None,  # 0.15,
-        max_offset=None,  # 0.5,
-        min_fps=5,
-        min_rt=400, max_rt=10000,
-        min_choice_percentage=None,  # 0.01,
-        max_choice_percentage=None,  # 0.99,
-        # exclude_runs=[
-        #     12, 23, 93, 144, 243, 258, 268, 343, 356, 373, 384, 386, 387,
-        #     393, 404, 379, 410, 411, 417, 410, 417, 425, 429, 440, 441, 445,
-        #     449, 458, 462, 475, 425, 488, 493],
-        # exclude_runs_reason='No clear AOIs',
-        filter_log_k=False,
-        path_origin=os.path.join('data', 'choice_task', 'added_var'),
-        path_target=os.path.join('data', 'choice_task', 'cleaned'))
-    # main(new_data=True)
+    main(new_data=False)

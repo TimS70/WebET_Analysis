@@ -52,16 +52,11 @@ get_packages(c( 'boot',
 
 # Read and create datasets
 ```{r}
-data_subject = read.csv(
-    file.path(root, 'data', 'fix_task', 'added_var', 
-              'data_subject.csv'))
+path = file.path(root, 'data', 'fix_task', 'added_var')
 
-data_trial = read.csv(
-    file.path(root, 'data', 'fix_task', 'added_var', 
-              'data_trial_fix.csv'))
-
-data_et = read.csv(
-    file.path(root, 'data', 'fix_task', 'added_var', 'data_et_fix.csv'))
+data_subject = read.csv(file.path(root, path, 'data_subject.csv'))
+data_trial = read.csv(file.path(root, path, 'data_trial.csv'))
+data_et = read.csv(file.path(root, path, 'data_et.csv'))
 
 summarize_datasets(data_et, data_trial, data_subject)
 ```

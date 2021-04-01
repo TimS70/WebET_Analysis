@@ -39,11 +39,6 @@ def corr_analysis(data_trial, data_subject, path_plots, path_tables):
               path=path_tables)
 
     # Participant level
-    grouped = data_trial \
-        .groupby(['run_id'], as_index=False) \
-        .agg(window=('window_diagonal', 'max'))
-    data_subject = merge_by_subject(data_subject, grouped, 'window')
-
     corr_columns = ['glasses_binary', 'window', 'fps',
                     'age', 'ethnic', 'offset', 'precision']
     corr_columns.sort(reverse=True)

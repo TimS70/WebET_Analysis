@@ -11,7 +11,7 @@ from data_prep.cleaning.corr_data import clean_corr_data
 from inference.F import anova_outcomes_factor
 from inference.t_test import t_test_outcomes_vs_factor
 from utils.combine import merge_by_index
-from utils.save_data import load_all_three_datasets
+from utils.save_data import load_all_three_datasets, write_csv
 from visualize.all_tasks import save_plot
 from visualize.all_tasks import get_box_plots
 from visualize.choice import plot_example_eye_movement, \
@@ -23,6 +23,7 @@ from visualize.fix_task.positions import plot_top_vs_bottom_positions
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from statsmodels.stats.anova import AnovaRM
 
 
 def analyze_choice_task(path_origin, path_plots, path_tables):
@@ -110,32 +111,38 @@ def analyze_choice_task(path_origin, path_plots, path_tables):
 def analyze_fix_task(path_origin, path_plots, path_tables):
 
     data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
-    # print(f"""Describe data quality: \n"""
-    #       f"""{data_subject[['fps', 'offset', 'offset_px', 'precision',
-    #                          'precision_px', 'hit_ratio']].describe()} \n""")
+    descriptives = round(data_subject[['offset', 'offset_px',
+                                       'precision', 'precision_px',
+                                       'fps', 'hit_ratio']].describe(), 4)
 
-    # data_subject['makeup'] = 0
-    # data_subject.loc[
-    #     (data_subject['eyeshadow'] == 1) |
-    #     (data_subject['masquara'] == 1) |
-    #     (data_subject['eyeliner'] == 1) |
-    #     (data_subject['browliner'] == 1), 'makeup'] = 1
-    #
-    # hist_plots_quality(data_subject, path_plots)
-    #
-    # check_randomization(data_trial, path_plots, path_tables)
+    write_csv(data_frame=descriptives, file_name='descriptives.csv',
+              path=path_tables, index=True)
+
+    print(f"""Describe data quality: \n"""
+          f"""{descriptives} \n""")
+
+    # Task order and position is analyzed in MLA
+
+    data_subject['makeup'] = 0
+    data_subject.loc[
+        (data_subject['eyeshadow'] == 1) |
+        (data_subject['masquara'] == 1) |
+        (data_subject['eyeliner'] == 1) |
+        (data_subject['browliner'] == 1), 'makeup'] = 1
+
+    hist_plots_quality(data_subject, path_plots)
+
+    check_randomization(data_trial, path_plots, path_tables)
 
     corr_analysis(data_trial, data_subject, path_plots, path_tables)
     exit()
     # t-test for glasses vs. age
-    t_test_outcomes_vs_factor(
-        data=data_subject,
-        factor='glasses_binary',
-        dependent=False,
-        outcomes=['age'],
-        file_name='t_test_glasses_vs_age.csv',
-        path=path_tables)
-
+    t_test_outcomes_vs_factor(data=data_subject,
+                              factor='glasses_binary',
+                              dependent=False,
+                              outcomes=['age'],
+                              file_name='t_test_glasses_vs_age.csv',
+                              path=path_tables)
 
     test_chin_rest(data_trial=data_trial,
                    data_subject=data_subject,
