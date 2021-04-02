@@ -77,8 +77,6 @@ def plot_outcome_vs_trials(data_trial_calibration, outcome, run):
     plt.xlabel('withinTaskIndex')
     plt.ylabel(outcome)
 
-    save_plot(file_name='calibration_' + outcome +
-                        '_vs_trials.png',
-              path=os.path.join('results', 'plots',
-                                'fix_task'))
+    save_plot(file_name='calibration_' + outcome + '_vs_trials.png',
+              path=os.path.join('results', 'plots', 'fix_task'))
     plt.close()

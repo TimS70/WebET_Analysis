@@ -36,7 +36,7 @@ def grand_mean_offset(path_origin, path_plots, path_tables):
 
     print(f"""Grand mean offset: \n"""
           f"""{summary} \n""")
-    exit()
+
     # Positions
     grouped = data_et \
         .groupby(['run_id', 'trial_index'], as_index=False) \
@@ -54,20 +54,30 @@ def grand_mean_offset(path_origin, path_plots, path_tables):
 
     data_trial = data_trial.assign(
         grand_deviation_px=euclidean_distance(
-            data_trial['x_mean_px'], data_trial['x_pos'],
-            data_trial['y_mean_px'], data_trial['y_pos']))
+            data_trial['x_mean_px'], data_trial['window_width'] / 2,
+            data_trial['y_mean_px'], data_trial['window_height'] / 2))
 
     grand_mean_positions = data_trial \
         .groupby(['x_pos', 'y_pos'], as_index=False) \
         .agg(x_mean=('x_mean', 'mean'),
              y_mean=('y_mean', 'mean'),
-             M=('grand_deviation', 'mean'),
-             SD=('grand_deviation', 'std'),
-             M_px=('grand_deviation_px', 'mean'),
-             SD_px=('grand_deviation_px', 'std'))
+             grand=('grand_deviation', 'mean'),
+             grand_sd=('grand_deviation', 'std'),
+             grand_px=('grand_deviation_px', 'mean'),
+             grand_sd_px=('grand_deviation_px', 'std'))
+
+    grand_mean_positions[['grand_px', 'grand_sd_px']] = round(
+        grand_mean_positions[['grand_px', 'grand_sd_px']], 2)
+
+    grand_mean_positions[['x_pos', 'y_pos', 'x_mean', 'y_mean',
+                          'grand', 'grand_sd']] = 100 * round(
+        grand_mean_positions[['x_pos', 'y_pos', 'x_mean', 'y_mean',
+                              'grand', 'grand_sd']], 4)
 
     print(f"""Grand mean positions: \n"""
-          f"""{grand_mean_positions} \n""")
+          f"""{grand_mean_positions} \n\n"""
+          f"""Describe: \n"""
+          f"""{grand_mean_positions[['grand', 'grand_px']].describe()} \n""")
 
     write_csv(data=grand_mean_positions,
               file_name='grand_mean_positions.csv',
@@ -79,7 +89,7 @@ def grand_mean_offset(path_origin, path_plots, path_tables):
     plt.hist(data_trial['grand_deviation'], bins=20)
     plt.title('Grand mean deviation')
     save_plot(file_name='grand_mean.png',
-              path=os.path.join(path_plots, 'offset'))
+              path=path_plots)
     plt.close()
 
 

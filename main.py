@@ -169,10 +169,10 @@ def analyze_fix():
     #                    path_target=os.path.join(path_plots, 'saccades'),
     #                    individual=True)
 
-    # check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',
-    #                                             'cleaned'),
-    #                    path_target=os.path.join(path_plots),
-    #                    individual=False)
+    check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',
+                                                'cleaned'),
+                       path_target=os.path.join(path_plots),
+                       individual=False)
 
     grand_mean_offset(path_origin=path_origin,
                       path_plots=path_plots,

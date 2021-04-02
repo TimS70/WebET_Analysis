@@ -475,8 +475,10 @@ def add_fps_trial_level(data_trial):
 
 def plot_fps_over_trials(data_trial):
     spaghetti_plot(
-        data_trial.loc[(data_trial['chinFirst'] == 0) & pd.notna(data_trial['fps']), :],
-        'trial_index', 'fps', 103)
+        data=data_trial[(data_trial['chinFirst'] == 0) &
+                        pd.notna(data_trial['fps'])],
+        x_var='trial_index', y_var='fps',
+        highlighted_run=103)
     plt.title('chinFirst == 0', loc='center', fontsize=12, fontweight=0, color='grey')
     plt.xlabel('trial_index')
     plt.ylabel('fps')

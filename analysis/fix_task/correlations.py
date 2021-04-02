@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 def corr_analysis(data_trial, data_subject, path_plots, path_tables):
 
-    corr_columns = ['window_diagonal', 'fps', 'x_pos', 'y_pos',
+    corr_columns = ['fps', 'x_pos', 'y_pos',
                     'glasses_binary', 'chin', 'precision', 'offset']
     corr_columns.sort(reverse=True)
 
@@ -23,7 +23,7 @@ def corr_analysis(data_trial, data_subject, path_plots, path_tables):
 
     sns.set()
     sns.pairplot(data=data_plot,
-                 vars=['window_diagonal', 'fps', 'precision', 'offset'],
+                 vars=['fps', 'precision', 'offset'],
                  hue='chin',
                  kind='reg',
                  corner=True,

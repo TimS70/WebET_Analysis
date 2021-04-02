@@ -167,8 +167,8 @@ def test_top_vs_bottom_positions(data_trial_fix, outcome):
     d = t_test_result.statistic / np.sqrt(n)
 
     output = pd.DataFrame({
-        'pos_1': ['bottom'],
-        'pos_2': ['top'],
+        'pos_1': ['top'],
+        'pos_2': ['bottom'],
         'pos_1_mean': np.mean(outcome_by_y_wide['20%']),
         'pos_2_mean': np.mean(outcome_by_y_wide['80%']),
         'pos_1_std': np.std(outcome_by_y_wide['20%']),

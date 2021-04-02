@@ -125,18 +125,19 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
     # Task order and position is analyzed in MLA
 
     data_subject['makeup'] = 0
-    data_subject.loc[
-        (data_subject['eyeshadow'] == 1) |
-        (data_subject['masquara'] == 1) |
-        (data_subject['eyeliner'] == 1) |
-        (data_subject['browliner'] == 1), 'makeup'] = 1
+    data_subject.loc[(data_subject['eyeshadow'] == 1) |
+                     (data_subject['masquara'] == 1) |
+                     (data_subject['eyeliner'] == 1) |
+                     (data_subject['browliner'] == 1), 'makeup'] = 1
 
     hist_plots_quality(data_subject, path_plots)
 
-    check_randomization(data_trial, path_plots, path_tables)
+    check_randomization(data_trial=data_trial,
+                        path_plots=path_plots,
+                        path_tables=path_tables)
 
     corr_analysis(data_trial, data_subject, path_plots, path_tables)
-    exit()
+
     # t-test for glasses vs. age
     t_test_outcomes_vs_factor(data=data_subject,
                               factor='glasses_binary',

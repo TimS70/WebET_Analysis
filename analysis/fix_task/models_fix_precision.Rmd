@@ -15,8 +15,7 @@ knitr::opts_knit$set(root.dir = normalizePath(file.path('..', '..')))
 knitr::opts_knit$get("root.dir")
 
 source(file.path(root, 'utils', 'r', 'geom_split_violin.R'))
-source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
-source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
+source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
 source(file.path(root, 'utils', 'r', 'summarize_datasets.R'))
 source(file.path(root, 'utils', 'r', 'get_packages.R'))
 source(file.path(root, 'utils', 'r', 'remove_runs.R'))
@@ -52,19 +51,15 @@ get_packages(c( 'boot',
 
 # Read and create datasets
 ```{r}
-data_subject = read.csv(
-    file.path(root, 'data', 'fix_task', 'added_var', 
-              'data_subject.csv'))
+path = file.path(root, 'data', 'fix_task', 'added_var')
 
-data_trial = read.csv(
-    file.path(root, 'data', 'fix_task', 'added_var', 
-              'data_trial_fix.csv'))
-
-data_et = read.csv(
-    file.path(root, 'data', 'fix_task', 'added_var', 'data_et_fix.csv'))
+data_subject = read.csv(file.path(path, 'data_subject.csv'))
+data_trial = read.csv(file.path(path, 'data_trial.csv'))
+data_et = read.csv(file.path(path, 'data_et.csv'))
 
 summarize_datasets(data_et, data_trial, data_subject)
 ```
+
 
 ## Add variables 
 ```{r}
@@ -74,25 +69,11 @@ data_subject$ethnic = factor(
 	levels = c("caucasian", "hispanic", "asian", "black"), # Faktorstufen
 	labels = c("caucasian", "hispanic", "asian", "black"))
 
-# Window
-grouped = data_trial %>%
-	group_by(run_id) %>%
-	dplyr::summarise(
-		window_diagonal = mean(window_diagonal_max),
-		.groups='keep')
-if ('window_diagonal' %in% names(data_subject)) {
-        data_subject = data_subject %>% dplyr::select(!'window_diagonal')
-    }
-data_subject = merge(data_subject, grouped, by='run_id')
-
 data_trial = merge_mean_by_subject(data_trial, data_subject, 'age')
 ```
 
 
-# Screening & Cleaning 
-Happens in Jupyter Notebook fix_variables_and_analysis.ipynb
-
-## Visualize offset variance 
+# Visualize offset variance 
 We need two more requirements to our data:
 1) at least three trials with a valid option index
 2) 40% of the trials have valid ET indices
@@ -118,39 +99,20 @@ ggplot(grouped, aes(factor(run_id), mean)) +
     theme(
         axis.text.x = element_blank(),
         ) +
-    coord_cartesian(ylim=c(0, 1))
+    coord_cartesian(ylim=c(0, 0.5))
 
 dir.create(file.path(path_results, 'MLA'))
-ggsave(file.path(path_results, 'MLA', 'runs_vs_precision.pdf'), 
+ggsave(file.path(path_results, 'MLA', 'runs_vs_precision.png'), 
 	   width=5.5, height=5)
 ```
 
 
-## ANOVA
+# ANOVA
 ```{r, anova}
 summary(aov(data_subject$precision ~ data_subject$gender))
 summary(aov(data_subject$precision ~ data_subject$degree))
 summary(aov(data_subject$precision ~ data_subject$ethnic))
 ```
-
-# Linear model (Fixed Effects, no MLA)
-Average precision=0.07 = 7%. No effect of glasses
-```{r}
-lm_null = lm(precision ~ 1, data = data_trial %>% filter(!is.na(precision)))
-summary(lm_null)
-
-lm_sub_0_control = lm(precision ~ window_diagonal + fps + age + ethnic, 
-					  data = data_subject)
-summary(lm_sub_0_control)
-
-# Selecting significant control variables
-lm_sub_1_control = lm(precision ~ ethnic, data = data_subject)
-
-lm_sub_2_exp = lm(precision ~ glasses_binary, data = data_subject)
-summary(lm_sub_2_exp)
-anova(lm_sub_1_control, lm_sub_2_exp)
-```
-
 
 # MLA 
 ## 1) Emtpy Model (intercept only)
@@ -173,25 +135,23 @@ ICCest(factor(data_trial$run_id), data_trial$precision, alpha=.05, CI.type="THD"
 ### Control variables
 Control for the fact that the subjects start at different places regarding the accuracy of the eyetracking data. Standard error has increased. Subjects vary by about 0.12 (Jan 24) around the intercept. The RI model is way better than the IO model. Therefore, we should do an MLM.
 ```{r}
-data_trial = data_trial %>%
-    mutate(
-        y_pos_c = scale(y_pos),
-        x_pos_c = scale(x_pos),
-        fps_c = scale(fps),
-        window_c = scale(window_diagonal),
-        age_c = scale(age))
+data_trial = merge_by_subject(data_trial, data_subject, 'window')
 
-lmer1_control = lmer(
-    precision ~  withinTaskIndex + x_pos_c + y_pos_c + window_c + fps_c + 
-    	age_c + (1 | run_id), 
-    data=data_trial,
-    REML=FALSE)
+data_trial = data_trial %>% mutate(
+	y_pos_c = recode(y_pos, '0.2'=(-1L), '0.5'=0L, '0.8'=1L),
+	x_pos_c = recode(x_pos, '0.2'=(-1L), '0.5'=0L, '0.8'=1L),
+	fps_c = scale(fps),
+	window_c = scale(window))
+
+lmer1_control = lmer(precision ~  withinTaskIndex + x_pos_c + y_pos_c + 
+					 	window_c + fps_c + (1 | run_id), 
+					 data=data_trial,
+					 REML=FALSE)
 summary(lmer1_control)
 
-lmer2_control = lmer(
-    precision ~  withinTaskIndex + y_pos_c + (1 | run_id), 
-    data=data_trial,
-    REML=FALSE)
+lmer2_control = lmer(precision ~  withinTaskIndex + y_pos_c + (1 | run_id), 
+					 data=data_trial,
+					 REML=FALSE)
 
 anova(lmer0_io, lmer2_control)
 ```
@@ -279,12 +239,12 @@ Predictors: attributeIndex + optionIndex + payneIndex
 ```{r}
 glmer_final = lmer(
     precision ~ withinTaskIndex + y_pos_c + chin + glasses_binary + 
-    	(chin + glasses_binary | run_id), 
+    	(1 | run_id), 
     data=data_trial,
     REML=FALSE)
 
 summary(glmer_final)
-confint(glmer_final, method="boot", n=50) # CI with Bootstrap
+confint(glmer_final, method="boot", n=150) # CI with Bootstrap
 # The confidence intervals should not include 1 to be significant
 ```
 
@@ -430,3 +390,24 @@ https://cran.rstudio.com/web/packages/HLMdiag/index.html
 
 #mdffits() #calculate measures of the change in the fixed effects estimates based on the deletetion of an observation, or group of observations
 ```
+
+
+# Linear model (Fixed Effects, no MLA)
+Average precision=0.07 = 7%. No effect of glasses
+```{r}
+lm_null = lm(precision ~ 1, data = data_trial %>% filter(!is.na(precision)))
+summary(lm_null)
+
+lm_sub_0_control = lm(precision ~ window + fps + age + ethnic, 
+					  data = data_subject)
+summary(lm_sub_0_control)
+
+# Selecting significant control variables
+lm_sub_1_control = lm(precision ~ ethnic, data = data_subject)
+
+lm_sub_2_exp = lm(precision ~ glasses_binary, data = data_subject)
+summary(lm_sub_2_exp)
+anova(lm_sub_1_control, lm_sub_2_exp)
+```
+
+

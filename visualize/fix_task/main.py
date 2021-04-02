@@ -31,6 +31,7 @@ def hist_plots_quality(data_subject, path_plots):
         plt.close()
 
 
+# noinspection PyUnresolvedReferences
 def fix_heatmaps(data, path_target):
 
     data = data[(data['t_task'] > 1000) &
@@ -120,9 +121,12 @@ def plot_hit_means_per_dot(data_trial, min_hit_ratio):
 
 def split_violin_plots_outcomes(data, split_factor, factor, file_name,
                                 path_target):
+
     outcomes_by_fix_order = data \
         .groupby(['run_id', split_factor, factor], as_index=False) \
-        [['offset', 'precision', 'fps']].mean()
+        .agg(offset=('offset', 'mean'),
+             precision=('precision', 'mean'),
+             fps=('fps', 'mean'))
 
     fig, axes = plt.subplots(1, 2, sharey='none', figsize=(15, 6))
     fig.suptitle('Offset and precision')
@@ -150,10 +154,10 @@ def plot_outcome_over_trials(data_trial, outcome, path_target):
         data_plot[data_plot['fixTask'] == 1], 'task_nr', outcome)
 
     plt.style.use('seaborn-whitegrid')
-    fig, ax = plt.subplots(1, 2, sharey=True, figsize=(15, 6))
+    fig, ax = plt.subplots(1, 2, sharey='all', figsize=(15, 6))
     fig.suptitle('Task 1 vs. Task 2')
 
-    ax[0].set_ylim(0, 1)
+    ax[0].set_ylim(0, 0.5)
 
     for i in [0, 1]:
         data = data_plot.loc[data_plot['task_nr'] == i, :]
@@ -164,6 +168,10 @@ def plot_outcome_over_trials(data_trial, outcome, path_target):
                   data[(outcome + '_std_upper')]],
             fmt='^k:',
             capsize=5)
+
+    ax[0].set_xlabel('Trial Nr.')
+    ax[1].set_xlabel('Trial Nr.')
+    ax[0].set_ylabel(outcome)
 
     save_plot(file_name=outcome + '_vs_trials.png',
               path=os.path.join(path_target, outcome),
@@ -176,7 +184,7 @@ def plot_outcome_over_trials_vs_chin(data_trial, outcome, path_target):
         data_trial[data_trial['fixTask'] == 1], 'chin', outcome)
 
     plt.style.use('seaborn-whitegrid')
-    fig, ax = plt.subplots(1, 2, sharey=True, figsize=(15, 6))
+    fig, ax = plt.subplots(1, 2, sharey='all', figsize=(15, 6))
     fig.suptitle('chin==0 vs. chin==1')
 
     ax[0].set_ylim(0, 1)

@@ -47,7 +47,7 @@ def check_randomization(data_trial, path_tables, path_plots):
 
     print('Tendency for lower overall precision for those who '
           'started with the chin-rest, not for Holm correction \n')
-    exit()
+
 
 # noinspection PyTypeChecker
 def plot_chin_first_vs_outcomes(data, path_target):
@@ -65,6 +65,6 @@ def plot_chin_first_vs_outcomes(data, path_target):
         sns.violinplot(ax=axes[1], x='chinFirst', y=outcome,
                        data=data_plot.loc[data_plot['chin'] == 1, :])
 
-        save_plot(file_name='chinFirst_vs_' + outcome + 'png',
+        save_plot(file_name='chinFirst_vs_' + outcome + '.png',
                   path=path_target)
         plt.close()
