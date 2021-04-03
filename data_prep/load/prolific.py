@@ -94,7 +94,9 @@ def integrate_prolific_data(file_origin, path_prolific, path_target):
 
     print(f"""Runs with missing status: \n {summary_na}""")
 
-    write_csv(data_subject, 'data_subject.csv', path_target)
+    write_csv(data=data_subject, file_name='data_subject.csv',
+              path=path_target)
 
     data_prolific = create_data_prolific(data_subject, path_prolific)
-    write_csv(data_prolific, 'data_prolific.csv', path_target)
+    write_csv(data=data_prolific, file_name='data_prolific.csv',
+              path=path_target)

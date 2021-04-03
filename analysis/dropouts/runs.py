@@ -70,16 +70,11 @@ def dropout_by_task_nr(data_trial):
         .agg(n=('run_id', 'count')) \
         .sort_values(by='n')
 
-    print(
-        f"""Dropout by task nr: \n"""
-        f"""{max_trial_by_nr} \n"""
-    )
+    print(f"""Dropout by task nr: \n"""
+          f"""{max_trial_by_nr} \n""")
 
-    write_csv(
-        max_trial_by_nr,
-        'dropout_by_task_nr.csv',
-        'results', 'tables', 'dropouts')
-
+    write_csv(data=max_trial_by_nr, file_name='dropout_by_task_nr.csv',
+              path=os.path.join('results', 'tables', 'dropouts'))
 
 def group_last_trial_for_each_run(data_trial):
     grouped_trial_type_new = data_trial.loc[:, [
@@ -125,10 +120,8 @@ def dropout_by_type(data_trial):
 
     print(f'Dropout by type: \n {max_trial_by_type} \n')
 
-    write_csv(
-        max_trial_by_type,
-        'dropout_by_type.csv',
-        'results', 'tables', 'dropouts')
+    write_csv(data=max_trial_by_type, file_name='dropout_by_type.csv',
+              path=os.path.join('results', 'tables', 'dropouts'))
 
     data_plot = max_trial_by_run[
         max_trial_by_run['next_trial_type_new'] != 'end'] \
@@ -180,10 +173,8 @@ def check_calibration(data_trial):
     ]
     print(f"""Dropouts during calibration 1: \n {cal_1_summary} \n""")
 
-    write_csv(
-        cal_1_summary,
-        'dropouts_cal_1.csv',
-        'results', 'tables', 'dropouts')
+    write_csv(data=cal_1_summary, file_name='dropouts_cal_1.csv',
+              path=os.path.join('results', 'tables', 'dropouts'))
 
 
 def multi_participation_by_run(data_trial):
@@ -264,15 +255,13 @@ def multi_participation_by_type(data_trial):
         .agg(n=('prolificID', 'nunique')) \
         .sort_values(by='n')
 
-    print(
-        f"""Those with multiple attempts previously dropped out at: \n"""
-        f"""Duplicate participants: {len(ids_multiple_runs)}"""
-        f"""{grouped_trial_type} \n""")
+    print(f"""Those with multiple attempts previously dropped out at: \n"""
+          f"""Duplicate participants: {len(ids_multiple_runs)}"""
+          f"""{grouped_trial_type} \n""")
 
-    write_csv(
-        grouped_trial_type,
-        'multi_participation_trial_type.csv',
-        'results', 'tables', 'dropouts')
+    write_csv(data=grouped_trial_type,
+              file_name='multi_participation_trial_type.csv',
+              path=os.path.join('results', 'tables', 'dropouts'))
 
     ids_stuck_at_et_init = runs_max_trial.loc[
         runs_max_trial['next_trial_type_new'] == 'et_init', 'prolificID'] \

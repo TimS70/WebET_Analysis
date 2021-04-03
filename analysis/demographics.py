@@ -48,8 +48,8 @@ def analyze_demographics():
         demo_table = demo_table.append(freq_table, ignore_index=True)
 
     print(demo_table)
-    write_csv(demo_table, 'demographics.csv',
-              'results', 'tables', 'demographics')
+    write_csv(data=demo_table, file_name='demographics.csv',
+              path=os.path.join('results', 'tables', 'demographics'))
 
     # Only US sample
     demo_table = pd.DataFrame(columns=['variable', 'n', 'percent'])
@@ -67,8 +67,8 @@ def analyze_demographics():
         demo_table = demo_table.append(freq_table, ignore_index=True)
 
     print(demo_table)
-    write_csv(demo_table, 'demographics_us.csv',
-              'results', 'tables', 'demographics')
+    write_csv(data=demo_table, file_name='demographics_us.csv',
+              path=os.path.join('results', 'tables', 'demographics'))
 
     plot_pie_charts(data_subject, predictors)
 
@@ -109,8 +109,8 @@ def frequency_table(data_subject, predictor, save_table=True):
     # print(f"""{freq_table} \n""")
 
     if save_table:
-        write_csv(freq_table, (predictor + '.csv'),
-                  'results', 'tables', 'demographics')
+        write_csv(data=freq_table, file_name=predictor + '.csv',
+                  path=os.path.join('results', 'tables', 'demographics'))
 
     return freq_table
 

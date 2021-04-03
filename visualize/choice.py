@@ -7,6 +7,7 @@ import pandas as pd
 import seaborn as sns
 from matplotlib import patches
 
+from analysis.fix_task.data_quality import group_within_task_index
 from utils.combine import merge_by_index
 from visualize.all_tasks import save_plot
 from visualize.eye_tracking import my_heatmap
@@ -138,41 +139,3 @@ def plot_example_eye_movement(data_et, data_trial, run):
               path=os.path.join('results', 'plots',
                                 'choice_task', 'et'))
     plt.close()
-
-
-def plot_categorical_confounders(data_subject):
-    predictors = ['chinFirst', 'ethnic', 'degree', 'Student Status']
-    outcome = 'choseLL'
-
-    fig, ax = plt.subplots(nrows=1, ncols=4, figsize=(16, 5))
-    fig.suptitle(outcome + ' for various categorical predictors', fontsize=20)
-    plt.subplots_adjust(hspace=0.5)
-
-    ax = ax.ravel()
-
-    for i in range(0, 4):
-        sns.boxplot(ax=ax[i], x=predictors[i], y=outcome,
-                    data=data_subject)
-
-        ax[i].tick_params(labelrotation=45, labelsize=13)
-        ax[i].tick_params(axis='y', labelrotation=None)
-
-        nobs = data_subject[predictors[i]].value_counts().values
-        nobs = [str(x) for x in nobs.tolist()]
-        nobs = ["n: " + i for i in nobs]
-        # Add it to the plot
-        pos = range(len(nobs))
-
-        max_value = data_subject[outcome].max()
-        y_pos = max_value + max_value * 0.15
-
-        for tick, label in zip(pos, ax[i].get_xticklabels()):
-            ax[i].text(
-                pos[tick], y_pos, nobs[tick],
-                verticalalignment='top',
-                horizontalalignment='center', size=13, weight='normal')
-
-    plt.tight_layout()
-    save_plot(file_name='cat_variables.png',
-              path=os.path.join('results', 'plots',
-                                'choice_task'))

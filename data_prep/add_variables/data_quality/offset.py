@@ -8,8 +8,7 @@ from visualize.fix_task.main import plot_hit_means_per_dot
 
 def add_hit_ratio(data_trial, data_et, max_offset=0.10,
                   min_hit_ratio=0.8):
-    data_et = data_et \
-        .assign(hit=(data_et['offset'] < max_offset).astype(int))
+    data_et = data_et.assign(hit=(data_et['offset'] < max_offset).astype(int))
 
     grouped = data_et \
         .groupby(['run_id', 'trial_index'], as_index=False) \

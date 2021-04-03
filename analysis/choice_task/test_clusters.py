@@ -7,7 +7,7 @@ from utils.path import makedir
 from utils.save_data import write_csv
 
 
-def test_transition_clusters(data_trial):
+def test_transition_clusters(data_trial, path_tables):
     print('Testing transition clusters in a regression model...')
 
     transition_columns = data_trial.columns.intersection([
@@ -45,9 +45,9 @@ def test_transition_clusters(data_trial):
     print(f"""Comparison of transition clusters: \n"""
           f"""{output} \n""")
 
-    write_csv(output,
-              'transition_clusters.csv',
-              'results', 'tables', 'transitions')
+    write_csv(data=output,
+              file_name='transition_clusters.csv',
+              path=path_tables)
 
     data_trial = data_trial.merge(
         data_cluster.loc[:, ['run_id', 'trial_index',

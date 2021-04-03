@@ -64,13 +64,18 @@ def violin_plot(data, outcome, factor, path, split_factor=None):
 
 
 def get_box_plots(data, outcome, predictors, file_name, path_target):
-    fig, ax = plt.subplots(nrows=2, ncols=4, figsize=(16, 10))
+
+    if len(predictors) > 4:
+        n_rows = 2
+    else:
+        n_rows = 1
+    fig, ax = plt.subplots(nrows=n_rows, ncols=4, figsize=(n_rows * 6, 10))
     fig.suptitle(outcome + ' for various categorical predictors', fontsize=20)
     plt.subplots_adjust(hspace=0.5)
 
     ax = ax.ravel()
 
-    for i in range(0, 8):
+    for i in range(0, len(predictors)):
         sns.boxplot(ax=ax[i], x=predictors[i], y=outcome, data=data)
 
         ax[i].tick_params(labelrotation=45, labelsize=13)

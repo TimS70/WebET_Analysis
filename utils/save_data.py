@@ -56,13 +56,12 @@ def summarize_datasets(data_et, data_trial, data_subject):
         'n_trials': [
             et_trial_count,
             len(data_trial),
-            '-']
-        })
+            '-']})
+
     print(f"""{summary} \n""")
 
 
 def write_csv(data, file_name, path, index=False):
     makedir(path)
     data.to_csv(os.path.join(path, file_name), index=index)
-    print(
-        f"""File '{file_name}' saved in {path} \n""")
+    print(f"""File '{file_name}' saved in {path} \n""")

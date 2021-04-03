@@ -81,7 +81,7 @@ def t_test_outcomes_vs_factor(data, dependent, factor,
           f"""(holm-corrected): \n"""
           f"""{summary} \n""")
 
-    write_csv(summary, file_name, path)
+    write_csv(data=summary, file_name=file_name, path=path)
 
 
 def t_test_rel(data_outcome_by_factor):

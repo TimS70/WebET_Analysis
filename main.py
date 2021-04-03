@@ -3,11 +3,12 @@ import subprocess
 
 import pandas as pd
 
+from analysis.choice_task.correlations import corr_analysis_choice
 from analysis.demographics import analyze_demographics
 from analysis.dropouts.main import analyze_dropouts
 from analysis.fix_task.gaze_saccade import check_gaze_saccade
 from analysis.fix_task.grand_mean_offset import grand_mean_offset
-from analysis.main import analyze_fix_task, analyze_choice_task
+from analysis.main import analyze_fix_task
 from data_prep.add_variables.data_quality.main import add_data_quality
 from data_prep.add_variables.fit_k.call_from_py import add_log_k
 from data_prep.add_variables.main import add_choice_behavioral_variables, \
@@ -22,6 +23,10 @@ from data_prep.load.choice import load_choice_data
 from data_prep.load.fix_task import load_fix_data
 from data_prep.load.main import create_datasets_from_cognition
 from data_prep.load.prolific import integrate_prolific_data
+from inference.F import anova_outcomes_factor
+from inference.t_test import t_test_outcomes_vs_factor
+from utils.save_data import load_all_three_datasets
+from visualize.all_tasks import get_box_plots
 from visualize.choice import plot_choice_task_heatmap
 from visualize.eye_tracking import plot_et_scatter
 
@@ -135,13 +140,13 @@ def prep_choice(main_aoi_width=0.4,
         max_offset=None,  # 0.5,
         min_fps=5,
         min_rt=400, max_rt=10000,
-        min_choice_percentage=None,  # 0.01,
-        max_choice_percentage=None,  # 0.99,
-        exclude_runs=[
-            12, 23, 93, 144, 243, 258, 268, 343, 356, 373, 384, 386, 387,
-            393, 404, 379, 410, 411, 417, 410, 417, 425, 429, 440, 441, 445,
-            449, 458, 462, 475, 425, 488, 493],
-        exclude_runs_reason='No clear AOIs',
+        min_choice_percentage=0.01,
+        max_choice_percentage=0.99,
+        # exclude_runs=[
+        #     12, 23, 93, 144, 243, 258, 268, 343, 356, 373, 384, 386, 387,
+        #     393, 404, 379, 410, 411, 417, 410, 417, 425, 429, 440, 441, 445,
+        #     449, 458, 462, 475, 425, 488, 493],
+        # exclude_runs_reason='No clear AOIs',
         filter_log_k=False,
         path_origin=os.path.join('data', 'choice_task', 'added_var'),
         path_target=os.path.join('data', 'choice_task', 'cleaned'))
@@ -168,15 +173,15 @@ def analyze_fix():
     #                    'added_var'),
     #                    path_target=os.path.join(path_plots, 'saccades'),
     #                    individual=True)
-
-    check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',
-                                                'cleaned'),
-                       path_target=os.path.join(path_plots),
-                       individual=False)
-
-    grand_mean_offset(path_origin=path_origin,
-                      path_plots=path_plots,
-                      path_tables=path_tables)
+    #
+    # check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',
+    #                                             'cleaned'),
+    #                    path_target=os.path.join(path_plots),
+    #                    individual=False)
+    #
+    # grand_mean_offset(path_origin=path_origin,
+    #                   path_plots=path_plots,
+    #                   path_tables=path_tables)
 
     analyze_fix_task(path_origin=path_origin,
                      path_plots=path_plots,
@@ -184,12 +189,42 @@ def analyze_fix():
 
 
 def analyze_choice():
-    analyze_choice_task(
-        path_origin=os.path.join('data', 'choice_task', 'cleaned'),
-        path_plots=os.path.join('results', 'plots', 'choice_task'),
-        path_tables=os.path.join('results', 'tables', 'choice_task'))
 
+    path_origin = os.path.join('data', 'choice_task', 'cleaned')
+    path_plots = os.path.join('results', 'plots', 'choice_task')
+    path_tables = os.path.join('results', 'tables', 'choice_task')
 
+    data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
+
+    data_subject['student_status'] = data_subject['Student Status']
+
+    predictors = ['chinFirst', 'ethnic', 'degree', 'student_status']
+
+    # Confounders
+    get_box_plots(
+        data=data_subject,
+        outcome='choseLL',
+        predictors=predictors,
+        file_name='box_plots_confounders_vs_choseLL.png',
+        path_target=path_plots)
+
+    for predictor in predictors:
+        anova_outcomes_factor(data=data_subject,
+                              factor=predictor,
+                              outcomes=['choseLL'],
+                              path=os.path.join(path_tables, 'confounders'))
+
+    t_test_outcomes_vs_factor(data=data_subject,
+                              factor='student_status',
+                              dependent=False,
+                              outcomes=['choseLL'],
+                              file_name='t_test_student_vs_choice.csv',
+                              path=path_tables)
+
+    # plot_example_eye_movement(data_et, data_trial,
+    #                           data_subject['run_id'].unique()[0])
+
+    # corr_analysis_choice(data_trial, data_subject, path_plots, path_tables)
 
 
 def main(new_data=False):
@@ -218,5 +253,6 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    analyze_fix()
+    prep_choice()
+    analyze_choice()
     # main(new_data=False)

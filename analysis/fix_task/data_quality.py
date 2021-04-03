@@ -10,9 +10,9 @@ from utils.save_data import write_csv
 
 
 def group_within_task_index(data, group_var, var_name):
-    df_m = data.groupby(
-        [group_var, 'withinTaskIndex'])[var_name].median() \
-        .reset_index() \
+    df_m = data \
+        .groupby([group_var, 'withinTaskIndex'], as_index=False) \
+        [var_name].median() \
         .rename(columns={var_name: var_name + '_median'}) \
         .reset_index()
 
@@ -57,10 +57,9 @@ def compare_conditions_subject(data_subject, data_trial_fix, outcome):
               ]
               ].describe()
 
-    write_csv(
-        summary,
-        (outcome + '_compare_glasses_chin_subject.csv'),
-        'results', 'tables', 'fix_task')
+    write_csv(data=summary,
+              file_name=outcome + '_compare_glasses_chin_subject.csv',
+              path=os.path.join('results', 'tables', 'fix_task'))
 
 
 def separate_outcomes_by_condition(data, large_data,

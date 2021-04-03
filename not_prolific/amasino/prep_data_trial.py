@@ -75,9 +75,9 @@ def add_log_k(data_subject, data_trial):
     print('Fitting log(add_k) in Matlab. \n')
     os.chdir(os.path.join('amasino', 'fit_k'))
 
-    write_csv(data_trial,
-              'data_trial.csv',
-              'data', 'amasino', 'added_var')
+    write_csv(data=data_trial,
+              file_name='data_trial.csv',
+              path=os.path.join('data', 'amasino', 'added_var'))
 
     # noinspection SpellCheckingInspection
     run_matlab = \
@@ -97,13 +97,12 @@ def add_log_k(data_subject, data_trial):
         pd.isna(data_subject['logK']),
         ['run_id', 'rt', 'choseLL', 'LL_top', 'logK', 'noise']]
 
-    write_csv(missing_values, 'missing_log_k.csv',
-        'data', 'amasino')
+    write_csv(data=missing_values, file_name='missing_log_k.csv',
+              path=os.path.join('data', 'amasino'))
 
-    print(
-        f"""n={len(data_subject)} participants. """
-        f"""{len(missing_values)} missing logK values. \n"""
-        f"""{missing_values}""")
+    print(f"""n={len(data_subject)} participants. """
+          f"""{len(missing_values)} missing logK values. \n"""
+          f"""{missing_values}""")
 
     return data_subject
 

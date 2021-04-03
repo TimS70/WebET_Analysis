@@ -27,11 +27,10 @@ def load_data():
 
     data_subject = pd.read_csv(
         os.path.join('data', 'all_trials', 'added_var', 'data_subject.csv')) \
-        .loc[
-                   :,
+        .loc[:,
                    ['run_id', 'prolificID', 'recorded_date',
-                    'birthyear', 'webcam_fps', 'webcam_label',
-                    'chosenAmount', 'chosenDelay', 'max_trial']] \
+                    'webcam_fps', 'chosenAmount', 'chosenDelay',
+                    'max_trial']] \
         .drop_duplicates() \
         .rename(columns={'chosenAmount': 'bonus_USD',
                          'chosenDelay': 'bonus_delay'})

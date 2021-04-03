@@ -44,7 +44,8 @@ def add_log_k(file_trial_input, file_subjects_to_merge, path):
               f"""{len(missing_values)} missing logK values. \n"""
               f"""{missing_values}""")
 
-        write_csv(missing_values, 'missing_log_k.csv', path)
+        write_csv(data=missing_values, file_name='missing_log_k.csv',
+                  path=path)
     else:
         print('All participants could be fitted to hyperbolic discounting')
 

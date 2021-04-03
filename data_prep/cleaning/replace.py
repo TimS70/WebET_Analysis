@@ -39,7 +39,8 @@ def clean_subject_variables(path_origin, path_target):
 
     data_subject['webcam_fps'] = np.round(data_subject['webcam_fps'])
 
-    write_csv(data_subject, 'data_subject.csv', path_target)
+    write_csv(data=data_subject, file_name='data_subject.csv',
+              path=path_target)
 
     return data_subject
 

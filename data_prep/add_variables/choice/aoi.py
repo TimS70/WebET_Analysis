@@ -173,9 +173,9 @@ def add_aoi_counts_on_trial_level(data_trial, data_et):
         .groupby(['run_id', 'trial_index'], as_index=False) \
         [['aoi_aSS', 'aoi_aLL', 'aoi_tSS', 'aoi_tLL']].sum()
 
-    write_csv(grouped,
-              'aoi_by_run_and_trial.csv',
-              'results', 'tables', 'aoi')
+    write_csv(data=grouped,
+              file_name='aoi_by_run_and_trial.csv',
+              path=os.path.join('results', 'tables', 'choice_task', 'aoi'))
 
     aoi_over_trials = grouped.assign(
         aoi_n=grouped[['aoi_aSS', 'aoi_tSS', 'aoi_aLL',

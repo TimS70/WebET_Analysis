@@ -158,6 +158,8 @@ def add_choice_et_variables(min_required_trials, min_gaze_points,
     data_et = add_fixation_counter(data_et)
 
     data_trial = count_fixations_on_trial_level(data_trial, data_et)
-    data_trial = test_transition_clusters(data_trial)
+    data_trial = test_transition_clusters(
+        data_trial=data_trial,
+        path_tables=os.path.join('results', 'tables', 'choice_task'))
 
     save_all_three_datasets(data_et, data_trial, data_subject, path_target)

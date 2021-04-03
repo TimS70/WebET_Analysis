@@ -15,7 +15,7 @@ from utils.save_data import summarize_datasets, save_all_three_datasets, \
     load_all_three_datasets
 
 
-def clean_global_data(path_origin, path_target,
+def clean_global_data(path_origin, path_target=None,
                       prolific=False, approved=False, one_attempt=False,
                       max_t_task=None, min_fps=None,
                       additionally_bad_runs=None, exclude_runs_reason=None,
@@ -146,7 +146,6 @@ def clean_global_data(path_origin, path_target,
         print(f"""Approval rate and Prolific Score: \n"""
               f"""{approval_summary} \n""")
 
-
     if min_fps is not None:
         runs_low_fps = filter_runs_low_fps(data_trial, data_et, min_fps)
         invalid_runs = combine_runs(invalid_runs, runs_low_fps)
@@ -177,4 +176,7 @@ def clean_global_data(path_origin, path_target,
     data_trial = clean_runs(data_trial, invalid_runs, 'data_trial')
     data_subject = clean_runs(data_subject, invalid_runs, 'data_subject')
 
-    save_all_three_datasets(data_et, data_trial, data_subject, path_target)
+    if path_target is not None:
+        save_all_three_datasets(data_et, data_trial, data_subject, path_target)
+
+    return data_et, data_trial, data_subject

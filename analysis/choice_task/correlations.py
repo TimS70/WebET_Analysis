@@ -10,12 +10,11 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-def corr_analysis_fix(data_trial, data_subject,
-                      path_plots, path_tables):
+def corr_analysis_choice(data_trial, data_subject, path_plots, path_tables):
 
-    corr_columns_trial = ['fps', 'x_pos', 'y_pos',
-                          'glasses_binary', 'chin',
-                          'precision', 'offset']
+    data_trial['rt'] = data_trial['trial_duration_exact']
+    corr_columns_trial = ['choseLL', 'k', 'attributeIndex', 'LL_top',
+                          'optionIndex', 'payneIndex', 'rt']
 
     corr_columns_trial.sort(reverse=True)
 
@@ -26,8 +25,8 @@ def corr_analysis_fix(data_trial, data_subject,
 
     sns.set()
     sns.pairplot(data=data_plot,
-                 vars=['fps', 'precision', 'offset'],
-                 hue='chin',
+                 vars=corr_columns_trial.remove('choseLL'),
+                 hue='choseLL',
                  kind='reg',
                  corner=True,
                  plot_kws=dict(scatter_kws=dict(s=0.1)))
@@ -42,8 +41,8 @@ def corr_analysis_fix(data_trial, data_subject,
               path=path_tables)
 
     # Participant level
-    corr_columns_subject = ['glasses_binary', 'window', 'fps',
-                            'age', 'ethnic', 'offset', 'precision']
+    corr_columns_subject = ['logK', 'choseLL', 'choice_rt', 'fps', 'age',
+                            'attributeIndex', 'optionIndex', 'payneIndex']
 
     corr_columns_subject.sort(reverse=True)
 
@@ -53,7 +52,10 @@ def corr_analysis_fix(data_trial, data_subject,
 
     sns.set()
     sns.pairplot(data=data_plot,
-                 vars=['window', 'fps', 'age', 'offset', 'precision'],
+                 vars=['choseLL', 'choice_rt', 'LL_top', 'logK',
+                       'attributeIndex', 'optionIndex', 'payneIndex',
+                       'fps', 'age'],
+                 hue='gender',
                  kind='reg',
                  corner=True,
                  plot_kws=dict(scatter_kws=dict(s=0.5)))

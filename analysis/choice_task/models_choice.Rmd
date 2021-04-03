@@ -15,8 +15,8 @@ knitr::opts_knit$set(root.dir = normalizePath(file.path('..', '..')))
 knitr::opts_knit$get("root.dir")
 
 source(file.path(root, 'utils', 'r', 'geom_split_violin.R'))
-source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
-source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
+source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
+source(file.path(root, 'utils', 'r', 'merge_by_index.R'))
 source(file.path(root, 'utils', 'r', 'summarize_datasets.R'))
 source(file.path(root, 'utils', 'r', 'get_packages.R'))
 source(file.path(root, 'utils', 'r', 'remove_runs.R'))
@@ -26,6 +26,8 @@ source(file.path(root, 'utils', 'r', 'add_x_count.R'))
 source(file.path(root, 'utils', 'r', 'identify_bad_choice_runs.R'))
 source(file.path(root, 'utils', 'r', 'create_time_bins.R'))
 source(file.path(root, 'utils', 'r', 'plot_et_time_bins.R'))
+source(file.path(root, 'utils', 'r', 'plot_outcome_variance.R'))
+
 
 get_packages(c('broom',
               'car', 
@@ -45,17 +47,10 @@ get_packages(c('broom',
 
 # Read and create datasets
 ```{r, read_data}
-data_subject = read.csv(
-    file.path(root, 'data', 'choice_task', 'cleaned', 
-              'data_subject.csv'))
-
-data_trial = read.csv(
-    file.path(root, 'data', 'choice_task', 'cleaned', 
-              'data_trial.csv'))
-
-data_et = read.csv(
-    file.path(root, 'data', 'choice_task', 'cleaned', 
-              'data_et.csv'))
+path = file.path(root, 'data', 'choice_task', 'cleaned')
+data_subject = read.csv(file.path(path, 'data_subject.csv'))
+data_trial = read.csv(file.path(path, 'data_trial.csv'))
+data_et = read.csv(file.path(path, 'data_et.csv'))
 
 summarize_datasets(data_et, data_trial, data_subject)
 ```
@@ -63,31 +58,8 @@ summarize_datasets(data_et, data_trial, data_subject)
 
 # Visualize choice variance 
 ```{r, choice_var_plot}
-grouped = data_trial %>%
-	group_by(run_id, choseLL) %>%
-	dplyr::summarise(
-		n = n(),
-		.groups = 'keep') %>%
-	mutate(choice_perc = n / 80)
-
-data_plot = grouped %>%
-    filter(choseLL==1) %>%
-    mutate(SE = sqrt(choice_perc * (1-choice_perc)/n))
-
-ggplot(data_plot, aes(factor(run_id), choice_perc)) + 
-    geom_pointrange(aes(ymin=choice_perc-1.96*SE, 
-                        ymax=choice_perc+1.96*SE)) +
-    xlab('run_id') +
-    ylab('Percent of choseLL') + 
-    theme(
-        axis.text.x = element_blank(),
-        ) +
-    coord_cartesian(ylim=c(0, 1))
-
-dir.create(file.path(path_results, 'MLA'), 
-		   showWarnings = FALSE)
-ggsave(file.path(path_results, 'MLA', 'runs_vs_choice.pdf'), 
-	   width=5.5, height=5)
+plot_outcome_variance(data_trial, 'choseLL')
+ggsave(file.path(path_results, 'runs_vs_choseLL.png'))
 ```
 
 # Check distribution over categorical variables
@@ -120,79 +92,20 @@ cat(paste(
 	table(temp$gender, temp$choseLL)))
 ```
 
-# Correlative Analysis
-
-## Scatter matrix
-```{r, corr_matrix, warning=FALSE}
-dir.create(file.path(path_results, 'correlations'),  
-		   showWarnings = FALSE)
-
-sapply(
-	data_subject %>%
-		dplyr::select(
-			'choseLL', 'attributeIndex', 'optionIndex', 'payneIndex', 
-	    	'fps', 'birthyear', 'LL_top', 'choice_rt', 'logK'),
-	function(x) sum(!is.na(x))
-)
-
-ggpairs(
-    data_subject,
-    columns = c('choseLL', 'attributeIndex', 'optionIndex', 'payneIndex', 
-    			'fps', 'birthyear', 'LL_top', 'choice_rt', 'logK'), 
-    upper = list(continuous = wrap("cor", size = 2)),
-    lower = list(continuous = wrap("smooth", alpha = 0.3, size=0.1)),
-    progress = F) + 
-	theme_bw(base_size = 8)
-ggsave(file.path(path_results, 'correlations', 'participant.png'), 
-	   width=5.5, height=5)
-
-
-ggpairs(
-    data_trial,
-    columns = c('choseLL', 'withinTaskIndex', 'trial_duration_exact',
-    			'fps',
-    			'attributeIndex', 'optionIndex', 'payneIndex'), 
-    upper = list(continuous = wrap("cor", size = 4)),
-    lower = list(continuous = wrap("smooth", alpha = 0.3, size=0.1)),
-    progress = F) +
-	theme_bw()
-ggsave(file.path(path_results, 'correlations', 'trial.png'),
-	   width=5.5, height=5)
-```
-
-## ANOVA
-```{r, anova}
-summary(aov(data_subject$choseLL ~ data_subject$gender))
-summary(aov(data_subject$choseLL ~ data_subject$degree))
-```
-
-
-# Logistic Regression on subject-level
- - See Sommet, 2017
- - choseLL is more likely than choseSS. 
- - Logisitic regression does not have residuals because it predicts probabilities not concrete values.
- - Predict log-odds (exp(beta)). Odds increase by the factor exp(beta), when the predictor changes in one unit. beta=0 means odds=1. 
- - A positive Attribute Index indicates more fixations on the amount attributes
- - A negative Option Index indicates more fixations on the delayed option
- - A negative Payne Index indicates more transitions within attributes 
- 
-```{r, glm}
-m_null = glm(choseLL ~ 1,
-         data = data_subject %>%
-		 	filter(!is.na(attributeIndex) & !is.na(payneIndex)), 
-         family = binomial(link = "logit"))
-summary(m_null)
-
-m1 = glm(choseLL ~ 1 + choice_rt + attributeIndex + payneIndex,
-         data = data_subject %>%
-		 	filter(!is.na(attributeIndex) & !is.na(payneIndex)), 
-         family = binomial(link = "logit"))
-summary(m1)
-anova(m_null, m1)
-```
-
 # MLA
 When I do not look at the summarized scores but on every trial, I need to account for the lack of interdependence and use a MLA.
+
+# LL_top vs. OptionIndex
+```{r}
+lme_ll_top = lmer(
+    optionIndex ~ LL_top + (1 | run_id), 
+    data = data_trial,
+    REML = FALSE)
+
+summary(lme_ll_top)
+confint(lme_ll_top, method="boot", n=500) 
+```
+
 
 ## Step 1: Empty model (Intercept Only)
 https://stats.idre.ucla.edu/r/dae/mixed-effects-logistic-regression/
@@ -509,3 +422,29 @@ https://cran.r-project.org/web/packages/DHARMa/vignettes/DHARMa.html
 #testTemporalAutocorrelation()
 #testSpatialAutocorrelation()
 ```
+
+
+# Logistic Regression on subject-level
+ - See Sommet, 2017
+ - choseLL is more likely than choseSS. 
+ - Logisitic regression does not have residuals because it predicts probabilities not concrete values.
+ - Predict log-odds (exp(beta)). Odds increase by the factor exp(beta), when the predictor changes in one unit. beta=0 means odds=1. 
+ - A positive Attribute Index indicates more fixations on the amount attributes
+ - A negative Option Index indicates more fixations on the delayed option
+ - A negative Payne Index indicates more transitions within attributes 
+ 
+```{r, glm}
+m_null = glm(choseLL ~ 1,
+         data = data_subject %>%
+		 	filter(!is.na(attributeIndex) & !is.na(payneIndex)), 
+         family = binomial(link = "logit"))
+summary(m_null)
+
+m1 = glm(choseLL ~ 1 + choice_rt + attributeIndex + payneIndex,
+         data = data_subject %>%
+		 	filter(!is.na(attributeIndex) & !is.na(payneIndex)), 
+         family = binomial(link = "logit"))
+summary(m1)
+anova(m_null, m1)
+```
+

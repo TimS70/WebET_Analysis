@@ -13,16 +13,18 @@ def test_glasses(data_trial, data_subject, path_plots, path_tables):
     for var in ['glasses', 'sight', 'glasses_binary']:
         freq_table = pd.crosstab(index=data_subject[var], columns="count")
         print(f"""{freq_table} \n""")
-        write_csv(freq_table,
-                  'glasses_freq_table_' + var + '.csv',
-                  os.path.join(path_plots, 'glasses'))
+        write_csv(data=freq_table,
+                  file_name='glasses_freq_table_' + var + '.csv',
+                  path=os.path.join(path_plots, 'glasses'))
 
     plot_sight_vs_outcomes(data=data_subject, path=path_plots)
     anova_outcomes_factor(data=data_subject,
                           factor='sight',
+                          outcomes=['offset', 'precision', 'fps'],
                           path=path_tables)
     anova_outcomes_factor(data=data_subject,
                           factor='glasses',
+                          outcomes=['offset', 'precision', 'fps'],
                           path=path_tables)
 
     t_test_outcomes_vs_factor(

@@ -144,14 +144,13 @@ def split_violin_plots_outcomes(data, split_factor, factor, file_name,
     plt.close()
 
 
-def plot_outcome_over_trials(data_trial, outcome, path_target):
-    data_plot = data_trial.copy()
+def plot_outcome_over_trials(data, outcome, path_target):
+    data_plot = data.copy()
 
     data_plot['task_nr'] = data_plot['task_nr'] \
         .replace([1, 2, 3], [0, 1, 1])
 
-    data_plot = group_within_task_index(
-        data_plot[data_plot['fixTask'] == 1], 'task_nr', outcome)
+    data_plot = group_within_task_index(data_plot, 'task_nr', outcome)
 
     plt.style.use('seaborn-whitegrid')
     fig, ax = plt.subplots(1, 2, sharey='all', figsize=(15, 6))
