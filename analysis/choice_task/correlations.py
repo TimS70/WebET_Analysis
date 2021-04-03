@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 def corr_analysis_choice(data_trial, data_subject, path_plots, path_tables):
 
     data_trial['rt'] = data_trial['trial_duration_exact']
-    corr_columns_trial = ['choseLL', 'k', 'attributeIndex', 'LL_top',
-                          'optionIndex', 'payneIndex', 'rt']
+    corr_columns_trial = ['choseLL', 'k', 'rt', 'LL_top',
+                          'optionIndex', 'attributeIndex', 'payneIndex']
 
     corr_columns_trial.sort(reverse=True)
 
@@ -35,27 +35,29 @@ def corr_analysis_choice(data_trial, data_subject, path_plots, path_tables):
               message=True)
     plt.close()
 
-    matrix = combine_corr_matrix(data=data_plot, variables=corr_columns_trial)
-    write_csv(data=matrix.reset_index(),
+    matrix, matrix_stars = combine_corr_matrix(
+        data=data_plot, variables=corr_columns_trial)
+
+    write_csv(data=matrix,
               file_name='corr_matrix_trial.csv',
-              path=path_tables)
+              path=path_tables,
+              index=True)
 
     # Participant level
-    corr_columns_subject = ['logK', 'choseLL', 'choice_rt', 'fps', 'age',
-                            'attributeIndex', 'optionIndex', 'payneIndex']
+    corr_columns_subject = ['age', 'fps', 'logK', 'choseLL', 'choice_rt',
+                            'optionIndex', 'attributeIndex', 'payneIndex']
 
     corr_columns_subject.sort(reverse=True)
 
     # Trial level
     data_plot = data_subject[np.append(['run_id'], corr_columns_subject)]
-    # data_plot = clean_corr_data(data_plot)
+    data_plot = clean_corr_data(data_plot)
 
     sns.set()
     sns.pairplot(data=data_plot,
-                 vars=['choseLL', 'choice_rt', 'LL_top', 'logK',
+                 vars=['choseLL', 'choice_rt', 'logK',
                        'attributeIndex', 'optionIndex', 'payneIndex',
                        'fps', 'age'],
-                 hue='gender',
                  kind='reg',
                  corner=True,
                  plot_kws=dict(scatter_kws=dict(s=0.5)))
@@ -64,7 +66,18 @@ def corr_analysis_choice(data_trial, data_subject, path_plots, path_tables):
               message=True)
     plt.close()
 
-    matrix = combine_corr_matrix(data=data_plot, variables=corr_columns_subject)
-    write_csv(data=matrix.reset_index(),
+    matrix, matrix_stars = combine_corr_matrix(data=data_plot,
+                                               variables=corr_columns_subject)
+
+    matrix_stars['M'] = data_plot[corr_columns_subject].mean().values
+    matrix_stars['SD'] = data_plot[corr_columns_subject].std().values
+    matrix_stars[['M', 'SD']] = round(matrix_stars[['M', 'SD']], 2)
+    matrix_stars = matrix_stars[np.append(['M', 'SD'], corr_columns_subject)]
+
+    write_csv(data=matrix,
               file_name='corr_matrix_subject.csv',
-              path=path_tables)
+              path=path_tables, index=True)
+
+    write_csv(data=matrix_stars,
+              file_name='corr_matrix_subject_stars.csv',
+              path=path_tables, index=True)

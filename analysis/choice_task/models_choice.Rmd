@@ -74,7 +74,7 @@ cat(paste(
 	table(data_trial$LL_top, data_trial$choseLL)))
 
 temp = data_trial %>% 
-    merge_mean_by_subject(data_subject, 'birthyear') %>%
+    merge_mean_by_subject(data_subject, 'age') %>%
     merge_mean_by_subject(data_subject, 'gender')
 
 temp$birthyear_bin = cut(

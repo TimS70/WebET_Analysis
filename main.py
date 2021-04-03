@@ -27,7 +27,7 @@ from inference.F import anova_outcomes_factor
 from inference.t_test import t_test_outcomes_vs_factor
 from utils.save_data import load_all_three_datasets
 from visualize.all_tasks import get_box_plots
-from visualize.choice import plot_choice_task_heatmap
+from visualize.choice import plot_choice_task_heatmap, plot_example_eye_movement
 from visualize.eye_tracking import plot_et_scatter
 
 
@@ -221,10 +221,10 @@ def analyze_choice():
                               file_name='t_test_student_vs_choice.csv',
                               path=path_tables)
 
-    # plot_example_eye_movement(data_et, data_trial,
-    #                           data_subject['run_id'].unique()[0])
+    plot_example_eye_movement(data_et, data_trial,
+                              data_subject['run_id'].unique()[0])
 
-    # corr_analysis_choice(data_trial, data_subject, path_plots, path_tables)
+    corr_analysis_choice(data_trial, data_subject, path_plots, path_tables)
 
 
 def main(new_data=False):
@@ -253,6 +253,5 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    prep_choice()
     analyze_choice()
     # main(new_data=False)
