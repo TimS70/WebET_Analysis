@@ -7869,7 +7869,7 @@ const tileGradConfig = {
             else if (x.rank === 3) {
                 for (let i = 0; i < reps[0]; ++i) {
                     for (let j = 0; j < reps[1]; ++j) {
-                        for (let add_k = 0; k < reps[2]; ++k) {
+                        for (let k = 0; k < reps[2]; ++k) {
                             xGrad =
                                 add(xGrad, slice(dy, [i * x.shape[0], j * x.shape[1], k * x.shape[2]], [x.shape[0], x.shape[1], x.shape[2]]));
                         }
@@ -7879,7 +7879,7 @@ const tileGradConfig = {
             else if (x.rank === 4) {
                 for (let i = 0; i < reps[0]; ++i) {
                     for (let j = 0; j < reps[1]; ++j) {
-                        for (let add_k = 0; k < reps[2]; ++k) {
+                        for (let k = 0; k < reps[2]; ++k) {
                             for (let l = 0; l < reps[3]; ++l) {
                                 xGrad =
                                     add(xGrad, slice(dy, [
@@ -11021,8 +11021,8 @@ function memory() {
  *
  * console.log(`newBytes: ${profile.newBytes}`);
  * console.log(`newTensors: ${profile.newTensors}`);
- * console.log(`byte usage over all kernels: ${profile.kernels.map(add_k =>
- * add_k.totalBytesSnapshot)}`);
+ * console.log(`byte usage over all kernels: ${profile.kernels.map(k =>
+ * k.totalBytesSnapshot)}`);
  * ```
  *
  */
@@ -14063,7 +14063,7 @@ function jarqueBeraNormalityTest(values) {
     // https://en.wikipedia.org/wiki/Jarque%E2%80%93Bera_test
     const n = values.length;
     const s = skewness(values);
-    const add_k = kurtosis(values);
+    const k = kurtosis(values);
     const jb = n / 6 * (Math.pow(s, 2) + 0.25 * Math.pow(k - 3, 2));
     // JB test requires 2-degress of freedom from Chi-Square @ 0.95:
     // http://www.itl.nist.gov/div898/handbook/eda/section3/eda3674.htm
@@ -15861,13 +15861,13 @@ const stridedSlice = Object(operation["a" /* op */])({ stridedSlice_ });
 
 
 /**
- * Finds the values and indices of the `add_k` largest entries along the last
+ * Finds the values and indices of the `k` largest entries along the last
  * dimension.
  *
- * If the input is a vector (rank=1), finds the add_k largest entries in the vector
+ * If the input is a vector (rank=1), finds the k largest entries in the vector
  * and outputs their values and indices as vectors. Thus values[j] is the j-th
  * largest entry in input, and its index is indices[j].
- * For higher rank inputs, computes the top add_k entries along the last dimension.
+ * For higher rank inputs, computes the top k entries along the last dimension.
  *
  * If two elements are equal, the lower-index element appears first.
  *
@@ -15877,20 +15877,20 @@ const stridedSlice = Object(operation["a" /* op */])({ stridedSlice_ });
  * values.print();
  * indices.print();
  * ```
- * @param x 1-D or higher `tf.Tensor` with last dimension being at least `add_k`.
- * @param add_k Number of top elements to look for along the last dimension.
- * @param sorted If true, the resulting `add_k` elements will be sorted by the
+ * @param x 1-D or higher `tf.Tensor` with last dimension being at least `k`.
+ * @param k Number of top elements to look for along the last dimension.
+ * @param sorted If true, the resulting `k` elements will be sorted by the
  *     values in descending order.
  */
 /** @doc {heading: 'Operations', subheading: 'Evaluation'} */
-function topk_(x, add_k = 1, sorted = true) {
+function topk_(x, k = 1, sorted = true) {
     const $x = Object(tensor_util_env["a" /* convertToTensor */])(x, 'x', 'topk');
     if ($x.rank === 0) {
         throw new Error('topk() expects the input to be of rank 1 or higher');
     }
     const lastDim = $x.shape[$x.shape.length - 1];
     if (k > lastDim) {
-        throw new Error(`'add_k' passed to topk() must be <= the last dimension (${lastDim}) ` +
+        throw new Error(`'k' passed to topk() must be <= the last dimension (${lastDim}) ` +
             `but got ${k}`);
     }
     const [values, indices] = engine["a" /* ENGINE */].runKernelFunc(b => b.topk($x, k, sorted), { $x });
@@ -16585,13 +16585,13 @@ const stft = Object(operation["a" /* op */])({ stft_ });
  * precision.print();
  * ```
  * @param predictions 2-D or higher `tf.Tensor` with last dimension being
- *     at least `add_k`.
+ *     at least `k`.
  * @param targets 1-D or higher `tf.Tensor`.
- * @param add_k Optional Number of top elements to look at for computing precision,
+ * @param k Optional Number of top elements to look at for computing precision,
  *     default to 1.
  */
 /** @doc {heading: 'Operations', subheading: 'Evaluation'} */
-async function inTopKAsync_(predictions, targets, add_k = 1) {
+async function inTopKAsync_(predictions, targets, k = 1) {
     const $predictions = Object(tensor_util_env["a" /* convertToTensor */])(predictions, 'predictions', 'inTopK');
     const $targets = Object(tensor_util_env["a" /* convertToTensor */])(targets, 'targets', 'inTopK');
     Object(util["assert"])($predictions.rank > 1, () => 'inTopK() expects the predictions to be of rank 2 or higher, ' +
@@ -17085,9 +17085,9 @@ const softmaxCrossEntropy = Object(operation["a" /* op */])({ softmaxCrossEntrop
  * Copy a tensor setting everything outside a central band in each innermost
  * matrix to zero.
  *
- * The band part is computed as follows: Assume input has `add_k` dimensions
+ * The band part is computed as follows: Assume input has `k` dimensions
  * `[I, J, K, ..., M, N]`, then the output is a tensor with the same shape where
- * `band[i, j, add_k, ..., m, n] = in_band(m, n) * input[i, j, add_k, ..., m, n]`.
+ * `band[i, j, k, ..., m, n] = in_band(m, n) * input[i, j, k, ..., m, n]`.
  * The indicator function
  * `in_band(m, n) = (num_lower < 0 || (m-n) <= num_lower))`
  * `&& (num_upper < 0 || (n-m) <= num_upper)`
@@ -17109,12 +17109,12 @@ const softmaxCrossEntropy = Object(operation["a" /* op */])({ softmaxCrossEntrop
  *            //  [ 0, -2, -1, 0]]
  * ```
  *
- * @param x Rank `add_k` tensor
+ * @param x Rank `k` tensor
  * @param numLower Number of subdiagonals to keep.
  *   If negative, keep entire lower triangle.
  * @param numUpper Number of subdiagonals to keep.
  *   If negative, keep entire upper triangle.
- * @returns Rank `add_k` tensor of the same shape as input.
+ * @returns Rank `k` tensor of the same shape as input.
  *   The extracted banded tensor.
  */
 /**
@@ -20074,7 +20074,7 @@ function exponents(n, inverse) {
 /**
  * Make the exponent term used by FFT.
  */
-function exponent(add_k, n, inverse) {
+function exponent(k, n, inverse) {
     const x = (inverse ? 2 : -2) * Math.PI * (k / n);
     const real = Math.cos(x);
     const imag = Math.sin(x);
@@ -20264,7 +20264,7 @@ function tile_impl_tile(xBuf, reps) {
 /** An implementation of the TopK kernel shared between webgl and cpu. */
 
 
-function topkImpl(x, xShape, xDtype, add_k, sorted) {
+function topkImpl(x, xShape, xDtype, k, sorted) {
     // Reshape into a 2d tensor [batch, lastDim] and compute topk along lastDim.
     const lastDim = xShape[xShape.length - 1];
     const [batch, size] = [x.length / lastDim, lastDim];
@@ -20287,7 +20287,7 @@ function topkImpl(x, xShape, xDtype, add_k, sorted) {
         }
     }
     // Reshape back to the original input shape, except that the last
-    // dimension is add_k.
+    // dimension is k.
     const outputShape = xShape.slice();
     outputShape[outputShape.length - 1] = k;
     return [
@@ -20496,7 +20496,7 @@ class KernelBackend {
     select(condition, a, b) {
         return notYetImplemented('select');
     }
-    topk(x, add_k, sorted) {
+    topk(x, k, sorted) {
         return notYetImplemented('topk');
     }
     min(x, axes) {
@@ -25512,7 +25512,7 @@ class tensor_Tensor {
         this.throwIfDisposed();
         return opHandler.unsortedSegmentSum(this, segmentIds, numSegments);
     }
-    topk(add_k = 1, sorted = true) {
+    topk(k = 1, sorted = true) {
         this.throwIfDisposed();
         return opHandler.topk(this, k, sorted);
     }
@@ -26394,7 +26394,7 @@ function walkTensorContainer(container, list, seen) {
     }
     // Iteration over keys works also for arrays.
     const iterable = container;
-    for (const add_k in iterable) {
+    for (const k in iterable) {
         const val = iterable[k];
         if (!seen.has(val)) {
             seen.add(val);
@@ -26440,7 +26440,7 @@ numeric.bench = function bench (f,interval) {
 }
 
 numeric._myIndexOf = (function _myIndexOf(w) {
-    var n = this.length,add_k;
+    var n = this.length,k;
     for(k=0;k<n;++k) if(this[k]===w) return k;
     return -1;
 });
@@ -26466,7 +26466,7 @@ numeric.prettyPrint = function prettyPrint(x) {
     }
     var ret = [];
     function foo(x) {
-        var add_k;
+        var k;
         if(typeof x === "undefined") { ret.push(Array(numeric.precision+8).join(' ')); return false; }
         if(typeof x === "string") { ret.push('"'+x+'"'); return false; }
         if(typeof x === "boolean") { ret.push(x.toString()); return false; }
@@ -26516,7 +26516,7 @@ numeric.parseDate = function parseDate(d) {
     function foo(d) {
         if(typeof d === 'string') { return Date.parse(d.replace(/-/g,'/')); }
         if(!(d instanceof Array)) { throw new Error("parseDate: parameter must be arrays of strings"); }
-        var ret = [],add_k;
+        var ret = [],k;
         for(k=0;k<d.length;k++) { ret[k] = foo(d[k]); }
         return ret;
     }
@@ -26527,7 +26527,7 @@ numeric.parseFloat = function parseFloat_(d) {
     function foo(d) {
         if(typeof d === 'string') { return parseFloat(d); }
         if(!(d instanceof Array)) { throw new Error("parseFloat: parameter must be arrays of strings"); }
-        var ret = [],add_k;
+        var ret = [],k;
         for(k=0;k<d.length;k++) { ret[k] = foo(d[k]); }
         return ret;
     }
@@ -26536,7 +26536,7 @@ numeric.parseFloat = function parseFloat_(d) {
 
 numeric.parseCSV = function parseCSV(t) {
     var foo = t.split('\n');
-    var j,add_k;
+    var j,k;
     var ret = [];
     var pat = /(([^'",]*)|('[^']*')|("[^"]*")),/g;
     var patnum = /^\s*(([+-]?[0-9]+(\.[0-9]*)?(e[+-]?[0-9]+)?)|([+-]?[0-9]*(\.[0-9]+)?(e[+-]?[0-9]+)?))\s*$/;
@@ -26643,7 +26643,7 @@ numeric.imageURL = function imageURL(img) {
         return crc ^ (-1);
     }
 
-    var h = img[0].length, w = img[0][0].length, s1, s2, next,add_k,length,a,b,i,j,adler32,crc32;
+    var h = img[0].length, w = img[0][0].length, s1, s2, next,k,length,a,b,i,j,adler32,crc32;
     var stream = [
                   137, 80, 78, 71, 13, 10, 26, 10,                           //  0: PNG signature
                   0,0,0,13,                                                  //  8: IHDR Chunk length
@@ -26796,7 +26796,7 @@ numeric.same = function same(x,y) {
     return true;
 }
 
-numeric.rep = function rep(s,v,add_k) {
+numeric.rep = function rep(s,v,k) {
     if(typeof k === "undefined") { k=0; }
     var n = s[k], ret = Array(n), i;
     if(k === s.length-1) {
@@ -26810,7 +26810,7 @@ numeric.rep = function rep(s,v,add_k) {
 
 
 numeric.dotMMsmall = function dotMMsmall(x,y) {
-    var i,j,add_k,p,q,r,ret,foo,bar,woo,i0,k0,p0,r0;
+    var i,j,k,p,q,r,ret,foo,bar,woo,i0,k0,p0,r0;
     p = x.length; q = y.length; r = y[0].length;
     ret = Array(p);
     for(i=p-1;i>=0;i--) {
@@ -26842,7 +26842,7 @@ numeric.dotMMbig = function dotMMbig(x,y){
     var gc = numeric._getCol, p = y.length, v = Array(p);
     var m = x.length, n = y[0].length, A = new Array(m), xj;
     var VV = numeric.dotVV;
-    var i,j,add_k,z;
+    var i,j,k,z;
     --p;
     --m;
     for(i=m;i!==-1;--i) A[i] = Array(n);
@@ -26866,7 +26866,7 @@ numeric.dotMV = function dotMV(x,y) {
 }
 
 numeric.dotVM = function dotVM(x,y) {
-    var i,j,add_k,p,q,r,ret,foo,bar,woo,i0,k0,p0,r0,s1,s2,s3,baz,accum;
+    var i,j,k,p,q,r,ret,foo,bar,woo,i0,k0,p0,r0,s1,s2,s3,baz,accum;
     p = x.length; q = y[0].length;
     ret = Array(q);
     for(k=q-1;k>=0;k--) {
@@ -26944,7 +26944,7 @@ numeric.identity = function identity(n) { return numeric.diag(numeric.rep([n],1)
 numeric.pointwise = function pointwise(params,body,setup) {
     if(typeof setup === "undefined") { setup = ""; }
     var fun = [];
-    var add_k;
+    var k;
     var avec = /\[i\]$/,p,thevec = '';
     var haveret = false;
     for(k=0;k<params.length;k++) {
@@ -26977,7 +26977,7 @@ numeric.pointwise = function pointwise(params,body,setup) {
 numeric.pointwise2 = function pointwise2(params,body,setup) {
     if(typeof setup === "undefined") { setup = ""; }
     var fun = [];
-    var add_k;
+    var k;
     var avec = /\[i\]$/,p,thevec = '';
     var haveret = false;
     for(k=0;k<params.length;k++) {
@@ -26999,23 +26999,23 @@ numeric.pointwise2 = function pointwise2(params,body,setup) {
             );
     return Function.apply(null,fun);
 }
-numeric._biforeach = (function _biforeach(x,y,s,add_k,f) {
+numeric._biforeach = (function _biforeach(x,y,s,k,f) {
     if(k === s.length-1) { f(x,y); return; }
     var i,n=s[k];
     for(i=n-1;i>=0;i--) { _biforeach(typeof x==="object"?x[i]:x,typeof y==="object"?y[i]:y,s,k+1,f); }
 });
-numeric._biforeach2 = (function _biforeach2(x,y,s,add_k,f) {
+numeric._biforeach2 = (function _biforeach2(x,y,s,k,f) {
     if(k === s.length-1) { return f(x,y); }
     var i,n=s[k],ret = Array(n);
     for(i=n-1;i>=0;--i) { ret[i] = _biforeach2(typeof x==="object"?x[i]:x,typeof y==="object"?y[i]:y,s,k+1,f); }
     return ret;
 });
-numeric._foreach = (function _foreach(x,s,add_k,f) {
+numeric._foreach = (function _foreach(x,s,k,f) {
     if(k === s.length-1) { f(x); return; }
     var i,n=s[k];
     for(i=n-1;i>=0;i--) { _foreach(x[i],s,k+1,f); }
 });
-numeric._foreach2 = (function _foreach2(x,s,add_k,f) {
+numeric._foreach2 = (function _foreach2(x,s,k,f) {
     if(k === s.length-1) { return f(x); }
     var i,n=s[k], ret = Array(n);
     for(i=n-1;i>=0;i--) { ret[i] = _foreach2(x[i],s,k+1,f); }
@@ -27182,8 +27182,8 @@ numeric.mapreducers = {
                     '    return accum;\n'+
                     '}'+
                     'if(typeof s === "undefined") s = numeric.dim(x);\n'+
-                    'if(typeof add_k === "undefined") add_k = 0;\n'+
-                    'if(add_k === s.length-1) return numeric.'+i+'V(x);\n'+
+                    'if(typeof k === "undefined") k = 0;\n'+
+                    'if(k === s.length-1) return numeric.'+i+'V(x);\n'+
                     'var xi;\n'+
                     'var n = x.length, i;\n'+
                     'for(i=n-1;i!==-1;--i) {\n'+
@@ -27211,7 +27211,7 @@ numeric.inv = function inv(x) {
     var s = numeric.dim(x), abs = Math.abs, m = s[0], n = s[1];
     var A = numeric.clone(x), Ai, Aj;
     var I = numeric.identity(m), Ii, Ij;
-    var i,j,add_k,x;
+    var i,j,k,x;
     for(j=0;j<n;++j) {
         var i0 = -1;
         var v0 = -1;
@@ -27238,7 +27238,7 @@ numeric.inv = function inv(x) {
 numeric.det = function det(x) {
     var s = numeric.dim(x);
     if(s.length !== 2 || s[0] !== s[1]) { throw new Error('numeric: det() only works on square matrices'); }
-    var n = s[0], ret = 1,i,j,add_k,A = numeric.clone(x),Aj,Ai,alpha,temp,k1,k2,k3;
+    var n = s[0], ret = 1,i,j,k,A = numeric.clone(x),Aj,Ai,alpha,temp,k1,k2,k3;
     for(j=0;j<n-1;j++) {
         k=j;
         for(i=j+1;i<n;i++) { if(Math.abs(A[i][j]) > Math.abs(A[k][j])) { k = i; } }
@@ -27316,7 +27316,7 @@ numeric.negtranspose = function negtranspose(x) {
     return ret;
 }
 
-numeric._random = function _random(s,add_k) {
+numeric._random = function _random(s,k) {
     var i,n=s[k],ret=Array(n), rnd;
     if(k === s.length-1) {
         rnd = Math.random;
@@ -27345,7 +27345,7 @@ numeric.linspace = function linspace(a,b,n) {
 
 numeric.getBlock = function getBlock(x,from,to) {
     var s = numeric.dim(x);
-    function foo(x,add_k) {
+    function foo(x,k) {
         var i,a = from[k], n = to[k]-a, ret = Array(n);
         if(k === s.length-1) {
             for(i=n;i>=0;i--) { ret[i] = x[i+a]; }
@@ -27359,7 +27359,7 @@ numeric.getBlock = function getBlock(x,from,to) {
 
 numeric.setBlock = function setBlock(x,from,to,B) {
     var s = numeric.dim(x);
-    function foo(x,y,add_k) {
+    function foo(x,y,k) {
         var i,a = from[k], n = to[k]-a;
         if(k === s.length-1) { for(i=n;i>=0;i--) { x[i+a] = y[i]; } }
         for(i=n;i>=0;i--) { foo(x[i+a],y[i],k+1); }
@@ -27390,7 +27390,7 @@ numeric.blockMatrix = function blockMatrix(X) {
     for(j=0;j<n;++j) N+=X[0][j][0].length;
     var Z = Array(M);
     for(i=0;i<M;++i) Z[i] = Array(N);
-    var I=0,J,ZI,add_k,l,Xijk;
+    var I=0,J,ZI,k,l,Xijk;
     for(i=0;i<m;++i) {
         J=N;
         for(j=n-1;j!==-1;--j) {
@@ -27439,7 +27439,7 @@ numeric.t = function t(x,y) { return new numeric.T(x,y); }
 numeric.Tbinop = function Tbinop(rr,rc,cr,cc,setup) {
     var io = numeric.indexOf;
     if(typeof setup !== "string") {
-        var add_k;
+        var k;
         setup = '';
         for(k in numeric) {
             if(numeric.hasOwnProperty(k) && (rr.indexOf(k)>=0 || rc.indexOf(k)>=0 || cr.indexOf(k)>=0 || cc.indexOf(k)>=0) && k.length>1) {
@@ -27555,11 +27555,11 @@ numeric.T.prototype.norm2 = numeric.Tunop(
 numeric.T.prototype.inv = function inv() {
     var A = this;
     if(typeof A.y === "undefined") { return new numeric.T(numeric.inv(A.x)); }
-    var n = A.x.length, i, j, add_k;
+    var n = A.x.length, i, j, k;
     var Rx = numeric.identity(n),Ry = numeric.rep([n,n],0);
     var Ax = numeric.clone(A.x), Ay = numeric.clone(A.y);
     var Aix, Aiy, Ajx, Ajy, Rix, Riy, Rjx, Rjy;
-    var i,j,add_k,d,d1,ax,ay,bx,by,temp;
+    var i,j,k,d,d1,ax,ay,bx,by,temp;
     for(i=0;i<n;i++) {
         ax = Ax[i][i]; ay = Ay[i][i];
         d = ax*ax+ay*ay;
@@ -27619,7 +27619,7 @@ numeric.T.prototype.inv = function inv() {
     return new numeric.T(Rx,Ry);
 }
 numeric.T.prototype.get = function get(i) {
-    var x = this.x, y = this.y, add_k = 0, ik, n = i.length;
+    var x = this.x, y = this.y, k = 0, ik, n = i.length;
     if(y) {
         while(k<n) {
             ik = i[k];
@@ -27637,7 +27637,7 @@ numeric.T.prototype.get = function get(i) {
     return new numeric.T(x);
 }
 numeric.T.prototype.set = function set(i,v) {
-    var x = this.x, y = this.y, add_k = 0, ik, n = i.length, vx = v.x, vy = v.y;
+    var x = this.x, y = this.y, k = 0, ik, n = i.length, vx = v.x, vy = v.y;
     if(n===0) {
         if(vy) { this.y = vy; }
         else if(y) { this.y = undefined; }
@@ -27706,7 +27706,7 @@ numeric.T.prototype.setRows = function setRows(i0,i1,A) {
     }
     return this;
 }
-numeric.T.prototype.getRow = function getRow(add_k) {
+numeric.T.prototype.getRow = function getRow(k) {
     var x = this.x, y = this.y;
     if(y) { return new numeric.T(x[k],y[k]); }
     return new numeric.T(x[k]);
@@ -27780,7 +27780,7 @@ numeric.house = function house(x) {
 numeric.toUpperHessenberg = function toUpperHessenberg(me) {
     var s = numeric.dim(me);
     if(s.length !== 2 || s[0] !== s[1]) { throw new Error('numeric: toUpperHessenberg() only works on square matrices'); }
-    var m = s[0], i,j,add_k,x,v,A = numeric.clone(me),B,C,Ai,Ci,Q = numeric.identity(m),Qi;
+    var m = s[0], i,j,k,x,v,A = numeric.clone(me),B,C,Ai,Ci,Q = numeric.identity(m),Qi;
     for(j=0;j<m-2;j++) {
         x = Array(m-j-1);
         for(i=j+1;i<m;i++) { x[i-j-1] = A[i][j]; }
@@ -27807,7 +27807,7 @@ numeric.QRFrancis = function(H,maxiter) {
     if(typeof maxiter === "undefined") { maxiter = 10000; }
     H = numeric.clone(H);
     var H0 = numeric.clone(H);
-    var s = numeric.dim(H),m=s[0],x,v,a,b,c,d,det,tr, Hloc, Q = numeric.identity(m), Qi, Hi, B, C, Ci,i,j,add_k,iter;
+    var s = numeric.dim(H),m=s[0],x,v,a,b,c,d,det,tr, Hloc, Q = numeric.identity(m), Qi, Hi, B, C, Ci,i,j,k,iter;
     if(m<3) { return {Q:Q, B:[ [0,m-1] ]}; }
     var epsilon = numeric.epsilon;
     for(iter=0;iter<maxiter;iter++) {
@@ -27894,7 +27894,7 @@ numeric.eig = function eig(A,maxiter) {
     var QH = numeric.toUpperHessenberg(A);
     var QB = numeric.QRFrancis(QH.H,maxiter);
     var T = numeric.T;
-    var n = A.length,i,add_k,flag = false,B = QB.B,H = numeric.dot(QB.Q,numeric.dot(QH.H,numeric.transpose(QB.Q)));
+    var n = A.length,i,k,flag = false,B = QB.B,H = numeric.dot(QB.Q,numeric.dot(QH.H,numeric.transpose(QB.Q)));
     var Q = new T(numeric.dot(QB.Q,QH.Q)),Q0;
     var m = B.length,j;
     var a,b,c,d,p1,p2,disc,x,y,p,q,n1,n2;
@@ -28006,7 +28006,7 @@ numeric.ccsSparse = function ccsSparse(A) {
     return [Ai,Aj,Av];
 }
 numeric.ccsFull = function ccsFull(A) {
-    var Ai = A[0], Aj = A[1], Av = A[2], s = numeric.ccsDim(A), m = s[0], n = s[1], i,j,j0,j1,add_k;
+    var Ai = A[0], Aj = A[1], Av = A[2], s = numeric.ccsDim(A), m = s[0], n = s[1], i,j,j0,j1,k;
     var B = numeric.rep([m,n],0);
     for(i=0;i<n;i++) {
         j0 = Ai[i];
@@ -28021,14 +28021,14 @@ numeric.ccsTSolve = function ccsTSolve(A,b,x,bj,xj) {
     if(typeof bj === "undefined") bj = numeric.linspace(0,x.length-1);
     if(typeof xj === "undefined") xj = [];
     function dfs(j) {
-        var add_k;
+        var k;
         if(x[j] !== 0) return;
         x[j] = 1;
         for(k=Ai[j];k<Ai[j+1];++k) dfs(Aj[k]);
         xj[n] = j;
         ++n;
     }
-    var i,j,j0,j1,add_k,l,l0,l1,a;
+    var i,j,j0,j1,k,l,l0,l1,a;
     for(i=bj.length-1;i!==-1;--i) { dfs(bj[i]); }
     xj.length = n;
     for(i=xj.length-1;i!==-1;--i) { x[xj[i]] = 0; }
@@ -28053,7 +28053,7 @@ numeric.ccsDFS = function ccsDFS(n) {
 }
 numeric.ccsDFS.prototype.dfs = function dfs(J,Ai,Aj,x,xj,Pinv) {
     var m = 0,foo,n=xj.length;
-    var add_k = this.k, k1 = this.k1, j = this.j,km,k11;
+    var k = this.k, k1 = this.k1, j = this.j,km,k11;
     if(x[J]!==0) return;
     x[J] = 1;
     j[0] = J;
@@ -28084,7 +28084,7 @@ numeric.ccsLPSolve = function ccsLPSolve(A,B,x,xj,I,Pinv,dfs) {
     var Ai = A[0], Aj = A[1], Av = A[2],m = Ai.length-1, n=0;
     var Bi = B[0], Bj = B[1], Bv = B[2];
     
-    var i,i0,i1,j,J,j0,j1,add_k,l,l0,l1,a;
+    var i,i0,i1,j,J,j0,j1,k,l,l0,l1,a;
     i0 = Bi[I];
     i1 = Bi[I+1];
     xj.length = 0;
@@ -28109,7 +28109,7 @@ numeric.ccsLUP1 = function ccsLUP1(A,threshold) {
     var L = [numeric.rep([m+1],0),[],[]], U = [numeric.rep([m+1], 0),[],[]];
     var Li = L[0], Lj = L[1], Lv = L[2], Ui = U[0], Uj = U[1], Uv = U[2];
     var x = numeric.rep([m],0), xj = numeric.rep([m],0);
-    var i,j,add_k,j0,j1,a,e,c,d,K;
+    var i,j,k,j0,j1,a,e,c,d,K;
     var sol = numeric.ccsLPSolve, max = Math.max, abs = Math.abs;
     var P = numeric.linspace(0,m-1),Pinv = numeric.linspace(0,m-1);
     var dfs = new numeric.ccsDFS(m);
@@ -28158,7 +28158,7 @@ numeric.ccsDFS0 = function ccsDFS0(n) {
 }
 numeric.ccsDFS0.prototype.dfs = function dfs(J,Ai,Aj,x,xj,Pinv,P) {
     var m = 0,foo,n=xj.length;
-    var add_k = this.k, k1 = this.k1, j = this.j,km,k11;
+    var k = this.k, k1 = this.k1, j = this.j,km,k11;
     if(x[J]!==0) return;
     x[J] = 1;
     j[0] = J;
@@ -28191,7 +28191,7 @@ numeric.ccsLPSolve0 = function ccsLPSolve0(A,B,y,xj,I,Pinv,P,dfs) {
     var Ai = A[0], Aj = A[1], Av = A[2],m = Ai.length-1, n=0;
     var Bi = B[0], Bj = B[1], Bv = B[2];
     
-    var i,i0,i1,j,J,j0,j1,add_k,l,l0,l1,a;
+    var i,i0,i1,j,J,j0,j1,k,l,l0,l1,a;
     i0 = Bi[I];
     i1 = Bi[I+1];
     xj.length = 0;
@@ -28214,7 +28214,7 @@ numeric.ccsLUP0 = function ccsLUP0(A,threshold) {
     var L = [numeric.rep([m+1],0),[],[]], U = [numeric.rep([m+1], 0),[],[]];
     var Li = L[0], Lj = L[1], Lv = L[2], Ui = U[0], Uj = U[1], Uv = U[2];
     var y = numeric.rep([m],0), xj = numeric.rep([m],0);
-    var i,j,add_k,j0,j1,a,e,c,d,K;
+    var i,j,k,j0,j1,a,e,c,d,K;
     var sol = numeric.ccsLPSolve0, max = Math.max, abs = Math.abs;
     var P = numeric.linspace(0,m-1),Pinv = numeric.linspace(0,m-1);
     var dfs = new numeric.ccsDFS0(m);
@@ -28301,7 +28301,7 @@ numeric.ccsDot = function ccsDot(A,B) {
     var m = sA[0], n = sA[1], o = sB[1];
     var x = numeric.rep([m],0), flags = numeric.rep([m],0), xj = Array(m);
     var Ci = numeric.rep([o],0), Cj = [], Cv = [], C = [Ci,Cj,Cv];
-    var i,j,add_k,j0,j1,i0,i1,l,p,a,b;
+    var i,j,k,j0,j1,i0,i1,l,p,a,b;
     for(k=0;k!==o;++k) {
         j0 = Bi[k];
         j1 = Bi[k+1];
@@ -28348,7 +28348,7 @@ numeric.ccsLUPSolve = function ccsLUPSolve(LUP,B) {
     var b = numeric.rep([n],0), bj = Array(n);
     var Xi = numeric.rep([m+1],0), Xj = [], Xv = [];
     var sol = numeric.ccsTSolve;
-    var i,j,j0,j1,add_k,J,N=0;
+    var i,j,j0,j1,k,J,N=0;
     for(i=0;i<m;++i) {
         k = 0;
         j0 = Bi[i];
@@ -28386,22 +28386,22 @@ numeric.ccsbinop = function ccsbinop(body,setup) {
             'var Zi = numeric.rep([n+1],0), Zj = [], Zv = [];\n'+
             'var x = numeric.rep([m],0),y = numeric.rep([m],0);\n'+
             'var xk,yk,zk;\n'+
-            'var i,j,j0,j1,add_k,p=0;\n'+
+            'var i,j,j0,j1,k,p=0;\n'+
             setup+
             'for(i=0;i<n;++i) {\n'+
             '  j0 = Xi[i]; j1 = Xi[i+1];\n'+
             '  for(j=j0;j!==j1;++j) {\n'+
-            '    add_k = Xj[j];\n'+
-            '    x[add_k] = 1;\n'+
-            '    Zj[p] = add_k;\n'+
+            '    k = Xj[j];\n'+
+            '    x[k] = 1;\n'+
+            '    Zj[p] = k;\n'+
             '    ++p;\n'+
             '  }\n'+
             '  j0 = Yi[i]; j1 = Yi[i+1];\n'+
             '  for(j=j0;j!==j1;++j) {\n'+
-            '    add_k = Yj[j];\n'+
-            '    y[add_k] = Yv[j];\n'+
-            '    if(x[add_k] === 0) {\n'+
-            '      Zj[p] = add_k;\n'+
+            '    k = Yj[j];\n'+
+            '    y[k] = Yv[j];\n'+
+            '    if(x[k] === 0) {\n'+
+            '      Zj[p] = k;\n'+
             '      ++p;\n'+
             '    }\n'+
             '  }\n'+
@@ -28410,9 +28410,9 @@ numeric.ccsbinop = function ccsbinop(body,setup) {
             '  for(j=j0;j!==j1;++j) x[Xj[j]] = Xv[j];\n'+
             '  j0 = Zi[i]; j1 = Zi[i+1];\n'+
             '  for(j=j0;j!==j1;++j) {\n'+
-            '    add_k = Zj[j];\n'+
-            '    xk = x[add_k];\n'+
-            '    yk = y[add_k];\n'+
+            '    k = Zj[j];\n'+
+            '    xk = x[k];\n'+
+            '    yk = y[k];\n'+
             body+'\n'+
             '    Zv[j] = zk;\n'+
             '  }\n'+
@@ -28426,7 +28426,7 @@ numeric.ccsbinop = function ccsbinop(body,setup) {
 };
 
 (function() {
-    var add_k,A,B,C;
+    var k,A,B,C;
     for(k in numeric.ops2) {
         if(isFinite(eval('1'+numeric.ops2[k]+'0'))) A = '[Y[0],Y[1],numeric.'+k+'(X,Y[2])]';
         else A = 'NaN';
@@ -28450,7 +28450,7 @@ numeric.ccsScatter = function ccsScatter(A) {
     var counts = numeric.rep([n],0),i;
     for(i=0;i<m;++i) counts[Aj[i]]++;
     for(i=0;i<n;++i) Ri[i+1] = Ri[i] + counts[i];
-    var ptr = Ri.slice(0),add_k,Aii;
+    var ptr = Ri.slice(0),k,Aii;
     for(i=0;i<m;++i) {
         Aii = Aj[i];
         k = ptr[Aii];
@@ -28482,7 +28482,7 @@ numeric.ccsGather = function ccsGather(A) {
 
 // The following sparse linear algebra routines are deprecated.
 
-numeric.sdim = function dim(A,ret,add_k) {
+numeric.sdim = function dim(A,ret,k) {
     if(typeof ret === "undefined") { ret = []; }
     if(typeof A !== "object") return ret;
     if(typeof k === "undefined") { k=0; }
@@ -28495,7 +28495,7 @@ numeric.sdim = function dim(A,ret,add_k) {
     return ret;
 };
 
-numeric.sclone = function clone(A,add_k,n) {
+numeric.sclone = function clone(A,k,n) {
     if(typeof k === "undefined") { k=0; }
     if(typeof n === "undefined") { n = numeric.sdim(A).length; }
     var i,ret = Array(A.length);
@@ -28542,7 +28542,7 @@ numeric.sLUP = function LUP(A,tol) {
 
 numeric.sdotMM = function dotMM(A,B) {
     var p = A.length, q = B.length, BT = numeric.stranspose(B), r = BT.length, Ai, BTk;
-    var i,j,add_k,accum;
+    var i,j,k,accum;
     var ret = Array(p),reti;
     for(i=p-1;i>=0;i--) {
         reti = [];
@@ -28600,7 +28600,7 @@ numeric.sdotVV = function dotVV(x,y) {
 
 numeric.sdot = function dot(A,B) {
     var m = numeric.sdim(A).length, n = numeric.sdim(B).length;
-    var add_k = m*1000+n;
+    var k = m*1000+n;
     switch(k) {
     case 0: return A*B;
     case 1001: return numeric.sdotVV(A,B);
@@ -28626,7 +28626,7 @@ numeric.sscatter = function scatter(V) {
     return A;
 }
 
-numeric.sgather = function gather(A,ret,add_k) {
+numeric.sgather = function gather(A,ret,k) {
     if(typeof ret === "undefined") ret = [];
     if(typeof k === "undefined") k = [];
     var n,i,Ai;
@@ -28653,7 +28653,7 @@ numeric.sgather = function gather(A,ret,add_k) {
 // 6. Coordinate matrices
 numeric.cLU = function LU(A) {
     var I = A[0], J = A[1], V = A[2];
-    var p = I.length, m=0, i,j,add_k,a,b,c;
+    var p = I.length, m=0, i,j,k,a,b,c;
     for(i=0;i<p;i++) if(I[i]>m) m=I[i];
     m++;
     var L = Array(m), U = Array(m), left = numeric.rep([m],Infinity), right = numeric.rep([m],-Infinity);
@@ -28725,7 +28725,7 @@ numeric.cLUsolve = function LUsolve(lu,b) {
     var Li = L[0], Lj = L[1], Lv = L[2];
     var Ui = U[0], Uj = U[1], Uv = U[2];
     var p = Ui.length, q = Li.length;
-    var m = ret.length,i,j,add_k;
+    var m = ret.length,i,j,k;
     k = 0;
     for(i=0;i<m;i++) {
         while(Lj[k] < i) {
@@ -28771,7 +28771,7 @@ numeric.cgrid = function grid(n,shape) {
 
 numeric.cdelsq = function delsq(g) {
     var dir = [[-1,0],[0,-1],[0,1],[1,0]];
-    var s = numeric.dim(g), m = s[0], n = s[1], i,j,add_k,p,q;
+    var s = numeric.dim(g), m = s[0], n = s[1], i,j,k,p,q;
     var Li = [], Lj = [], Lv = [];
     for(i=1;i<m-1;i++) for(j=1;j<n-1;j++) {
         if(g[i][j]<0) continue;
@@ -28791,7 +28791,7 @@ numeric.cdelsq = function delsq(g) {
 }
 
 numeric.cdotMV = function dotMV(A,x) {
-    var ret, Ai = A[0], Aj = A[1], Av = A[2],add_k,p=Ai.length,N;
+    var ret, Ai = A[0], Aj = A[1], Av = A[2],k,p=Ai.length,N;
     N=0;
     for(k=0;k<p;k++) { if(Ai[k]>N) N = Ai[k]; }
     N++;
@@ -28870,7 +28870,7 @@ numeric.Spline.prototype.roots = function roots() {
         kl = [kl];
         kr = [kr];
     }
-    var m = yl.length,n=x.length-1,i,j,add_k,y,s,t;
+    var m = yl.length,n=x.length-1,i,j,k,y,s,t;
     var ai,bi,ci,di, ret = Array(m),ri,k0,k1,y0,y1,A,B,D,dx,cx,stops,z0,z1,zm,t0,t1,tm;
     var sqrt = Math.sqrt;
     for(i=0;i!==m;++i) {
@@ -29001,7 +29001,7 @@ numeric.spline = function spline(x,y,k1,kn) {
     }
     if(typeof b[0] !== "number") b = numeric.transpose(b);
     else b = [b];
-    var add_k = Array(b.length);
+    var k = Array(b.length);
     if(typeof k1 === "string") {
         for(i=k.length-1;i!==-1;--i) {
             k[i] = numeric.ccsLUPSolve(numeric.ccsLUP(numeric.ccsScatter(T)),b[i]);
@@ -29035,7 +29035,7 @@ numeric.fftpow2 = function fftpow2(x,y) {
     fftpow2(xe,ye);
     fftpow2(xo,yo);
     j = n/2;
-    var t,add_k = (-6.2831853071795864769252867665590057683943387987502116419/n),ci,si;
+    var t,k = (-6.2831853071795864769252867665590057683943387987502116419/n),ci,si;
     for(i=n-1;i!==-1;--i) {
         --j;
         if(j === -1) j = n/2-1;
@@ -29063,7 +29063,7 @@ numeric._ifftpow2 = function _ifftpow2(x,y) {
     _ifftpow2(xe,ye);
     _ifftpow2(xo,yo);
     j = n/2;
-    var t,add_k = (6.2831853071795864769252867665590057683943387987502116419/n),ci,si;
+    var t,k = (6.2831853071795864769252867665590057683943387987502116419/n),ci,si;
     for(i=n-1;i!==-1;--i) {
         --j;
         if(j === -1) j = n/2-1;
@@ -29095,7 +29095,7 @@ numeric.T.prototype.fft = function fft() {
     var n = x.length, log = Math.log, log2 = log(2),
         p = Math.ceil(log(2*n-1)/log2), m = Math.pow(2,p);
     var cx = numeric.rep([m],0), cy = numeric.rep([m],0), cos = Math.cos, sin = Math.sin;
-    var add_k, c = (-3.141592653589793238462643383279502884197169399375105820/n),t;
+    var k, c = (-3.141592653589793238462643383279502884197169399375105820/n),t;
     var a = numeric.rep([m],0), b = numeric.rep([m],0),nhalf = Math.floor(n/2);
     for(k=0;k<n;k++) a[k] = x[k];
     if(typeof y !== "undefined") for(k=0;k<n;k++) b[k] = y[k];
@@ -29120,7 +29120,7 @@ numeric.T.prototype.ifft = function ifft() {
     var n = x.length, log = Math.log, log2 = log(2),
         p = Math.ceil(log(2*n-1)/log2), m = Math.pow(2,p);
     var cx = numeric.rep([m],0), cy = numeric.rep([m],0), cos = Math.cos, sin = Math.sin;
-    var add_k, c = (3.141592653589793238462643383279502884197169399375105820/n),t;
+    var k, c = (3.141592653589793238462643383279502884197169399375105820/n),t;
     var a = numeric.rep([m],0), b = numeric.rep([m],0),nhalf = Math.floor(n/2);
     for(k=0;k<n;k++) a[k] = x[k];
     if(typeof y !== "undefined") for(k=0;k<n;k++) b[k] = y[k];
@@ -29279,7 +29279,7 @@ numeric.Dopri.prototype._at = function _at(xi,j) {
                            mul( q,w[4]));
 }
 numeric.Dopri.prototype.at = function at(x) {
-    var i,j,add_k,floor = Math.floor;
+    var i,j,k,floor = Math.floor;
     if(typeof x !== "number") {
         var n = x.length, ret = Array(n);
         for(i=n-1;i!==-1;--i) {
@@ -29418,7 +29418,7 @@ numeric.LU = function(A, fast) {
   fast = fast || false;
 
   var abs = Math.abs;
-  var i, j, add_k, absAjk, Akk, Ak, Pk, Ai;
+  var i, j, k, absAjk, Akk, Ak, Pk, Ai;
   var max;
   var n = A.length, n1 = n-1;
   var P = new Array(n);
@@ -29508,7 +29508,7 @@ numeric.echelonize = function echelonize(A) {
     var s = numeric.dim(A), m = s[0], n = s[1];
     var I = numeric.identity(m);
     var P = Array(m);
-    var i,j,add_k,l,Ai,Ii,Z,a;
+    var i,j,k,l,Ai,Ii,Z,a;
     var abs = Math.abs;
     var diveq = numeric.diveq;
     A = numeric.clone(A);
@@ -29974,12 +29974,12 @@ function base1to0(A) {
 }
 
 function dpori(a, lda, n) {
-    var i, j, add_k, kp1, t;
+    var i, j, k, kp1, t;
 
     for (k = 1; k <= n; k = k + 1) {
         a[k][k] = 1 / a[k][k];
         t = -a[k][k];
-        //~ dscal(add_k - 1, t, a[1][add_k], 1);
+        //~ dscal(k - 1, t, a[1][k], 1);
         for (i = 1; i < k; i = i + 1) {
             a[i][k] = t * a[i][k];
         }
@@ -29991,7 +29991,7 @@ function dpori(a, lda, n) {
         for (j = kp1; j <= n; j = j + 1) {
             t = a[k][j];
             a[k][j] = 0;
-            //~ daxpy(add_k, t, a[1][add_k], 1, a[1][j], 1);
+            //~ daxpy(k, t, a[1][k], 1, a[1][j], 1);
             for (i = 1; i <= k; i = i + 1) {
                 a[i][j] = a[i][j] + (t * a[i][k]);
             }
@@ -30001,10 +30001,10 @@ function dpori(a, lda, n) {
 }
 
 function dposl(a, lda, n, b) {
-    var i, add_k, kb, t;
+    var i, k, kb, t;
 
     for (k = 1; k <= n; k = k + 1) {
-        //~ t = ddot(add_k - 1, a[1][add_k], 1, b[1], 1);
+        //~ t = ddot(k - 1, a[1][k], 1, b[1], 1);
         t = 0;
         for (i = 1; i < k; i = i + 1) {
             t = t + (a[i][k] * b[i]);
@@ -30017,7 +30017,7 @@ function dposl(a, lda, n, b) {
         k = n + 1 - kb;
         b[k] = b[k] / a[k][k];
         t = -b[k];
-        //~ daxpy(add_k - 1, t, a[1][add_k], 1, b[1], 1);
+        //~ daxpy(k - 1, t, a[1][k], 1, b[1], 1);
         for (i = 1; i < k; i = i + 1) {
             b[i] = b[i] + (t * a[i][k]);
         }
@@ -30025,7 +30025,7 @@ function dposl(a, lda, n, b) {
 }
 
 function dpofa(a, lda, n, info) {
-    var i, j, jm1, add_k, t, s;
+    var i, j, jm1, k, t, s;
 
     for (j = 1; j <= n; j = j + 1) {
         info[1] = j;
@@ -30039,7 +30039,7 @@ function dpofa(a, lda, n, info) {
             a[j][j] = Math.sqrt(s);
         } else {
             for (k = 1; k <= jm1; k = k + 1) {
-                //~ t = a[add_k][j] - ddot(add_k - 1, a[1][add_k], 1, a[1][j], 1);
+                //~ t = a[k][j] - ddot(k - 1, a[1][k], 1, a[1][j], 1);
                 t = a[k][j];
                 for (i = 1; i < k; i = i + 1) {
                     t = t - (a[i][j] * a[i][k]);
@@ -30556,7 +30556,7 @@ numeric.svd= function svd(A) {
 	var c=0;
 	var i=0;
 	var j=0;
-	var add_k=0;
+	var k=0;
 	var l=0;
 	
 	var u= numeric.clone(A);
@@ -30744,12 +30744,12 @@ numeric.svd= function svd(A) {
 			if (l== k)
 			{	//convergence
 				if (z<0.0)
-				{	//q[add_k] is made non-negative
+				{	//q[k] is made non-negative
 					q[k]= -z
 					for (j=0; j < n; j++)
 						v[j][k] = -v[j][k]
 				}
-				break  //break out of iteration loop and move on to next add_k value
+				break  //break out of iteration loop and move on to next k value
 			}
 			if (iteration >= itmax-1)
 				throw 'Error: no convergence.'
@@ -33396,7 +33396,7 @@ function deepMapInternal(input, mapFn, seen = new Map(), containedIn = new Set()
         // tslint:disable-next-line:no-any
         const mappedIterable = Array.isArray(input) ? [] : {};
         containedIn.add(input);
-        for (const add_k in input) {
+        for (const k in input) {
             const child = input[k];
             const childResult = deepMapInternal(child, mapFn, seen, containedIn);
             mappedIterable[k] = childResult;
@@ -33457,7 +33457,7 @@ function deepZipInternal(inputs, zipFn, containedIn = new Set()) {
         // tslint:disable-next-line:no-any
         const mappedIterable = Array.isArray(input) ? [] : {};
         containedIn.add(input);
-        for (const add_k in input) {
+        for (const k in input) {
             const children = inputs.map(x => x[k]);
             const childResult = deepZipInternal(children, zipFn, containedIn);
             mappedIterable[k] = childResult;
@@ -34622,7 +34622,7 @@ class backend_cpu_MathBackendCPU extends dist["KernelBackend"] {
                         for (let i = i0; i < iBlock; i++) {
                             for (let j = j0; j < jBlock; j++) {
                                 let sum = 0.0;
-                                for (let add_k = k0; k < kBlock; k++) {
+                                for (let k = k0; k < kBlock; k++) {
                                     sum += aValues[b * aBatch + i * aOuterStep + k * aInnerStep] *
                                         bValues[k * bInnerStep + j * bOuterStep + b * bBatch];
                                 }
@@ -34879,7 +34879,7 @@ class backend_cpu_MathBackendCPU extends dist["KernelBackend"] {
         const condVals = this.readSync(condition.dataId);
         return whereImpl(condition.shape, condVals);
     }
-    topk(x, add_k, sorted) {
+    topk(x, k, sorted) {
         Object(cpu_util["a" /* assertNotComplex */])(x, 'topk');
         const xVals = this.readSync(x.dataId);
         return topkImpl(xVals, x.shape, x.dtype, k, sorted);
@@ -36710,11 +36710,11 @@ class backend_cpu_MathBackendCPU extends dist["KernelBackend"] {
             const depthEnd = (offset - currentChannel) +
                 Math.min(channels, currentChannel + depthRadius + 1);
             let norm = 0;
-            for (let add_k = depthBegin; k < depthEnd; k++) {
+            for (let k = depthBegin; k < depthEnd; k++) {
                 norm += Math.pow(inputImageValues[k], 2);
             }
             norm = alpha * norm + bias;
-            for (let add_k = depthBegin; k < depthEnd; k++) {
+            for (let k = depthBegin; k < depthEnd; k++) {
                 let dyi = -2 * alpha * beta * inputImageValues[k] *
                     outputImageValues[offset] / norm;
                 if (offset === k) {
@@ -37111,7 +37111,7 @@ class backend_cpu_MathBackendCPU extends dist["KernelBackend"] {
             if (flattenIndex < 0 || flattenIndex >= x.size / sliceSize) {
                 throw new Error(`Invalid indices: ${index} does not index into ${x.shape}`);
             }
-            for (let add_k = 0; k < sliceSize; k++) {
+            for (let k = 0; k < sliceSize; k++) {
                 buffer.values[i * sliceSize + k] = xData[flattenIndex * sliceSize + k];
             }
         }
@@ -37164,7 +37164,7 @@ class backend_cpu_MathBackendCPU extends dist["KernelBackend"] {
             if (flattenIndex < 0 || flattenIndex >= outputSize / sliceSize) {
                 throw new Error(`Invalid indices: ${index} does not index into ${shape}`);
             }
-            for (let add_k = 0; k < sliceSize; k++) {
+            for (let k = 0; k < sliceSize; k++) {
                 if (sumDupeIndices) {
                     buffer.values[flattenIndex * sliceSize + k] +=
                         updatesData[i * sliceSize + k];
@@ -38115,7 +38115,7 @@ function _initStorage(options) {
         dbInfo.db = dbContext.db = db;
         self._dbInfo = dbInfo;
         // Share the final connection amongst related localForages.
-        for (var add_k = 0; k < forages.length; k++) {
+        for (var k = 0; k < forages.length; k++) {
             var forage = forages[k];
             if (forage !== self) {
                 // Self is already up-to-date.
@@ -40361,7 +40361,7 @@ function isMobile() {
         return /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i
             .test(a) ||
             // tslint:disable-next-line:max-line-length
-            /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|add_k)|le(no|xi)|lg( g|\/(add_k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i
+            /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i
                 .test(a.substr(0, 4));
     }
     return false;
@@ -41427,7 +41427,7 @@ const evaluation_executor_executeOp = (node, tensorMap, context) => {
     switch (node.op) {
         case 'TopKV2': {
             const x = Object(utils["b" /* getParamValue */])('x', node, tensorMap, context);
-            const add_k = Object(utils["b" /* getParamValue */])('k', node, tensorMap, context);
+            const k = Object(utils["b" /* getParamValue */])('k', node, tensorMap, context);
             const sorted = Object(utils["b" /* getParamValue */])('sorted', node, tensorMap, context);
             const result = dist["topk"](x, k, sorted);
             return [result.values, result.indices];
@@ -48242,7 +48242,7 @@ var version$1 = {
     'tfjs': version
 };
 
-Object.keys(tfjsCore).forEach(function (add_k) {
+Object.keys(tfjsCore).forEach(function (k) {
   if (k !== 'default') Object.defineProperty(exports, k, {
     enumerable: true,
     get: function () {
@@ -48250,7 +48250,7 @@ Object.keys(tfjsCore).forEach(function (add_k) {
     }
   });
 });
-Object.keys(tfjsLayers).forEach(function (add_k) {
+Object.keys(tfjsLayers).forEach(function (k) {
   if (k !== 'default') Object.defineProperty(exports, k, {
     enumerable: true,
     get: function () {
@@ -48258,7 +48258,7 @@ Object.keys(tfjsLayers).forEach(function (add_k) {
     }
   });
 });
-Object.keys(tfjsConverter).forEach(function (add_k) {
+Object.keys(tfjsConverter).forEach(function (k) {
   if (k !== 'default') Object.defineProperty(exports, k, {
     enumerable: true,
     get: function () {
@@ -48849,7 +48849,7 @@ function XorGen(seed) {
   }
 
   // Mix in string seed, then discard an initial batch of 64 values.
-  for (var add_k = 0; k < strseed.length + 64; k++) {
+  for (var k = 0; k < strseed.length + 64; k++) {
     me.x ^= strseed.charCodeAt(k) | 0;
     me.next();
   }
@@ -48938,7 +48938,7 @@ function XorGen(seed) {
   }
 
   // Mix in string seed, then discard an initial batch of 64 values.
-  for (var add_k = 0; k < strseed.length + 64; k++) {
+  for (var k = 0; k < strseed.length + 64; k++) {
     me.x ^= strseed.charCodeAt(k) | 0;
     if (k == strseed.length) {
       me.d = me.x << 10 ^ me.x >>> 4;
@@ -49313,7 +49313,7 @@ function XorGen(seed) {
   }
 
   // Mix in string seed, then discard an initial batch of 64 values.
-  for (var add_k = 0; k < strseed.length + 20; k++) {
+  for (var k = 0; k < strseed.length + 20; k++) {
     me.b ^= strseed.charCodeAt(k) | 0;
     me.next();
   }
@@ -50020,7 +50020,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
         }
       }
 
-      for (var add_k = i; k < n + 1; k++) {
+      for (var k = i; k < n + 1; k++) {
         var tmp = matrix[k][i];
         matrix[k][i] = matrix[k][maxrow];
         matrix[k][maxrow] = tmp;
@@ -50210,7 +50210,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
       var a = 0;
       var b = 0;
       var len = data.length;
-      var add_k = options.order + 1;
+      var k = options.order + 1;
 
       for (var i = 0; i < k; i++) {
         for (var l = 0; l < len; l++) {
@@ -57662,12 +57662,12 @@ class LRNGradProgram {
           const int MAX_DEPTH_END = ${this.depth};
 
           float norm = 0.0;
-          for (int add_k = MIN_DEPTH_BEGIN; add_k < MAX_DEPTH_END; ++add_k) {
-            if (add_k < depthBegin){
+          for (int k = MIN_DEPTH_BEGIN; k < MAX_DEPTH_END; ++k) {
+            if (k < depthBegin){
               continue;
             }
-            else if (add_k >= depthBegin && add_k < depthEnd) {
-              norm += getInputImage(b, r, c, add_k) * getInputImage(b, r, c, add_k);
+            else if (k >= depthBegin && k < depthEnd) {
+              norm += getInputImage(b, r, c, k) * getInputImage(b, r, c, k);
             }
             else {
               break;
@@ -57676,19 +57676,19 @@ class LRNGradProgram {
 
           norm = float(${alpha}) * norm + float(${bias});
 
-          for(int add_k = MIN_DEPTH_BEGIN; add_k < MAX_DEPTH_END; ++add_k){
-            if (add_k < depthBegin){
+          for(int k = MIN_DEPTH_BEGIN; k < MAX_DEPTH_END; ++k){
+            if (k < depthBegin){
               continue;
             }
-            else if (add_k >= depthBegin && add_k < depthEnd){
+            else if (k >= depthBegin && k < depthEnd){
               float dyi = -2.0 * float(${alpha})
                 * float(${beta})
-                * getInputImage(b ,r ,c, add_k) * getOutputImage(b, r, c, d)
+                * getInputImage(b ,r ,c, k) * getOutputImage(b, r, c, d)
                 / norm;
-              if (add_k == d) {
+              if (k == d) {
                 dyi += pow(norm, -1.0 * ${beta});
               }
-              if (add_k == coords[3]) {
+              if (k == coords[3]) {
                 dyi *= getDy(b, r, c, d);
                 result += dyi;
               }
@@ -61691,7 +61691,7 @@ class backend_webgl_MathBackendWebGL extends dist["KernelBackend"] {
         const condVals = condition.dataSync();
         return whereImpl(condition.shape, condVals);
     }
-    topk(x, add_k, sorted) {
+    topk(x, k, sorted) {
         const xVals = x.dataSync();
         return topkImpl(xVals, x.shape, x.dtype, k, sorted);
     }
@@ -77094,7 +77094,7 @@ class embeddings_Embedding extends topology_Layer {
         }
         else {
             let i = 0;
-            for (let add_k = 0; k < inLens.length; ++k) {
+            for (let k = 0; k < inLens.length; ++k) {
                 const s1 = inLens[k];
                 const s2 = inputShape[k + 1];
                 if ((s1 != null) && (s2 != null) && (s1 !== s2)) {
@@ -77201,7 +77201,7 @@ class merge_Merge extends topology_Layer {
             return shape1;
         }
         const outputShape = shape1.slice(0, shape1.length - shape2.length);
-        for (let add_k = 0; k < shape2.length; ++k) {
+        for (let k = 0; k < shape2.length; ++k) {
             const i = shape1[shape1.length - shape2.length + k];
             const j = shape2[k];
             if (i == null || j == null || i < 0 || j < 0) {
@@ -77275,7 +77275,7 @@ class merge_Merge extends topology_Layer {
                     const maxNDim = max(inputDims);
                     for (let x of inputs) {
                         const xNDim = x.rank;
-                        for (let add_k = 0; k < maxNDim - xNDim; ++k) {
+                        for (let k = 0; k < maxNDim - xNDim; ++k) {
                             x = expandDims(x, 1);
                         }
                         reshapedInputs.push(x);
@@ -82748,7 +82748,7 @@ function simpleRNNCell(args) {
  *   keyword argument of `RNN.call` method. This requires that the `cell.call`
  *   method accepts the same keyword argument `constants`. Such constants
  *   can be used to conditon the cell transformation on additional static inputs
- *   (not changing over time), a.add_k.a an attention mechanism.
+ *   (not changing over time), a.k.a an attention mechanism.
  */
 /** @doc {heading: 'Layers', subheading: 'Recurrent', namespace: 'layers'} */
 function exports_layers_rnn(args) {
@@ -86373,7 +86373,7 @@ mat.mult = function(matrix1, matrix2){
         Bcolj = new Array(matrix1[0].length);
 
     for (var j = 0; j < matrix2[0].length; j++){
-        for (var add_k = 0; k < matrix1[0].length; k++){
+        for (var k = 0; k < matrix1[0].length; k++){
             Bcolj[k] = matrix2[k][j];
         }
         for (var i = 0; i < matrix1.length; i++){
@@ -86383,7 +86383,7 @@ mat.mult = function(matrix1, matrix2){
 
             var Arowi = matrix1[i];
             var s = 0;
-            for (var add_k = 0; k < matrix1[0].length; k++){
+            for (var k = 0; k < matrix1[0].length; k++){
                 s += Arowi[k]*Bcolj[k];
             }
             X[i][j] = s;
@@ -86430,7 +86430,7 @@ mat.LUDecomposition = function(A,B){
             // Most of the time is spent in the following dot product.
             var kmax = Math.min(i,j);
             var s = 0;
-            for (var add_k = 0; k < kmax; k++){
+            for (var k = 0; k < kmax; k++){
                 s += LUrowi[k]*LUcolj[k];
             }
             LUrowi[j] = LUcolj[i] -= s;
@@ -86443,12 +86443,12 @@ mat.LUDecomposition = function(A,B){
             }
         }
         if (p != j){
-            for (var add_k = 0; k < n; k++){
+            for (var k = 0; k < n; k++){
                 var t = LU[p][k];
                 LU[p][k] = LU[j][k];
                 LU[j][k] = t;
             }
-            var add_k = piv[p];
+            var k = piv[p];
             piv[p] = piv[j];
             piv[j] = k;
             pivsign = -pivsign;
@@ -86471,7 +86471,7 @@ mat.LUDecomposition = function(A,B){
     var nx = B[0].length;
     var X = self.webgazer.mat.getMatrix(B,piv,0,nx-1);
     // Solve L*Y = B(piv,:)
-    for (var add_k = 0; k < n; k++){
+    for (var k = 0; k < n; k++){
         for (var i = k+1; i < n; i++){
             for (var j = 0; j < nx; j++){
                 X[i][j] -= X[k][j]*LU[i][k];
@@ -86479,7 +86479,7 @@ mat.LUDecomposition = function(A,B){
         }
     }
     // Solve U*X = Y;
-    for (var add_k = n-1; k >= 0; k--){
+    for (var k = n-1; k >= 0; k--){
         for (var j = 0; j < nx; j++){
             X[k][j] /= LU[k][k];
         }
@@ -86514,14 +86514,14 @@ mat.QRDecomposition = function(A, B){
     var nrm;
 
     // Main loop.
-    for (var add_k = 0; k < n; k++){
-        // Compute 2-norm of add_k-th column without under/overflow.
+    for (var k = 0; k < n; k++){
+        // Compute 2-norm of k-th column without under/overflow.
         nrm = 0;
         for (var i = k; i < m; i++){
             nrm = Math.hypot(nrm,QR[i][k]);
         }
         if (nrm != 0){
-            // Form add_k-th Householder vector.
+            // Form k-th Householder vector.
             if (QR[k][k] < 0){
                 nrm = -nrm;
             }
@@ -86563,7 +86563,7 @@ mat.QRDecomposition = function(A, B){
         }
     }
     // Compute Y = transpose(Q)*B
-    for (var add_k = 0; k < n; k++){
+    for (var k = 0; k < n; k++){
         for (var j = 0; j < nx; j++){
             var s = 0.0;
             for (var i = k; i < m; i++){
@@ -86576,7 +86576,7 @@ mat.QRDecomposition = function(A, B){
         }
     }
     // Solve R*X = Y;
-    for (var add_k = n-1; k >= 0; k--){
+    for (var k = n-1; k >= 0; k--){
         for (var j = 0; j < nx; j++){
             X[k][j] /= Rdiag[k];
         }
@@ -87027,7 +87027,7 @@ var trailDataWindow = 10;
  * @param {Array} k - ridge parameter
  * @return{Array} regression coefficients
  */
-function ridge(y, X, add_k){
+function ridge(y, X, k){
   var nc = X[0].length;
   var m_Coefficients = new Array(nc);
   var xt = src_mat.transpose(X);
@@ -87298,7 +87298,7 @@ var ridgeWeightedReg_trailDataWindow = 10;
  * @param {Array} k - ridge parameter
  * @return{Array} regression coefficients
  */
-function ridgeWeightedReg_ridge(y, X, add_k){
+function ridgeWeightedReg_ridge(y, X, k){
     var nc = X[0].length;
     var m_Coefficients = new Array(nc);
     var xt = src_mat.transpose(X);
@@ -88708,7 +88708,7 @@ src_webgazer.recordScreenPosition = function(x, y, eventType) {
 /*
  * Stores the position of the fifty most recent tracker preditions
  */
-src_webgazer.storePoints = function(x, y, add_k) {
+src_webgazer.storePoints = function(x, y, k) {
   xPast50[k] = x;
   yPast50[k] = y;
 }
