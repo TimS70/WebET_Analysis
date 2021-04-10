@@ -69,20 +69,20 @@ clustering_best_runs = c(7,32,45,48,63,96,126,128,130,197,205,212,238,275,
 # Prep data 
 ## Load data
 ```{r, load_datasets}
-path = file.path('data', 'cognition_myself', 'choice_task', 'cleaned')
-
-data_subject = read.csv(file.path(root, path, 'data_subject.csv'))
-data_trial = read.csv(file.path(root, path, 'data_trial.csv'))
-data_et = read.csv(file.path(root, path, 'data_et.csv'))
+path=file.path(root, 'data', 'choice_task', 'cleaned')
+data_subject = read.csv(file.path(path, 'data_subject.csv'))
+data_trial = read.csv(file.path(path, 'data_trial.csv'))
+data_et = read.csv(file.path(path, 'data_et.csv'))
 
 summarize_datasets(data_et, data_trial, data_subject)
 ```
 
 ## Check AOI (optionally new AOIs)
 ```{r}
-# data_et = add_new_aoi(data_et, 0.40, 0.40)
+data_et = add_new_aoi(data_et, 0.4, 0.4)
 
-ggplot(data_et %>% filter(aoi %in% c('TL', 'TR', 'BL', 'BR')), aes(x=x, y=y)) +
+ggplot(data_et %>% filter(aoi %in% c('TL', 'TR', 'BL', 'BR')) %>% head(10000), 
+	   aes(x=x, y=y)) +
     geom_point(size=2.5, aes(alpha=.5))+
     guides(alpha=FALSE,color=FALSE, shape=FALSE)+
     theme_bw() + 
@@ -187,7 +187,21 @@ lastGaze_long <- data_trial %>%
     	choseTop=mean(choseTop),
         .groups = 'keep') 
 
-lastGaze_long
+sel_runs = lastGaze_long %>% 
+	filter(last_fix_top == 1) %>%
+	filter(choseTop < 0.6) %>%
+	dplyr::pull(run_id)
+
+data_subject %>% 
+	filter(run_id %in% sel_runs)
+
+
+t.test(choseTop ~ last_fix_top,
+	   data=lastGaze_long,
+	   paired=TRUE)
+	
+cohen.d(choseTop ~ last_fix_top, pooled=TRUE, paired=TRUE, 
+	data=lastGaze_long)
 
 # plot
 ggplot(lastGaze_long, 
@@ -355,6 +369,27 @@ data_time_bins
 ## All data
 ```{r}
 plot_et_time_bins(data_time_bins)
+
+ggplot(data_time_bins, 
+		aes(x=factor(time_bin), y=p_lookTop, 
+			fill=factor(choseTop, c('1', '0')))) + 
+	geom_violin(alpha=.7, size=0, position="dodge") +
+	stat_summary(
+		fun=mean, geom="point", 
+		shape=45, size=10, position=position_dodge(.9), 
+		aes(color=factor(choseTop, c('1', '0')))) +
+	scale_colour_manual( 
+		values=c("1"="black", "0"="white"), name="", 
+		labels=c("Chose top", "Chose bottom")) +
+	scale_fill_grey(
+		start=.3, end=.7, name="",
+	  	labels=c("Chose top", "Chose bottom")) +
+	xlab("Time bins") + ylab("Proportion looking top") +
+	ylim(0, 1) + 
+	geom_text(x=5, y=1.01, label="***") + 
+	annotate("segment",x=4.7, xend=5.3, y=1, yend=1) +
+	theme_bw() + 
+	theme(text=element_text(size=20), legend.position="bottom")
 ggsave(file.path(path_results, 'et', 'time_bins', 'top_vs_bottom.png'), 
 			 width=5.5, height=5)
 ```
@@ -576,7 +611,7 @@ grouped_tb_index = data_trial %>%
 		tb_index = mean(tb_index),
 		.groups = 'keep')
 
-data_subject = merge_mean_by_subject(data_subject, grouped_tb_index, 'tb_index')
+data_subject = merge_by_subject(data_subject, grouped_tb_index, 'tb_index')
 
 ggplot(data_subject, aes(tb_index))+
     geom_histogram(binwidth=.1, alpha=.5, position="identity")+

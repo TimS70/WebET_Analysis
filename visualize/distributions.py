@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 from visualize.all_tasks import save_plot
 
 
-def plot_histogram(variable, file_name, path):
-    plt.hist(variable, bins=50)
+def plot_histogram(variable, file_name, path, n_bins=50):
+    plt.hist(variable, bins=n_bins)
     plt.xlim(0, 1)
     plt.ylim(1, 0)
     save_plot(file_name, path)

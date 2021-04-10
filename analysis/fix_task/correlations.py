@@ -37,7 +37,8 @@ def corr_analysis_fix(data_trial, data_subject,
     plt.close()
 
     matrix = combine_corr_matrix(data=data_plot, variables=corr_columns_trial)
-    write_csv(data=matrix.reset_index(),
+    write_csv(data=matrix,
+              index=True,
               file_name='corr_matrix_trial.csv',
               path=path_tables)
 

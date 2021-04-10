@@ -12,14 +12,19 @@ plot_et_time_bins = function(data_time_bins) {
 	print(runs_not_enough_bins)
 
 	# t-test
-	# for (bin in unique(data_time_bins$time_bin)) {
-	#     print(t.test(p_lookTop ~ choseTop,
-	#                  data=data_time_bins %>%
-	#                      filter(time_bin==bin &
-	#                             !(run_id %in% runs_not_enough_bins)),
-	#                  paired=TRUE))
-	# }
-	
+	for (bin in unique(data_time_bins$time_bin)) {
+	    print(t.test(p_lookTop ~ choseTop,
+	                 data=data_time_bins %>%
+	                     filter(time_bin==bin &
+	                            !(run_id %in% runs_not_enough_bins)),
+	                 paired=TRUE))
+		
+		print(cohen.d(p_lookTop ~ choseTop, pooled=TRUE, paired=TRUE, 
+					  data=data_time_bins %>%
+	                     filter(time_bin==bin &
+	                            !(run_id %in% runs_not_enough_bins))))
+	}
+
 	
 	bin_plot = ggplot(data_time_bins, 
 		aes(x=factor(time_bin), y=p_lookTop, 
@@ -36,6 +41,7 @@ plot_et_time_bins = function(data_time_bins) {
 		start=.3, end=.7, name="",
 	  	labels=c("Chose top", "Chose bottom")) +
 	xlab("Time bins") + ylab("Proportion looking top") +
+	ylim(0, 1) + 
 	theme_bw() + 
 	theme(text=element_text(size=20), legend.position="bottom")
 	

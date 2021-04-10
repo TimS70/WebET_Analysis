@@ -26,9 +26,13 @@ from data_prep.load.prolific import integrate_prolific_data
 from inference.F import anova_outcomes_factor
 from inference.t_test import t_test_outcomes_vs_factor
 from utils.save_data import load_all_three_datasets
-from visualize.all_tasks import get_box_plots
+from visualize.all_tasks import get_box_plots, save_plot
 from visualize.choice import plot_choice_task_heatmap, plot_example_eye_movement
+from visualize.distributions import plot_histogram
 from visualize.eye_tracking import plot_et_scatter
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def prep_global():
@@ -89,8 +93,7 @@ def prep_choice(main_aoi_width=0.4,
         path_origin=os.path.join('data', 'choice_task',
                                  'raw', 'data_et.csv'),
         path_target=os.path.join('results', 'plots',
-                                 'clustering', 'py_clusters',
-                                 'heatmaps_all'))
+                                 'choice_Task', 'individual_heatmaps', 'all'))
 
     add_aoi_et(aoi_width=main_aoi_width, aoi_height=main_aoi_height,
                path_origin=os.path.join('data', 'choice_task', 'raw'),
@@ -135,7 +138,7 @@ def prep_choice(main_aoi_width=0.4,
 
     clean_data_choice(
         us_sample=False,
-        min_hit_ratio= 0.6,
+        min_hit_ratio=0.6,
         max_precision=None,  # 0.15,
         max_offset=None,  # 0.5,
         min_fps=5,
@@ -146,13 +149,28 @@ def prep_choice(main_aoi_width=0.4,
         #     12, 23, 93, 144, 243, 258, 268, 343, 356, 373, 384, 386, 387,
         #     393, 404, 379, 410, 411, 417, 410, 417, 425, 429, 440, 441, 445,
         #     449, 458, 462, 475, 425, 488, 493],
-        # exclude_runs_reason='No clear AOIs',
-        filter_log_k=False,
+        exclude_runs_reason='No clear AOIs',
+        filter_log_k=True,
         path_origin=os.path.join('data', 'choice_task', 'added_var'),
         path_target=os.path.join('data', 'choice_task', 'cleaned'))
 
+    plot_choice_task_heatmap(
+        path_origin=os.path.join('data', 'choice_task',
+                                 'cleaned', 'data_et.csv'),
+        path_target=os.path.join('results', 'plots',
+                                 'choice_Task', 'individual_heatmaps', 'selected'))
+
 
 def analyze_global():
+
+    path_origin = os.path.join('data', 'all_trials', 'cleaned')
+    data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
+
+    # Window size
+    print(f"""Describe window: \n"""
+          f"""{data_subject[['window', 'window_x', 
+                             'window_y']].describe()} \n""")
+
     analyze_dropouts(
         path_origin=os.path.join('data', 'all_trials', 'added_var'))
 
@@ -196,17 +214,40 @@ def analyze_choice():
 
     data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
+    # Log K
+    plt.hist(x=data_subject['logK'],
+             bins=25)
+    save_plot(file_name='log_k_histogram.png',
+              path=os.path.join('results', 'plots', 'choice_task', 'log_k'))
+    plt.close()
+
+    print(data_subject['logK'].describe())
+
+    # ET Indices
+    print(f"""ET Indices: \n"""
+          f"""{round(data_subject[['optionIndex', 'attributeIndex', 
+                                   'payneIndex']].describe(), 2)} \n""")
+
+    for outcome in ['optionIndex', 'attributeIndex', 'payneIndex']:
+        plt.hist(x=data_subject[outcome], bins=10)
+        plt.title(outcome)
+        plt.xlim(-1, 1)
+        save_plot(file_name=outcome + '.png',
+                  path=os.path.join('results', 'plots', 'choice_task',
+                                    'et_indices'))
+        plt.close()
+
+
     data_subject['student_status'] = data_subject['Student Status']
 
     predictors = ['chinFirst', 'ethnic', 'degree', 'student_status']
 
     # Confounders
-    get_box_plots(
-        data=data_subject,
-        outcome='choseLL',
-        predictors=predictors,
-        file_name='box_plots_confounders_vs_choseLL.png',
-        path_target=path_plots)
+    get_box_plots(data=data_subject,
+                  outcome='choseLL',
+                  predictors=predictors,
+                  file_name='box_plots_confounders_vs_choseLL.png',
+                  path_target=path_plots)
 
     for predictor in predictors:
         anova_outcomes_factor(data=data_subject,
@@ -239,17 +280,17 @@ def main(new_data=False):
             path_prolific=os.path.join('data', 'prolific'),
             path_target=os.path.join('data', 'all_trials', 'combined'))
 
-    prep_global()
+    # prep_global()
     prep_fix()
     prep_choice()
     analyze_global()
     analyze_fix()
     analyze_choice()
-
-    # Render R markdowns
-    subprocess.call(
-        ['Rscript', '--vanilla', 'analysis/run_r_markdowns.R'],
-        shell=True)
+    #
+    # # Render R markdowns
+    # subprocess.call(
+    #     ['Rscript', '--vanilla', 'analysis/run_r_markdowns.R'],
+    #     shell=True)
 
 
 if __name__ == '__main__':

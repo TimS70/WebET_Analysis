@@ -103,7 +103,7 @@ lme_ll_top = lmer(
     REML = FALSE)
 
 summary(lme_ll_top)
-confint(lme_ll_top, method="boot", n=500) 
+sconfint(lme_ll_top, method="boot", n=500) 
 ```
 
 

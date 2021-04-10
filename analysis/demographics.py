@@ -33,7 +33,7 @@ def analyze_demographics():
         'residence', 'nationality_grouped',
         'employment_status', 'Student Status', 'degree',
         'kind_of_correction', 'sight', 'vertPosition', 'webcam_fps',
-        'ethnic', 'gender']
+        'ethnic', 'gender', 'browser']
 
     demo_table = pd.DataFrame(columns=['variable', 'n', 'percent'])
     for predictor in predictors:
@@ -55,7 +55,7 @@ def analyze_demographics():
     demo_table = pd.DataFrame(columns=['variable', 'n', 'percent'])
     for predictor in predictors:
         freq_table = frequency_table(
-            data_subject.loc[data_subject['residence']=='United States', :],
+            data_subject[data_subject['residence'] == 'United States'],
             predictor, save_table=False)
 
         sub_header = pd.DataFrame(
@@ -102,8 +102,8 @@ def frequency_table(data_subject, predictor, save_table=True):
             index=data_subject[predictor],
             columns="count") \
         .reset_index() \
-        .assign(percent=lambda data_frame: data_frame['count'] /
-                                           sum(data_frame['count'])) \
+        .assign(percent=lambda data_frame: round(100 * data_frame['count'] /
+                                           sum(data_frame['count']), 2)) \
         .sort_values(by='count')
 
     # print(f"""{freq_table} \n""")

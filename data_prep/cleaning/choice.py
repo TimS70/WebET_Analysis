@@ -138,13 +138,11 @@ def clean_data_choice(
 
     if (min_rt is not None) & (max_rt is not None):
         # Remove Long trials
-        data_trial = clean_trial_duration(
-            data_trial, min_rt, max_rt, 'data_trial')
+        data_trial = clean_trial_duration(data_trial, min_rt, max_rt,
+                                          'data_trial')
 
-        data_et = merge_by_index(
-            data_et, data_trial, 'trial_duration_exact')
-        data_et = clean_trial_duration(
-            data_et, min_rt, max_rt, 'data_et')
+        data_et = merge_by_index(data_et, data_trial, 'trial_duration_exact')
+        data_et = clean_trial_duration(data_et, min_rt, max_rt, 'data_et')
         data_et = data_et.drop(columns='trial_duration_exact')
 
     save_all_three_datasets(data_et, data_trial, data_subject, path_target)

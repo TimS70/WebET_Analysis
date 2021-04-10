@@ -16,8 +16,8 @@ knitr::opts_knit$get("root.dir")
 
 
 source(file.path(root, 'utils', 'r', 'geom_split_violin.R'))
-source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
-source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
+source(file.path(root, 'utils', 'r', 'merge_by_index.R'))
+source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
 source(file.path(root, 'utils', 'r', 'merge_by_index.R'))
 source(file.path(root, 'utils', 'r', 'summarize_datasets.R'))
 source(file.path(root, 'utils', 'r', 'get_packages.R'))
@@ -114,6 +114,9 @@ ggsave(file.path(path_results, 'log_k', 'log_k_vs_noise.png'),
 
 # Histogram of left/right and top/bottom choice distribution
 ```{r, plot_prop_top}
+sd(data_subject$choseTop)
+
+
 dir.create(file.path(path_results, 'behavior'),  showWarnings = FALSE)
 ggplot(data_subject, aes(x=choseTop)) +
 	geom_histogram(bins=15) + 
@@ -388,51 +391,28 @@ data_et %>%
 
 
 ```{r}
-time_bins_choseTB_long = data_et %>%
-	merge(
-		data_trial %>% dplyr::select(run_id, trial_index, choseTop),
-		by=c('run_id', 'trial_index')) %>%
-    filter(
-    	!is.na(aoi) & aoi!=0) %>%
+data_time_bins =  data_et %>%
+	merge_by_index(data_trial, 'choseTop') %>%
+    filter(!is.na(aoi) & !aoi %in% c(0, '0')) %>%
     mutate(
         lookTop = as.numeric(aoi %in% c('TL', 'TR')), 
         lookBottom = as.numeric(aoi %in% c('BL', 'BR'))) %>%
     dplyr::group_by(run_id, choseTop, time_bin) %>%
     dplyr::summarise(
-        n = n(),
+        n_trials = n(),
         n_lookTop = sum(lookTop),
         n_lookBottom = sum(lookBottom),    
-        p_lookTop = sum(lookTop)/n,
-        p_lookBottom = sum(lookBottom)/n,
+        p_lookTop = sum(lookTop)/n_trials,
+        p_lookBottom = sum(lookBottom)/n_trials,
         .groups = 'keep') %>%
-    arrange(choseTop)
-
-time_bins_choseTB_long %>% head(5)
-
-time_bins_choseTB_long %>%
-    group_by(run_id, choseTop) %>%
-    dplyr::summarise(
-    	n=length(unique(time_bin)),
-    	.groups = 'keep') %>%
-    filter(n<5)
-
-subjects_not_enough_bins = time_bins_choseTB_long %>%
-    group_by(run_id, choseTop) %>%
-    dplyr::summarise(
-    	n=length(unique(time_bin)),
-    	.groups = 'keep') %>%
-    filter(n<5) %>%
-    dplyr::pull(run_id)
-
-time_bins_choseTB_long %>%
-    filter(time_bin %in% c(4, 5)) %>%
-    dplyr::group_by(time_bin, choseTop) %>%
-    dplyr::summarise(
-    	p_lookTop = mean(p_lookTop),
-    	.groups = 'keep')
-#Violin plot of time bins
-
-time_bins_choseTB_long$choseTop = as.factor(time_bins_choseTB_long$choseTop)
+	mutate(
+		choseTop = factor(choseTop, c('1', '0')), 
+		time_bin = factor(time_bin)) %>%
+	merge_by_subject(data_subject, 'window') %>%
+	merge_by_subject(data_subject, 'fps') %>%
+	dplyr::select(
+		run_id, window, fps, choseTop, time_bin, n_trials, 
+		n_lookTop, n_lookBottom, p_lookTop, p_lookBottom)
 
 for (bin in unique(time_bins_choseTB_long$time_bin)) {
     print(t.test(p_lookTop ~ choseTop, 
@@ -442,30 +422,7 @@ for (bin in unique(time_bins_choseTB_long$time_bin)) {
                  paired=TRUE))
 }
 
-ggplot(time_bins_choseTB_long, 
-       aes(x=factor(time_bin), y=p_lookTop, fill=factor(choseTop, c('1', '0')))) +
-    geom_split_violin(alpha=.7, size=1, position="dodge") +
-    stat_summary(
-        fun=mean, geom="point",
-        shape=45,size=10,
-        position=position_dodge(.9), 
-        aes(color=factor(choseTop, c('1', '0')))) +
-    theme_bw() + 
-    theme(text=element_text(size=20), 
-    legend.position="bottom") +
-    ggtitle('Eye-tracking time bins') +
-    scale_colour_manual(
-        values=c("1"="black", "0"="white"), 
-        name="", 
-        labels=c("Chose Top", "Chose Bottom")) +
-    scale_fill_grey(
-        start=.3, end=.7, name="",
-        labels=c("Chose Top", "Chose Bottom")) +
-              # If significant
-    geom_text(x=5, y=1.03, label="***") + 
-    annotate("segment",x=4.7, xend=5.3, y=1.02, yend=1.02) +
-    ylab("Proportion looking top") +
-    xlab("Time bins")
+plot_et_time_bins(time_bins_choseTB_long)
 ggsave(file.path(path_results, 'et', 'bins_top_vs_bottom.png'), 
 			 width=5.5, height=5)
 ```
@@ -807,12 +764,15 @@ runs_na_ai = data_subject %>%
 runs_na_pi = data_subject %>%
 	filter(is.na(payneIndex)) %>%
 	dplyr::pull(run_id)
-
+	
 
 t.test(rt ~ errorTrial,
        data=grouped %>% filter(
            LLexpected==1),
        paired=TRUE, na.action=na.omit)
+
+cohen.d(rt ~ errorTrial,alpha=.05,
+		data=grouped %>% filter(LLexpected==1))
 
 runs_na_error_oi = grouped %>% filter(
 		   	!is.na(optionIndex) &
@@ -949,7 +909,7 @@ data_plot = grouped %>%
         LLexpected = factor(LLexpected))
 
 ggplot(data_plot, aes(x=LLexpected, y=rt, fill=errorTrial)) +
-  geom_split_violin(alpha=.6, size=0, position=position_dodge(0)) +
+  geom_violin(alpha=.6, size=0, position=position_dodge(0)) +
   stat_summary(
       fun.data="mean_se",
       geom="linerange",
@@ -964,7 +924,8 @@ ggplot(data_plot, aes(x=LLexpected, y=rt, fill=errorTrial)) +
   # geom_text(x=2, y=7.4, label="***",size=10) + 
   coord_cartesian(ylim=c(0,7.5)) +
   theme_bw() + 
-  theme(text=element_text(size=20)) +
+  theme(text=element_text(size=20),
+  	    legend.position="bottom") +
   scale_x_discrete(labels=c("SS>LL", "LL>SS")) +
   xlab("Choices") + ylab("Response Time (s)") + 
   labs(fill="",color="")+
