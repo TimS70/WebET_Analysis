@@ -10,8 +10,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-def corr_analysis_fix(data_trial, data_subject,
-                      path_plots, path_tables):
+def corr_analysis_fix(data_trial, data_subject, path_plots, path_tables):
 
     corr_columns_trial = ['fps', 'x_pos', 'y_pos',
                           'glasses_binary', 'chin',
@@ -36,7 +35,9 @@ def corr_analysis_fix(data_trial, data_subject,
               message=True)
     plt.close()
 
-    matrix = combine_corr_matrix(data=data_plot, variables=corr_columns_trial)
+    matrix, matrix_stars = combine_corr_matrix(data=data_plot,
+                                               variables=corr_columns_trial)
+
     write_csv(data=matrix,
               index=True,
               file_name='corr_matrix_trial.csv',
@@ -63,7 +64,8 @@ def corr_analysis_fix(data_trial, data_subject,
               message=True)
     plt.close()
 
-    matrix = combine_corr_matrix(data=data_plot, variables=corr_columns_subject)
+    matrix, matrix_stars = combine_corr_matrix(data=data_plot,
+                                               variables=corr_columns_subject)
     write_csv(data=matrix.reset_index(),
               file_name='corr_matrix_subject.csv',
               path=path_tables)

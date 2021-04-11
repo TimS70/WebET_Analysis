@@ -167,9 +167,9 @@ def clean_global_data(path_origin, path_target=None,
                     len(invalid_runs),
                     len(invalid_runs) / n_runs])
 
-    summary = pd.DataFrame(summary, columns=['name', 'n', 'percent']) \
+    summary = pd.DataFrame(summary, columns=['description', 'n', '%']) \
         .sort_values(by='n')
-    summary['percent'] = 100 * round(summary['percent'], 4)
+    summary['percent'] = round(100 * summary['%'], 2)
 
 
     print(f"""\nIn total, n={len(invalid_runs)} have to be """

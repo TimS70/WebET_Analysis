@@ -29,15 +29,25 @@ def compare_positions(data_trial_fix, outcome, path_target):
     position_tests.loc[position_tests['p'] < 0.01, 'Sig'] = """**"""
     position_tests.loc[position_tests['p'] < 0.001, 'Sig'] = """***"""
 
+    position_tests[['pos_1_mean', 'pos_2_mean', 'pos_1_std', 'pos_2_std', 'd', 't']] = round(
+        position_tests[['pos_1_mean', 'pos_2_mean', 'pos_1_std', 'pos_2_std', 'd', 't']],
+        2)
+    position_tests['p'] = round(position_tests['p'], 3)
+
+    position_tests = position_tests[['pos_1', 'pos_1_mean', 'pos_1_std',
+                                     'pos_2', 'pos_2_mean', 'pos_2_std',
+                                     'd', 'n', 't', 'p', 'Sig']]
+
     significant_results = position_tests.loc[
-        position_tests['Sig'] != 'np',
-        ['pos_1', 'pos_2', 'd', 't', 'p']]
+        position_tests['Sig'] != 'np', ['pos_1', 'pos_2', 'd', 't', 'p']]
 
     if len(significant_results) > 0:
         print(f"""Significant results for {outcome}: \n"""
               f"""{significant_results} \n""")
     else:
         print(f"""No significant results for {outcome}. \n""")
+
+    position_tests['Sig'] = position_tests['Sig'].replace('np', '')
 
     write_csv(data=position_tests,
               file_name='positions_' + outcome + '_t_test.csv',

@@ -45,8 +45,6 @@ def t_test_outcomes_vs_factor(data, dependent, factor,
         outcome_by_factor = pivot_outcome_by_factor(
             data, factor, var)
 
-        print(outcome_by_factor)
-        exit()
         if dependent:
             t_test_result = t_test_rel(outcome_by_factor)
         else:
