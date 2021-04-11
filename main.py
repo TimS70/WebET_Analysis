@@ -29,7 +29,8 @@ from not_prolific.cognition_myself.main import \
     prep_and_analyze_data_cognition_myself
 from utils.save_data import load_all_three_datasets
 from visualize.all_tasks import get_box_plots, save_plot
-from visualize.choice import plot_choice_task_heatmap, plot_example_eye_movement
+from visualize.choice import plot_choice_task_heatmap, \
+    plot_example_eye_movement, plot_log_k_frequency
 from visualize.distributions import plot_histogram
 from visualize.eye_tracking import plot_et_scatter
 
@@ -217,13 +218,10 @@ def analyze_choice():
     data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
     # Log K
-    plt.hist(x=data_subject['logK'],
-             bins=25)
-    save_plot(file_name='log_k_histogram.png',
-              path=os.path.join('results', 'plots', 'choice_task', 'log_k'))
-    plt.close()
-
     print(data_subject['logK'].describe())
+    # Done in R
+    plot_log_k_frequency(data_subject['logK'])
+    exit()
 
     # ET Indices
     print(f"""ET Indices: \n"""
@@ -238,7 +236,6 @@ def analyze_choice():
                   path=os.path.join('results', 'plots', 'choice_task',
                                     'et_indices'))
         plt.close()
-
 
     data_subject['student_status'] = data_subject['Student Status']
 
@@ -282,18 +279,19 @@ def main(new_data=False):
             path_prolific=os.path.join('data', 'prolific'),
             path_target=os.path.join('data', 'all_trials', 'combined'))
 
-    # prep_global()
+    prep_global()
     prep_fix()
     prep_choice()
     analyze_global()
     analyze_fix()
     analyze_choice()
-    #
-    # # Render R markdowns
-    # subprocess.call(
-    #     ['Rscript', '--vanilla', 'analysis/run_r_markdowns.R'],
-    #     shell=True)
+
+    # Render R markdowns
+    subprocess.call(
+        ['Rscript', '--vanilla', 'analysis/run_r_markdowns.R'],
+        shell=True)
 
 
 if __name__ == '__main__':
-    main(new_data=False)
+    analyze_choice()
+    # main(new_data=False)

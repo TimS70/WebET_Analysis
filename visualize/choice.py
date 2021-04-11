@@ -139,3 +139,23 @@ def plot_example_eye_movement(data_et, data_trial, run):
               path=os.path.join('results', 'plots',
                                 'choice_task', 'et'))
     plt.close()
+
+
+def plot_log_k_frequency(variable):
+    plt.hist(x=variable, bins=25, color='grey')
+    plt.xlim(-10, 0)
+    plt.xticks(np.arange(-10, 0, 0.5))
+    # plt.yticks(np.arange(0, 100, 0.25))
+
+    plt.title('Frequency distribution of log(k)')
+    plt.xlabel('log(k)')
+    plt.ylabel('count')
+
+
+    plt.grid()
+    plt.tight_layout()
+    plt.box(False)
+
+    save_plot(file_name='log_k_histogram.png',
+              path=os.path.join('results', 'plots', 'choice_task', 'log_k'))
+    plt.close()

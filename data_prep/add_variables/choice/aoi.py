@@ -12,25 +12,32 @@ from visualize.all_tasks import save_plot
 
 
 def add_aoi(data, aoi_width, aoi_height):
-    aoi_centers = pd.DataFrame(
-        [
-            [(0.05 + 0.9 * 0.2), 0.25],
-            [(0.05 + 0.9 * 0.8), 0.25],
-            [(0.05 + 0.9 * 0.2), 0.75],
-            [(0.05 + 0.9 * 0.8), 0.75]
-        ],
-        columns=['x', 'y'],
-        index=['TL', 'TR', 'BL', 'BR']
-    )
 
     data['aoi'] = np.nan
-    for aoi in aoi_centers.index:
-        data.loc[
-            (data['x'] > (aoi_centers.loc[aoi, 'x'] - aoi_width / 2)) &
-            (data['x'] < (aoi_centers.loc[aoi, 'x'] + aoi_width / 2)) &
-            (data['y'] > (aoi_centers.loc[aoi, 'y'] - aoi_height / 2)) &
-            (data['y'] < (aoi_centers.loc[aoi, 'y'] + aoi_height / 2)),
-            'aoi'] = aoi
+    data.loc[
+        (data['x'] > ((0.05 + 0.9 * 0.2) - aoi_width / 2)) &
+        (data['x'] < ((0.05 + 0.9 * 0.2) + aoi_width / 2)) &
+        (data['y'] > (0.25 - aoi_height / 2)) &
+        (data['y'] < (0.25 + aoi_height / 2)), 'aoi'] = 'TL'
+
+    data.loc[
+        (data['x'] > ((0.05 + 0.9 * 0.8) - aoi_width / 2)) &
+        (data['x'] < ((0.05 + 0.9 * 0.8) + aoi_width / 2)) &
+        (data['y'] > (0.25 - aoi_height / 2)) &
+        (data['y'] < (0.25 + aoi_height / 2)), 'aoi'] = 'TR'
+
+    data.loc[
+        (data['x'] > ((0.05 + 0.9 * 0.2) - aoi_width / 2)) &
+        (data['x'] < ((0.05 + 0.9 * 0.2) + aoi_width / 2)) &
+        (data['y'] > (0.75 - aoi_height / 2)) &
+        (data['y'] < (0.75 + aoi_height / 2)), 'aoi'] = 'BL'
+
+    data.loc[
+        (data['x'] > ((0.05 + 0.9 * 0.8) - aoi_width / 2)) &
+        (data['x'] < ((0.05 + 0.9 * 0.8) + aoi_width / 2)) &
+        (data['y'] > (0.75 - aoi_height / 2)) &
+        (data['y'] < (0.75 + aoi_height / 2)), 'aoi'] = 'BR'
+
     return data
 
 

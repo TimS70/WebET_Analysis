@@ -59,8 +59,8 @@ summarize_datasets(data_et, data_trial, data_subject)
 
 ## add_k-values
 ```{r, add_k_values}
-data_trial = merge_mean_by_subject(data_trial, data_subject, 'logK')
-data_trial = merge_mean_by_subject(data_trial, data_subject, 'noise')
+data_trial = merge_by_subject(data_trial, data_subject, 'logK')
+data_trial = merge_by_subject(data_trial, data_subject, 'noise')
 ```
 
 
@@ -83,20 +83,24 @@ summary(data_trial$n_fixations)
 
 # Distribution of add_k-values
 ````{r, plot_k}
-dir.create(file.path(path_results, 'log_k'), showWarnings = FALSE)
+dir.create(file.path(path_results, 'discounting'), showWarnings = FALSE)
 
 ggplot(data_subject, aes(x=logK))+
     geom_histogram(binwidth=.5, alpha=.5, position="identity")+
     scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
-    theme_bw()+theme(text=element_text(size=40))
-ggsave(file.path(path_results, 'log_k', 'log_k_histogram.png'), 
+    theme_bw() + 
+	theme(text=element_text(size=15),
+		  plot.title = element_text(size = 20, face = "bold")) + 
+	ggtitle('Frequency distribution of log(k)') + 
+	xlim(-10, 0)
+ggsave(file.path(path_results, 'discounting', 'log_k_histogram.png'), 
 	   width=5.5, height=5)
 
 ggplot(data_subject, aes(x=noise))+
     geom_histogram(binwidth=1, alpha=.5, position="identity")+
     scale_fill_manual(values=c("palegreen","cornflowerblue"), name="") +
     theme_bw()+theme(text=element_text(size=40))
-ggsave(file.path(path_results, 'log_k', 'noise_histogram.png'), 
+ggsave(file.path(path_results, 'discounting', 'noise_histogram.png'), 
 	   width=5.5, height=5)
 
 ggplot(data_subject, aes(x=logK, y=noise)) +
@@ -107,12 +111,12 @@ ggplot(data_subject, aes(x=logK, y=noise)) +
     theme(text=element_text(size=20)) +
     xlab("logK") + ylab("noise") +
     ggtitle('logK vs. noise') 
-ggsave(file.path(path_results, 'log_k', 'log_k_vs_noise.png'), 
+ggsave(file.path(path_results, 'discounting', 'log_k_vs_noise.png'), 
 	   width=5.5, height=5)
 ````
 
 
-# Histogram of left/right and top/bottom choice distribution
+# Histogram of top/bottom choice distribution
 ```{r, plot_prop_top}
 sd(data_subject$choseTop)
 
@@ -227,49 +231,53 @@ ggsave(file.path(path_results, 'SV', 'fixations.png'),width=5.5, height=5)
 # Eye tracking indices
 ## Correlation of Eye tracking indices and discount rate
 ```{r, eyetracking_indices}
-dir.create(file.path(path_results, 'et'),  showWarnings = FALSE)
-ggplot(data_subject %>% filter(!is.na(optionIndex)), 
-       aes(x=optionIndex, y=logK)) +
-		geom_point(size=2.5, aes(alpha=.5)) +
-		guides(alpha=FALSE,color=FALSE, shape=FALSE) +
-		theme_bw() + 
-		xlim(-1,1) +
-		theme(text=element_text(size=20))+
-		xlab("Option index") +
-		ylab("log(add_k)") +
-		scale_colour_grey()
-ggsave(file.path(path_results, 'et', 'logK_oi.png'), width=5.7, height=5)
+highlight_runs = data_subject %>% filter(logK < -9) 
+dir.create(file.path(path_results, 'discounting'),  showWarnings = FALSE)
+data_subject %>% 
+	filter(!is.na(optionIndex) & logK > -9.5) %>%
+	ggplot(aes(x=optionIndex, y=logK)) +
+	geom_point(data=highlight_runs %>% filter(!is.na(optionIndex)), 
+			   aes(x=optionIndex, y=logK, alpha=.5), shape=17) +
+	geom_point(size=2.5, aes(alpha=.5)) +
+	guides(alpha=FALSE,color=FALSE, shape=FALSE) +
+	theme_bw() + scale_colour_grey() +
+	xlim(-1,1) + ylim(-10, 0) +
+	theme(text=element_text(size=15)) +
+	xlab("Option index") + ylab("log(k)") + 
+	scale_shape_manual(values=runs_log_k)
+ggsave(file.path(path_results, 'discounting', 'logK_oi.png'), width=5.7, height=5)
 
 data_test = data_subject %>% filter(!is.na(optionIndex))
 cor.test(data_test$optionIndex, data_test$logK) 
 
-ggplot(data_subject %>% filter(!is.na(attributeIndex)), 
-       aes(x=attributeIndex, y=logK)) +
-		geom_point(size=2.5, aes(alpha=.5)) +
-		guides(alpha=FALSE,color=FALSE, shape=FALSE) +
-		theme_bw() + 
-		xlim(-1,1) +
-		scale_colour_grey()
-		theme(text=element_text(size=20)) +
-		xlab("Attribute index") + ylab("log(add_k)")
-ggsave(file.path(path_results, 'et', 'logK_ai.png'),width=5.7, height=5)
+data_subject %>% filter(!is.na(attributeIndex) & logK > -9.5) %>%
+	ggplot(aes(x=attributeIndex, y=logK)) +
+	geom_point(size=2.5, aes(alpha=.5)) +
+	geom_point(data=highlight_runs %>% filter(!is.na(attributeIndex)), 
+			   aes(x=attributeIndex, y=logK, alpha=.5), shape=17) +
+	guides(alpha=FALSE,color=FALSE, shape=FALSE) +
+	theme_bw() + scale_colour_grey() +
+	xlim(-1,1) +
+	theme(text=element_text(size=15)) +
+	xlab("Attribute index") + ylab("log(k)")
+
+ggsave(file.path(path_results, 'discounting', 'logK_ai.png'),width=5.7, height=5)
 
 data_test = data_subject %>% filter(!is.na(attributeIndex))
 cor.test(data_test$attributeIndex, data_test$logK) 
 
-#Plot correlation between Payne index and discount rate
-#Replication sample
-ggplot(data_subject %>% filter(!is.na(attributeIndex)), 
-       aes(x=payneIndex, y=logK)) +
-		geom_point(size=2.5, aes(alpha=.5))+
-		guides(alpha=FALSE,color=FALSE, shape=FALSE)+
-		theme_bw() + 
-		xlim(-1,1) + 
-		scale_colour_grey() + 
-		theme(text=element_text(size=20))+
-		xlab("Payne index") +
-		ylab("log(add_k)")
-ggsave(file.path(path_results, 'et', 'logK_pi.png'),width=5.7, height=5)
+data_subject %>% filter(!is.na(payneIndex) & logK > -9.5) %>%
+	ggplot(aes(x=attributeIndex, y=logK)) +
+	geom_point(size=2.5, aes(alpha=.5)) +
+	geom_point(data=highlight_runs %>% filter(!is.na(payneIndex)), 
+			   aes(x=payneIndex, y=logK, alpha=.5), shape=17) +
+	guides(alpha=FALSE,color=FALSE, shape=FALSE) +
+	theme_bw() + scale_colour_grey() +
+	xlim(-1,1) +
+	theme(text=element_text(size=15)) +
+	xlab("Payne index") + ylab("log(k)")
+
+ggsave(file.path(path_results, 'discounting', 'logK_pi.png'),width=5.7, height=5)
 
 data_test = data_subject %>% filter(!is.na(payneIndex))
 cor.test(data_test$payneIndex, data_test$logK) 
@@ -414,15 +422,7 @@ data_time_bins =  data_et %>%
 		run_id, window, fps, choseTop, time_bin, n_trials, 
 		n_lookTop, n_lookBottom, p_lookTop, p_lookBottom)
 
-for (bin in unique(time_bins_choseTB_long$time_bin)) {
-    print(t.test(p_lookTop ~ choseTop, 
-                 data=time_bins_choseTB_long %>% 
-                     filter(time_bin==bin &
-                            !(run_id %in% subjects_not_enough_bins)), 
-                 paired=TRUE))
-}
-
-plot_et_time_bins(time_bins_choseTB_long)
+plot_et_time_bins(data_time_bins)
 ggsave(file.path(path_results, 'et', 'bins_top_vs_bottom.png'), 
 			 width=5.5, height=5)
 ```
@@ -909,30 +909,32 @@ data_plot = grouped %>%
         LLexpected = factor(LLexpected))
 
 ggplot(data_plot, aes(x=LLexpected, y=rt, fill=errorTrial)) +
-  geom_violin(alpha=.6, size=0, position=position_dodge(0)) +
-  stat_summary(
-      fun.data="mean_se",
-      geom="linerange",
-      aes(color=errorTrial),
-      alpha=1,
-      size=1.5) +
-  stat_summary(
-      fun=mean, 
-      geom="line",
-      aes(group=errorTrial, color=errorTrial), 
-      size=1.5) +
-  # geom_text(x=2, y=7.4, label="***",size=10) + 
-  coord_cartesian(ylim=c(0,7.5)) +
-  theme_bw() + 
-  theme(text=element_text(size=20),
-  	    legend.position="bottom") +
-  scale_x_discrete(labels=c("SS>LL", "LL>SS")) +
-  xlab("Choices") + ylab("Response Time (s)") + 
-  labs(fill="",color="")+
-  guides(size="none") + 
-  scale_colour_grey() + scale_fill_grey()
+	geom_violin(alpha=.6, size=0, position=position_dodge(0)) +
+	stat_summary(
+		fun.data="mean_se",
+		geom="linerange",
+		aes(color=errorTrial),
+		alpha=1,
+		size=1.5) +
+	stat_summary(
+		fun=mean, 
+		geom="line",
+		aes(group=errorTrial, color=errorTrial), 
+		size=1.5) +
+	# geom_text(x=2, y=7.4, label="***",size=10) + 
+	coord_cartesian(ylim=c(0,7.5)) +
+	geom_text(x=2, y=6.4, label="***",size=10) + 
+	coord_cartesian(ylim=c(0,7.5))+
+	theme_bw() + 
+	theme(text=element_text(size=20),
+	  legend.position="bottom") +
+	scale_x_discrete(labels=c("SS>LL", "LL>SS")) +
+	xlab("Choices") + ylab("Response Time (s)") + 
+	labs(fill="",color="")+
+	guides(size="none") + 
+	scale_colour_grey() + scale_fill_grey()
 ggsave(file.path(path_results, 'behavior', 'error_trials_vs_rt.png'), 
-			 width=5.5, height=5)
+			 width=5.5, height=6)
 ```
 
 ```{r}
@@ -953,14 +955,13 @@ ggplot(
       aes(group=errorTrial, color=errorTrial), 
       size=1.5) +
   # geom_text(x=2, y=7.4, label="***",size=10) + 
-  coord_cartesian(ylim=c(-2.5, 2.5)) +
+  coord_cartesian(ylim=c(-1, 1)) +
   theme_bw() + 
-  theme(text=element_text(size=20)) +
+  theme(text=element_text(size=20), legend.position="bottom") + 
   scale_x_discrete(labels=c("SS>LL", "LL>SS")) +
-  xlab("Choices") + ylab("Option Index") + 
   labs(fill="",color="")+
   guides(size="none") + 
   scale_colour_grey() + scale_fill_grey()
 ggsave(file.path(path_results, 'et', 'error_trials_vs_oi.png'), 
-			 width=5.5, height=5)
+			 width=5.5, height=6)
 ```
