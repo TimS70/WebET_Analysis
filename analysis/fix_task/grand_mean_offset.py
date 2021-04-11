@@ -61,6 +61,8 @@ def grand_mean_offset(path_origin, path_plots, path_tables):
         .groupby(['x_pos', 'y_pos'], as_index=False) \
         .agg(x_mean=('x_mean', 'mean'),
              y_mean=('y_mean', 'mean'),
+             x_sd=('x_mean', 'std'),
+             y_sd=('y_mean', 'std'),
              grand=('grand_deviation', 'mean'),
              grand_sd=('grand_deviation', 'std'),
              grand_px=('grand_deviation_px', 'mean'),
@@ -69,10 +71,19 @@ def grand_mean_offset(path_origin, path_plots, path_tables):
     grand_mean_positions[['grand_px', 'grand_sd_px']] = round(
         grand_mean_positions[['grand_px', 'grand_sd_px']], 2)
 
-    grand_mean_positions[['x_pos', 'y_pos', 'x_mean', 'y_mean',
-                          'grand', 'grand_sd']] = 100 * round(
-        grand_mean_positions[['x_pos', 'y_pos', 'x_mean', 'y_mean',
-                              'grand', 'grand_sd']], 4)
+    grand_mean_positions[['x_mean', 'x_sd', 'y_mean', 'y_sd',
+                          'grand', 'grand_sd']] = round(
+        100 * grand_mean_positions[['x_mean', 'y_mean', 'x_sd', 'y_sd',
+                                    'grand', 'grand_sd']], 2)
+
+    for col in ['x_pos', 'y_pos']:
+        grand_mean_positions[col] = grand_mean_positions[col].apply(
+            lambda x: str(int(x * 100)) + '%')
+
+    grand_mean_positions = grand_mean_positions[['x_pos', 'x_mean',
+                                                 'y_pos', 'y_mean',
+                                                 'grand', 'grand_px',
+                                                 'grand_sd', 'grand_sd_px']]
 
     print(f"""Grand mean positions: \n"""
           f"""{grand_mean_positions} \n\n"""
