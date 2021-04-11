@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pandas as pd
 
@@ -12,7 +14,7 @@ from data_prep.cleaning.find_invalid_runs.fix import \
 from data_prep.cleaning.replace import clean_subject_variables
 from utils.combine import combine_runs
 from utils.save_data import summarize_datasets, save_all_three_datasets, \
-    load_all_three_datasets
+    load_all_three_datasets, write_csv
 
 
 def clean_global_data(path_origin, path_target=None,
@@ -167,10 +169,17 @@ def clean_global_data(path_origin, path_target=None,
 
     summary = pd.DataFrame(summary, columns=['name', 'n', 'percent']) \
         .sort_values(by='n')
+    summary['percent'] = 100 * round(summary['percent'], 4)
+
 
     print(f"""\nIn total, n={len(invalid_runs)} have to be """
           f"""removed from n={n_runs} runs: \n"""
           f"""{summary} \n""")
+
+    write_csv(data=summary,
+              file_name='global_cleaning.csv',
+              index=False,
+              path=os.path.join('results', 'tables'))
 
     data_et = clean_runs(data_et, invalid_runs, 'data_et')
     data_trial = clean_runs(data_trial, invalid_runs, 'data_trial')

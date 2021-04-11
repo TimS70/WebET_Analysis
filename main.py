@@ -293,5 +293,16 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    analyze_choice()
+    runs_no_saccade = [144, 171, 380]
+    clean_global_data(
+        path_origin=os.path.join('data', 'all_trials', 'added_var'),
+        path_target=os.path.join('data', 'all_trials', 'cleaned'),
+        prolific=True, approved=True, one_attempt=True,
+        max_t_task=5500, min_fps=3,
+        additionally_bad_runs=runs_no_saccade, exclude_runs_reason='No saccade',
+        max_missing_et=10,
+        full_runs=True, valid_sight=True,
+        follow_instruction=True, correct_webgazer_clock=True,
+        complete_fix_task=True,
+        approval_rate=0.5)
     # main(new_data=False)
