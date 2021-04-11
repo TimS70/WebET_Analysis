@@ -21,6 +21,8 @@ def combine_corr_matrix(data, variables):
     matrix = pd.concat([matrix_r, matrix_p, matrix_stars]) \
         .sort_index(ascending=False)
 
+    matrix_stars.index = matrix_r.index
+
     return matrix, matrix_stars
 
 

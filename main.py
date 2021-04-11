@@ -200,10 +200,10 @@ def analyze_fix():
     #                    path_target=os.path.join(path_plots),
     #                    individual=False)
     #
-    grand_mean_offset(path_origin=path_origin,
-                      path_plots=path_plots,
-                      path_tables=path_tables)
-    exit()
+    # grand_mean_offset(path_origin=path_origin,
+    #                   path_plots=path_plots,
+    #                   path_tables=path_tables)
+
     analyze_fix_task(path_origin=path_origin,
                      path_plots=path_plots,
                      path_tables=path_tables)
@@ -217,52 +217,51 @@ def analyze_choice():
 
     data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
-    # Log K
-    print(data_subject['logK'].describe())
-    # Done in R
-    plot_log_k_frequency(data_subject['logK'])
-    exit()
-
-    # ET Indices
-    print(f"""ET Indices: \n"""
-          f"""{round(data_subject[['optionIndex', 'attributeIndex', 
-                                   'payneIndex']].describe(), 2)} \n""")
-
-    for outcome in ['optionIndex', 'attributeIndex', 'payneIndex']:
-        plt.hist(x=data_subject[outcome], bins=10)
-        plt.title(outcome)
-        plt.xlim(-1, 1)
-        save_plot(file_name=outcome + '.png',
-                  path=os.path.join('results', 'plots', 'choice_task',
-                                    'et_indices'))
-        plt.close()
-
-    data_subject['student_status'] = data_subject['Student Status']
-
-    predictors = ['chinFirst', 'ethnic', 'degree', 'student_status']
-
-    # Confounders
-    get_box_plots(data=data_subject,
-                  outcome='choseLL',
-                  predictors=predictors,
-                  file_name='box_plots_confounders_vs_choseLL.png',
-                  path_target=path_plots)
-
-    for predictor in predictors:
-        anova_outcomes_factor(data=data_subject,
-                              factor=predictor,
-                              outcomes=['choseLL'],
-                              path=os.path.join(path_tables, 'confounders'))
-
-    t_test_outcomes_vs_factor(data=data_subject,
-                              factor='student_status',
-                              dependent=False,
-                              outcomes=['choseLL'],
-                              file_name='t_test_student_vs_choice.csv',
-                              path=path_tables)
-
-    plot_example_eye_movement(data_et, data_trial,
-                              data_subject['run_id'].unique()[0])
+    # # Log K
+    # print(data_subject['logK'].describe())
+    # # Done in R
+    # plot_log_k_frequency(data_subject['logK'])
+    #
+    # # ET Indices
+    # print(f"""ET Indices: \n"""
+    #       f"""{round(data_subject[['optionIndex', 'attributeIndex',
+    #                                'payneIndex']].describe(), 2)} \n""")
+    #
+    # for outcome in ['optionIndex', 'attributeIndex', 'payneIndex']:
+    #     plt.hist(x=data_subject[outcome], bins=10)
+    #     plt.title(outcome)
+    #     plt.xlim(-1, 1)
+    #     save_plot(file_name=outcome + '.png',
+    #               path=os.path.join('results', 'plots', 'choice_task',
+    #                                 'et_indices'))
+    #     plt.close()
+    #
+    # data_subject['student_status'] = data_subject['Student Status']
+    #
+    # predictors = ['chinFirst', 'ethnic', 'degree', 'student_status']
+    #
+    # # Confounders
+    # get_box_plots(data=data_subject,
+    #               outcome='choseLL',
+    #               predictors=predictors,
+    #               file_name='box_plots_confounders_vs_choseLL.png',
+    #               path_target=path_plots)
+    #
+    # for predictor in predictors:
+    #     anova_outcomes_factor(data=data_subject,
+    #                           factor=predictor,
+    #                           outcomes=['choseLL'],
+    #                           path=os.path.join(path_tables, 'confounders'))
+    #
+    # t_test_outcomes_vs_factor(data=data_subject,
+    #                           factor='student_status',
+    #                           dependent=False,
+    #                           outcomes=['choseLL'],
+    #                           file_name='t_test_student_vs_choice.csv',
+    #                           path=path_tables)
+    #
+    # plot_example_eye_movement(data_et, data_trial,
+    #                           data_subject['run_id'].unique()[0])
 
     corr_analysis_choice(data_trial, data_subject, path_plots, path_tables)
 
@@ -293,5 +292,5 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    analyze_fix()
+    analyze_choice()
     # main(new_data=False)
