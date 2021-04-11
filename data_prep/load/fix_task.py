@@ -1,5 +1,6 @@
 from utils.combine import merge_by_index, merge_by_subject
 from utils.save_data import load_all_three_datasets, save_all_three_datasets
+import numpy as np
 
 
 def load_fix_data(path_origin, path_target):
@@ -36,7 +37,7 @@ def load_fix_data(path_origin, path_target):
             'trial_type_new', 'trial_type_nr', 'fixTask', 'withinTaskIndex',
             'x_count', 'fps', 'glasses_binary']]
 
-    data_subject = data_subject[[
+    subject_columns = [
         # Raw data
         # 'Employment Status', 'chosenAmount', 'chosenDelay',
         # Already analyzed in global
@@ -52,6 +53,8 @@ def load_fix_data(path_origin, path_target):
         'sight', 'glasses', 'glasses_binary',
         'vertPosition', 'browser', 'window', 'window_x', 'window_y',
         'eyeshadow', 'masquara', 'eyeliner', 'browliner',
-        'Autistic Spectrum Disorder', 'fps']]
+        'Autistic Spectrum Disorder', 'fps']
+    selected_columns = np.intersect1d(subject_columns, data_subject.columns)
+    data_subject = data_subject[selected_columns]
 
     save_all_three_datasets(data_et, data_trial, data_subject, path_target)

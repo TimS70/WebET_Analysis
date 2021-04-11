@@ -8,6 +8,7 @@ from tqdm import tqdm
 from utils.combine import merge_by_index
 from utils.path import makedir
 from utils.save_data import write_csv
+from visualize.all_tasks import save_plot
 
 
 def add_aoi(data, aoi_width, aoi_height):
@@ -184,8 +185,8 @@ def add_aoi_counts_on_trial_level(data_trial, data_et):
         .loc[:, 'aoi_n']
 
     plt.hist(aoi_over_trials, bins=20)
-    plt.savefig(
-        os.path.join('results', 'plots', 'choice_task', 'n_aoi_over_trials.png'))
+    save_plot(file_name='n_aoi_over_trials.png',
+              path=os.path.join('results', 'plots', 'choice_task'))
     plt.close()
 
     for var in ['aoi_aSS', 'aoi_aLL', 'aoi_tSS', 'aoi_tLL']:

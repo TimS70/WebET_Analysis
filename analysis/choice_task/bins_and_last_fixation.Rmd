@@ -648,16 +648,15 @@ bins_cleaned_tb_index =  data_et %>%
 		time_bin = factor(time_bin))
 
 # Clean trials
-print(paste(
-	'excluded', 
-	data_trial %>% 
-		filter(tb_index %in% c(-1, 1)) %>% 
-		nrow(),
-	'trials with tb_index in c(-1, 1). ',
-	data_trial %>% 
-		filter(!tb_index %in% c(-1, 1)) %>% 
-		nrow(),
-	'remain. '))
+print(paste('excluded', 
+			data_trial %>% 
+				filter(tb_index %in% c(-1, 1)) %>% 
+				nrow(),
+			'trials with tb_index in c(-1, 1). ',
+			data_trial %>% 
+				filter(!tb_index %in% c(-1, 1)) %>% 
+				nrow(),
+			'remain. '))
 
 plot_et_time_bins(bins_cleaned_tb_index)
 ggsave(file.path(path_results, 'et', 'time_bins', 'balanced_tb_index_trials.png'), 

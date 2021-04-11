@@ -1,5 +1,6 @@
 from utils.combine import merge_by_index
 from utils.save_data import load_all_three_datasets, save_all_three_datasets
+import numpy as np
 
 
 def load_choice_data(path_origin, path_target):
@@ -29,7 +30,7 @@ def load_choice_data(path_origin, path_target):
     data_et = data_et[['run_id', 'trial_index', 'withinTaskIndex', 'x', 'y',
                        't_task']]
 
-    data_subject = data_subject[[
+    subject_columns = [
         # Raw data
         # 'Employment Status', 'chosenAmount', 'chosenDelay',
         # Already analyzed in global
@@ -46,6 +47,8 @@ def load_choice_data(path_origin, path_target):
         'Country of Birth', 'Current Country of Residence',
         'First Language', 'Nationality', 'Sex',
         'Autistic Spectrum Disorder', 'fps',
-        'Student Status', 'employment_status', 'fullTime_binary']]
+        'Student Status', 'employment_status', 'fullTime_binary']
+    selected_columns = np.intersect1d(subject_columns, data_subject.columns)
+    data_subject = data_subject[selected_columns]
 
     save_all_three_datasets(data_et, data_trial, data_subject, path_target)

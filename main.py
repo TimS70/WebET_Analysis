@@ -25,6 +25,8 @@ from data_prep.load.main import create_datasets_from_cognition
 from data_prep.load.prolific import integrate_prolific_data
 from inference.F import anova_outcomes_factor
 from inference.t_test import t_test_outcomes_vs_factor
+from not_prolific.cognition_myself.main import \
+    prep_and_analyze_data_cognition_myself
 from utils.save_data import load_all_three_datasets
 from visualize.all_tasks import get_box_plots, save_plot
 from visualize.choice import plot_choice_task_heatmap, plot_example_eye_movement
@@ -294,5 +296,4 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    analyze_choice()
-    # main(new_data=False)
+    main(new_data=False)
