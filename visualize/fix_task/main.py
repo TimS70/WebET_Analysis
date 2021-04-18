@@ -32,41 +32,38 @@ def hist_plots_quality(data_subject, path_plots):
 
 
 # noinspection PyUnresolvedReferences
-def fix_heatmaps(data, path_target):
+def fix_heatmaps(data, file_name, path_target, title="Fix task heatmap"):
 
     data = data[(data['t_task'] > 1000) &
                 (data['x'] > 0) & (data['x'] < 1) &
                 (data['y'] > 0) & (data['y'] < 1)]
 
-    for run in tqdm(data['run_id'].unique(),
-                    desc='Plot fix task heatmaps: '):
+    x = data['x']
+    y = data['y']
 
-        data_this = data[data['run_id'] == run]
-        x = data_this['x']
-        y = data_this['y']
+    fig, ax = plt.subplots(figsize=(7, 7 * (9/16)))
 
-        fig, ax = plt.subplots(figsize=(7, 7 * (9/16)))
+    s = 16
+    img, extent = my_heatmap(x, y, s=s)
+    img = img * 10
+    img = img.round() / 10
 
-        s = 34
-        img, extent = my_heatmap(x, y, s=s)
+    ax.imshow(img, extent=extent, origin='upper',
+              cmap='Greens', aspect=(9 / 16))
+    ax.set_xlim(0, 1)
+    ax.set_ylim(1, 0)
+    ax.set_title(title)
+    ax.set_xlabel('Position of target in % of screen width')
+    ax.set_ylabel('Position of target in % of screen height')
+    plt.gcf().subplots_adjust(bottom=0.15)
 
-        ax.imshow(img, extent=extent, origin='upper',
-                  cmap=cm.Greens,  aspect=(9 / 16))
-        ax.set_xlim(0, 1)
-        ax.set_ylim(1, 0)
-        ax.set_title('Fix task heatmap for run #' + str(round(run)))
-        ax.text(0.0, 1.15,
-                f'Distribution of gaze points after 1 second, $\sigma$ = {s}')
-        plt.gcf().subplots_adjust(bottom=0.15)
+    x_pos = [0.2, 0.5, 0.8, 0.2, 0.5, 0.8, 0.2, 0.5, 0.8]
+    y_pos = [0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8]
+    for i in range(0, len(x_pos)):
+        plt.text(x_pos[i], y_pos[i], '+', size=12, ha="center")
 
-        x_pos = [0.2, 0.5, 0.8, 0.2, 0.5, 0.8, 0.2, 0.5, 0.8]
-        y_pos = [0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8]
-        for i in range(0, len(x_pos)):
-            plt.text(x_pos[i], y_pos[i], '+', size=12, ha="center")
-
-        save_plot(file_name=str(round(run)) + '.png',
-                  path=path_target)
-        plt.close()
+    save_plot(file_name=file_name, path=path_target)
+    plt.close()
 
 
 # noinspection PyUnboundLocalVariable

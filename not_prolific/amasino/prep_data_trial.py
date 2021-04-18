@@ -10,7 +10,7 @@ from utils.save_data import write_csv
 
 def load_data():
     root = r'C:\Users\User\GitHub\WebET_Analysis'
-    path = os.path.join(root, 'data', 'amasino', 'raw')
+    path = os.path.join(root, 'not_prolific', 'amasino', 'source')
 
     # x, y starts at top-left (0, 0)
     data_et = pd.read_csv(
@@ -63,11 +63,9 @@ def add_choseTop(data):
     data.loc[(data["choseLL"] == 0) & (data["LL_top"] == 0),
              "choseTop"] = 1
 
-    print(
-        f"""Add choseTop variables \n"""
-        f"""{data.loc[:, 
-             ['choseLL', 'LL_top', 'choseTop']]} \n"""
-    )
+    print(f"""Add choseTop variables \n"""
+          f"""{data[['choseLL', 'LL_top', 'choseTop']]} \n""")
+
     return data
 
 

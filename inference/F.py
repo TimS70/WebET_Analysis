@@ -6,6 +6,7 @@ from scipy import stats
 from statsmodels.formula.api import ols
 
 from utils.save_data import write_csv
+import pandas as pd
 
 
 def compare_variances(data, factor, outcome):
@@ -31,14 +32,26 @@ def compare_variances(data, factor, outcome):
 
 
 def anova_outcomes_factor(data, outcomes, factor, path):
+    summary = pd.DataFrame([],
+                           columns=['sum_sq', 'df', 'F', 'PR(>F)', 'outcome'])
+
     for var in outcomes:
         linear_model = ols((var + ' ~ ' + factor), data=data).fit()
         # Type 2 ANOVA DataFrame
         outcome_table = sm.stats.anova_lm(linear_model, typ=2)
 
-        print(f"""{var} vs {factor} ANOVA: \n"""
-              f"""{outcome_table} \n""")
+        outcome_table['outcome'] = var
+        summary = summary.append(outcome_table)
 
-        write_csv(data=outcome_table,
-                  file_name='anova_' + var + '_vs_' + factor + '.csv',
-                  path=os.path.join(path))
+    summary = summary[['outcome', 'sum_sq', 'df', 'F', 'PR(>F)']]
+
+    summary['df'] = summary['df'].astype(int)
+    summary[['sum_sq', 'F']] = round(summary[['sum_sq', 'F']], 2)
+    summary[['PR(>F)']] = round(summary[['PR(>F)']], 3)
+
+    print(f"""Outcomes vs {factor} ANOVA: \n"""
+          f"""{summary} \n""")
+
+    write_csv(data=summary,
+              file_name='anova_outcomes_vs_' + factor + '.csv',
+              path=os.path.join(path))

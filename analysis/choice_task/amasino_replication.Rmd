@@ -231,6 +231,9 @@ ggsave(file.path(path_results, 'SV', 'fixations.png'),width=5.5, height=5)
 # Eye tracking indices
 ## Correlation of Eye tracking indices and discount rate
 ```{r, eyetracking_indices}
+data_subject %>%
+	dplyr::select(run_id, optionIndex, payneIndex, attributeIndex)
+
 highlight_runs = data_subject %>% filter(logK < -9) 
 dir.create(file.path(path_results, 'discounting'),  showWarnings = FALSE)
 data_subject %>% 

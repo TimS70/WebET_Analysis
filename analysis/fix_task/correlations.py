@@ -44,10 +44,23 @@ def corr_analysis_fix(data_trial, data_subject, path_plots, path_tables):
               path=path_tables)
 
     # Participant level
-    corr_columns_subject = ['glasses_binary', 'window', 'fps',
-                            'age', 'ethnic', 'offset', 'precision']
+    data_subject['1_offset'] = data_subject['offset']
+    data_subject['2_precision'] = data_subject['precision']
+    data_subject['3_fps'] = data_subject['fps']
+    data_subject['4_ethnic'] = data_subject['ethnic']
+    data_subject['5_age'] = data_subject['age']
+    data_subject['6_glasses'] = data_subject['glasses_binary']
+    data_subject['7_window'] = data_subject['window']
 
-    corr_columns_subject.sort(reverse=True)
+    corr_columns_subject = ['1_offset',
+                            '2_precision',
+                            '3_fps',
+                            '4_ethnic',
+                            '5_age',
+                            '6_glasses',
+                            '7_window']
+
+    corr_columns_subject.sort(reverse=False)
 
     # Trial level
     data_plot = data_subject[np.append(['run_id'], corr_columns_subject)]
@@ -55,7 +68,7 @@ def corr_analysis_fix(data_trial, data_subject, path_plots, path_tables):
 
     sns.set()
     sns.pairplot(data=data_plot,
-                 vars=['window', 'fps', 'age', 'offset', 'precision'],
+                 vars=corr_columns_subject.remove('4_ethnic'),
                  kind='reg',
                  corner=True,
                  plot_kws=dict(scatter_kws=dict(s=0.5)))
@@ -69,3 +82,14 @@ def corr_analysis_fix(data_trial, data_subject, path_plots, path_tables):
     write_csv(data=matrix.reset_index(),
               file_name='corr_matrix_subject.csv',
               path=path_tables)
+
+    matrix_stars['n'] = data_plot[corr_columns_subject].count().values
+    matrix_stars['M'] = data_plot[corr_columns_subject].mean().values
+    matrix_stars['SD'] = data_plot[corr_columns_subject].std().values
+    matrix_stars[['M', 'SD']] = round(matrix_stars[['M', 'SD']], 2)
+    matrix_stars = matrix_stars[np.append(['n', 'M', 'SD'],
+                                          corr_columns_subject)]
+
+    write_csv(data=matrix_stars,
+              file_name='corr_matrix_subject_stars.csv',
+              path=path_tables, index=True)

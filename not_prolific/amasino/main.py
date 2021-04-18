@@ -2,7 +2,8 @@ import os
 import subprocess
 
 from not_prolific.amasino.cleaning import invalid_choice_runs
-from not_prolific.amasino.prep_data_et import transform_xy_coordinates
+from not_prolific.amasino.prep_data_et import transform_xy_coordinates, \
+    run_clustering
 from not_prolific.amasino.prep_data_trial import load_data, add_trial_index, \
     add_log_k, add_choseTop, add_choice_options
 from analysis.choice_task.test_clusters import test_transition_clusters
@@ -15,7 +16,11 @@ from utils.combine import merge_by_index
 from utils.save_data import save_all_three_datasets, load_all_three_datasets
 
 
-def prep_data():
+def prep_data(new_clustering, aoi_width, aoi_height):
+
+    if new_clustering:
+        run_clustering(path=os.path.join('not_prolific', 'amasino', 'source'))
+
     data_et, data_trial = load_data()
 
     data_trial = add_trial_index(data_trial)
@@ -46,7 +51,11 @@ def prep_data():
     data_et['trial_index'] = data_et['withinTaskIndex']
 
     data_et = transform_xy_coordinates(data_et)
-    data_et = add_aoi_et(data_et)
+    data_et = add_aoi_et(aoi_width=aoi_width, aoi_height=aoi_height,
+                         data=data_et)
+
+    exit()
+
     data_et = merge_by_index(data_et, data_trial,
                              'amountLeft', 'LL_top',
                              'choseLL', 'choseTop')
@@ -62,9 +71,8 @@ def prep_data():
     data_et, data_trial, data_subject = load_all_three_datasets(
         os.path.join('data', 'amasino', 'added_var'))
 
-    data_trial = add_et_indices(
-        data_trial, data_et,
-        min_gaze_points=3)
+    data_trial = add_et_indices(data_trial, data_et,
+                                min_gaze_points=3)
 
     data_et = add_fixation_counter(data_et)
 
@@ -112,7 +120,7 @@ def analyze():
         shell=True)
 
 
-def test_amasino_data():
-    prep_data()
+def test_amasino_data(new_clustering, aoi_width, aoi_height):
+    prep_data(new_clustering, aoi_width, aoi_height)
     clean_data()
     # analyze()

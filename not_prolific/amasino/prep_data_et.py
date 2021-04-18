@@ -1,3 +1,21 @@
+import os
+import subprocess
+
+
+def run_clustering(path):
+    run_matlab = \
+        f"""matlab -wait -nojvm -nosplash -nodesktop -r "ET_adjustClusters(2); exit"""
+
+    print(f"""Clustering Amasino replication data: \n"""
+          f"""Run Matlab from console: \n"""
+          f"""{run_matlab} \n""")
+
+    os.chdir(path)
+    subprocess.run(run_matlab, shell=True, check=True)
+    root = r'C:\Users\User\GitHub\WebET_Analysis'
+    os.chdir(root)
+
+
 def transform_xy_coordinates(data_et):
 
     data_et = data_et.copy()

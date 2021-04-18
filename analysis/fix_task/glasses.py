@@ -22,6 +22,7 @@ def test_glasses(data_trial, data_subject, path_plots, path_tables):
                           factor='sight',
                           outcomes=['offset', 'precision', 'fps'],
                           path=path_tables)
+
     anova_outcomes_factor(data=data_subject,
                           factor='glasses',
                           outcomes=['offset', 'precision', 'fps'],
@@ -36,11 +37,10 @@ def test_glasses(data_trial, data_subject, path_plots, path_tables):
         path=path_tables)
 
     for outcome in ['offset', 'precision', 'fps', 'hit_mean']:
-        violin_plot(
-            data=data_trial,
-            outcome=outcome,
-            factor='chin', split_factor='glasses_binary',
-            path=path_plots)
+        violin_plot(data=data_trial,
+                    outcome=outcome,
+                    factor='chin', split_factor='glasses_binary',
+                    path=path_plots)
 
     print('Check only those with high fps (Semmelmann & Weigelt, 2019)')
     data_t_test = data_subject[data_subject['fps'] > 15]

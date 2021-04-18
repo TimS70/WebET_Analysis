@@ -113,8 +113,14 @@ def add_choice_behavioral_variables(path_origin, path_target, path_fix_subject):
     write_csv(data_subject, 'data_subject.csv', path_target)
 
 
-def add_aoi_et(aoi_width, aoi_height, path_origin, path_target):
-    data_et = pd.read_csv(os.path.join(path_origin, 'data_et.csv'))
+def add_aoi_et(aoi_width, aoi_height, path_origin=None, path_target=None,
+               data=None):
+
+    if path_origin is not None:
+        data_et = pd.read_csv(os.path.join(path_origin, 'data_et.csv'))
+
+    if data is not None:
+        data_et = data
 
     if (aoi_width >= 0.5) | (aoi_height >= 0.5):
         print(f"""Define the 4 quadrants of the screen """
@@ -134,7 +140,8 @@ def add_aoi_et(aoi_width, aoi_height, path_origin, path_target):
     print(f"""Gaze points across AOIs: \n"""
           f"""{freq_table} \n""")
 
-    write_csv(data_et, 'data_et.csv', path_target)
+    if path_target is not None:
+        write_csv(data_et, 'data_et.csv', path_target)
 
     return data_et
 
