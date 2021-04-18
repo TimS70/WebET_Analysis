@@ -293,5 +293,6 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    test_amasino_data(new_clustering=False, aoi_width=0.4, aoi_height=0.4)
+    test_amasino_data(new_clustering=False, aoi_width=0.4, aoi_height=0.4,
+                      path_tables=os.path.join('results', 'amasino'))
     # main(new_data=False)

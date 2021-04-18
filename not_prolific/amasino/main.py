@@ -1,6 +1,7 @@
 import os
 import subprocess
 
+from data_prep.add_variables.choice.choice_options import top_bottom_attributes
 from not_prolific.amasino.cleaning import invalid_choice_runs
 from not_prolific.amasino.prep_data_et import transform_xy_coordinates, \
     run_clustering
@@ -16,7 +17,7 @@ from utils.combine import merge_by_index
 from utils.save_data import save_all_three_datasets, load_all_three_datasets
 
 
-def prep_data(new_clustering, aoi_width, aoi_height):
+def prep_data(new_clustering, aoi_width, aoi_height, path_tables):
 
     if new_clustering:
         run_clustering(path=os.path.join('not_prolific', 'amasino', 'source'))
@@ -46,6 +47,8 @@ def prep_data(new_clustering, aoi_width, aoi_height):
 
     data_trial = add_choice_options(data_trial)
     data_trial = add_choseTop(data_trial)
+    data_subject = add_choseTop(data_subject)
+    data_trial = top_bottom_attributes(data_trial)
 
     # Eye-tracking Indices
     data_et['trial_index'] = data_et['withinTaskIndex']
@@ -53,8 +56,6 @@ def prep_data(new_clustering, aoi_width, aoi_height):
     data_et = transform_xy_coordinates(data_et)
     data_et = add_aoi_et(aoi_width=aoi_width, aoi_height=aoi_height,
                          data=data_et)
-
-    exit()
 
     data_et = merge_by_index(data_et, data_trial,
                              'amountLeft', 'LL_top',
@@ -65,20 +66,21 @@ def prep_data(new_clustering, aoi_width, aoi_height):
     data_trial = match_remaining_et_trials(data_trial, data_et)
     data_trial = add_aoi_counts_on_trial_level(data_trial, data_et)
 
-    save_all_three_datasets(data_et, data_trial, data_subject,
-                            os.path.join('data', 'amasino', 'added_var'))
-
-    data_et, data_trial, data_subject = load_all_three_datasets(
-        os.path.join('data', 'amasino', 'added_var'))
-
-    data_trial = add_et_indices(data_trial, data_et,
-                                min_gaze_points=3)
+    data_trial = add_et_indices(data_trial, data_et, min_gaze_points=3)
 
     data_et = add_fixation_counter(data_et)
 
     data_trial['withinTaskIndex'] = data_trial['trial_index']
     data_trial = count_fixations_on_trial_level(data_trial, data_et)
-    data_trial = test_transition_clusters(data_trial)
+    data_trial = test_transition_clusters(data_trial=data_trial,
+                                          path_tables=path_tables)
+
+    save_all_three_datasets(data_et, data_trial, data_subject,
+                            os.path.join('data', 'amasino', 'added_var'))
+
+
+    data_et, data_trial, data_subject = load_all_three_datasets(
+        os.path.join('data', 'amasino', 'added_var'))
 
     data_subject = add_log_k(data_subject, data_trial)
 
@@ -109,18 +111,17 @@ def analyze():
         os.path.join('data', 'amasino', 'added_var'))
 
     data_trial['trial_duration_exact'] = data_trial['rt']
-    data_trial = add_choice_options(data_trial)
+
 
     # plot_example_eye_movement(data_et, data_trial,
     #                           data_subject['run_id'].unique()[0])
     # plot_choice_task_heatmap(data_et)
 
-    subprocess.call(
-        ['Rscript', '--vanilla', 'amasino/run_r_markdowns.R'],
-        shell=True)
+    subprocess.call(['Rscript', '--vanilla', 'amasino/run_r_markdowns.R'],
+                    shell=True)
 
 
-def test_amasino_data(new_clustering, aoi_width, aoi_height):
-    prep_data(new_clustering, aoi_width, aoi_height)
+def test_amasino_data(new_clustering, aoi_width, aoi_height, path_tables):
+    # prep_data(new_clustering, aoi_width, aoi_height, path_tables)
     clean_data()
     # analyze()

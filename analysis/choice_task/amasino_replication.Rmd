@@ -168,6 +168,23 @@ data_trial$dSV_bin = cut(
     paste() %>%
     as.numeric()
 
+
+grouped = data_trial %>%
+	dplyr::group_by(run_id) %>%
+	dplyr::summarise(fixations = mean(n_fixations),
+					 .groups = 'keep') 
+mean(grouped$fixations)
+sd(grouped$fixations)
+
+n_fix_amasino = read.csv(file.path(root, 'data', 'amasino', 'n_fixations.csv'))
+n_fix_amasino
+grouped
+t.test(n_fix_amasino$fixations, grouped$fixations, var.equal = FALSE)
+```
+
+
+```{r}
+
 SV_bins = data_trial %>%
 		add_x_count(data_et) %>%
     dplyr::group_by(run_id, dSV_bin) %>%

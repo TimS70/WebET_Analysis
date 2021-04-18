@@ -136,17 +136,15 @@ def top_bottom_attributes(data):
         ['run_id', 'LL_top'],
         as_index=False).agg(
             n=('trial_index', 'count'),
-            max_trial=('withinTaskIndex', 'max'),
             aT_min=('aT', 'min'),
             aT_max=('aT', 'max'),
             aB_min=('aB', 'min'),
             aB_max=('aB', 'max'),
     )
 
-    print(
-        f"""data_trial: Added top and bottom attributes: \n"""
-        f"""{example} \n"""
-        f"""{grouped_test} \n""")
+    print(f"""data_trial: Added top and bottom attributes: \n"""
+          f"""{example} \n"""
+          f"""{grouped_test} \n""")
 
     return data
 

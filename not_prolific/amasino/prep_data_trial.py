@@ -70,8 +70,8 @@ def add_choseTop(data):
 
 
 def add_log_k(data_subject, data_trial):
-    print('Fitting log(add_k) in Matlab. \n')
-    os.chdir(os.path.join('amasino', 'fit_k'))
+
+    print('Fitting log(k) in Matlab. \n')
 
     write_csv(data=data_trial,
               file_name='data_trial.csv',
@@ -81,9 +81,10 @@ def add_log_k(data_subject, data_trial):
     run_matlab = \
         'matlab -wait -nojvm -nosplash -nodesktop -r "fit_discount_k(); exit"'
 
+    root = r'C:\Users\User\GitHub\WebET_Analysis'
+    os.chdir(os.path.join(root, 'not_prolific', 'amasino', 'fit_k'))
     subprocess.run(run_matlab, shell=True, check=True)
-
-    os.chdir(os.path.join('../..', '..'))
+    os.chdir(root)
 
     root = "C:/Users/User/GitHub/WebET_Analysis"
     log_k = pd.read_csv(os.path.join(root, 'data', 'amasino', 'logK.csv'))
@@ -103,6 +104,12 @@ def add_log_k(data_subject, data_trial):
           f"""{missing_values}""")
 
     return data_subject
+
+
+def add_choseTop(data):
+    data['choseTop'] = data['choseLL'] * data['LL_top'] + \
+                             (1-data['choseLL']) * (1-data['LL_top'])
+    return data
 
 
 def add_choice_options(data_trial):

@@ -97,11 +97,12 @@ def et_data_transition_type(data):
 
     if 't_task' in data.columns:
         data.loc[data['t_task'] == 0, 'transition_type'] = 0
-        data = data[['run_id', 'trial_index', 't_task',
-                     'transition_type']]
+        data = data[['run_id', 'trial_index', 't_task', 'transition_type']]
     else:
         new_trial_begins = (np.append([0], np.diff(data['trial_index'])) != 0) \
             .astype(int)
+
+        data = data.reset_index(drop=True)
 
         data.loc[new_trial_begins, 'transition_type'] = 0
         data = data[['run_id', 'trial_index', 'transition_type']]

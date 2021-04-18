@@ -238,10 +238,8 @@ def add_fixation_counter(data):
             ['aoi'],
             as_index=False)['n'].sum()
 
-    print(
-        f"""data_et: Added fixation counter: \n"""
-        f"""{grouped_n_fix_by_aoi}"""
-    )
+    print(f"""data_et: Added fixation counter: \n"""
+          f"""{grouped_n_fix_by_aoi}""")
 
     return data
 
