@@ -74,22 +74,20 @@ cat(paste(
 	table(data_trial$LL_top, data_trial$choseLL)))
 
 temp = data_trial %>% 
-    merge_mean_by_subject(data_subject, 'age') %>%
-    merge_mean_by_subject(data_subject, 'gender')
+    merge_by_subject(data_subject, 'age') %>%
+    merge_by_subject(data_subject, 'gender')
 
 temp$birthyear_bin = cut(
-                temp$birthyear, 
-                breaks = c(0, 1950, 1960, 1970, 1980, 1990, 2000, 2010),
-                labels = c(1950, 1960, 1970, 1980, 1990, 2000, 2010),
+                temp$age, 
+                breaks = c(0, 18, 30, 40, 50, 60, 7),
+                labels = c(   18, 30, 40, 50, 60),
                 include.lowest=TRUE)
 
-cat(paste(
-	'birthyear vs. choseLL: \n',
-	table(temp$birthyear_bin, temp$choseLL)))
+print('Age vs. choseLL')
+print(table(temp$birthyear_bin, temp$choseLL))
 
-cat(paste(
-	'gender vs. choseLL: \n',
-	table(temp$gender, temp$choseLL)))
+print('gender vs. choseLL: \n')
+print(table(temp$gender, temp$choseLL))
 ```
 
 # MLA
@@ -103,7 +101,7 @@ lme_ll_top = lmer(
     REML = FALSE)
 
 summary(lme_ll_top)
-sconfint(lme_ll_top, method="boot", n=500) 
+confint(lme_ll_top, method="boot", n=500) 
 ```
 
 
