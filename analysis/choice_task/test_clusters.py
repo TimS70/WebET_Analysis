@@ -7,19 +7,35 @@ from utils.path import makedir
 from utils.save_data import write_csv
 
 
-def add_transition_clusters(data_trial, path_tables):
+def add_transition_clusters(data_trial, path_tables,
+                            undirected_transitions=False):
     print('Testing transition clusters in a regression model...')
 
-    transition_columns = data_trial.columns.intersection([
-        'trans_type_0',
-        'trans_type_aLLtLL', 'trans_type_tLLaLL',
-        'trans_type_tLLaSS', 'trans_type_aSStLL',
-        'trans_type_aLLaSS', 'trans_type_aSSaLL',
-        'trans_type_aSStSS', 'trans_type_tSSaSS',
-        'trans_type_tLLtSS', 'trans_type_tSStLL'])
+    if undirected_transitions:
+        data_trial['trans_type_aLLtLL'] = data_trial['trans_type_aLLtLL'] + data_trial['trans_type_tLLaLL']
+        data_trial['trans_type_tLLaSS'] = data_trial['trans_type_tLLaSS'] + data_trial['trans_type_aSStLL']
+        data_trial['trans_type_aLLaSS'] = data_trial['trans_type_aLLaSS'] + data_trial['trans_type_aSSaLL']
+        data_trial['trans_type_aSStSS'] = data_trial['trans_type_aSStSS'] + data_trial['trans_type_tSSaSS']
+        data_trial['trans_type_tLLtSS'] = data_trial['trans_type_tLLtSS'] + data_trial['trans_type_tSStLL']
 
-    data_cluster = data_trial.dropna(subset=transition_columns,
-                                     how='all')
+        transition_columns = data_trial.columns.intersection([
+            'trans_type_0',
+            'trans_type_aLLtLL',
+            'trans_type_tLLaSS',
+            'trans_type_aLLaSS',
+            'trans_type_aSStSS',
+            'trans_type_tLLtSS'])
+
+    else:
+        transition_columns = data_trial.columns.intersection([
+            'trans_type_0',
+            'trans_type_aLLtLL', 'trans_type_tLLaLL',
+            'trans_type_tLLaSS', 'trans_type_aSStLL',
+            'trans_type_aLLaSS', 'trans_type_aSSaLL',
+            'trans_type_aSStSS', 'trans_type_tSSaSS',
+            'trans_type_tLLtSS', 'trans_type_tSStLL'])
+
+    data_cluster = data_trial.dropna(subset=transition_columns, how='all')
 
     scaler = StandardScaler()
     scaled_features = scaler.fit_transform(

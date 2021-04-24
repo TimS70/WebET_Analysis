@@ -48,33 +48,26 @@ data_trial$rt_c = scale(data_trial$trial_duration_exact)
 # The two cluster solution fits best
 fit_clusters(data_trial)
 
-cluster_name = 'cluster2'
-grouped = data_trial %>% 
-	dplyr::select(!!as.symbol(cluster_name),
-				  trans_type_0,   
-				  trans_type_aLLtLL,
-				  trans_type_tLLaLL,        
-  				  trans_type_tLLaSS,
-				  trans_type_aSStLL, 
-  				  trans_type_aLLaSS,
-				  trans_type_aSSaLL,        
- 				  trans_type_aSStSS,
-				  trans_type_tSSaSS, 
-				  trans_type_tLLtSS,
-				  trans_type_tSStLL,         
-				  trans_type_aLLtSS,
-				  trans_type_tSSaLL) %>%
-	dplyr::group_by(!!as.symbol(cluster_name)) %>%
-	dplyr::summarise(across(everything(), list(mean))) %>%
-	t()
-grouped
 
 plot_transition_strength(data=data_trial,
 						 cluster=1, 
 						 parralel_distance=0.01, 
-						 cluster_name = 'cluster2')
+						 cluster_name = 'cluster2',
+						 strength_factor=0.2,
+						 cutoff=0,
+						 undirected=TRUE,
+						 title = 'Gaze transitions of cluster 1 trials')
+ggsave(file.path(path_results, 'et', 'transitions_cluster_1.png'), 
+	   width=5.5, height=5)
+
 
 plot_transition_strength(data=data_trial,
 						 cluster=2, 
 						 parralel_distance=0.01, 
-						 cluster_name = 'cluster2')
+						 cluster_name = 'cluster2',
+						 strength_factor=0.2,
+						 cutoff=0,
+						 undirected=TRUE,
+						 title = 'Gaze transitions of cluster 2 trials')
+ggsave(file.path(path_results, 'et', 'transitions_cluster_2.png'), 
+	   width=5.5, height=5)
