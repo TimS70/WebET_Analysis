@@ -7,17 +7,19 @@ from utils.path import makedir
 from utils.save_data import write_csv
 
 
-def test_transition_clusters(data_trial, path_tables):
+def add_transition_clusters(data_trial, path_tables):
     print('Testing transition clusters in a regression model...')
 
     transition_columns = data_trial.columns.intersection([
         'trans_type_0',
-        'trans_type_aLLtLL', 'trans_type_tLLaSS', 'trans_type_aLLaSS',
-        'trans_type_aSStSS', 'trans_type_tLLtSS'])
+        'trans_type_aLLtLL', 'trans_type_tLLaLL',
+        'trans_type_tLLaSS', 'trans_type_aSStLL',
+        'trans_type_aLLaSS', 'trans_type_aSSaLL',
+        'trans_type_aSStSS', 'trans_type_tSSaSS',
+        'trans_type_tLLtSS', 'trans_type_tSStLL'])
 
-    data_cluster = data_trial.dropna(
-        subset=transition_columns,
-        how='all')
+    data_cluster = data_trial.dropna(subset=transition_columns,
+                                     how='all')
 
     scaler = StandardScaler()
     scaled_features = scaler.fit_transform(
@@ -50,8 +52,8 @@ def test_transition_clusters(data_trial, path_tables):
               path=path_tables)
 
     data_trial = data_trial.merge(
-        data_cluster.loc[:, ['run_id', 'trial_index',
-                             'cluster2', 'cluster3', 'cluster4']],
+        data_cluster[['run_id', 'trial_index',
+                      'cluster2', 'cluster3', 'cluster4']],
         on=['run_id', 'trial_index'],
         how='left')
 

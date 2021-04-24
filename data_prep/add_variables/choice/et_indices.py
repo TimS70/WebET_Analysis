@@ -4,18 +4,14 @@ import pandas as pd
 from utils.combine import merge_by_index
 
 
-def add_et_indices(data_trial, data_et,
-                   min_gaze_points=3):
+def add_et_indices(data_trial, data_et, min_gaze_points=3):
 
-    data_trial['optionIndex'] = add_option_index(
-        data_trial, min_gaze_points)
-    data_trial['attributeIndex'] = add_attribute_index(
-        data_trial, min_gaze_points)
+    data_trial['optionIndex'] = add_option_index(data_trial, min_gaze_points)
+    data_trial['attributeIndex'] = add_attribute_index(data_trial,
+                                                       min_gaze_points)
 
-    print(data_trial.loc[:, [
-                                'aoi_aLL', 'aoi_tLL', 'aoi_aSS', 'aoi_tSS',
-                                'attributeIndex', 'optionIndex'
-                            ]].head(10))
+    print(data_trial[['aoi_aLL', 'aoi_tLL', 'aoi_aSS', 'aoi_tSS',
+                     'attributeIndex', 'optionIndex']].head(10))
 
     data_trial = add_transition_type(data_trial, data_et)
     data_trial['payneIndex'] = add_payne_index(data_trial)
@@ -81,9 +77,7 @@ def add_attribute_index(data, min_n_points):
 
 
 def et_data_transition_type(data):
-    data = data.loc[
-           pd.notna(data['aoi']) &
-           (data['aoi'] != 0), :].copy()
+    data = data[pd.notna(data['aoi']) & (data['aoi'] != 0)].copy()
 
     data['newAOIIndex'] = 0
     data.loc[(data['aoi_aLL'] == 1), 'newAOIIndex'] = 1
@@ -93,7 +87,6 @@ def et_data_transition_type(data):
     data.sort_values(by=['run_id', 'withinTaskIndex'])
     # Add a 0 due to the way np.diff works
     data['transition_type'] = np.append([0], np.diff(data['newAOIIndex']))
-    data['transition_type'] = abs(data['transition_type'])
 
     if 't_task' in data.columns:
         data.loc[data['t_task'] == 0, 'transition_type'] = 0
@@ -115,21 +108,25 @@ def add_transition_type(data, data_et):
     data_et['transition_type'] = data_et['transition_type']
 
     transition_count = pd.pivot_table(
-        data_et.loc[:, ['run_id', 'trial_index', 'transition_type']],
+        data_et[['run_id', 'trial_index', 'transition_type']],
         index=['run_id', 'trial_index'],
         columns=['transition_type'],
         aggfunc=len,
         fill_value=0) \
         .reset_index() \
-        .rename(columns={
-            0: "trans_type_0",
-            1: "trans_type_aLLtLL",
-            2: "trans_type_tLLaSS",
-            3: "trans_type_aLLaSS",
-            4: "trans_type_aSStSS",
-            6: "trans_type_tLLtSS",
-            7: "trans_type_aLLtSS",
-            8: "trans_type_0_tSS"})
+        .rename(columns={0: "trans_type_0",
+                         1: "trans_type_aLLtLL",
+                         2: "trans_type_tLLaSS",
+                         3: "trans_type_aLLaSS",
+                         4: "trans_type_aSStSS",
+                         6: "trans_type_tLLtSS",
+                         7: "trans_type_aLLtSS",
+                         -1: "trans_type_tLLaLL",
+                         -2: "trans_type_aSStLL",
+                         -3: "trans_type_aSSaLL",
+                         -4: "trans_type_tSSaSS",
+                         -6: "trans_type_tSStLL",
+                         -7: "trans_type_tSSaLL"})
 
     transition_columns = transition_count \
         .drop(columns=['run_id', 'trial_index']) \
@@ -145,11 +142,11 @@ def add_transition_type(data, data_et):
 
 def add_payne_index(data):
     option_wise_transition = \
-        data['trans_type_aLLtLL'] + \
-        data['trans_type_aSStSS']
+        data['trans_type_aLLtLL'] + data['trans_type_tLLaLL'] + \
+        data['trans_type_aSStSS'] + data['trans_type_tSSaSS']
     attribute_wise_transition = \
-        data['trans_type_aLLaSS'] + \
-        data['trans_type_tLLtSS']
+        data['trans_type_aLLaSS'] + data['trans_type_aSSaLL'] + \
+        data['trans_type_tLLtSS'] + data['trans_type_tSStLL']
 
     payne_index = \
         (option_wise_transition - attribute_wise_transition) / \

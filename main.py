@@ -93,23 +93,23 @@ def prep_choice(main_aoi_width=0.4,
         path_fix_subject=os.path.join('data', 'fix_task', 'added_var'))
 
     # eye-tracking
-    plot_choice_task_heatmap(
-        path_origin=os.path.join('data', 'choice_task',
-                                 'raw', 'data_et.csv'),
-        path_target=os.path.join('results', 'plots',
-                                 'choice_Task', 'individual_heatmaps', 'all'))
+    # plot_choice_task_heatmap(
+    #     path_origin=os.path.join('data', 'choice_task',
+    #                              'raw', 'data_et.csv'),
+    #     path_target=os.path.join('results', 'plots',
+    #                              'choice_Task', 'individual_heatmaps', 'all'))
 
     add_aoi_et(aoi_width=main_aoi_width, aoi_height=main_aoi_height,
                path_origin=os.path.join('data', 'choice_task', 'raw'),
                path_target=os.path.join('data', 'choice_task', 'added_var'))
 
-    data_plot = pd.read_csv(os.path.join(
-        'data', 'choice_task', 'added_var', 'data_et.csv'))
-    data_plot = data_plot[pd.notna(data_plot['aoi'])]
-    plot_et_scatter(x=data_plot['x'], y=data_plot['y'],
-                    title='AOI raw for all runs ',
-                    file_name='aoi_scatter.png',
-                    path=os.path.join('results', 'plots', 'choice_task', 'et'))
+    # data_plot = pd.read_csv(os.path.join(
+    #     'data', 'choice_task', 'added_var', 'data_et.csv'))
+    # data_plot = data_plot[pd.notna(data_plot['aoi'])]
+    # plot_et_scatter(x=data_plot['x'], y=data_plot['y'],
+    #                 title='AOI raw for all runs ',
+    #                 file_name='aoi_scatter.png',
+    #                 path=os.path.join('results', 'plots', 'choice_task', 'et'))
 
     if correct_clusters:
         data_et_corrected = init_cluster_correction(
@@ -293,6 +293,5 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    test_amasino_data(new_clustering=False, aoi_width=0.4, aoi_height=0.4,
-                      path_tables=os.path.join('results', 'amasino'))
+    prep_choice()
     # main(new_data=False)

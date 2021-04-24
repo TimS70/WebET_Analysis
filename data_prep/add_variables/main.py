@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 
-from analysis.choice_task.test_clusters import test_transition_clusters
+from analysis.choice_task.test_clusters import add_transition_clusters
 from data_prep.add_variables.both_tasks.subject import add_fps_subject_level, \
     add_max_trials, \
     add_glasses_binary, add_recorded_date, add_window
@@ -165,7 +165,7 @@ def add_choice_et_variables(min_required_trials, min_gaze_points,
     data_et = add_fixation_counter(data_et)
 
     data_trial = count_fixations_on_trial_level(data_trial, data_et)
-    data_trial = test_transition_clusters(
+    data_trial = add_transition_clusters(
         data_trial=data_trial,
         path_tables=os.path.join('results', 'tables', 'choice_task'))
 

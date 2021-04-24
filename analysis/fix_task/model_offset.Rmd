@@ -25,6 +25,7 @@ source(file.path(root, 'utils', 'r', 'add_x_count.R'))
 source(file.path(root, 'utils', 'r', 'plot_outcome_variance.R'))
 
 get_packages(c( 'boot',
+				'boxcoxmix',
 			    'broom',
 			    'car',
 			    'compiler',
@@ -200,7 +201,9 @@ data_trial = data_trial %>%
 levene_model <- lm(res_sq ~ run_id, data=data_trial)
 anova(levene_model)
 
+jpeg(file = file.path(path_results, 'assumptions', 'heteroscedasticity.jpeg'))
 plot(glmer_final)
+dev.off()
 ```
 
 ### Normal distribution of residuals

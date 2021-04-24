@@ -7,7 +7,7 @@ from not_prolific.amasino.prep_data_et import transform_xy_coordinates, \
     run_clustering
 from not_prolific.amasino.prep_data_trial import load_data, add_trial_index, \
     add_log_k, add_choseTop, add_choice_options
-from analysis.choice_task.test_clusters import test_transition_clusters
+from analysis.choice_task.test_clusters import add_transition_clusters
 from data_prep.add_variables.choice.aoi import match_remaining_et_trials, add_aoi_counts_on_trial_level, \
     add_fixation_counter, count_fixations_on_trial_level, create_aoi_columns
 from data_prep.add_variables.choice.et_indices import add_et_indices
@@ -72,8 +72,8 @@ def prep_data(new_clustering, aoi_width, aoi_height, path_tables):
 
     data_trial['withinTaskIndex'] = data_trial['trial_index']
     data_trial = count_fixations_on_trial_level(data_trial, data_et)
-    data_trial = test_transition_clusters(data_trial=data_trial,
-                                          path_tables=path_tables)
+    data_trial = add_transition_clusters(data_trial=data_trial,
+                                         path_tables=path_tables)
 
     save_all_three_datasets(data_et, data_trial, data_subject,
                             os.path.join('data', 'amasino', 'added_var'))
