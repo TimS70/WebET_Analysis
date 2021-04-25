@@ -93,7 +93,7 @@ ggpairs(data_trial,
 					'x_pos', 'y_pos', 'glasses_binary', 'chin', 'hit_mean',
 					'precision', 'offset'), 
 		upper = list(continuous = wrap("cor", size = 2)),
-		lower = list(continuous = wrap("smooth", alpha = 0.3, size=0.1)),
+		lower = list(continuous = wrap("smooth", alpha = 0.3, size=0.01)),
 		progress = F) +
 	theme_bw()
 

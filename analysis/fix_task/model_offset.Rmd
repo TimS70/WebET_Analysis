@@ -170,15 +170,14 @@ print(paste(
 
 
 ## Assumptions
-Sources: 
- - https://www.youtube.com/watch?v=UvyxSqEXBwc
- - https://www.pythonfordatascience.org/mixed-effects-regression-python/
- - https://ademos.people.uic.edu/Chapter18.html
+
  
 ### Linearity: Plot residuals vs. observed
+Linearity is violated
 ```{r}
 dir.create(file.path(path_results, 'assumptions'))
 
+glmer_final
 # Standardized residuals
 data_trial$residuals = residuals(glmer_final, type='pearson')
 ggplot(data_trial, aes(x=residuals, y=offset)) + 
@@ -190,7 +189,31 @@ ggplot(data_trial, aes(x=residuals, y=offset)) +
 	
 ggsave(filename = file.path(path_results, 'assumptions', 'linearity.png'))
 ```
+```{r}
+# png(file=path, width=400, height=400)
+pairs(~	offset + withinTaskIndex + x_pos_c + y_pos_c + fps + chin + 
+	  	glasses_binary,
+		data=data_trial,
+		pch=16)
 
+for (var in c('withinTaskIndex', 'x_pos_c', 'y_pos_c', 'fps', 'chin', 
+			  'glasses_binary')) {
+	my_plot = ggplot(data_trial, aes(x=!!as.symbol(var), y=offset)) +
+	    geom_point(size=2.5, aes(alpha=.5))+
+	    guides(alpha=FALSE,color=FALSE, shape=FALSE)+
+	    theme_bw() + 
+	    scale_colour_grey() + 
+	    theme(text=element_text(size=20)) +
+	    xlab(var) + ylab("offset") +
+	    ggtitle(paste('offset vs. ', var, sep=''))
+	
+	print(my_plot)
+}
+	  	
+
+
+# dev.off()
+```
 ### Homosedasticity: Homogeneity of residuals across groups
 ANOVA as a variation of Levene's test. Extract residuals from the model and square the absolute value. Should be not significant. Significant differences across residuals. We have Heteroscedasticity.
 ```{r}
@@ -209,7 +232,9 @@ dev.off()
 ### Normal distribution of residuals
 Normal distribution not given. 
 ```{r}
-qqmath(lmer4_rs, id=0.05)
+simulationOutput <- simulateResiduals(fittedModel = glmer_final)
+plot(simulationOutput, quantreg = FALSE)
+qqmath(glmer_final, id=0.05)
 ```
 
 Lets try with log transformed offset
