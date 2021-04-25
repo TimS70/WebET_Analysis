@@ -148,3 +148,5 @@ def clean_data_choice(
     save_all_three_datasets(data_et, data_trial, data_subject, path_target)
 
     check_unequal_trial_numbers(data_et, data_trial)
+
+    return data_et, data_trial, data_subject

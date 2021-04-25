@@ -17,8 +17,8 @@ source(file.path(root, 'utils', 'r', 'create_time_bins.R'))
 source(file.path(root, 'utils', 'r', 'plot_et_time_bins.R'))
 source(file.path(root, 'utils', 'r', 'plot_outcome_variance.R'))
 
+source(file.path(root, 'analysis', 'choice_task', 'scatter_matrix.R'))
 source(file.path(root, 'analysis', 'choice_task', 'fit_clusters.R'))
-source(file.path(root, 'analysis', 'choice_task', 'plot_transition_strength.R'))
 
 get_packages(c(
 	'apaTables',
@@ -50,7 +50,29 @@ data_trial$rt_c = scale(data_trial$trial_duration_exact)
 # The two cluster solution fits best
 model_comparison = fit_clusters(data_trial)
 
-plot_transition_strength(data=data_trial,
+m_cluster_2 = glmer(
+    choseLL ~ withinTaskIndex + rt_c + attributeIndex + 
+    	payneIndex  + cluster2 + 
+    	(1 | run_id), 
+    data = data_trial, 
+    family = binomial, 
+    control = glmerControl(optimizer = "bobyqa"),
+    nAGQ = 1)
+confint(m_cluster_2, method="boot", n=50)
+
+table(data_subject$cluster2)
+table(data_subject$cluster3)
+
+data_subject %>%
+	filter(cluster3==2) %>%
+	dplyr::select(run_id, cluster2, cluster3)
+
+scatter_matrix(data=data_subject, 
+			   path=file.path(path_results, 'et', 'cluster_matrix.png'))
+
+source(file.path(root, 'analysis', 'choice_task', 'plot_transition_strength.R'))
+
+plot_transition_strength(data=data_subject,
 						 cluster=1, 
 						 parralel_distance=0.01, 
 						 cluster_name = 'cluster2',
@@ -61,8 +83,7 @@ plot_transition_strength(data=data_trial,
 ggsave(file.path(path_results, 'et', 'transitions_cluster_1.png'), 
 	   width=5.5, height=5)
 
-
-plot_transition_strength(data=data_trial,
+plot_transition_strength(data=data_subject,
 						 cluster=2, 
 						 parralel_distance=0.01, 
 						 cluster_name = 'cluster2',

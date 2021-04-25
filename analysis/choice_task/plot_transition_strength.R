@@ -22,12 +22,12 @@ plot_transition_strength = function(data, cluster=1,
 		sum()
 
 	if (undirected) {
-		data$trans_type_aLLtLL = data$trans_type_aLLtLL + data$trans_type_tLLaLL        
-		data$trans_type_tLLaSS = data$trans_type_tLLaSS + data$trans_type_aSStLL 
-		data$trans_type_aLLaSS = data$trans_type_aLLaSS + data$trans_type_aSSaLL        
-		data$trans_type_aSStSS = data$trans_type_aSStSS + data$trans_type_tSSaSS 
-		data$trans_type_tLLtSS = data$trans_type_tLLtSS + data$trans_type_tSStLL         
-		data$trans_type_aLLtSS = data$trans_type_aLLtSS + data$trans_type_tSSaLL	
+		# data$trans_type_aLLtLL = data$trans_type_aLLtLL + data$trans_type_tLLaLL        
+		# data$trans_type_tLLaSS = data$trans_type_tLLaSS + data$trans_type_aSStLL 
+		# data$trans_type_aLLaSS = data$trans_type_aLLaSS + data$trans_type_aSSaLL        
+		# data$trans_type_aSStSS = data$trans_type_aSStSS + data$trans_type_tSSaSS 
+		# data$trans_type_tLLtSS = data$trans_type_tLLtSS + data$trans_type_tSStLL         
+		# data$trans_type_aLLtSS = data$trans_type_aLLtSS + data$trans_type_tSSaLL	
 		
 		grouped = data %>% 
 			dplyr::select(!!as.symbol(cluster_name),

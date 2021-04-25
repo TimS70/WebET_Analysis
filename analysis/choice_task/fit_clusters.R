@@ -44,6 +44,7 @@ fit_clusters = function(data_trial) {
 	
 	print(model_comparison)
 	print(summary(m_cluster_2))
+	print(confint.default(m_cluster_2, method="boot", n=250))
 	
 	return(model_comparison)
 }

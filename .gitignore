@@ -6,3 +6,4 @@ data_prep/clustering/source/
 **/__pycache__
 **/.ipynb_checkpoints
 **/.Rhistory
+**/.RDataTmp
