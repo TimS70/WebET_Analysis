@@ -20,20 +20,22 @@ source(file.path(root, 'utils', 'r', 'plot_outcome_variance.R'))
 source(file.path(root, 'analysis', 'choice_task', 'fit_clusters.R'))
 source(file.path(root, 'analysis', 'choice_task', 'plot_transition_strength.R'))
 
-get_packages(c('broom',
-              'car', 
-              'colorspace',
-              "effsize",
-              'e1071',
-              'GGally',
-			  'ggplot2',
-              "ggsignif",
-			  'Hmisc',
-              'lme4',
-              'QuantPsyc',
-              "RColorBrewer",
-              'reshape2',
-              'tidyverse'))
+get_packages(c(
+	'apaTables',
+	'broom',
+	'car', 
+	'colorspace',
+	"effsize",
+	'e1071',
+	'GGally',
+	'ggplot2',
+	"ggsignif",
+	'Hmisc',
+	'lme4',
+	'QuantPsyc',
+	"RColorBrewer",
+	'reshape2',
+	'tidyverse'))
 
 # Load data
 path = file.path(root, 'data', 'choice_task', 'cleaned')
@@ -46,14 +48,13 @@ summarize_datasets(data_et, data_trial, data_subject)
 data_trial$rt_c = scale(data_trial$trial_duration_exact)
 
 # The two cluster solution fits best
-fit_clusters(data_trial)
-
+model_comparison = fit_clusters(data_trial)
 
 plot_transition_strength(data=data_trial,
 						 cluster=1, 
 						 parralel_distance=0.01, 
 						 cluster_name = 'cluster2',
-						 strength_factor=0.2,
+						 strength_factor=1.5,
 						 cutoff=0,
 						 undirected=TRUE,
 						 title = 'Gaze transitions of cluster 1 trials')
@@ -65,7 +66,7 @@ plot_transition_strength(data=data_trial,
 						 cluster=2, 
 						 parralel_distance=0.01, 
 						 cluster_name = 'cluster2',
-						 strength_factor=0.2,
+						 strength_factor=1.5,
 						 cutoff=0,
 						 undirected=TRUE,
 						 title = 'Gaze transitions of cluster 2 trials')

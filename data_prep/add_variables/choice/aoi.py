@@ -212,12 +212,14 @@ def add_aoi_counts_on_trial_level(data_trial, data_et):
 
 def add_fixation_counter(data):
     data = data.copy()
-    data.loc[:, 'fix_counter'] = 0
+    data['fix_counter'] = 0
 
     for subject in tqdm(
             data['run_id'].unique(),
             desc='Add fixation counter to data_et: '):
-        for trial in data.loc[data['run_id'] == subject, 'withinTaskIndex'].unique():
+        for trial in data.loc[data['run_id'] == subject, 'withinTaskIndex'] \
+                .unique():
+
             temp_aoi = data.loc[
                 (data['run_id'] == subject) &
                 (data['withinTaskIndex'] == trial),

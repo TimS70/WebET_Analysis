@@ -39,5 +39,11 @@ fit_clusters = function(data_trial) {
 	fixef(m_cluster_4)[5]
 	
 	# confint(m_cluster_2, method="boot", n=50) # Bootstrap
-	anova(m_cluster_1, m_cluster_2, m_cluster_3, m_cluster_4)
+	model_comparison = anova(m_cluster_1, m_cluster_2, m_cluster_3, 
+							  m_cluster_4)
+	
+	print(model_comparison)
+	print(summary(m_cluster_2))
+	
+	return(model_comparison)
 }

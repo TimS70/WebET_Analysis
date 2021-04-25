@@ -39,12 +39,13 @@ plot_transition_strength = function(data, cluster=1,
 							trans_type_aLLtSS) %>%
 			dplyr::group_by(!!as.symbol(cluster_name)) %>%
 			dplyr::summarise(
-				aLLtLL = 100 * sum(trans_type_aLLtLL) / n_transitions,        
-				tLLaSS = 100 * sum(trans_type_tLLaSS) / n_transitions, 
-				aLLaSS = 100 * sum(trans_type_aLLaSS) / n_transitions,        
-				aSStSS = 100 * sum(trans_type_aSStSS) / n_transitions, 
-				tLLtSS = 100 * sum(trans_type_tLLtSS) / n_transitions,         
-				aLLtSS = 100 * sum(trans_type_aLLtSS) / n_transitions) %>%
+				n = n(),
+				aLLtLL = mean(trans_type_aLLtLL),        
+				tLLaSS = mean(trans_type_tLLaSS), 
+				aLLaSS = mean(trans_type_aLLaSS),        
+				aSStSS = mean(trans_type_aSStSS), 
+				tLLtSS = mean(trans_type_tLLtSS),         
+				aLLtSS = mean(trans_type_aLLtSS)) %>%
 				t()
 		
 		grouped[grouped < cutoff] = 0
@@ -178,18 +179,19 @@ plot_transition_strength = function(data, cluster=1,
 						  trans_type_tSSaLL) %>%
 			dplyr::group_by(!!as.symbol(cluster_name)) %>%
 			dplyr::summarise(
-				aLLtLL = 100 * sum(trans_type_aLLtLL) / n_transitions,
-				tLLaLL = 100 * sum(trans_type_tLLaLL) / n_transitions,        
-				tLLaSS = 100 * sum(trans_type_tLLaSS) / n_transitions,
-				aSStLL = 100 * sum(trans_type_aSStLL) / n_transitions, 
-				aLLaSS = 100 * sum(trans_type_aLLaSS) / n_transitions,
-				aSSaLL = 100 * sum(trans_type_aSSaLL) / n_transitions,        
-				aSStSS = 100 * sum(trans_type_aSStSS) / n_transitions,
-				tSSaSS = 100 * sum(trans_type_tSSaSS) / n_transitions, 
-				tLLtSS = 100 * sum(trans_type_tLLtSS) / n_transitions,
-				tSStLL = 100 * sum(trans_type_tSStLL) / n_transitions,         
-				aLLtSS = 100 * sum(trans_type_aLLtSS) / n_transitions,
-				tSSaLL = 100 * sum(trans_type_tSSaLL) / n_transitions) %>%
+				n = n(),
+				aLLtLL = mean(trans_type_aLLtLL),
+				tLLaLL = mean(trans_type_tLLaLL),        
+				tLLaSS = mean(trans_type_tLLaSS),
+				aSStLL = mean(trans_type_aSStLL), 
+				aLLaSS = mean(trans_type_aLLaSS),
+				aSSaLL = mean(trans_type_aSSaLL),        
+				aSStSS = mean(trans_type_aSStSS),
+				tSSaSS = mean(trans_type_tSSaSS), 
+				tLLtSS = mean(trans_type_tLLtSS),
+				tSStLL = mean(trans_type_tSStLL),         
+				aLLtSS = mean(trans_type_aLLtSS),
+				tSSaLL = mean(trans_type_tSSaLL)) %>%
 				t()
 		
 		grouped[grouped < cutoff] = 0 
@@ -297,6 +299,9 @@ plot_transition_strength = function(data, cluster=1,
 			xlab('x-Position [% screen size]') +
 			ylab('y-Position [% screen size]') 
 	}
+	
+	
+	print(row.names(grouped))
 	
 	print(round(grouped, 2))
 	print(paste('N Transitions :', n_transitions))

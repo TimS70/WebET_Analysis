@@ -31,8 +31,7 @@ def find_aoi_clusters(data, message, min_cluster_size, run):
                on='quadrant',
                how='left')
 
-    aoi_clusters = aoi_clusters[
-        aoi_clusters['n_cluster'] > min_cluster_size]
+    aoi_clusters = aoi_clusters[aoi_clusters['n_cluster'] > min_cluster_size]
 
     if (len(aoi_clusters) < 4) & message:
         print(f'\n'

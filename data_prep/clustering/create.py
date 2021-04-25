@@ -20,14 +20,11 @@ def add_clusters(data, distance_threshold):
     data = data[pd.notna(data['x']) & pd.notna(data['y'])] \
         .reset_index(drop=True)
 
-    model = AgglomerativeClustering(
-        n_clusters=None,
-        linkage='average',
-        distance_threshold=distance_threshold)
-    # fit model and predict clusters
-    data['cluster'] = pd.Series(
-        model.fit_predict(data[['x', 'y']]))
+    model = AgglomerativeClustering(n_clusters=None,
+                                    linkage='average',
+                                    distance_threshold=distance_threshold)
 
-    run = round(data['run_id'].unique()[0])
+    # fit model and predict clusters
+    data['cluster'] = pd.Series(model.fit_predict(data[['x', 'y']]))
 
     return data
