@@ -1,87 +1,90 @@
-# Sources: 
-# https://www.youtube.com/watch?v=UvyxSqEXBwc
-# https://www.pythonfordatascience.org/mixed-effects-regression-python/
-# https://ademos.people.uic.edu/Chapter18.html
-# https://cran.r-project.org/web/packages/DHARMa/vignettes/DHARMa.html
+library(DHARMa)
+	
+test_assumptions <- function(model, data, outcome) {
+	
+	dir.create(file.path('results', 'plots', 'fix_task', 'assumptions'),
+			   showWarnings = FALSE)
 
-set.seed(8675309)
+	# HLM diag overview
+	# case_delete() #iteratively delete groups corresponding to the levels of
+	# a hierarchical linear model, using lmer to fit the models for each deleted 
+	# case
 
-source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
-source(file.path(root, 'utils', 'r', 'get_packages.R'))
-get_packages(c(
-		"lme4",
-		"ggplot2",
-		"HLMdiag",
-		"DHARMa",
-		"car", #for the Levene test which we will not discuss here
-		"Matrix"))
+	#covratio() #calculate measures of the change in the covariance matrices 
+	# for the fixed effects based on the deletion of an observation, or group 
+	# of observations,
+	
+	#diagnostics() #is used to compute deletion diagnostics for a hierarchical 
+	# linear model based on the building blocks returned by case_delete.
+	
+	#HLMresid() #extracts residuals from a hierarchical linear model fit 
+	# using lmer. Can provide a variety of different types of residuals based 
+	# upon the specifications when you call the function
+	
+	#leverage() #calculates the leverage of a hierarchical linear model fit
+	
+	#mdffits() #calculate measures of the change in the fixed effects 
+	# estimates based on the deletetion of an observation, or group of 
+	# observations
+	
+	
+	
+	
+	# Linarity, Normality of the residuals, over- and under-dispersion
+	simulation_output = simulateResiduals(model, plot=T, use.u = T)
+	print(simulation_output)
+	my_plot <- plot(simulation_output)
+	print(my_plot)
 
-path = file.path(root, 'data', 'fix_task', 'added_var')
+	# Test for over- and underdispersion
+	my_result <- testDispersion(simulation_output)
+	print(my_result)
 
-# Get Data
-data_subject = read.csv(file.path(path, 'data_subject.csv'))
-data_trial = read.csv(file.path(path, 'data_trial.csv'))
-data_et = read.csv(file.path(path, 'data_et.csv'))
+	# For continuous predictors
+	my_result <- testQuantiles(simulation_output)
+	print(my_result)
 
-summarize_datasets(data_et, data_trial, data_subject)
+	for (pred in c('run_id')) {
+		print(paste('Check residuals for predictor', pred))
+		my_plot <- plotResiduals(simulation_output,
+								 form = data %>% dplyr::pull(!!as.symbol(pred)),
+								 xlab=pred)
+		print(my_plot)
+	}
+	
+	# Classical Residual plots, without DHARMa
 
-data_trial = data_trial %>%
-	merge_by_subject(data_subject, 'window') %>%
-    mutate(y_pos_c = dplyr::recode(y_pos, '0.2'=(-1L), '0.5'=0L, '0.8'=1L),
-    	   x_pos_c = dplyr::recode(x_pos, '0.2'=(-1L), '0.5'=0L, '0.8'=1L),
-    	   fps_c = scale(fps),
-    	   window_c = scale(window))
-
-
-# Fit models 
-data_trial$offset_100 = data_trial$offset * 100
-lmer_offset = glmer(
-    offset_100 ~ withinTaskIndex + x_pos_c + y_pos_c + fps + chin + glasses_binary + 
-    	(chin + glasses_binary | run_id), 
-    data=data_trial,
-    family='poisson')
-summary(lmer_offset)
-
-lmer_precision = lmer(
-    precision ~ withinTaskIndex + x_pos_c + y_pos_c + fps + chin + glasses_binary + 
-    	(chin + glasses_binary | run_id), 
-    data=data_trial,
-    REML=FALSE)
-
-lmer_hit_mean = lmer(
-    hit_mean ~ withinTaskIndex + x_pos_c + y_pos_c + fps + chin + glasses_binary + 
-    	(1 | run_id), 
-    data=data_trial,
-    REML=FALSE)
-
-# Linearity
-simulation_output = simulateResiduals(lmer_offset, plot=T, use.u = T)
-
-# Over- Underdispersion
-testDispersion(simulation_output)
-testQuantiles(simulation_output)
-
-subset = data_trial %>% 
-	filter(run_id==unique(data_trial$run_id)[1]) %>% 
-	dplyr::select(offset_100)
-
-ggplot(data_trial, aes(x=offset_100)) + 
-	geom_histogram(binwidth=25)
-
-
-# Tested for various predictors 
-plotResiduals(simulation_output, data_trial$run_id)
-
-plotResiduals(simulation_output, form = data_trial$run_id)
-residuals(simulation_output, quantileFunction = qnorm, outlierValues = c(-7,7))
-simulateResiduals(lmer_precision, plot=T, use.u = T)
-simulateResiduals(lmer_hit_mean, plot=T, use.u = T)
-
-
-# resid() calls for the residuals of the model, Cigarettes was our initial 
-# outcome variables - we're plotting the residuals vs observered
-
-Plot.Model.F.Linearity<-plot(resid(Model.F),Cigarettes) 
-
-
-sessionInfo()
+	# Standardized residuals
+	data$residuals = residuals(model, type='pearson')
+	ggplot(data, aes(x=residuals, y=!!as.symbol(outcome))) + 
+		geom_point() + 
+		ggtitle(paste('Distribution Standardized Residuals against', outcome)) + 
+		xlab('Predicted') + 
+		ylab('Standardized Residuals') +
+		theme_bw()
+		
+	ggsave(filename = file.path(path_results, 'assumptions', 
+								paste(outcome, 'linearity.png', sep='_')))
+	
+	# Heteroscedasticity
+	data = data %>%
+	    mutate(res = residuals(model),
+	    	   res_sq = (abs(res)^2))
+	
+	levene_model <- lm(res_sq ~ run_id, data=data)
+	print('Testing for Heteroscedasticity')
+	print(anova(levene_model))
+	
+	jpeg(file = file.path(path_results, 'assumptions', 
+						  paste(outcome, 'heteroscedasticity.jpeg', sep='_')))
+	plot(model)
+	dev.off()
+	
+	# Normal distribution of residuals
+	my_plot <- qqmath(model, id=0.05)
+	print(my_plot)
+	
+	# Multicollinearity
+	car::vif(model)
+	
+}
