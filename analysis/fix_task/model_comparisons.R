@@ -1,4 +1,4 @@
-find_best_model <- function(data, outcome='precision') {
+find_best_model <- function(data, outcome) {
 	
 	## Intercept as Outcome	 
 	grouped = data %>%
@@ -23,15 +23,7 @@ find_best_model <- function(data, outcome='precision') {
 	lmer0_io = lmer(formula(paste(outcome, '~ 1 + (1 | run_id)')), 
 					data=data,
 					REML=FALSE) # FML for comparing different fixed effects
-	
-	icc_est <- ICCest(factor(data$run_id), 
-		   data$precision, 
-		   alpha=.05, 
-		   CI.type="THD")
-	
-	print('ICC Estimation')
-	print(icc_est)
-	
+
 	# 2) Intermediate models
 	# Control variables
 	# Control for the fact that the subjects start at different places 
@@ -42,16 +34,19 @@ find_best_model <- function(data, outcome='precision') {
 		
 	lmer1_control = lmer(
 	    formula(paste0(outcome, 
-	    			   ' ~  withinTaskIndex + chinFirst + x_pos_c + ',
-	    			   'y_pos_c + window_c + fps_c + (1 | run_id)')), 
+	    			   ' ~  withinTaskIndex + ',
+	    			   'x_pos_c + y_pos_c + window_c + fps_c + ',
+	    			   '(1 | run_id)')), 
 	    data=data,
 	    REML=FALSE)
 	
 	# 3) Random Intercept
 	lmer3_experimental = lmer(
 	    formula(paste0(outcome, 
-	    			   ' ~ withinTaskIndex + y_pos_c + ',
-	    			   'glasses_binary + chin + (1 | run_id)')), 
+	    			   ' ~ withinTaskIndex + ',
+	    			   'x_pos_c + y_pos_c + window_c + fps_c + ',
+	    			   'glasses_binary + chin + ',
+	    			   '(1 | run_id)')), 
 	    data=data,
 	    REML=FALSE)
 
@@ -59,15 +54,19 @@ find_best_model <- function(data, outcome='precision') {
 	# Do not forget to look at the correlations among the random effects
 	lmer4_rs = lmer(
 	    formula(paste0(outcome, 
-	    			   ' ~ withinTaskIndex + y_pos_c + chin + ',
-	    			   'glasses_binary + (chin + glasses_binary | run_id)')), 
+	    			   ' ~ withinTaskIndex + ',
+	    			   'x_pos_c + y_pos_c + window_c + fps_c + ',
+	    			   'glasses_binary + chin + ',
+	    			   '(chin + glasses_binary | run_id)')), 
 	    data=data,
 	    REML=FALSE)
 	
 	## Intercept as Outcome	 
 	lmer5_iao = lmer(
 	    formula(paste0(outcome, 
-	    			   ' ~ withinTaskIndex + y_pos_c + chin + ',
+	    			   ' ~ withinTaskIndex + ',
+	    			   'x_pos_c + y_pos_c + window_c + fps_c + ',
+	    			   'glasses_binary + chin + ',
 	    			   'fps_subject_c + (chin | run_id)')), 
 	    data=data,
 	    REML=FALSE)
@@ -75,7 +74,9 @@ find_best_model <- function(data, outcome='precision') {
 	
 	lmer6_iao = lmer(
 	    formula(paste0(outcome, 
-	    			   ' ~ withinTaskIndex + y_pos_c + ',
+	    			   ' ~ withinTaskIndex + ',
+	    			   'x_pos_c + y_pos_c + window_c + fps_c + ',
+	    			   'glasses_binary + chin + ',
 	    			   'chin * fps_subject_c + (chin | run_id)')), 
 	    data=data,
 	    REML=FALSE)
@@ -83,18 +84,26 @@ find_best_model <- function(data, outcome='precision') {
 	# Final Model
 	lmer_final = lmer(
 		formula(paste0(outcome, 
-					   ' ~ withinTaskIndex + x_pos_c + y_pos_c + ',
-					   'chin + glasses_binary + ',
+	    			   ' ~ withinTaskIndex + ',
+	    			   'x_pos_c + y_pos_c + window_c + fps_c + ',
+	    			   'glasses_binary + chin + ',
 					   '(chin + glasses_binary | run_id)')), 
 	    data=data,
 	    REML=FALSE)
 	
+	print(paste0(outcome, ': Intercept Only'))
 	print(summary(lmer0_io)) 
+	print(paste0(outcome, ': Control variables'))
 	print(summary(lmer1_control)) 
+	print(paste0(outcome, ': Experimental variables'))
 	print(summary(lmer3_experimental)) 
+	print(paste0(outcome, ': Random Slope'))
 	print(summary(lmer4_rs)) 
+	print(paste0(outcome, ': Intercept as Outcome'))
 	print(summary(lmer5_iao)) 
+	print(paste0(outcome, ': Intercept as Outcome with Interaction'))
 	print(summary(lmer6_iao)) 
+	print(paste0(outcome, ': Final Model'))
 	print(summary(lmer_final))
 	
 	print(anova(lmer0_io, 
@@ -109,4 +118,36 @@ find_best_model <- function(data, outcome='precision') {
 	# The confidence intervals should not include 1 to be significant
 	
 	return(lmer_final)
+}
+
+
+find_brm_models <- function(data, outcome) {
+	
+	## Intercept as Outcome	 
+	grouped = data %>%
+	    group_by(run_id) %>%
+	    dplyr::summarise(
+	    	fps_subject = mean(fps),
+	    	.groups = 'keep')
+	
+	data = data %>%
+		mutate(y_pos_c = recode(y_pos, '0.2'=(-1L), '0.5'=0L, '0.8'=1L),
+			   x_pos_c = recode(x_pos, '0.2'=(-1L), '0.5'=0L, '0.8'=1L),
+			   fps_c = scale(fps),
+			   window_c = scale(window)) %>%
+	    merge_by_subject(grouped, 'fps_subject') %>%
+	    mutate(fps_subject_c = fps - mean(grouped$fps_subject))
+
+	brm_0 = brm(formula(paste0(outcome, 
+	    			   ' ~ withinTaskIndex + ',
+	    			   'x_pos_c + y_pos_c + window_c + fps_c + ',
+	    			   'glasses_binary + chin + ',
+	    			   '(1 | run_id)')), 
+		warmup = 1000, iter = 3000, 
+		cores = 2, chains = 2, 
+		data=data) 
+	
+	print(summary(brm_0))
+	
+	return(brm_0)
 }

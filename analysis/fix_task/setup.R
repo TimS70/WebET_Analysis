@@ -15,8 +15,10 @@ source(file.path(root, 'analysis', 'fix_task', 'model_effects.R'))
 source(file.path(root, 'analysis', 'fix_task', 'model_robust.R'))
 source(file.path(root, 'analysis', 'fix_task', 'assumptions.R'))
 source(file.path(root, 'analysis', 'fix_task', 'transformation.R'))
+source(file.path(root, 'analysis', 'fix_task', 'get_icc.R'))
 
-get_packages(c( 'boot',
+get_packages(c( 'brms',
+				'boot',
 				'boxcoxmix',
 			    'broom',
 			    'car',
@@ -37,6 +39,7 @@ get_packages(c( 'boot',
 			    'parallel',
 			    'reshape',
 			    'reshape2',
+				'RcppParallel', 
 			    "rsq",
 			    'tidyverse',
 			    "tinytex"))

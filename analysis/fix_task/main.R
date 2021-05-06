@@ -42,9 +42,17 @@ dir.create(file.path(path_results, 'correlations'), showWarnings = FALSE)
 # ANOVA
 anova_fix_data(data_subject)
 
+get_icc(data=data_trial, outcome='precision') 
+get_icc(data=data_trial, outcome='offset') 
+get_icc(data=data_trial, outcome='hit_mean') 
+
 lmer_precision <- find_best_model(data=data_trial, outcome='precision')
 lmer_offset <- find_best_model(data=data_trial, outcome='offset')
 lmer_hit_mean <- find_best_model(data=data_trial, outcome='hit_mean')
+
+source(file.path(path_analysis, 'setup.R'))
+brm_0 <- find_brm_models(data=data_trial, outcome='offset')
+simulation_output = simulateResiduals(brm_0, plot=F, use.u = F)
 
 # effects
 pseudo_r2_l1(data_trial, 'offset')
@@ -64,7 +72,6 @@ test_assumptions(model=lmer_hit_mean, data=data_trial, outcome='hit_mean')
 
 offset_robust(data=data_trial)
 
-source(file.path(path_analysis, 'setup.R'))
 transform_model(data=data_trial, model=lmer_offset, outcome='offset')
 transform_model(data=data_trial, model=lmer_precision, outcome='precision')
 transform_model(data=data_trial, model=lmer_hit_mean, outcome='hit_mean')

@@ -18,7 +18,7 @@ transform_model <- function(data, model, outcome) {
 	lmer_sqrt <- update(lmer_basic, sqrt(.) ~ .)
 	test_assumptions(model=lmer_sqrt, data=data, outcome=outcome_sqrt)
 	
-	box_cox(data=data, model=model, outcome='offset')
+	# box_cox(data=data, model=model, outcome='offset')
 
 }
 
