@@ -2,7 +2,11 @@ library(DHARMa)
 	
 test_assumptions <- function(model, data, outcome) {
 	
-	dir.create(file.path('results', 'plots', 'fix_task', 'assumptions'),
+	print('Test assumptions for')
+	print(model)
+	
+	dir.create(file.path('results', 'plots', 'fix_task', 'assumptions', 
+						 outcome),
 			   showWarnings = FALSE)
 
 	# HLM diag overview
@@ -31,10 +35,13 @@ test_assumptions <- function(model, data, outcome) {
 	
 	
 	# Linarity, Normality of the residuals, over- and under-dispersion
-	simulation_output = simulateResiduals(model, plot=T, use.u = T)
-	print(simulation_output)
+	par(mar = rep(2, 4))
+	simulation_output = simulateResiduals(model, plot=F, use.u = T)
+	png(file = file.path(path_results, 'assumptions', outcome, 'dharma.png'),
+		width = 800, height = 400)
 	my_plot <- plot(simulation_output)
 	print(my_plot)
+	dev.off()
 
 	# Test for over- and underdispersion
 	my_result <- testDispersion(simulation_output)
@@ -46,10 +53,14 @@ test_assumptions <- function(model, data, outcome) {
 
 	for (pred in c('run_id')) {
 		print(paste('Check residuals for predictor', pred))
+		png(file = file.path(path_results, 'assumptions', outcome,
+			paste0('residuals_', pred, '.png')),
+			width = 400, height = 400)
+		
 		my_plot <- plotResiduals(simulation_output,
 								 form = data %>% dplyr::pull(!!as.symbol(pred)),
 								 xlab=pred)
-		print(my_plot)
+		dev.off()
 	}
 	
 	# Classical Residual plots, without DHARMa
@@ -63,8 +74,9 @@ test_assumptions <- function(model, data, outcome) {
 		ylab('Standardized Residuals') +
 		theme_bw()
 		
-	ggsave(filename = file.path(path_results, 'assumptions', 
-								paste(outcome, 'linearity.png', sep='_')))
+	ggsave(filename = file.path(path_results, 'assumptions', outcome, 
+								'linearity.png'),
+		   width = 4, height = 4)
 	
 	# Heteroscedasticity
 	data = data %>%
@@ -75,14 +87,19 @@ test_assumptions <- function(model, data, outcome) {
 	print('Testing for Heteroscedasticity')
 	print(anova(levene_model))
 	
-	jpeg(file = file.path(path_results, 'assumptions', 
-						  paste(outcome, 'heteroscedasticity.jpeg', sep='_')))
-	plot(model)
+	png(file = file.path(path_results, 'assumptions', outcome, 
+						 'heteroscedasticity.png'),
+		width = 400, height = 400)
+	print(plot(model))
 	dev.off()
 	
 	# Normal distribution of residuals
 	my_plot <- qqmath(model, id=0.05)
+	png(file = file.path(path_results, 'assumptions', outcome, 
+						 'residuals_old.png'),
+		width = 400, height = 400)
 	print(my_plot)
+	dev.off()
 	
 	# Multicollinearity
 	car::vif(model)

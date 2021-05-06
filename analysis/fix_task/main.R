@@ -4,8 +4,7 @@ path_results = file.path(root, 'results', 'plots', 'fix_task')
 
 
 source(file.path(root, 'utils', 'r', 'geom_split_violin.R'))
-source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
-source(file.path(root, 'utils', 'r', 'merge_mean_by_subject.R'))
+source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
 source(file.path(root, 'utils', 'r', 'summarize_datasets.R'))
 source(file.path(root, 'utils', 'r', 'get_packages.R'))
 source(file.path(root, 'utils', 'r', 'remove_runs.R'))
@@ -19,6 +18,8 @@ source(file.path(root, 'analysis', 'fix_task', 'scatter_matrix_subject.R'))
 source(file.path(root, 'analysis', 'fix_task', 'model_comparisons.R'))
 source(file.path(root, 'analysis', 'fix_task', 'model_effects.R'))
 source(file.path(root, 'analysis', 'fix_task', 'model_robust.R'))
+source(file.path(root, 'analysis', 'fix_task', 'assumptions.R'))
+source(file.path(root, 'analysis', 'fix_task', 'transformation.R'))
 
 get_packages(c( 'boot',
 			    'broom',
@@ -60,6 +61,7 @@ data_subject$ethnic = factor(
 	labels = c("caucasian", "hispanic", "asian", "black"))
 
 data_trial = data_trial %>%
+	merge_by_subject(data_subject, 'window') %>%
 	mutate(y_pos_c = recode(y_pos, '0.2'=(-1L), '0.5'=0L, '0.8'=1L),
 		   x_pos_c = recode(x_pos, '0.2'=(-1L), '0.5'=0L, '0.8'=1L),
 		   fps_c = scale(fps),
@@ -74,25 +76,40 @@ for (var in c('offset', 'precision', 'hit_mean')) {
 
 data_trial = merge_mean_by_subject(data_trial, data_subject, 'window')
 dir.create(file.path(path_results, 'correlations'), showWarnings = FALSE)
-scatter_matrix_trial(data_trial)
-scatter_matrix_subject(data_subject)
+# scatter_matrix_trial(data_trial)
+# scatter_matrix_subject(data_subject)
 
 # ANOVA
 anova_fix_data(data_subject)
 
-# Models
-source(file.path(root, 'analysis', 'fix_task', 'model_comparisons.R'))
-source(file.path(root, 'analysis', 'fix_task', 'model_effects.R'))
-lmer_offset <- offset_models(data_trial)
+lmer_precision <- find_best_model(data=data_trial, outcome='precision')
+lmer_offset <- find_best_model(data=data_trial, outcome='offset')
+lmer_hit_mean <- find_best_model(data=data_trial, outcome='hit_mean')
+
 
 # effects
 pseudo_r2_l1(data_trial, 'offset')
 pseudo_r2_l2(data_trial, 'offset')
 
-# Assumptions
-source(file.path(root, 'analysis', 'fix_task', 'assumptions.R'))
-test_assumptions(model=lmer_offset, data=data_trial, outcome='offset')
+pseudo_r2_l1(data_trial, 'precision')
+pseudo_r2_l2(data_trial, 'precision')
 
+pseudo_r2_l1(data_trial, 'hit_mean')
+pseudo_r2_l2(data_trial, 'hit_mean')
+
+
+# Assumptions
+test_assumptions(model=lmer_offset, data=data_trial, outcome='offset')
+test_assumptions(model=lmer_precision, data=data_trial, outcome='precision')
+test_assumptions(model=lmer_hit_mean, data=data_trial, outcome='hit_mean')
 
 offset_robust(data=data_trial)
+
+source(file.path(root, 'analysis', 'fix_task', 'transformation.R'))
+transform_model(data=data_trial, model=lmer_offset, outcome='offset')
+transform_model(data=data_trial, model=lmer_precision, outcome='precision')
+transform_model(data=data_trial, model=lmer_hit_mean, outcome='hit_mean')
+
+
+sessionInfo()
 
