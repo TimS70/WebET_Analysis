@@ -1,5 +1,5 @@
-compare_logistic <- function(data) {
-	
+compare_models <- function(data) {
+
 # 	 - See Sommet, 2017
 #  - choseLL is more likely than choseSS. 
 #  - Logisitic regression does not have residuals because it predicts probabilities not concrete values.
@@ -11,13 +11,14 @@ compare_logistic <- function(data) {
 	print('Test logistic model: ')
 	m_null = glm(choseLL ~ 1,
          data = data_subject %>%
-		 	filter(!is.na(attributeIndex) & !is.na(payneIndex)), 
+		 	filter(!is.na(attributeIndex) & !is.na(payneIndex) &
+		 		   !is.na(optionIndex)), 
          family = binomial(link = "logit"))
 	print('Null model:')
 	print(summary(m_null))
 	
 	m1 = glm(choseLL ~ 1 + choice_rt + 
-			 	optionIndex + attributeIndex + payneIndex,
+			 	I(optionIndex^2) + attributeIndex + payneIndex,
 	         data = data_subject %>%
 			 	filter(!is.na(optionIndex) & 
 			 		   !is.na(attributeIndex) &
@@ -27,5 +28,8 @@ compare_logistic <- function(data) {
 	print('Full model:')
 	print(summary(m1))
 	output_anova <- anova(m_null, m1)
+	print('ANOVA')
 	print(output_anova)
+	
+	return(m1)
 }

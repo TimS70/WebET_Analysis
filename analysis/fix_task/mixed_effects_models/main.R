@@ -36,8 +36,8 @@ for (var in c('offset', 'precision', 'hit_mean')) {
 
 data_trial = merge_by_subject(data_trial, data_subject, 'window')
 dir.create(file.path(path_results, 'correlations'), showWarnings = FALSE)
-# scatter_matrix_trial(data_trial)
-# scatter_matrix_subject(data_subject)
+scatter_matrix_trial(data_trial)
+scatter_matrix_subject(data_subject)
 
 # ANOVA
 anova_fix_data(data_subject)
