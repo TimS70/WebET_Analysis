@@ -1,0 +1,41 @@
+source(file.path(root, 'utils', 'r', 'geom_split_violin.R'))
+source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
+source(file.path(root, 'utils', 'r', 'summarize_datasets.R'))
+source(file.path(root, 'utils', 'r', 'get_packages.R'))
+source(file.path(root, 'utils', 'r', 'remove_runs.R'))
+source(file.path(root, 'utils', 'r', 'add_log_k.R'))
+source(file.path(root, 'utils', 'r', 'remove_na_et_indices.R'))
+source(file.path(root, 'utils', 'r', 'add_x_count.R'))
+source(file.path(root, 'utils', 'r', 'plot_outcome_variance.R'))
+source(file.path(root, 'analysis', 'fix_task', 'anova_fix_data.R'))
+source(file.path(root, 'analysis', 'fix_task', 'scatter_matrix_trial.R'))
+source(file.path(root, 'analysis', 'fix_task', 'scatter_matrix_subject.R'))
+source(file.path(root, 'analysis', 'fix_task', 'model_comparisons.R'))
+source(file.path(root, 'analysis', 'fix_task', 'model_effects.R'))
+source(file.path(root, 'analysis', 'fix_task', 'model_robust.R'))
+source(file.path(root, 'analysis', 'fix_task', 'assumptions.R'))
+source(file.path(root, 'analysis', 'fix_task', 'transformation.R'))
+
+get_packages(c( 'boot',
+			    'broom',
+			    'car',
+			    'compiler',
+			    'data.table',
+			    'DHARMa',
+			    'GGally',
+			    'HLMdiag',
+			    'Hmisc',
+			    'influence.ME', 
+			    "ICC",
+			    "knitr",
+			    'lme4',
+			    'lattice',
+			    'lme4',
+			    "lmerTest", # Erhalte p-Werte
+			    'nlme', 
+			    'parallel',
+			    'reshape',
+			    'reshape2',
+			    "rsq",
+			    'tidyverse',
+			    "tinytex"))

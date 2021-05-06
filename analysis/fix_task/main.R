@@ -1,49 +1,9 @@
 root = "C:/Users/User/GitHub/WebET_Analysis"
 setwd(root)
 path_results = file.path(root, 'results', 'plots', 'fix_task')
+path_analysis = file.path(root, 'analysis', 'fix_task')
 
-
-source(file.path(root, 'utils', 'r', 'geom_split_violin.R'))
-source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
-source(file.path(root, 'utils', 'r', 'summarize_datasets.R'))
-source(file.path(root, 'utils', 'r', 'get_packages.R'))
-source(file.path(root, 'utils', 'r', 'remove_runs.R'))
-source(file.path(root, 'utils', 'r', 'add_log_k.R'))
-source(file.path(root, 'utils', 'r', 'remove_na_et_indices.R'))
-source(file.path(root, 'utils', 'r', 'add_x_count.R'))
-source(file.path(root, 'utils', 'r', 'plot_outcome_variance.R'))
-source(file.path(root, 'analysis', 'fix_task', 'anova_fix_data.R'))
-source(file.path(root, 'analysis', 'fix_task', 'scatter_matrix_trial.R'))
-source(file.path(root, 'analysis', 'fix_task', 'scatter_matrix_subject.R'))
-source(file.path(root, 'analysis', 'fix_task', 'model_comparisons.R'))
-source(file.path(root, 'analysis', 'fix_task', 'model_effects.R'))
-source(file.path(root, 'analysis', 'fix_task', 'model_robust.R'))
-source(file.path(root, 'analysis', 'fix_task', 'assumptions.R'))
-source(file.path(root, 'analysis', 'fix_task', 'transformation.R'))
-
-get_packages(c( 'boot',
-			    'broom',
-			    'car',
-			    'compiler',
-			    'data.table',
-			    'DHARMa',
-			    'GGally',
-			    'HLMdiag',
-			    'Hmisc',
-			    'influence.ME', 
-			    "ICC",
-			    "knitr",
-			    'lme4',
-			    'lattice',
-			    'lme4',
-			    "lmerTest", # Erhalte p-Werte
-			    'nlme', 
-			    'parallel',
-			    'reshape',
-			    'reshape2',
-			    "rsq",
-			    'tidyverse',
-			    "tinytex"))
+source(file.path(path_analysis, 'setup.R'))
 
 # Read data
 path = file.path(root, 'data', 'fix_task', 'added_var')
@@ -74,7 +34,7 @@ for (var in c('offset', 'precision', 'hit_mean')) {
 		   width=5.5, height=5)
 }
 
-data_trial = merge_mean_by_subject(data_trial, data_subject, 'window')
+data_trial = merge_by_subject(data_trial, data_subject, 'window')
 dir.create(file.path(path_results, 'correlations'), showWarnings = FALSE)
 # scatter_matrix_trial(data_trial)
 # scatter_matrix_subject(data_subject)
@@ -85,7 +45,6 @@ anova_fix_data(data_subject)
 lmer_precision <- find_best_model(data=data_trial, outcome='precision')
 lmer_offset <- find_best_model(data=data_trial, outcome='offset')
 lmer_hit_mean <- find_best_model(data=data_trial, outcome='hit_mean')
-
 
 # effects
 pseudo_r2_l1(data_trial, 'offset')
@@ -112,4 +71,3 @@ transform_model(data=data_trial, model=lmer_hit_mean, outcome='hit_mean')
 
 
 sessionInfo()
-
