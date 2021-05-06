@@ -64,10 +64,9 @@ test_assumptions(model=lmer_hit_mean, data=data_trial, outcome='hit_mean')
 
 offset_robust(data=data_trial)
 
-source(file.path(root, 'analysis', 'fix_task', 'transformation.R'))
+source(file.path(path_analysis, 'setup.R'))
 transform_model(data=data_trial, model=lmer_offset, outcome='offset')
 transform_model(data=data_trial, model=lmer_precision, outcome='precision')
 transform_model(data=data_trial, model=lmer_hit_mean, outcome='hit_mean')
-
 
 sessionInfo()

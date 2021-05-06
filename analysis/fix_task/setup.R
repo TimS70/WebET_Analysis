@@ -17,6 +17,7 @@ source(file.path(root, 'analysis', 'fix_task', 'assumptions.R'))
 source(file.path(root, 'analysis', 'fix_task', 'transformation.R'))
 
 get_packages(c( 'boot',
+				'boxcoxmix',
 			    'broom',
 			    'car',
 			    'compiler',
