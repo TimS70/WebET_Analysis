@@ -14,11 +14,11 @@ source(file.path(path, 'plot_et_time_bins.R'))
 source(file.path(path, 'plot_outcome_variance.R'))
 source(file.path(path_analysis, 'check_cat_distribution.R'))
 source(file.path(path_analysis, 'predict_option_index.R'))
-source(file.path(path_analysis, 'compare_choice_models.R'))
+source(file.path(path_analysis, 'compare_models.R'))
 source(file.path(path_analysis, 'simple_slopes.R'))
 source(file.path(path_analysis, 'effects.R'))
 source(file.path(path_analysis, 'test_clusters.R'))
-source(file.path(path_analysis, 'compare_logistic.R'))
+source(file.path(path_analysis, 'simple_logistic.R'))
 source(file.path(path_analysis, 'assumptions.R'))
 
 get_packages(c('broom',

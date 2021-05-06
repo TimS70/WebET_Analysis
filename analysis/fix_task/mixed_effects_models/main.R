@@ -1,7 +1,7 @@
 root = "C:/Users/User/GitHub/WebET_Analysis"
 setwd(root)
 path_results = file.path(root, 'results', 'plots', 'fix_task')
-path_analysis = file.path(root, 'analysis', 'fix_task')
+path_analysis = file.path(root, 'analysis', 'fix_task', 'mixed_effects_models')
 
 source(file.path(path_analysis, 'setup.R'))
 
@@ -50,10 +50,6 @@ lmer_precision <- find_best_model(data=data_trial, outcome='precision')
 lmer_offset <- find_best_model(data=data_trial, outcome='offset')
 lmer_hit_mean <- find_best_model(data=data_trial, outcome='hit_mean')
 
-source(file.path(path_analysis, 'setup.R'))
-brm_0 <- find_brm_models(data=data_trial, outcome='offset')
-simulation_output = simulateResiduals(brm_0, plot=F, use.u = F)
-
 # effects
 pseudo_r2_l1(data_trial, 'offset')
 pseudo_r2_l2(data_trial, 'offset')
@@ -70,10 +66,11 @@ test_assumptions(model=lmer_offset, data=data_trial, outcome='offset')
 test_assumptions(model=lmer_precision, data=data_trial, outcome='precision')
 test_assumptions(model=lmer_hit_mean, data=data_trial, outcome='hit_mean')
 
-offset_robust(data=data_trial)
-
 transform_model(data=data_trial, model=lmer_offset, outcome='offset')
 transform_model(data=data_trial, model=lmer_precision, outcome='precision')
 transform_model(data=data_trial, model=lmer_hit_mean, outcome='hit_mean')
+
+# brm_0 <- find_brm_models(data=data_trial, outcome='offset')
+# offset_robust(data=data_trial)
 
 sessionInfo()

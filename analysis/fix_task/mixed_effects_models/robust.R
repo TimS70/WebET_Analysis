@@ -1,6 +1,8 @@
 library(robustlmm)
 
 offset_robust <- function(data) {
+	data$offset_100 <- data$offset * 100
+	
 	# Robust LMM
 	lmer_offset_r = rlmer(
 	    offset_100 ~ withinTaskIndex + x_pos_c + y_pos_c + fps + chin + glasses_binary 
