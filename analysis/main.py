@@ -20,7 +20,6 @@ from tqdm import tqdm
 
 
 def analyze_fix_task(path_origin, path_plots, path_tables):
-
     data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
     descriptives = round(data_subject[['offset', 'offset_px',
@@ -117,23 +116,53 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
         data_subject['glasses_binary'] == 1,
         'run_id'].unique()
 
-    for run in range(0, 5):
+    for run in runs_glasses:
         visualize_exemplary_run(
             data=data_plot[
-                (data_plot['run_id'] == runs_glasses[run]) &
+                (data_plot['run_id'] == run) &
                 (data_plot['chin'] == 0)],
-            path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_0'))
+            path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_0',
+                                     'no_chin'))
+
+        visualize_exemplary_run(
+            data=data_plot[
+                (data_plot['run_id'] == run) &
+                (data_plot['chin'] == 1)],
+            path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_0',
+                                     'chin'))
 
     runs_no_glasses = data_subject.loc[
         data_subject['glasses_binary'] == 0,
         'run_id'].unique()
 
-    for run in range(0, 5):
+    for run in runs_no_glasses:
         visualize_exemplary_run(
             data=data_plot[
-                (data_plot['run_id'] == runs_no_glasses[run]) &
+                (data_plot['run_id'] == run) &
                 (data_plot['chin'] == 0)],
-            path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_1'))
+            path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_1',
+                                     'no_chin'))
+
+        visualize_exemplary_run(
+            data=data_plot[
+                (data_plot['run_id'] == run) &
+                (data_plot['chin'] == 1)],
+            path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_1',
+                                     'chin'))
+
+    outlier_runs = data_subject.loc[
+        (data_subject['glasses_binary'] == 0) &
+        (data_subject['offset'] > 0.5),
+        'run_id'].unique()
+
+    for run in outlier_runs:
+
+        visualize_exemplary_run(
+            data=data_plot[
+                (data_plot['run_id'] == run) &
+                (data_plot['chin'] == 0)],
+            path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_0',
+                                     'outliers'))
 
     # Heatmap for all gaze points
     # fix_heatmaps(data=data_et,

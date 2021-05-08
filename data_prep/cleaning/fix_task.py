@@ -1,11 +1,11 @@
 import numpy as np
 import pandas as pd
 
+from data_prep.cleaning.drop_invalid_data.runs import clean_runs
 from data_prep.cleaning.drop_invalid_data.trials import clean_trial_duration
 from utils.save_data import load_all_three_datasets, save_all_three_datasets
 
-
-def clean_data_fix(max_t_task, path_origin, path_target):
+def clean_data_fix(max_t_task, exclude_runs, path_origin, path_target):
     print('################################### \n'
           'Clean fix task datasets \n'
           '################################### \n')
@@ -18,6 +18,10 @@ def clean_data_fix(max_t_task, path_origin, path_target):
 
     data_trial = clean_trial_duration(data_trial, 0, max_t_task, 'data_trial')
     data_et = clean_trial_duration(data_et, 0, max_t_task, 'data_et')
+
+    data_subject = clean_runs(data_subject, exclude_runs, name='data_subject')
+    data_et = clean_runs(data_et, exclude_runs, name='data_et')
+    data_trial = clean_runs(data_trial, exclude_runs, name='data_trial')
 
     save_all_three_datasets(data_et, data_trial, data_subject, path_target)
 

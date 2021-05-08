@@ -73,6 +73,7 @@ def prep_fix():
                   path_target=os.path.join('data', 'fix_task', 'raw'))
 
     clean_data_fix(max_t_task=5500,
+                   exclude_runs=[268, 325, 243, 425, 488],
                    path_origin=os.path.join('data', 'fix_task', 'raw'),
                    path_target=os.path.join('data', 'fix_task', 'cleaned'))
 

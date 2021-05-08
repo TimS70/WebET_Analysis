@@ -61,12 +61,37 @@ examine_glasses <- function(data, path) {
 	t.test(grand_offset ~ glasses_binary,
 		   data=data_subject %>% filter(!is.na(glasses_binary)))
 	
-	this_run <- unique(data_et$run_id)[1]
-	ggplot(data=data_et %>% 
-		   	filter(run_id==this_run) %>%
-			slice(0:500),
-		   aes(x, y)) +
-		geom_point() + 
-		ggtitle(paste0('Scatter plot, run_id=', this_run))
+	compare_histograms(data=data_subject, outcome='hit_mean', bin_width=0.05)
+	compare_histograms(data=data_subject, outcome='offset', bin_width=0.025)	
+	
+	
+
+}
+
+compare_histograms <- function(data, outcome, bin_width=0.1) {
+	
+	for (i in 0:1) {
 		
+		my_plot <- ggplot(data=data %>% filter(glasses_binary == i),
+			   aes(!!as.symbol(outcome))) +
+			geom_histogram(binwidth=bin_width) +
+			scale_x_continuous(breaks=seq(0, 1, 0.1), limits=0:1) +
+			ggtitle(paste('Histogram', outcome, 'glasses ==', i)) 
+		
+		print(my_plot)
+		
+		ggsave(file.path(path, 
+						 paste0('histogram_', outcome, '_glasses_', i, '.png')), 
+			   width=5.5, height=5)
+	
+	}
+	
+	print(paste('Comparison for:', outcome))
+	grouped <- data %>% 
+		group_by(glasses_binary) %>%
+		dplyr::summarise(ave = mean(!!as.symbol(outcome)),
+						 med = median(!!as.symbol(outcome)),
+						 .groups = 'keep')
+	print(grouped)
+	
 }
