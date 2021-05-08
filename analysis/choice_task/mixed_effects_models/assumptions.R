@@ -1,8 +1,7 @@
 test_assumptions <- function(model, data) {
 	
-	
-	print('Test assumptions for')
-	print(formula(model))
+	# print('Test assumptions for')
+	# print(formula(model))
 	
 	path <- file.path('results', 'plots', 'choice_task', 'assumptions')
 	dir.create(path, showWarnings = FALSE)

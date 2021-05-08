@@ -19,14 +19,21 @@ summarize_datasets(data_et, data_trial, data_subject)
 # data_subject <- data_subject %>% 
 # 	filter(!run_id %in% data_subject[c(166, 179, 192), 'run_id'])
 
+# Some outliers were found but they do not have any atypical properties 
+data_subject %>%
+	filter(run_id %in% data_subject[c(15, 34), 'run_id']) %>%
+	dplyr::select(age, ethnic, fps, window, offset, precision, n_valid_dots, 
+				  choice_rt, choseLL, choseTop, attributeIndex, optionIndex, 
+				  payneIndex, logK, noise) %>%
+	t()
+
 # Modify data
 data_subject <- data_subject %>%
 	mutate(
 		ethnic = factor(ethnic,
 			levels = c("caucasian", "hispanic", "asian", "black"), # Faktorstufen
 			labels = c("caucasian", "hispanic", "asian", "black")),
-		optionIndex_2 = optionIndex**2) %>%
-	filter(!run_id %in% data_subject[c(15, 34), 'run_id'])
+		optionIndex_2 = optionIndex**2)
 
 glm_choice <- compare_models(data=data_subject)
 

@@ -72,24 +72,36 @@ def visualize_exemplary_run(data, path_target):
     axes = axes.ravel()
     x_pos = [0.2, 0.5, 0.8, 0.2, 0.5, 0.8, 0.2, 0.5, 0.8]
     y_pos = [0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8]
+
     for i in range(0, 9):
-        axes_data = data.loc[
-                    (data['x_pos'] == x_pos[i]) &
-                    (data['y_pos'] == y_pos[i]), :]
-        image = axes[i].scatter(
-            axes_data['x'],
-            axes_data['y'],
-            c=axes_data['t_task'],
-            cmap='viridis'
-        )
+        axes_data = data[(data['x_pos'] == x_pos[i]) &
+                         (data['y_pos'] == y_pos[i])]
+
+        image = axes[i].scatter(axes_data['x'],
+                                axes_data['y'],
+                                c=axes_data['t_task'],
+                                cmap='viridis',
+                                s=2)
+
+        text_params = {'ha': 'center',
+                       'va': 'center',
+                       'size': '15',
+                       'family': 'sans-serif'}
+
+        axes[i].text(x_pos[i], y_pos[i], '+', **text_params)
         axes[i].set_ylim(1, 0)
         axes[i].set_xlim(0, 1)
+        axes[i].grid(which='major', alpha=0.5)
+        axes[i].grid(which='minor', alpha=0.2)
+        axes[i].set_xticks([0.2, 0.5, 0.8], minor=False)
+        axes[i].set_xticks(np.arange(0, 1, 0.1), minor=True)
+        axes[i].set_yticks([0.2, 0.5, 0.8], minor=False)
+        axes[i].set_yticks(np.arange(0, 1, 0.1), minor=True)
 
     fig.colorbar(image, ax=axes)
 
     run = data['run_id'].unique()[0]
-    save_plot(file_name='exemplary_run_' + str(round(run)) +
-                        '.png',
+    save_plot(file_name='exemplary_run_' + str(round(run)) + '.png',
               path=path_target,
               message=True)
     plt.close()

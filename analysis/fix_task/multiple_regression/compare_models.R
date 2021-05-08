@@ -5,7 +5,7 @@ compare_models <- function(data, outcome) {
 			   window_c = scale(window))
 	
 	lm_control <- lm(formula(paste(outcome, 
-								   '~ fps_c + window_c + ethnic')),
+								   '~ fps_c + window_c + ethnic + vert_pos')),
 					 data=data) 
 	print('lm_control')
 	print(summary(lm_control))
@@ -26,10 +26,12 @@ hit_ratio_models <- function(data, outcome='hit_ratio') {
 		
 	data = data %>%
 		mutate(fps_c = scale(fps),
-			   window_c = scale(window))
+			   window_c = scale(window), 
+			   offset_c = scale(offset), 
+			   precision_c = scale(precision))
 	
 	lm_control <- lm(formula(paste(outcome, 
-								   '~ fps_c + window_c + ethnic')),
+								   '~ fps_c + window_c + ethnic + vert_pos')),
 					 data=data) 
 	print('lm_control')
 	print(summary(lm_control))
@@ -38,7 +40,7 @@ hit_ratio_models <- function(data, outcome='hit_ratio') {
 	print('lm_experiment')
 	print(summary(lm_experiment))
 	
-	lm_off_prec <- update(lm_experiment, . ~ . + offset + precision)
+	lm_off_prec <- update(lm_experiment, . ~ . + offset_c + precision_c)
 	print('lm_off_prec')
 	print(summary(lm_off_prec))
 	

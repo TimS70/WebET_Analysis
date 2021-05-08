@@ -38,7 +38,7 @@ compare_choice_models <- function(data, data_subject) {
 	# Random Intercept
 	glmer1_ri = glmer(
 	    choseLL ~ withinTaskIndex + rt_c + 
-	    	optionIndex + attributeIndex + payneIndex + (1 | run_id), 
+	    	optionIndex_2 + attributeIndex + payneIndex + (1 | run_id), 
 	    data = data,
 	    family = binomial, 
 	    control = glmerControl(optimizer = "bobyqa"),
@@ -57,7 +57,7 @@ compare_choice_models <- function(data, data_subject) {
 	
 	glmer2_rirs = glmer(
 	    choseLL ~ withinTaskIndex + rt_c + 
-	    	optionIndex + attributeIndex + payneIndex  + 
+	    	optionIndex_2 + attributeIndex + payneIndex  + 
 	    	(optionIndex + attributeIndex + payneIndex  | run_id), 
 	    data = data,
 	    family = binomial, 
@@ -69,7 +69,7 @@ compare_choice_models <- function(data, data_subject) {
 
 	glmer2_rirs_2 = glmer(
 	    choseLL ~ withinTaskIndex + rt_c + 
-	    	optionIndex + attributeIndex + payneIndex  + 
+	    	optionIndex_2 + attributeIndex + payneIndex  + 
 	    	(attributeIndex  | run_id), 
 	    data = data,
 	    family = binomial, 
@@ -81,7 +81,7 @@ compare_choice_models <- function(data, data_subject) {
 
 	
 	# Final Model
-	glmer_final <- glmer2_ri
+	glmer_final <- glmer1_ri
 
 	# print(paste('glmer_wsc_io', summary(glmer_wsc_io), sep='\n'))
 	# print(paste('glmer_wsc_ri', summary(glmer_wsc_ri), sep='\n'))

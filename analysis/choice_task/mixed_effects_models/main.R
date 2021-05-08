@@ -24,7 +24,8 @@ check_cat_distribution(data=data_trial)
 predict_option_index(data=data_trial)
 
 data_clean <- data_trial %>%
-	mutate(rt_c = scale(trial_duration_exact)) %>%
+	mutate(rt_c = scale(trial_duration_exact), 
+		   optionIndex_2 = optionIndex^2) %>%
    	filter(!is.na(attributeIndex) &
    		   !is.na(payneIndex) &
 		   !is.na(optionIndex))

@@ -36,8 +36,8 @@ for (var in c('offset', 'precision', 'hit_mean')) {
 
 data_trial = merge_by_subject(data_trial, data_subject, 'window')
 dir.create(file.path(path_results, 'correlations'), showWarnings = FALSE)
-scatter_matrix_trial(data_trial)
-scatter_matrix_subject(data_subject)
+# scatter_matrix_trial(data_trial)
+# scatter_matrix_subject(data_subject)
 
 # ANOVA
 anova_fix_data(data_subject)
@@ -59,7 +59,6 @@ pseudo_r2_l2(data_trial, 'precision')
 
 pseudo_r2_l1(data_trial, 'hit_mean')
 pseudo_r2_l2(data_trial, 'hit_mean')
-
 
 # Assumptions
 test_assumptions(model=lmer_offset, data=data_trial, outcome='offset')

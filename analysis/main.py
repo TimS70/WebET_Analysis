@@ -69,10 +69,10 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
     #                data_subject=data_subject,
     #                path_plots=os.path.join(path_plots, 'chin_rest'),
     #                path_tables=os.path.join(path_tables, 'chin_rest'))
-    test_glasses(data_trial=data_trial,
-                 data_subject=data_subject,
-                 path_plots=os.path.join(path_plots, 'glasses'),
-                 path_tables=os.path.join(path_tables, 'glasses'))
+    # test_glasses(data_trial=data_trial,
+    #              data_subject=data_subject,
+    #              path_plots=os.path.join(path_plots, 'glasses'),
+    #              path_tables=os.path.join(path_tables, 'glasses'))
     #
     # # Over the trials
     # for outcome in ['offset', 'precision']:
@@ -110,13 +110,30 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
     #                           alpha=0.05)
     # print(tukey)
     #
-    # # Visualize_exemplary_run
-    # data_plot = merge_by_index(data_et, data_trial, 'chin')
-    # visualize_exemplary_run(
-    #     data=data_plot[
-    #         (data_plot['run_id'] == data_plot['run_id'].unique()[0]) &
-    #         (data_plot['chin'] == 0)],
-    #     path_target=os.path.join(path_plots, 'exemplary_runs'))
+    # Visualize_exemplary_run
+    data_plot = merge_by_index(data_et, data_trial, 'chin')
+
+    runs_glasses = data_subject.loc[
+        data_subject['glasses_binary'] == 1,
+        'run_id'].unique()
+
+    for run in range(0, 5):
+        visualize_exemplary_run(
+            data=data_plot[
+                (data_plot['run_id'] == runs_glasses[run]) &
+                (data_plot['chin'] == 0)],
+            path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_0'))
+
+    runs_no_glasses = data_subject.loc[
+        data_subject['glasses_binary'] == 0,
+        'run_id'].unique()
+
+    for run in range(0, 5):
+        visualize_exemplary_run(
+            data=data_plot[
+                (data_plot['run_id'] == runs_no_glasses[run]) &
+                (data_plot['chin'] == 0)],
+            path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_1'))
 
     # Heatmap for all gaze points
     # fix_heatmaps(data=data_et,

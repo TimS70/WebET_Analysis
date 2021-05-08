@@ -231,8 +231,6 @@ def analyze_choice():
 
     data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
-
-
     # Log K
     print(data_subject['logK'].describe())
     # Done in R
@@ -308,5 +306,5 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    prep_choice(new_plots=False)
+    analyze_fix()
     # main(new_data=False)
