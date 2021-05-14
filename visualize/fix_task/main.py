@@ -22,11 +22,13 @@ def hist_plots_quality(data_subject, path_plots):
     font_size = 15
     plt.rcParams.update({'font.size': font_size})
 
-    for outcome in ['offset', 'precision', 'fps']:
-        plt.hist(data_subject[outcome], bins=20)
-        plt.title(outcome + ' Histogram')
+    for outcome in ['offset', 'precision', 'hit_mean']:
+        fig, ax = plt.subplots()
+        ax.hist(data_subject[outcome], bins=20)
+        ax.set_xticks(np.arange(0, 1.1, 0.1))
+        ax.set_title(outcome + ' Histogram')
         save_plot(file_name=outcome + '_histogram.png',
-                  path=os.path.join(path_plots, outcome),
+                  path=os.path.join(path_plots, 'histograms'),
                   message=True)
         plt.close()
 
@@ -101,7 +103,7 @@ def visualize_exemplary_run(data, path_target):
     fig.colorbar(image, ax=axes)
 
     run = data['run_id'].unique()[0]
-    save_plot(file_name='exemplary_run_' + str(round(run)) + '.png',
+    save_plot(file_name=str(round(run)) + '.png',
               path=path_target,
               message=True)
     plt.close()

@@ -61,7 +61,7 @@ def summarize_datasets(data_et, data_trial, data_subject):
     print(f"""{summary} \n""")
 
 
-def write_csv(data, file_name, path, index=False):
+def write_csv(data, file_name, path, index=False) -> object:
     makedir(path)
     data.to_csv(os.path.join(path, file_name), index=index)
     print(f"""File '{file_name}' saved in {path} \n""")

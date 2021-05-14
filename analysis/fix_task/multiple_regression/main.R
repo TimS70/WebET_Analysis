@@ -23,6 +23,13 @@ predict_validation(data=data_subject)
 
 examine_glasses(data=data_subject, path=file.path(path_results, 'glasses'))
 
+data_subject %>% dplyr::select(webcam_width, webcam_height)
+ggplot(data=data_subject, aes(webcam_diag)) +
+	geom_histogram() 
+	# scale_x_continuous(breaks=seq(0, 1, 0.1), limits=0:1) +
+			# ggtitle(paste('Histogram', outcome, 'glasses ==', i)) 
+
+source(file.path(path_analysis, 'setup.R'))
 lm_offset <- compare_models(data=data_subject, outcome='offset')
 test_assumptions(model=lm_offset, data=data_subject,  
 				 path=file.path(root, 'offset'))
@@ -37,5 +44,3 @@ test_assumptions(model=lm_precision, data=data_subject,
 lm_hit_mean <- hit_ratio_models(data=data_subject, outcome='hit_mean')
 test_assumptions(model=lm_hit_mean, data=data_subject,  
 				 path=file.path(root, 'lm_hit_ratio'))
-
-

@@ -58,3 +58,5 @@ def load_fix_data(path_origin, path_target):
     data_subject = data_subject[selected_columns]
 
     save_all_three_datasets(data_et, data_trial, data_subject, path_target)
+
+    return data_et, data_trial, data_subject

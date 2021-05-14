@@ -47,7 +47,6 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
     #                           file_name='t_test_makeup_vs_outcomes.csv',
     #                           path=path_tables)
     #
-    # hist_plots_quality(data_subject, path_plots)
     #
     # check_randomization(data_trial=data_trial,
     #                     path_plots=path_plots,

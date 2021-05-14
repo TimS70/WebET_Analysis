@@ -35,7 +35,7 @@ find_best_model <- function(data, outcome) {
 	lmer1_control = lmer(
 	    formula(paste0(outcome, 
 	    			   ' ~  withinTaskIndex + ',
-	    			   'x_pos_c + y_pos_c + window_c + fps_c + ',
+	    			   'x_pos_c + y_pos_c + window_c + fps_c + webcam_diag + ',
 	    			   '(1 | run_id)')), 
 	    data=data,
 	    REML=FALSE)
@@ -44,7 +44,7 @@ find_best_model <- function(data, outcome) {
 	lmer3_experimental = lmer(
 	    formula(paste0(outcome, 
 	    			   ' ~ withinTaskIndex + ',
-	    			   'x_pos_c + y_pos_c + window_c + fps_c + ',
+	    			   'x_pos_c + y_pos_c + window_c + fps_c + webcam_diag + ',
 	    			   'glasses_binary + chin + ',
 	    			   '(1 | run_id)')), 
 	    data=data,
@@ -55,7 +55,7 @@ find_best_model <- function(data, outcome) {
 	lmer4_rs = lmer(
 	    formula(paste0(outcome, 
 	    			   ' ~ withinTaskIndex + ',
-	    			   'x_pos_c + y_pos_c + window_c + fps_c + ',
+	    			   'x_pos_c + y_pos_c + window_c + fps_c + webcam_diag + ',
 	    			   'glasses_binary + chin + ',
 	    			   '(chin + glasses_binary | run_id)')), 
 	    data=data,
@@ -65,7 +65,7 @@ find_best_model <- function(data, outcome) {
 	lmer5_iao = lmer(
 	    formula(paste0(outcome, 
 	    			   ' ~ withinTaskIndex + ',
-	    			   'x_pos_c + y_pos_c + window_c + fps_c + ',
+	    			   'x_pos_c + y_pos_c + window_c + fps_c + webcam_diag + ',
 	    			   'glasses_binary + chin + ',
 	    			   'fps_subject_c + (chin | run_id)')), 
 	    data=data,
@@ -75,7 +75,7 @@ find_best_model <- function(data, outcome) {
 	lmer6_iao = lmer(
 	    formula(paste0(outcome, 
 	    			   ' ~ withinTaskIndex + ',
-	    			   'x_pos_c + y_pos_c + window_c + fps_c + ',
+	    			   'x_pos_c + y_pos_c + window_c + fps_c + webcam_diag + ',
 	    			   'glasses_binary + chin + ',
 	    			   'chin * fps_subject_c + (chin | run_id)')), 
 	    data=data,
@@ -85,7 +85,7 @@ find_best_model <- function(data, outcome) {
 	lmer_final = lmer(
 		formula(paste0(outcome, 
 	    			   ' ~ withinTaskIndex + ',
-	    			   'x_pos_c + y_pos_c + window_c + fps_c + ',
+	    			   'x_pos_c + y_pos_c + window_c + fps_c + webcam_diag + ',
 	    			   'glasses_binary + chin + ',
 					   '(chin + glasses_binary | run_id)')), 
 	    data=data,
@@ -106,9 +106,13 @@ find_best_model <- function(data, outcome) {
 	print(paste0(outcome, ': Final Model'))
 	print(summary(lmer_final))
 	
+	print('ANOVA Control')
 	print(anova(lmer0_io, 
 				lmer1_control, 
-				lmer3_experimental, 
+				lmer3_experimental))
+	
+	print('ANOVA RS')
+	print(anova(lmer3_experimental, 
 				lmer4_rs, 
 				lmer5_iao,
 				lmer6_iao,

@@ -9,12 +9,15 @@ from utils.save_data import load_all_three_datasets, save_all_three_datasets
 from visualize.eye_tracking import plot_grand_mean
 
 
-def add_data_quality(max_offset, min_hits_per_dot, path_origin, path_target):
+def add_data_quality(max_offset, min_hits_per_dot,
+                     data_subject=None, data_trial=None, data_et=None,
+                     path_origin=None, path_target=None):
     print('################################### \n'
           'Calculate data quality variables \n'
           '################################### \n')
 
-    data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
+    if path_origin is not None:
+        data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
     # Offset
     data_et = add_offset(data_et)
@@ -46,6 +49,12 @@ def add_data_quality(max_offset, min_hits_per_dot, path_origin, path_target):
                                min_hit_ratio=min_hits_per_dot)
     data_subject = add_n_valid_dots(data_subject, data_trial)
 
+    grouped = data_trial.groupby(
+        ['run_id'], as_index=False).agg(
+        hit_mean=('hit_mean', 'mean'))
+
+    data_subject = merge_by_subject(data_subject, grouped, 'hit_mean')
+
     # Precision
     data_et = distance_from_xy_mean_square(data_et)
     data_trial = aggregate_precision_from_et_data(data_trial, data_et)
@@ -57,4 +66,7 @@ def add_data_quality(max_offset, min_hits_per_dot, path_origin, path_target):
     data_subject = merge_by_subject(data_subject, grouped,
                                     'precision', 'precision_px')
 
-    save_all_three_datasets(data_et, data_trial, data_subject, path_target)
+    if path_target is not None:
+        save_all_three_datasets(data_et, data_trial, data_subject, path_target)
+
+    return data_et, data_trial, data_subject

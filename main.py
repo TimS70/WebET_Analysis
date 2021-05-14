@@ -29,15 +29,19 @@ from inference.t_test import t_test_outcomes_vs_factor
 from not_prolific.amasino.main import test_amasino_data
 from not_prolific.cognition_myself.main import \
     prep_and_analyze_data_cognition_myself
-from utils.save_data import load_all_three_datasets, save_all_three_datasets
+from utils.save_data import load_all_three_datasets, save_all_three_datasets, \
+    write_csv
 from visualize.all_tasks import get_box_plots, save_plot
 from visualize.choice import plot_choice_task_heatmap, \
     plot_example_eye_movement, plot_log_k_frequency
 from visualize.distributions import plot_histogram
 from visualize.eye_tracking import plot_et_scatter
 
+
 import matplotlib.pyplot as plt
 import numpy as np
+
+from visualize.fix_task.main import hist_plots_quality
 
 
 def prep_global():
@@ -69,11 +73,42 @@ def prep_global():
 
 
 def prep_fix():
-    load_fix_data(path_origin=os.path.join('data', 'all_trials', 'cleaned'),
-                  path_target=os.path.join('data', 'fix_task', 'raw'))
+    data_et, data_trial, data_subject = load_fix_data(
+        path_origin=os.path.join('data', 'all_trials', 'cleaned'),
+        path_target=os.path.join('data', 'fix_task', 'raw'))
+
+    data_et, data_trial, data_subject = add_data_quality(
+        max_offset=0.15,
+        min_hits_per_dot=0.8,
+        data_subject=data_subject,
+        data_trial=data_trial,
+        data_et=data_et)
+
+    descriptives = round(data_subject[['offset', 'offset_px',
+                                       'precision', 'precision_px',
+                                       'fps', 'hit_ratio']].describe(), 4)
+
+    print(f"""Describe data quality: \n"""
+          f"""{descriptives} \n""")
+
+    hist_plots_quality(data_subject,
+                       path_plots=os.path.join('results', 'plots', 'fix_task'))
+
+    outliers = data_subject.loc[
+        (data_subject['offset'] > 0.5) |
+        (data_subject['precision'] > 0.2),
+        ['run_id', 'offset', 'precision', 'hit_mean', 'fps', 'glasses_binary']] \
+        .T
+
+    write_csv(data=outliers, file_name='outliers.csv',
+              path=os.path.join('results', 'tables', 'fix_task'), index=True)
+
+    print(f"""Outliers: {round(outliers, 4)}""")
 
     clean_data_fix(max_t_task=5500,
-                   exclude_runs=[268, 325, 243, 425, 488],
+                   exclude_runs=[268, 325, 243, 425, 488,
+                                 354, 293, 268  # Extreme offset
+                                 ],
                    path_origin=os.path.join('data', 'fix_task', 'raw'),
                    path_target=os.path.join('data', 'fix_task', 'cleaned'))
 
@@ -81,7 +116,6 @@ def prep_fix():
                      min_hits_per_dot=0.8,
                      path_origin=os.path.join('data', 'fix_task', 'cleaned'),
                      path_target=os.path.join('data', 'fix_task', 'added_var'))
-
 
 def prep_choice(main_aoi_width=0.4,
                 main_aoi_height=0.4,
@@ -307,5 +341,5 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    analyze_fix()
+    prep_fix()
     # main(new_data=False)

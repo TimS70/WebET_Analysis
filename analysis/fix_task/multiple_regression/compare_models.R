@@ -5,7 +5,7 @@ compare_models <- function(data, outcome) {
 			   window_c = scale(window))
 	
 	lm_control <- lm(formula(paste(outcome, 
-								   '~ fps_c + window_c + ethnic + vert_pos')),
+								   '~ fps_c + window_c + ethnic + vert_pos + webcam_diag')),
 					 data=data) 
 	print('lm_control')
 	print(summary(lm_control))
@@ -31,7 +31,7 @@ hit_ratio_models <- function(data, outcome='hit_ratio') {
 			   precision_c = scale(precision))
 	
 	lm_control <- lm(formula(paste(outcome, 
-								   '~ fps_c + window_c + ethnic + vert_pos')),
+								   '~ fps_c + window_c + ethnic + vert_pos + webcam_diag')),
 					 data=data) 
 	print('lm_control')
 	print(summary(lm_control))
