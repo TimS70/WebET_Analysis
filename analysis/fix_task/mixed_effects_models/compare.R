@@ -1,4 +1,5 @@
-find_best_model <- function(data, outcome) {
+find_best_model <- function(data, outcome, control_variables,
+						   exp_variables) {
 	
 	## Intercept as Outcome	 
 	grouped = data %>%
@@ -31,62 +32,55 @@ find_best_model <- function(data, outcome) {
 	# increased. Subjects vary by about 0.12 (Jan 24) around the intercept. 
 	# The RI model is way better than the IO model. Therefore, we should do 
 	# an MLM.
-		
 	lmer1_control = lmer(
-	    formula(paste0(outcome, 
-	    			   ' ~  withinTaskIndex + ',
-	    			   'x_pos_c + y_pos_c + window_c + fps_c + webcam_diag + ',
-	    			   '(1 | run_id)')), 
+	    formula(paste0(outcome, ' ~  ', 
+	    			   control_variables, 
+	    			   ' + (1 | run_id)')), 
 	    data=data,
 	    REML=FALSE)
 	
 	# 3) Random Intercept
 	lmer3_experimental = lmer(
-	    formula(paste0(outcome, 
-	    			   ' ~ withinTaskIndex + ',
-	    			   'x_pos_c + y_pos_c + window_c + fps_c + webcam_diag + ',
-	    			   'glasses_binary + chin + ',
-	    			   '(1 | run_id)')), 
+	    formula(paste0(outcome, ' ~  ', 
+	    			   control_variables, ' + ',
+	    			   exp_variables, ' + ',
+	    			   ' + (1 | run_id)')), 
 	    data=data,
 	    REML=FALSE)
 
 	### Random slopes
 	# Do not forget to look at the correlations among the random effects
 	lmer4_rs = lmer(
-	    formula(paste0(outcome, 
-	    			   ' ~ withinTaskIndex + ',
-	    			   'x_pos_c + y_pos_c + window_c + fps_c + webcam_diag + ',
-	    			   'glasses_binary + chin + ',
+	    formula(paste0(outcome, ' ~  ', 
+	    			   control_variables, ' + ',
+	    			   exp_variables, ' + ',
 	    			   '(chin + glasses_binary | run_id)')), 
 	    data=data,
 	    REML=FALSE)
 	
 	## Intercept as Outcome	 
 	lmer5_iao = lmer(
-	    formula(paste0(outcome, 
-	    			   ' ~ withinTaskIndex + ',
-	    			   'x_pos_c + y_pos_c + window_c + fps_c + webcam_diag + ',
-	    			   'glasses_binary + chin + ',
+	    formula(paste0(outcome, ' ~  ', 
+	    			   control_variables, ' + ',
+	    			   exp_variables, ' + ',
 	    			   'fps_subject_c + (chin | run_id)')), 
 	    data=data,
 	    REML=FALSE)
 	summary(lmer5_iao)
 	
 	lmer6_iao = lmer(
-	    formula(paste0(outcome, 
-	    			   ' ~ withinTaskIndex + ',
-	    			   'x_pos_c + y_pos_c + window_c + fps_c + webcam_diag + ',
-	    			   'glasses_binary + chin + ',
+	    formula(paste0(outcome, ' ~  ', 
+	    			   control_variables, ' + ',
+	    			   exp_variables, ' + ',
 	    			   'chin * fps_subject_c + (chin | run_id)')), 
 	    data=data,
 	    REML=FALSE)
 	
 	# Final Model
 	lmer_final = lmer(
-		formula(paste0(outcome, 
-	    			   ' ~ withinTaskIndex + ',
-	    			   'x_pos_c + y_pos_c + window_c + fps_c + webcam_diag + ',
-	    			   'glasses_binary + chin + ',
+		formula(paste0(outcome, ' ~  ', 
+	    			   control_variables, ' + ',
+	    			   exp_variables, ' + ',
 					   '(chin + glasses_binary | run_id)')), 
 	    data=data,
 	    REML=FALSE)

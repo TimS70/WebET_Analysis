@@ -17,29 +17,29 @@ source(file.path(path_analysis, 'assumptions.R'))
 source(file.path(path_analysis, 'transformation.R'))
 source(file.path(path_analysis, 'icc.R'))
 
-get_packages(c( 'brms',
-				'boot',
-				'boxcoxmix',
-			    'broom',
-			    'car',
-			    'compiler',
-			    'data.table',
-			    'DHARMa',
-			    'GGally',
-			    'HLMdiag',
-			    'Hmisc',
-			    'influence.ME', 
-			    "ICC",
-			    "knitr",
-			    'lme4',
-			    'lattice',
-			    'lme4',
-			    "lmerTest", # Erhalte p-Werte
-			    'nlme', 
-			    'parallel',
-			    'reshape',
-			    'reshape2',
-				'RcppParallel', 
-			    "rsq",
-			    'tidyverse',
-			    "tinytex"))
+library(brms)
+library(boot)
+library(boxcoxmix)
+library(broom)
+library(car)
+library(compiler)
+library(data.table)
+library(DHARMa)
+library(GGally)
+library(HLMdiag)
+library(Hmisc)
+library(influence.ME)
+library(ICC)
+library(knitr)
+library(lme4)
+library(lattice)
+library(lme4)
+library(lmerTest) # Erhalte p-Werte
+library(nlme)
+library(parallel)
+library(reshape)
+library(reshape2)
+library(RcppParallel)
+library(rsq)
+library(tidyverse)
+library(tinytex)

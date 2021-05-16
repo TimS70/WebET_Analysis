@@ -16,20 +16,13 @@ summarize_datasets(data_et, data_trial, data_subject)
 data_subject <- prep_data_subject(data_subject=data_subject, 
 				  data_trial=data_trial)
 
-inspect_outliers(data_subject=data_subject, 
-				 data_et=data_et)
+# inspect_outliers(data_subject=data_subject, 
+# 				 data_et=data_et)
 
 predict_validation(data=data_subject)
 
 examine_glasses(data=data_subject, path=file.path(path_results, 'glasses'))
 
-data_subject %>% dplyr::select(webcam_width, webcam_height)
-ggplot(data=data_subject, aes(webcam_diag)) +
-	geom_histogram() 
-	# scale_x_continuous(breaks=seq(0, 1, 0.1), limits=0:1) +
-			# ggtitle(paste('Histogram', outcome, 'glasses ==', i)) 
-
-source(file.path(path_analysis, 'setup.R'))
 lm_offset <- compare_models(data=data_subject, outcome='offset')
 test_assumptions(model=lm_offset, data=data_subject,  
 				 path=file.path(root, 'offset'))

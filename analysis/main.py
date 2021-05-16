@@ -26,142 +26,142 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
                                        'precision', 'precision_px',
                                        'fps', 'hit_ratio']].describe(), 4)
 
-    # write_csv(data=descriptives, file_name='descriptives.csv',
-    #           path=path_tables, index=True)
-    #
-    # print(f"""Describe data quality: \n"""
-    #       f"""{descriptives} \n""")
-    #
-    # # Task order and position is analyzed in MLA
-    #
-    # data_subject['makeup'] = 0
-    # data_subject.loc[(data_subject['eyeshadow'] == 1) |
-    #                  (data_subject['masquara'] == 1) |
-    #                  (data_subject['eyeliner'] == 1) |
-    #                  (data_subject['browliner'] == 1), 'makeup'] = 1
-    #
-    # t_test_outcomes_vs_factor(data=data_subject,
-    #                           factor='makeup',
-    #                           dependent=False,
-    #                           outcomes=['offset', 'precision'],
-    #                           file_name='t_test_makeup_vs_outcomes.csv',
-    #                           path=path_tables)
-    #
-    #
-    # check_randomization(data_trial=data_trial,
-    #                     path_plots=path_plots,
-    #                     path_tables=path_tables)
-    #
-    # corr_analysis_fix(data_trial=data_trial, data_subject=data_subject,
-    #                   path_plots=path_plots, path_tables=path_tables)
-    #
-    # # t-test for glasses vs. age
-    # t_test_outcomes_vs_factor(data=data_subject,
-    #                           factor='glasses_binary',
-    #                           dependent=False,
-    #                           outcomes=['age'],
-    #                           file_name='t_test_glasses_vs_age.csv',
-    #                           path=path_tables)
-    #
-    # test_chin_rest(data_trial=data_trial,
-    #                data_subject=data_subject,
-    #                path_plots=os.path.join(path_plots, 'chin_rest'),
-    #                path_tables=os.path.join(path_tables, 'chin_rest'))
-    # test_glasses(data_trial=data_trial,
-    #              data_subject=data_subject,
-    #              path_plots=os.path.join(path_plots, 'glasses'),
-    #              path_tables=os.path.join(path_tables, 'glasses'))
-    #
-    # # Over the trials
-    # for outcome in ['offset', 'precision']:
-    #     plot_outcome_over_trials(
-    #         data_trial[data_trial['fixTask'] == 1], outcome, path_plots)
-    #     plot_outcome_over_trials_vs_chin(data_trial, outcome, path_plots)
-    #     compare_positions(data_trial, outcome, path_tables)
-    #     plot_top_vs_bottom_positions(data_trial, outcome, path_plots)
-    #
-    # # Categorical confounders analysis
-    # for outcome in ['offset', 'precision', 'fps']:
-    #     get_box_plots(
-    #         data=data_subject,
-    #         outcome=outcome,
-    #         predictors=['vertPosition', 'gender', 'ethnic',
-    #                     'degree', 'browser', 'glasses', 'sight', 'sight'],
-    #         file_name='box_plots_confounders_vs_' + outcome + '.png',
-    #         path_target=os.path.join(path_plots, outcome))
-    #
-    # for predictor in ['vertPosition', 'gender', 'ethnic',
-    #                  'degree', 'browser', 'glasses', 'sight', 'makeup']:
-    #     anova_outcomes_factor(data=data_subject,
-    #                           factor=predictor,
-    #                           outcomes=['offset', 'precision', 'fps'],
-    #                           path=os.path.join(path_tables, 'confounders'))
-    #
-    # print('Test vertical position')
-    # tukey = pairwise_tukeyhsd(endog=data_subject['fps'],
-    #                           groups=data_subject['vertPosition'],
-    #                           alpha=0.05)
-    # print(tukey)
-    #
-    # tukey = pairwise_tukeyhsd(endog=data_subject['offset'],
-    #                           groups=data_subject['browser'],
-    #                           alpha=0.05)
-    # print(tukey)
-    #
-    # Visualize_exemplary_run
-    data_plot = merge_by_index(data_et, data_trial, 'chin')
+    write_csv(data=descriptives, file_name='descriptives.csv',
+              path=path_tables, index=True)
 
-    runs_glasses = data_subject.loc[
-        data_subject['glasses_binary'] == 1,
-        'run_id'].unique()
+    print(f"""Describe data quality: \n"""
+          f"""{descriptives} \n""")
 
-    for run in runs_glasses:
-        visualize_exemplary_run(
-            data=data_plot[
-                (data_plot['run_id'] == run) &
-                (data_plot['chin'] == 0)],
-            path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_0',
-                                     'no_chin'))
+    # Task order and position is analyzed in MLA
 
-        visualize_exemplary_run(
-            data=data_plot[
-                (data_plot['run_id'] == run) &
-                (data_plot['chin'] == 1)],
-            path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_0',
-                                     'chin'))
+    data_subject['makeup'] = 0
+    data_subject.loc[(data_subject['eyeshadow'] == 1) |
+                     (data_subject['masquara'] == 1) |
+                     (data_subject['eyeliner'] == 1) |
+                     (data_subject['browliner'] == 1), 'makeup'] = 1
 
-    runs_no_glasses = data_subject.loc[
-        data_subject['glasses_binary'] == 0,
-        'run_id'].unique()
+    t_test_outcomes_vs_factor(data=data_subject,
+                              factor='makeup',
+                              dependent=False,
+                              outcomes=['offset', 'precision'],
+                              file_name='t_test_makeup_vs_outcomes.csv',
+                              path=path_tables)
 
-    for run in runs_no_glasses:
-        visualize_exemplary_run(
-            data=data_plot[
-                (data_plot['run_id'] == run) &
-                (data_plot['chin'] == 0)],
-            path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_1',
-                                     'no_chin'))
 
-        visualize_exemplary_run(
-            data=data_plot[
-                (data_plot['run_id'] == run) &
-                (data_plot['chin'] == 1)],
-            path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_1',
-                                     'chin'))
+    check_randomization(data_trial=data_trial,
+                        path_plots=path_plots,
+                        path_tables=path_tables)
 
-    outlier_runs = data_subject.loc[
-        (data_subject['glasses_binary'] == 0) &
-        (data_subject['offset'] > 0.5),
-        'run_id'].unique()
+    corr_analysis_fix(data_trial=data_trial, data_subject=data_subject,
+                      path_plots=path_plots, path_tables=path_tables)
 
-    for run in outlier_runs:
+    # t-test for glasses vs. age
+    t_test_outcomes_vs_factor(data=data_subject,
+                              factor='glasses_binary',
+                              dependent=False,
+                              outcomes=['age'],
+                              file_name='t_test_glasses_vs_age.csv',
+                              path=path_tables)
 
-        visualize_exemplary_run(
-            data=data_plot[
-                (data_plot['run_id'] == run) &
-                (data_plot['chin'] == 0)],
-            path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_0',
-                                     'outliers'))
+    test_chin_rest(data_trial=data_trial,
+                   data_subject=data_subject,
+                   path_plots=os.path.join(path_plots, 'chin_rest'),
+                   path_tables=os.path.join(path_tables, 'chin_rest'))
+    test_glasses(data_trial=data_trial,
+                 data_subject=data_subject,
+                 path_plots=os.path.join(path_plots, 'glasses'),
+                 path_tables=os.path.join(path_tables, 'glasses'))
+
+    # Over the trials
+    for outcome in ['offset', 'precision']:
+        plot_outcome_over_trials(
+            data_trial[data_trial['fixTask'] == 1], outcome, path_plots)
+        plot_outcome_over_trials_vs_chin(data_trial, outcome, path_plots)
+        compare_positions(data_trial, outcome, path_tables)
+        plot_top_vs_bottom_positions(data_trial, outcome, path_plots)
+
+    # Categorical confounders analysis
+    for outcome in ['offset', 'precision', 'fps']:
+        get_box_plots(
+            data=data_subject,
+            outcome=outcome,
+            predictors=['vertPosition', 'gender', 'ethnic',
+                        'degree', 'browser', 'glasses', 'sight', 'sight'],
+            file_name='box_plots_confounders_vs_' + outcome + '.png',
+            path_target=os.path.join(path_plots, outcome))
+
+    for predictor in ['vertPosition', 'gender', 'ethnic',
+                     'degree', 'browser', 'glasses', 'sight', 'makeup']:
+        anova_outcomes_factor(data=data_subject,
+                              factor=predictor,
+                              outcomes=['offset', 'precision', 'fps'],
+                              path=os.path.join(path_tables, 'confounders'))
+
+    print('Test vertical position')
+    tukey = pairwise_tukeyhsd(endog=data_subject['fps'],
+                              groups=data_subject['vertPosition'],
+                              alpha=0.05)
+    print(tukey)
+
+    tukey = pairwise_tukeyhsd(endog=data_subject['offset'],
+                              groups=data_subject['browser'],
+                              alpha=0.05)
+    print(tukey)
+
+    # # Visualize_exemplary_run
+    # data_plot = merge_by_index(data_et, data_trial, 'chin')
+    #
+    # runs_glasses = data_subject.loc[
+    #     data_subject['glasses_binary'] == 1,
+    #     'run_id'].unique()
+    #
+    # for run in runs_glasses:
+    #     visualize_exemplary_run(
+    #         data=data_plot[
+    #             (data_plot['run_id'] == run) &
+    #             (data_plot['chin'] == 0)],
+    #         path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_0',
+    #                                  'no_chin'))
+    #
+    #     visualize_exemplary_run(
+    #         data=data_plot[
+    #             (data_plot['run_id'] == run) &
+    #             (data_plot['chin'] == 1)],
+    #         path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_0',
+    #                                  'chin'))
+    #
+    # runs_no_glasses = data_subject.loc[
+    #     data_subject['glasses_binary'] == 0,
+    #     'run_id'].unique()
+    #
+    # for run in runs_no_glasses:
+    #     visualize_exemplary_run(
+    #         data=data_plot[
+    #             (data_plot['run_id'] == run) &
+    #             (data_plot['chin'] == 0)],
+    #         path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_1',
+    #                                  'no_chin'))
+    #
+    #     visualize_exemplary_run(
+    #         data=data_plot[
+    #             (data_plot['run_id'] == run) &
+    #             (data_plot['chin'] == 1)],
+    #         path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_1',
+    #                                  'chin'))
+    #
+    # outlier_runs = data_subject.loc[
+    #     (data_subject['glasses_binary'] == 0) &
+    #     (data_subject['offset'] > 0.5),
+    #     'run_id'].unique()
+    #
+    # for run in outlier_runs:
+    #
+    #     visualize_exemplary_run(
+    #         data=data_plot[
+    #             (data_plot['run_id'] == run) &
+    #             (data_plot['chin'] == 0)],
+    #         path_target=os.path.join(path_plots, 'exemplary_runs', 'glasses_0',
+    #                                  'outliers'))
 
     # Heatmap for all gaze points
     # fix_heatmaps(data=data_et,

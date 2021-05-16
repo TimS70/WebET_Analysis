@@ -249,9 +249,9 @@ def analyze_fix():
     #                    path_target=os.path.join(path_plots),
     #                    individual=False)
     #
-    # grand_mean_offset(path_origin=path_origin,
-    #                   path_plots=path_plots,
-    #                   path_tables=path_tables)
+    grand_mean_offset(path_origin=path_origin,
+                      path_plots=path_plots,
+                      path_tables=path_tables)
 
     analyze_fix_task(path_origin=path_origin,
                      path_plots=path_plots,
@@ -341,5 +341,5 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    prep_fix()
+    analyze_fix()
     # main(new_data=False)

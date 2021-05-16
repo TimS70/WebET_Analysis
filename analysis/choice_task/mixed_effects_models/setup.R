@@ -21,17 +21,17 @@ source(file.path(path_analysis, 'test_clusters.R'))
 source(file.path(path_analysis, 'simple_logistic.R'))
 source(file.path(path_analysis, 'assumptions.R'))
 
-get_packages(c('broom',
-              'car', 
-              'colorspace',
-			  'DHARMa',
-              "effsize",
-              'e1071',
-              'GGally',
-              "ggsignif",
-			  'Hmisc',
-              'lme4',
-              'QuantPsyc',
-              "RColorBrewer",
-              'reshape2',
-              'tidyverse'))
+library('broom')
+library('car') 
+library('colorspace')
+library('DHARMa')
+library("effsize")
+library('e1071')
+library('GGally')
+library("ggsignif")
+library('Hmisc')
+library('lme4')
+library('QuantPsyc')
+library("RColorBrewer")
+library('reshape2')
+library('tidyverse')
