@@ -1,20 +1,5 @@
-find_best_model <- function(data, outcome, control_variables,
-						   exp_variables) {
-	
-	## Intercept as Outcome	 
-	grouped = data %>%
-	    group_by(run_id) %>%
-	    dplyr::summarise(
-	    	fps_subject = mean(fps),
-	    	.groups = 'keep')
-	
-	data = data %>%
-		mutate(y_pos_c = recode(y_pos, '0.2'=(-1L), '0.5'=0L, '0.8'=1L),
-			   x_pos_c = recode(x_pos, '0.2'=(-1L), '0.5'=0L, '0.8'=1L),
-			   fps_c = scale(fps),
-			   window_c = scale(window)) %>%
-	    merge_by_subject(grouped, 'fps_subject') %>%
-	    mutate(fps_subject_c = fps - mean(grouped$fps_subject))
+find_best_model <- function(data, outcome, control_variables, 
+							exp_variables) {
 	
 	# 1) Emtpy model (intercept only)
 	# ICC = 0.46. 46% of the variance can be explained by the variance between 
@@ -63,25 +48,16 @@ find_best_model <- function(data, outcome, control_variables,
 	    formula(paste0(outcome, ' ~  ', 
 	    			   control_variables, ' + ',
 	    			   exp_variables, ' + ',
-	    			   'fps_subject_c + (chin | run_id)')), 
+	    			   'fps_subject_c + (1 | run_id)')), 
 	    data=data,
 	    REML=FALSE)
 	summary(lmer5_iao)
 	
-	lmer6_iao = lmer(
+	lmer6_iao_rs = lmer(
 	    formula(paste0(outcome, ' ~  ', 
 	    			   control_variables, ' + ',
 	    			   exp_variables, ' + ',
-	    			   'chin * fps_subject_c + (chin | run_id)')), 
-	    data=data,
-	    REML=FALSE)
-	
-	# Final Model
-	lmer_final = lmer(
-		formula(paste0(outcome, ' ~  ', 
-	    			   control_variables, ' + ',
-	    			   exp_variables, ' + ',
-					   '(chin + glasses_binary | run_id)')), 
+	    			   'fps_subject_c + (chin + glasses_binary | run_id)')), 
 	    data=data,
 	    REML=FALSE)
 	
@@ -95,25 +71,40 @@ find_best_model <- function(data, outcome, control_variables,
 	print(summary(lmer4_rs)) 
 	print(paste0(outcome, ': Intercept as Outcome'))
 	print(summary(lmer5_iao)) 
-	print(paste0(outcome, ': Intercept as Outcome with Interaction'))
-	print(summary(lmer6_iao)) 
-	print(paste0(outcome, ': Final Model'))
-	print(summary(lmer_final))
+	print(paste0(outcome, ': Intercept as Outcome plus Random Slope'))
+	print(summary(lmer6_iao_rs)) 
 	
 	print('ANOVA Control')
 	print(anova(lmer0_io, 
 				lmer1_control, 
-				lmer3_experimental))
+				lmer3_experimental,
+				lmer4_rs))
 	
 	print('ANOVA RS')
 	print(anova(lmer3_experimental, 
-				lmer4_rs, 
 				lmer5_iao,
-				lmer6_iao,
-				lmer_final))
+				lmer6_iao_rs))
+	
+	print('ANOVA RS vs. IAO RS')
+	print(anova(lmer4_rs,
+				lmer6_iao_rs))
 	
 	# confint(glmer_final, method="boot", n=50) # CI with Bootstrap
 	# The confidence intervals should not include 1 to be significant
+	
+	if (output=='hit_mean') {
+		print("lmer_final <- lmer6_iao_rs")
+		lmer_final <- lmer6_iao_rs
+	} else if (output=='offset') {
+		print("lmer_final <- lmer6_iao_rs")
+		lmer_final <- lmer6_iao_rs
+	} else if (output=='precision') {
+		print("lmer_final <- lmer6_iao_rs")
+		lmer_final <- lmer6_iao_rs
+	} else {
+		print("lmer_final <- lmer6_iao_rs")
+		lmer_final <- lmer0_io
+	}
 	
 	return(lmer_final)
 }

@@ -37,7 +37,6 @@ from visualize.choice import plot_choice_task_heatmap, \
 from visualize.distributions import plot_histogram
 from visualize.eye_tracking import plot_et_scatter
 
-
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -45,7 +44,6 @@ from visualize.fix_task.main import hist_plots_quality
 
 
 def prep_global():
-
     add_variables_global(
         path_origin=os.path.join('data', 'all_trials', 'combined'),
         path_target=os.path.join('data', 'all_trials', 'added_var'))
@@ -117,11 +115,11 @@ def prep_fix():
                      path_origin=os.path.join('data', 'fix_task', 'cleaned'),
                      path_target=os.path.join('data', 'fix_task', 'added_var'))
 
+
 def prep_choice(main_aoi_width=0.4,
                 main_aoi_height=0.4,
                 correct_clusters=False,
                 new_plots=True):
-
     # load_choice_data(path_origin=os.path.join('data', 'all_trials', 'cleaned'),
     #                  path_target=os.path.join('data', 'choice_task', 'raw'))
     #
@@ -210,17 +208,17 @@ def prep_choice(main_aoi_width=0.4,
             path_origin=os.path.join('data', 'choice_task',
                                      'cleaned', 'data_et.csv'),
             path_target=os.path.join('results', 'plots',
-                                     'choice_Task', 'individual_heatmaps', 'selected'))
+                                     'choice_Task', 'individual_heatmaps',
+                                     'selected'))
 
 
 def analyze_global():
-
     path_origin = os.path.join('data', 'all_trials', 'cleaned')
     data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
     # Window size
     print(f"""Describe window: \n"""
-          f"""{data_subject[['window', 'window_x', 
+          f"""{data_subject[['window', 'window_x',
                              'window_y']].describe()} \n""")
 
     analyze_dropouts(
@@ -229,37 +227,7 @@ def analyze_global():
     analyze_demographics()
 
 
-def analyze_fix():
-
-    print('################################### \n'
-          'Analyze fix task data \n'
-          '################################### \n')
-
-    path_plots = os.path.join('results', 'plots', 'fix_task')
-    path_tables = os.path.join('results', 'tables', 'fix_task')
-    path_origin = os.path.join('data', 'fix_task', 'added_var')
-
-    # check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',
-    #                    'added_var'),
-    #                    path_target=os.path.join(path_plots, 'saccades'),
-    #                    individual=True)
-    #
-    # check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',
-    #                                             'cleaned'),
-    #                    path_target=os.path.join(path_plots),
-    #                    individual=False)
-    #
-    grand_mean_offset(path_origin=path_origin,
-                      path_plots=path_plots,
-                      path_tables=path_tables)
-
-    analyze_fix_task(path_origin=path_origin,
-                     path_plots=path_plots,
-                     path_tables=path_tables)
-
-
 def analyze_choice():
-
     path_origin = os.path.join('data', 'choice_task', 'cleaned')
     path_plots = os.path.join('results', 'plots', 'choice_task')
     path_tables = os.path.join('results', 'tables', 'choice_task')
@@ -341,5 +309,8 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    analyze_fix()
+    analyze_fix_task(
+        path_plots=os.path.join('results', 'plots', 'fix_task'),
+        path_tables=os.path.join('results', 'tables', 'fix_task'),
+        path_origin=os.path.join('data', 'fix_task', 'added_var'))
     # main(new_data=False)
