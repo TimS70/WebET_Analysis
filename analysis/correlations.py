@@ -1,11 +1,4 @@
-import os
-
-import numpy as np
 import pandas as pd
-from utils.save_data import write_csv
-from visualize.all_tasks import save_plot
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 
 def combine_corr_matrix(data, variables):
@@ -40,5 +33,3 @@ def clean_corr_data(data_plot):
     print(f"""Length of data clean: {len(data_plot_clean)} \n""")
 
     return data_plot_clean
-
-
