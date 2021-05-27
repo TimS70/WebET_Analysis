@@ -1,9 +1,8 @@
-test_assumptions <- function(model, data) {
+test_assumptions <- function(model, data, path) {
 	
 	# print('Test assumptions for')
 	# print(formula(model))
 	
-	path <- file.path('results', 'plots', 'choice_task', 'assumptions')
 	dir.create(path, showWarnings = FALSE)
 
 	# HLM diag overview
@@ -27,9 +26,6 @@ test_assumptions <- function(model, data) {
 	#mdffits() #calculate measures of the change in the fixed effects 
 	# estimates based on the deletetion of an observation, or group of 
 	# observations
-	
-	
-	
 	
 	# Linarity, Normality of the residuals, over- and under-dispersion
 	par(mar = rep(2, 4))

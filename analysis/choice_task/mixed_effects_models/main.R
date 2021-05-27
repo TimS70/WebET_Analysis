@@ -1,4 +1,4 @@
-root = "C:/Users/User/GitHub/WebET_Analysis"
+root = "C:/Users/TimSchneegans/Documents/github/WebET_Analysis"
 setwd(root)
 path_analysis <- file.path(root, 'analysis', 'choice_task',
 						   'mixed_effects_models')
@@ -30,10 +30,11 @@ data_clean <- data_trial %>%
    		   !is.na(payneIndex) &
 		   !is.na(optionIndex))
 
-compare_logistic(data_subject)
+# compare_logistic(data_subject)
 
-glmer_choice <- compare_choice_models(data=data_clean,
-									  data_subject=data_subject)
+glmer_choice <- compare_choice_models(
+    data=data_clean,
+    data_subject=data_subject)
 
 test_clusters(model=glmer_choice, data=data_clean)
 
@@ -43,4 +44,7 @@ glmer_sd_ll <- simple_slopes(data=data_clean, model=glmer_choice, upper=FALSE)
 odds_ratio(model=glmer_choice, data=data_clean) 
 
 # Test_Assumptions
-test_assumptions(model=glmer_choice, data=data_clean)
+test_assumptions(
+  model=glmer_choice, data=data_clean,
+  path=file.path('results', 'plots', 'choice_task', 'assumptions'))
+

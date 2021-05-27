@@ -38,7 +38,7 @@ compare_choice_models <- function(data, data_subject) {
 	# Random Intercept
 	glmer1_ri = glmer(
 	    choseLL ~ withinTaskIndex + rt_c + 
-	    	optionIndex_2 + attributeIndex + payneIndex + (1 | run_id), 
+	    	optionIndex + attributeIndex + payneIndex + (1 | run_id), 
 	    data = data,
 	    family = binomial, 
 	    control = glmerControl(optimizer = "bobyqa"),
@@ -57,7 +57,7 @@ compare_choice_models <- function(data, data_subject) {
 	
 	glmer2_rirs = glmer(
 	    choseLL ~ withinTaskIndex + rt_c + 
-	    	optionIndex_2 + attributeIndex + payneIndex  + 
+	    	optionIndex + attributeIndex + payneIndex  + 
 	    	(optionIndex + attributeIndex + payneIndex  | run_id), 
 	    data = data,
 	    family = binomial, 
@@ -69,7 +69,7 @@ compare_choice_models <- function(data, data_subject) {
 
 	glmer2_rirs_2 = glmer(
 	    choseLL ~ withinTaskIndex + rt_c + 
-	    	optionIndex_2 + attributeIndex + payneIndex  + 
+	    	optionIndex + attributeIndex + payneIndex  + 
 	    	(attributeIndex  | run_id), 
 	    data = data,
 	    family = binomial, 
@@ -174,9 +174,11 @@ compare_choice_models <- function(data, data_subject) {
 	print('WSC: Random Intercept - Random Slope')
 	print(summary(glmer_wsc_rirs))
 	
-	output_anova <- anova(glmer_wsc_io, 
-						  glmer_wsc_ri,
-						  glmer_wsc_rirs)
+	output_anova <- anova(
+  	  glmer_wsc_io,
+  	  glmer_wsc_ri,
+  	  glmer_wsc_rirs)
+	
 	print('Within-Subject-Centering Anova')
 	print(output_anova)
 	
