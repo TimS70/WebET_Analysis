@@ -1,4 +1,4 @@
-root = "C:/Users/User/GitHub/WebET_Analysis"
+root = "C:/Users/TimSchneegans/Documents/github/WebET_Analysis"
 
 path_results = file.path(root, 'results', 'plots', 'fix_task')
 path_analysis = file.path(root, 'analysis', 'fix_task', 'mixed_effects_models')
@@ -27,6 +27,9 @@ data_subject <- data_subject %>%
 							  levels = c('a', 'b', 'c'),
 							  labels = c('a', 'b', 'c')))
 
+data_trial <- prep_data(data_subject=data_subject, data_trial=data_trial)
+
+
 data_subject %>% 
 	dplyr::select(webcam_width, webcam_height) %>%
 	table()
@@ -42,16 +45,6 @@ data_subject %>%
 
 data_subject$webcam_fps %>%
 	table()
-
-data_trial = data_trial %>%
-	merge_by_subject(data_subject, 'window') %>%
-	merge_by_subject(data_subject, 'webcam_diag') %>%
-	merge_by_subject(data_subject, 'vertPosition') %>%
-	merge_by_subject(data_subject, 'ethnic') %>%
-	mutate(y_pos_c = recode(y_pos, '0.2'=(-1L), '0.5'=0L, '0.8'=1L),
-		   x_pos_c = recode(x_pos, '0.2'=(-1L), '0.5'=0L, '0.8'=1L),
-		   fps_c = scale(fps),
-		   window_c = scale(window))
 
 # Visual inspection
 for (var in c('offset', 'precision', 'hit_mean')) {
@@ -87,35 +80,25 @@ exp_variables <- paste(
 	'glasses_binary',
 	sep=' + ')
 
-## Intercept as Outcome	 
-grouped = data_subject %>%
-    group_by(run_id) %>%
-    dplyr::summarise(
-    	fps_subject = mean(fps),
-    	.groups = 'keep')
-
-data_trial = data_trial %>%
-	mutate(y_pos_c = recode(y_pos, '0.2'=(-1L), '0.5'=0L, '0.8'=1L),
-		   x_pos_c = recode(x_pos, '0.2'=(-1L), '0.5'=0L, '0.8'=1L),
-		   fps_c = scale(fps),
-		   window_c = scale(window),
-		   offset_c = scale(offset), 
-		   precision_c = scale(precision)) %>%
-    merge_by_subject(grouped, 'fps_subject') %>%
-    mutate(fps_subject_c = fps - mean(grouped$fps_subject))
-
-lmer_hit_mean <- find_best_model(data=data_trial, outcome='hit_mean',
+lmer_hit_mean <- compare_models(data=data_trial, outcome='hit_mean',
 								 control_variables=control_variables,
 								 exp_variables=exp_variables)
 
-lmer_offset <- find_best_model(data=data_trial, outcome='offset',
+lmer_offset <- compare_models(data=data_trial, outcome='offset',
 							   control_variables=control_variables,
  							   exp_variables=exp_variables)
 
-lmer_precision <- find_best_model(data=data_trial, outcome='precision',
+lmer_precision <- compare_models(data=data_trial, outcome='precision',
 								  control_variables=control_variables,
  								  exp_variables=exp_variables)
 
+lmer_offset_log <- compare_models(data=data_trial, outcome='offset_log',
+                               control_variables=control_variables,
+                               exp_variables=exp_variables)
+
+lmer_precision_log <- compare_models(data=data_trial, outcome='precision_log',
+                                  control_variables=control_variables,
+                                  exp_variables=exp_variables)
 
 # effects
 # pseudo_r2_l1(data_trial, 'offset')
@@ -129,7 +112,11 @@ lmer_precision <- find_best_model(data=data_trial, outcome='precision',
 
 # Assumptions
 test_assumptions(model=lmer_offset, data=data_trial, outcome='offset')
+test_assumptions(model=lmer_offset_log, data=data_trial, 
+                 outcome='offset_log')
 test_assumptions(model=lmer_precision, data=data_trial, outcome='precision')
+test_assumptions(model=lmer_precision_log, data=data_trial, 
+                 outcome='precision_log')
 test_assumptions(model=lmer_hit_mean, data=data_trial, outcome='hit_mean')
 # 
 transform_model(data=data_trial, model=lmer_offset, outcome='offset')

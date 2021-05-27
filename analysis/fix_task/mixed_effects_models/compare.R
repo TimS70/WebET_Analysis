@@ -1,4 +1,4 @@
-find_best_model <- function(data, outcome, control_variables, 
+compare_models <- function(data, outcome, control_variables, 
 							exp_variables) {
 	
 	# 1) Emtpy model (intercept only)
@@ -92,13 +92,13 @@ find_best_model <- function(data, outcome, control_variables,
 	# confint(glmer_final, method="boot", n=50) # CI with Bootstrap
 	# The confidence intervals should not include 1 to be significant
 	
-	if (output=='hit_mean') {
+	if (outcome=='hit_mean') {
 		print("lmer_final <- lmer6_iao_rs")
 		lmer_final <- lmer6_iao_rs
-	} else if (output=='offset') {
+	} else if (outcome=='offset') {
 		print("lmer_final <- lmer6_iao_rs")
 		lmer_final <- lmer6_iao_rs
-	} else if (output=='precision') {
+	} else if (outcome=='precision') {
 		print("lmer_final <- lmer6_iao_rs")
 		lmer_final <- lmer6_iao_rs
 	} else {

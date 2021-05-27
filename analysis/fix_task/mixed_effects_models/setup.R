@@ -16,6 +16,8 @@ source(file.path(path_analysis, 'robust.R'))
 source(file.path(path_analysis, 'assumptions.R'))
 source(file.path(path_analysis, 'transformation.R'))
 source(file.path(path_analysis, 'icc.R'))
+source(file.path(path_analysis, 'prep_data.R'))
+
 
 library(brms)
 library(boot)

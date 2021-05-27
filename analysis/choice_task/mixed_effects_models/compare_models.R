@@ -35,6 +35,17 @@ compare_choice_models <- function(data, data_subject) {
 		'The average probability for choseLL is exp(beta_0)/(1+exp(beta_0)) = ',
 		round(prob_intercept, 2)))
 	
+	# Control variables
+	glmer1_control = glmer(
+	    choseLL ~ withinTaskIndex + rt_c + (1 | run_id), 
+	    data = data,
+	    family = binomial, 
+	    control = glmerControl(optimizer = "bobyqa"),
+	    nAGQ = 1)
+
+	print('Control variables')	
+	print(summary(glmer1_control))
+	
 	# Random Intercept
 	glmer1_ri = glmer(
 	    choseLL ~ withinTaskIndex + rt_c + 
@@ -44,7 +55,7 @@ compare_choice_models <- function(data, data_subject) {
 	    control = glmerControl(optimizer = "bobyqa"),
 	    nAGQ = 1)
 	
-	print('Random Intercept')
+	print('Experimental variables')
 	print(summary(glmer1_ri))
 
 	beta_0 = fixef(glmer1_ri)[1][1]
@@ -67,40 +78,16 @@ compare_choice_models <- function(data, data_subject) {
 	print('Random Intercept - Random Slope')
 	print(summary(glmer2_rirs))
 
-	glmer2_rirs_2 = glmer(
-	    choseLL ~ withinTaskIndex + rt_c + 
-	    	optionIndex + attributeIndex + payneIndex  + 
-	    	(attributeIndex  | run_id), 
-	    data = data,
-	    family = binomial, 
-	    control = glmerControl(optimizer = "bobyqa"),
-	    nAGQ = 1)
-	
-	print('Random Intercept - Random Slope 2')
-	print(summary(glmer2_rirs_2))
+	output_anova <- anova(
+	  glmer0_io, 
+    glmer1_control,
+		glmer1_ri)
 
-	
-	# Final Model
-	glmer_final <- glmer1_ri
-
-	# print(paste('glmer_wsc_io', summary(glmer_wsc_io), sep='\n'))
-	# print(paste('glmer_wsc_ri', summary(glmer_wsc_ri), sep='\n'))
-	# print(paste('glmer_wsc_rirs', summary(glmer_wsc_rirs), sep='\n'))
-	
-	print('Final Model:')
-	print(summary(glmer_final))
-	# confint(glmer_final, method="boot", n=50), 
-				
-	output_anova <- anova(glmer0_io, 
-							glmer1_ri, 
-							glmer2_rirs, 
-							glmer2_rirs_2,
-							glmer_final)
-							# glmer_wsc_io,
-							# glmer_wsc_ri,
-							# glmer_wsc_rirs)
 	print(output_anova)
 
+	# Final Model
+	glmer_final <- glmer1_ri
+	# confint(glmer_final, method="boot", n=50), 
 	
 	# Within Subject Centering
 
@@ -111,11 +98,12 @@ compare_choice_models <- function(data, data_subject) {
 	    data_subject$payneIndex,
 	    data_subject$choice_rt)
 
-	names(grouped) = c('run_id',
-	                   'cluster_mean_AI',
-	                   'cluster_mean_OI',
-	                   'cluster_mean_PI',
-					   'cluster_mean_rt')
+	names(grouped) = c(
+	  'run_id',
+    'cluster_mean_AI',
+    'cluster_mean_OI',
+    'cluster_mean_PI',
+    'cluster_mean_rt')
 
 	for (col in names(grouped)[2:5]){
 	    if (col %in% names(data)) {
