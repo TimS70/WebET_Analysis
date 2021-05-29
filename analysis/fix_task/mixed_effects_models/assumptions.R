@@ -1,13 +1,11 @@
 library(DHARMa)
 	
-test_assumptions <- function(model, data, outcome) {
+test_assumptions <- function(model, data, outcome, path) {
 	
 	print('Test assumptions for')
 	print(model)
 	
-	dir.create(file.path('results', 'plots', 'fix_task', 'assumptions', 
-						 outcome),
-			   showWarnings = FALSE)
+	dir.create(path, showWarnings = FALSE)
 
 	# HLM diag overview
 	# case_delete() #iteratively delete groups corresponding to the levels of
@@ -87,8 +85,7 @@ test_assumptions <- function(model, data, outcome) {
 	print('Testing for Heteroscedasticity')
 	print(anova(levene_model))
 	
-	png(file = file.path(path_results, 'assumptions', outcome, 
-						 'heteroscedasticity.png'),
+	png(file = file.path(path, 'heteroscedasticity.png'),
 		width = 400, height = 400)
 	print(plot(model))
 	dev.off()

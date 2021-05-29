@@ -1,3 +1,6 @@
+library(boxcoxmix)
+
+
 transform_model <- function(data, model, outcome) {
 	
 	outcome_log <- paste(outcome, 'log', sep='_')

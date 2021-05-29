@@ -1,0 +1,2 @@
+In order Because these model assumptions were violated, we also tried robustLMM, which allows parameter estimation that is robust against outliers, by replacing residuals and spherical random effects with functions and therefore limiting their influence on parameter estimations. However, QQ plots did not show an improved fit to the data. 
+Then, we tried Box-Cox transformation with the boxcoxmix package 

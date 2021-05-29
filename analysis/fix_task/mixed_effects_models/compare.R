@@ -1,112 +1,302 @@
-compare_models <- function(data, outcome, control_variables, 
-							exp_variables) {
-	
-	# 1) Emtpy model (intercept only)
-	# ICC = 0.46. 46% of the variance can be explained by the variance between 
-	# the subjects. Interdependence assumption of the simple linear regression 
-	# is violated. We should to an MLA
+library(brms)
+library(lmerTest)
 
-	lmer0_io = lmer(formula(paste(outcome, '~ 1 + (1 | run_id)')), 
-					data=data,
-					REML=FALSE) # FML for comparing different fixed effects
+hit_ratio_models <- function(data) {
+  
+    print('Testing control variables')
+    lmer_full_control <- lmer(hit_mean ~
+                    trial + 
+                    chinFirst + 
+                    x_pos_c +
+                    y_pos_c +
+                    window_c +
+                    fps_c + 
+                    webcam_diag +
+                    vertPosition +
+                    ethnic + 
+                    fps_subject_c + 
+                    (1 | run_id),
+                    data=data)
+  
+    print(step(lmer_full_control))
+    
+    control_variables <- 'trial + x_pos_c + fps_c + fps_subject_c'
+  
+  # 1) Emtpy model (intercept only)
+  # ICC = 0.46. 46% of the variance can be explained by the variance between 
+  # the subjects. Interdependence assumption of the simple linear regression 
+  # is violated. We should to an MLA
+  
+    lmer_0_io = lmer(
+        hit_mean ~ 1 + (1 | run_id), 
+        data=data,
+        REML=FALSE
+    ) # FML for comparing different fixed effects
+  
+    # 2) Intermediate models
+    # Control variables
+    # Control for the fact that the subjects start at different places 
+    # regarding the accuracy of the eyetracking data. Standard error has 
+    # increased. Subjects vary by about 0.12 (Jan 24) around the intercept. 
+    # The RI model is way better than the IO model. Therefore, we should do 
+    # an MLM.
+    lmer_1_control = lmer(
+        formula(paste0(
+            'hit_mean ~ ',
+            control_variables,
+            ' + (1 | run_id)'
+        )),
+        data=data,
+        REML=FALSE
+    )
+  
+  # 3) Random Intercept
+    lmer_2_exp = lmer(
+        formula(paste0(
+            'hit_mean ~ ',
+            control_variables,
+            ' + chin + glasses_binary + (1 | run_id)'
+        )),
+        data=data,
+        REML=FALSE
+    )  
+  ### Random slopes
+  # Do not forget to look at the correlations among the random effects
+    lmer_3_rs = lmer(
+        formula(paste0(
+            'hit_mean ~ ',
+            control_variables,
+            ' + chin + glasses_binary', 
+            ' + (chin + glasses_binary | run_id)'
+        )),
+        data=data,
+        REML=FALSE
+    ) 
+  
+    print(summary(lmer_0_io)) 
+    print(summary(lmer_1_control)) 
+    ci <- confint(lmer_1_control, method="boot", n=500) # CI with Bootstrap
+    print(ci)
+    print(summary(lmer_2_exp)) 
+    ci <- confint(lmer_2_exp, method="boot", n=500) # CI with Bootstrap
+    print(ci)
+    print(summary(lmer_3_rs)) 
+    ci <- confint(lmer_3_rs, method="boot", n=500) # CI with Bootstrap
+    print(ci)
+    
+    print('ANOVA Control')
+    print(anova(lmer_0_io, 
+                lmer_1_control, 
+                lmer_2_exp,
+                lmer_3_rs))
 
-	# 2) Intermediate models
-	# Control variables
-	# Control for the fact that the subjects start at different places 
-	# regarding the accuracy of the eyetracking data. Standard error has 
-	# increased. Subjects vary by about 0.12 (Jan 24) around the intercept. 
-	# The RI model is way better than the IO model. Therefore, we should do 
-	# an MLM.
-	lmer1_control = lmer(
-	    formula(paste0(outcome, ' ~  ', 
-	    			   control_variables, 
-	    			   ' + (1 | run_id)')), 
-	    data=data,
-	    REML=FALSE)
-	
-	# 3) Random Intercept
-	lmer3_experimental = lmer(
-	    formula(paste0(outcome, ' ~  ', 
-	    			   control_variables, ' + ',
-	    			   exp_variables, ' + ',
-	    			   ' + (1 | run_id)')), 
-	    data=data,
-	    REML=FALSE)
+    # confint(glmer_final, method="boot", n=50) # CI with Bootstrap
+    # The confidence intervals should not include 1 to be significant
+    
+    lmer_final <- lmer_3_rs
+    
+    return(lmer_final)
+}
 
-	### Random slopes
-	# Do not forget to look at the correlations among the random effects
-	lmer4_rs = lmer(
-	    formula(paste0(outcome, ' ~  ', 
-	    			   control_variables, ' + ',
-	    			   exp_variables, ' + ',
-	    			   '(chin + glasses_binary | run_id)')), 
-	    data=data,
-	    REML=FALSE)
-	
-	## Intercept as Outcome	 
-	lmer5_iao = lmer(
-	    formula(paste0(outcome, ' ~  ', 
-	    			   control_variables, ' + ',
-	    			   exp_variables, ' + ',
-	    			   'fps_subject_c + (1 | run_id)')), 
-	    data=data,
-	    REML=FALSE)
-	summary(lmer5_iao)
-	
-	lmer6_iao_rs = lmer(
-	    formula(paste0(outcome, ' ~  ', 
-	    			   control_variables, ' + ',
-	    			   exp_variables, ' + ',
-	    			   'fps_subject_c + (chin + glasses_binary | run_id)')), 
-	    data=data,
-	    REML=FALSE)
-	
-	print(paste0(outcome, ': Intercept Only'))
-	print(summary(lmer0_io)) 
-	print(paste0(outcome, ': Control variables'))
-	print(summary(lmer1_control)) 
-	print(paste0(outcome, ': Experimental variables'))
-	print(summary(lmer3_experimental)) 
-	print(paste0(outcome, ': Random Slope'))
-	print(summary(lmer4_rs)) 
-	print(paste0(outcome, ': Intercept as Outcome'))
-	print(summary(lmer5_iao)) 
-	print(paste0(outcome, ': Intercept as Outcome plus Random Slope'))
-	print(summary(lmer6_iao_rs)) 
-	
-	print('ANOVA Control')
-	print(anova(lmer0_io, 
-				lmer1_control, 
-				lmer3_experimental,
-				lmer4_rs))
-	
-	print('ANOVA RS')
-	print(anova(lmer3_experimental, 
-				lmer5_iao,
-				lmer6_iao_rs))
-	
-	print('ANOVA RS vs. IAO RS')
-	print(anova(lmer4_rs,
-				lmer6_iao_rs))
-	
-	# confint(glmer_final, method="boot", n=50) # CI with Bootstrap
-	# The confidence intervals should not include 1 to be significant
-	
-	if (outcome=='hit_mean') {
-		print("lmer_final <- lmer6_iao_rs")
-		lmer_final <- lmer6_iao_rs
-	} else if (outcome=='offset') {
-		print("lmer_final <- lmer6_iao_rs")
-		lmer_final <- lmer6_iao_rs
-	} else if (outcome=='precision') {
-		print("lmer_final <- lmer6_iao_rs")
-		lmer_final <- lmer6_iao_rs
-	} else {
-		print("lmer_final <- lmer6_iao_rs")
-		lmer_final <- lmer0_io
-	}
-	
-	return(lmer_final)
+
+offset_models <- function(data) {
+
+    print('Testing control variables')
+    
+    lmer_full_control <- lmer(offset ~
+                                  trial + 
+                                  chinFirst + 
+                                  x_pos_c +
+                                  y_pos_c +
+                                  window_c +
+                                  fps_c + 
+                                  webcam_diag +
+                                  vertPosition +
+                                  ethnic + 
+                                  fps_subject_c + 
+                                  (1 | run_id),
+                              data=data)
+    
+    print(step(lmer_full_control))
+    
+    control_variables <- 'trial + x_pos_c + y_pos_c + fps_c + fps_subject_c'
+    
+    # 1) Emtpy model (intercept only)
+    # ICC = 0.46. 46% of the variance can be explained by the variance between 
+    # the subjects. Interdependence assumption of the simple linear regression 
+    # is violated. We should to an MLA
+    
+    lmer_0_io = lmer(
+        offset ~ 1 + (1 | run_id), 
+        data=data,
+        REML=FALSE
+    ) # FML for comparing different fixed effects
+    
+    # 2) Intermediate models
+    # Control variables
+    # Control for the fact that the subjects start at different places 
+    # regarding the accuracy of the eyetracking data. Standard error has 
+    # increased. Subjects vary by about 0.12 (Jan 24) around the intercept. 
+    # The RI model is way better than the IO model. Therefore, we should do 
+    # an MLM.
+    lmer_1_control = lmer(
+        formula(paste0(
+            'offset ~ ',
+            control_variables,
+            ' + (1 | run_id)'
+        )),
+        data=data,
+        REML=FALSE
+    )
+    
+    # 3) Random Intercept
+    lmer_2_exp = lmer(
+        formula(paste0(
+            'offset ~ ',
+            control_variables,
+            ' + chin + glasses_binary + (1 | run_id)'
+        )),
+        data=data,
+        REML=FALSE
+    )  
+    ### Random slopes
+    # Do not forget to look at the correlations among the random effects
+    lmer_3_rs = lmer(
+        formula(paste0(
+            'offset ~ ',
+            control_variables,
+            ' + chin + glasses_binary', 
+            ' + (chin + glasses_binary | run_id)'
+        )),
+        data=data,
+        REML=FALSE
+    ) 
+    
+    print(summary(lmer_0_io)) 
+    print(summary(lmer_1_control)) 
+    ci <- confint(lmer_1_control, method="boot", n=500) # CI with Bootstrap
+    print(ci)
+    print(summary(lmer_2_exp)) 
+    ci <- confint(lmer_2_exp, method="boot", n=500) # CI with Bootstrap
+    print(ci)
+    print(summary(lmer_3_rs)) 
+    ci <- confint(lmer_3_rs, method="boot", n=500) # CI with Bootstrap
+    print(ci)
+    
+    print('ANOVA Control')
+    print(anova(lmer_0_io, 
+                lmer_1_control, 
+                lmer_2_exp,
+                lmer_3_rs))
+    
+    # confint(glmer_final, method="boot", n=50) # CI with Bootstrap
+    # The confidence intervals should not include 1 to be significant
+    
+    lmer_final <- lmer_3_rs
+    
+    return(lmer_final)
+}
+
+
+precision_models <- function(data) {
+    
+    print('Testing control variables')
+    
+    lmer_full_control <- lmer(precision ~
+                                  trial + 
+                                  chinFirst + 
+                                  x_pos_c +
+                                  y_pos_c +
+                                  window_c +
+                                  fps_c + 
+                                  webcam_diag +
+                                  vertPosition +
+                                  ethnic + 
+                                  fps_subject_c + 
+                                  (1 | run_id),
+                              data=data)
+    
+    print(step(lmer_full_control))
+    
+    control_variables <- 'trial + y_pos_c + fps_c + fps_subject_c'
+    
+    # 1) Emtpy model (intercept only)
+    # ICC = 0.46. 46% of the variance can be explained by the variance between 
+    # the subjects. Interdependence assumption of the simple linear regression 
+    # is violated. We should to an MLA
+    
+    lmer_0_io = lmer(
+        precision ~ 1 + (1 | run_id), 
+        data=data,
+        REML=FALSE
+    ) # FML for comparing different fixed effects
+    
+    # 2) Intermediate models
+    # Control variables
+    # Control for the fact that the subjects start at different places 
+    # regarding the accuracy of the eyetracking data. Standard error has 
+    # increased. Subjects vary by about 0.12 (Jan 24) around the intercept. 
+    # The RI model is way better than the IO model. Therefore, we should do 
+    # an MLM.
+    lmer_1_control = lmer(
+        formula(paste0(
+            'precision ~ ',
+            control_variables,
+            ' + (1 | run_id)'
+        )),
+        data=data,
+        REML=FALSE
+    )
+    
+    # 3) Random Intercept
+    lmer_2_exp = lmer(
+        formula(paste0(
+            'precision ~ ',
+            control_variables,
+            ' + chin + glasses_binary + (1 | run_id)'
+        )),
+        data=data,
+        REML=FALSE
+    )  
+    ### Random slopes
+    # Do not forget to look at the correlations among the random effects
+    lmer_3_rs = lmer(
+        formula(paste0(
+            'precision ~ ',
+            control_variables,
+            ' + chin + glasses_binary', 
+            ' + (chin + glasses_binary | run_id)'
+        )),
+        data=data,
+        REML=FALSE
+    ) 
+    
+    print(summary(lmer_0_io)) 
+    print(summary(lmer_1_control)) 
+    ci <- confint(lmer_1_control, method="boot", n=500) # CI with Bootstrap
+    print(ci)
+    print(summary(lmer_2_exp)) 
+    ci <- confint(lmer_2_exp, method="boot", n=500) # CI with Bootstrap
+    print(ci)
+    print(summary(lmer_3_rs)) 
+    ci <- confint(lmer_3_rs, method="boot", n=500) # CI with Bootstrap
+    print(ci)
+    
+    print('ANOVA')
+    print(anova(lmer_0_io, 
+                lmer_1_control, 
+                lmer_2_exp,
+                lmer_3_rs))
+
+    print('ANOVA')
+    print(anova(lmer_1_control, 
+                lmer_3_rs))    
+    # 
+    # The confidence intervals should not include 1 to be significant
+    
+    lmer_final <- lmer_3_rs
+    
+    return(lmer_final)
 }
 
 
