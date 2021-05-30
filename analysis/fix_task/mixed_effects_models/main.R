@@ -4,7 +4,6 @@ library(car)
 library(compiler)
 library(data.table)
 library(GGally)
-library(HLMdiag)
 library(Hmisc)
 library(influence.ME)
 library(ICC)
@@ -62,18 +61,18 @@ data_subject <- prep_subject_data(data_subject=data_subject)
 data_trial <- prep_trial_data(data_subject=data_subject, data_trial=data_trial)
 
 # Visual inspection
-for (var in c('offset', 'precision', 'hit_mean')) {
-	plot_outcome_variance(data_trial, var)
-	ggsave(file.path(path_results, 'MLA', paste0('runs_vs_', var, '.png')), 
-		   width=5.5, height=5)
-}
-
-dir.create(file.path(path_results, 'correlations'), showWarnings = FALSE)
-scatter_matrix_trial(data_trial)
-scatter_matrix_subject(data_subject)
+# for (var in c('offset', 'precision', 'hit_mean')) {
+# 	plot_outcome_variance(data_trial, var)
+# 	ggsave(file.path(path_results, 'MLA', paste0('runs_vs_', var, '.png')), 
+# 		   width=5.5, height=5)
+# }
+# 
+# dir.create(file.path(path_results, 'correlations'), showWarnings = FALSE)
+# scatter_matrix_trial(data_trial)
+# scatter_matrix_subject(data_subject)
 
 # ANOVA
-anova_fix_data(data_subject)
+# anova_fix_data(data_subject)
 
 get_icc(data=data_trial, outcome='precision') 
 get_icc(data=data_trial, outcome='offset') 

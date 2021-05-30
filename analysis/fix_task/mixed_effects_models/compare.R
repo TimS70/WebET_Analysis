@@ -1,22 +1,23 @@
 library(brms)
 library(lmerTest)
 
-hit_ratio_models <- function(data) {
+hit_ratio_models <- function(data, apa_path=FALSE) {
   
     print('Testing control variables')
-    lmer_full_control <- lmer(hit_mean ~
-                    trial + 
-                    chinFirst + 
-                    x_pos_c +
-                    y_pos_c +
-                    window_c +
-                    fps_c + 
-                    webcam_diag +
-                    vertPosition +
-                    ethnic + 
-                    fps_subject_c + 
-                    (1 | run_id),
-                    data=data)
+    lmer_full_control <- lmer(
+        hit_mean ~
+        trial + 
+        chinFirst + 
+        x_pos_c +
+        y_pos_c +
+        fps_c + 
+        window_c +
+        webcam_diag +
+        vertPosition +
+        ethnic + 
+        fps_subject_c + 
+        (1 | run_id),
+        data=data)
   
     print(step(lmer_full_control))
     
@@ -99,7 +100,7 @@ hit_ratio_models <- function(data) {
 }
 
 
-offset_models <- function(data) {
+offset_models <- function(data, apa_path=FALSE) {
 
     print('Testing control variables')
     
@@ -109,7 +110,7 @@ offset_models <- function(data) {
                                   x_pos_c +
                                   y_pos_c +
                                   window_c +
-                                  fps_c + 
+                                  fps_c +
                                   webcam_diag +
                                   vertPosition +
                                   ethnic + 
@@ -117,7 +118,7 @@ offset_models <- function(data) {
                                   (1 | run_id),
                               data=data)
     
-    print(step(lmer_full_control))
+    print(lmerTest::step(object=lmer_full_control))
     
     control_variables <- 'trial + x_pos_c + y_pos_c + fps_c + fps_subject_c'
     
@@ -198,7 +199,7 @@ offset_models <- function(data) {
 }
 
 
-precision_models <- function(data) {
+precision_models <- function(data, apa_path=FALSE) {
     
     print('Testing control variables')
     
@@ -216,7 +217,7 @@ precision_models <- function(data) {
                                   (1 | run_id),
                               data=data)
     
-    print(step(lmer_full_control))
+    # print(step(lmer_full_control))
     
     control_variables <- 'trial + y_pos_c + fps_c + fps_subject_c'
     
