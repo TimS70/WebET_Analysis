@@ -14,8 +14,6 @@ def analyze_demographics():
           'Analyze demographics \n'
           '################################### \n')
 
-
-
     data_subject = pd.read_csv(
         os.path.join('data', 'all_trials', 'cleaned', 'data_subject.csv'))
 
@@ -85,6 +83,11 @@ def analyze_demographics():
               path=os.path.join('results', 'plots', 'demographics'))
     plt.close()
 
+    compare_us_vs_int_sample(
+        data_subject=data_subject,
+        path_table=os.path.join('results', 'tables', 'demographics')
+    )
+
 
 def add_demographic_grouped_variable(data_subject, old_column, new_column, categories):
     data_subject[new_column] = 'other'
@@ -104,7 +107,7 @@ def frequency_table(data_subject, predictor, save_table=True):
         .reset_index() \
         .assign(percent=lambda data_frame: round(100 * data_frame['count'] /
                                            sum(data_frame['count']), 2)) \
-        .sort_values(by='count')
+        .sort_values(by='count', ascending=False)
 
     # print(f"""{freq_table} \n""")
 
@@ -145,3 +148,55 @@ def cross_tab(col, data_subject):
         .sort_values(by='count')
     pie.columns = [col, 'count']
     return pie
+
+
+def compare_us_vs_int_sample(path_table, data_subject=None, path_data_subject=None):
+
+    if data_subject is None:
+        data_subject = pd.read_csv(os.path.join(path_data_subject))
+
+    data_subject['residence'] = data_subject['Current Country of Residence']
+
+    runs_not_us = data_subject.loc[
+        data_subject['residence'] != 'United States', 'run_id']
+
+    data_subject['residence'] = 'us'
+    data_subject.loc[
+        data_subject['run_id'].isin(runs_not_us),
+        'residence'] = 'international'
+
+    grouped_us = data_subject.groupby(
+        ['residence'],
+        as_index=False).agg(
+        n=('run_id', 'count'),
+        attributeIndex=('attributeIndex', 'mean'),
+        attributeIndex_std=('attributeIndex', 'std'),
+        optionIndex=('optionIndex', 'mean'),
+        optionIndex_std=('optionIndex', 'std'),
+        payneIndex=('payneIndex', 'mean'),
+        payneIndex_std=('payneIndex', 'std'),
+        choseLL=('choseLL', 'mean'),
+        choseLL_std=('choseLL', 'std'),
+        choseTop=('choseTop', 'mean'),
+        choseTop_std=('choseTop', 'std'),
+        logK=('logK', 'mean'),
+        logK_std=('logK', 'std'),
+        choice_rt=('choice_rt', 'mean'),
+        choice_rt_std=('choice_rt', 'std'),
+        offset=('offset', 'mean'),
+        offset_std=('offset', 'std'),
+        precision=('precision', 'mean'),
+        precision_std=('precision', 'std'),
+        fps=('fps', 'mean'),
+        fps_std=('fps', 'std')).T
+
+    write_csv(
+        data=grouped_us,
+        file_name='us_vs_international_sample.csv',
+        path=path_table
+    )
+
+    print(
+        f"""grouped_us.transpose: \n"""
+        f"""{grouped_us} \n"""
+    )

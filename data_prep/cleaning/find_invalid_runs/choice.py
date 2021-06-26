@@ -9,45 +9,7 @@ def filter_runs_not_us(data_subject):
     runs_not_us = data_subject.loc[
         data_subject['residence'] != 'United States', 'run_id']
 
-    data_subject['residence'] = 'us'
-    data_subject.loc[
-        data_subject['run_id'].isin(runs_not_us),
-        'residence'] = 'international'
-
-    grouped_us = data_subject.groupby(
-        ['residence'],
-        as_index=False).agg(
-        n=('run_id', 'count'),
-        attributeIndex=('attributeIndex', 'mean'),
-        attributeIndex_std=('attributeIndex', 'std'),
-        optionIndex=('optionIndex', 'mean'),
-        optionIndex_std=('optionIndex', 'std'),
-        payneIndex=('payneIndex', 'mean'),
-        payneIndex_std=('payneIndex', 'std'),
-        choseLL=('choseLL', 'mean'),
-        choseLL_std=('choseLL', 'std'),
-        choseTop=('choseTop', 'mean'),
-        choseTop_std=('choseTop', 'std'),
-        logK=('logK', 'mean'),
-        logK_std=('logK', 'std'),
-        choice_rt=('choice_rt', 'mean'),
-        choice_rt_std=('choice_rt', 'std'),
-        offset=('offset', 'mean'),
-        offset_std=('offset', 'std'),
-        precision=('precision', 'mean'),
-        precision_std=('precision', 'std'),
-        fps=('fps', 'mean'),
-        fps_std=('fps', 'std')).T
-
-    write_csv(grouped_us, 'us_vs_international_sample.csv',
-              'results', 'tables', 'demographics')
-
-    print(
-        f"""{len(runs_not_us)} runs do not reside inside the us. """
-        f"""However, since their behavior does not differ much, """
-        f"""we will keep them for now. \n \n"""
-        f"""grouped_us.transpose: \n"""
-        f"""{grouped_us} \n""")
+    print(f"""{len(runs_not_us)} runs do not reside inside the us. """)
 
     return runs_not_us
 

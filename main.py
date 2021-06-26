@@ -1,11 +1,9 @@
 import os
 import subprocess
 
-import pandas as pd
-
 from analysis.choice_task.correlations import corr_analysis_choice
 from analysis.choice_task.test_clusters import add_transition_clusters
-from analysis.demographics import analyze_demographics
+from analysis.demographics import analyze_demographics, compare_us_vs_int_sample
 from analysis.dropouts.main import analyze_dropouts
 from analysis.fix_task.gaze_saccade import check_gaze_saccade
 from analysis.fix_task.grand_mean_offset import grand_mean_offset
@@ -37,8 +35,8 @@ from visualize.choice import plot_choice_task_heatmap, \
 from visualize.distributions import plot_histogram
 from visualize.eye_tracking import plot_et_scatter
 
+import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
 
 from visualize.fix_task.main import hist_plots_quality
 
@@ -89,8 +87,10 @@ def prep_fix():
     print(f"""Describe data quality: \n"""
           f"""{descriptives} \n""")
 
-    hist_plots_quality(data_subject,
-                       path_plots=os.path.join('results', 'plots', 'fix_task'))
+    hist_plots_quality(
+        data_subject,
+        path_plots=os.path.join('results', 'plots', 'fix_task')
+    )
 
     outliers = data_subject.loc[
         (data_subject['offset'] > 0.5) |
@@ -120,62 +120,69 @@ def prep_choice(main_aoi_width=0.4,
                 main_aoi_height=0.4,
                 correct_clusters=False,
                 new_plots=True):
-    # load_choice_data(path_origin=os.path.join('data', 'all_trials', 'cleaned'),
-    #                  path_target=os.path.join('data', 'choice_task', 'raw'))
-    #
-    # add_choice_behavioral_variables(
-    #     path_origin=os.path.join('data', 'choice_task', 'raw'),
-    #     path_target=os.path.join('data', 'choice_task', 'added_var'),
-    #     path_fix_subject=os.path.join('data', 'fix_task', 'added_var'))
-    #
-    # if new_plots:
-    #     plot_choice_task_heatmap(
-    #         path_origin=os.path.join('data', 'choice_task',
-    #                                  'raw', 'data_et.csv'),
-    #         path_target=os.path.join('results', 'plots',
-    #                                  'choice_Task', 'individual_heatmaps', 'all'))
-    #
-    # add_aoi_et(aoi_width=main_aoi_width, aoi_height=main_aoi_height,
-    #            path_origin=os.path.join('data', 'choice_task', 'raw'),
-    #            path_target=os.path.join('data', 'choice_task', 'added_var'))
-    #
-    # if new_plots:
-    #     data_plot = pd.read_csv(os.path.join(
-    #         'data', 'choice_task', 'added_var', 'data_et.csv'))
-    #     data_plot = data_plot[pd.notna(data_plot['aoi'])]
-    #     plot_et_scatter(x=data_plot['x'], y=data_plot['y'],
-    #                     title='AOI raw for all runs ',
-    #                     file_name='aoi_scatter.png',
-    #                     path=os.path.join('results', 'plots', 'choice_task', 'et'))
-    #
-    # if correct_clusters:
-    #     data_et_corrected = init_cluster_correction(
-    #         distance_threshold=0.25,
-    #         min_cluster_size=50,
-    #         min_ratio=0.5,
-    #         max_deviation=0.25,
-    #         aoi_width=main_aoi_width,
-    #         aoi_height=main_aoi_height,
-    #         message=False,
-    #         path_origin=os.path.join('data', 'choice_task', 'added_var'),
-    #         path_target=os.path.join('data', 'choice_task', 'added_var'))
-    #
-    #     plot_choice_task_heatmap(
-    #         path_origin=os.path.join('data', 'choice_task',
-    #                                  'raw', 'data_et.csv'),
-    #         path_target=os.path.join('results', 'plots',
-    #                                  'clustering', 'py_clusters',
-    #                                  'heatmaps_selected'),
-    #         runs=data_et_corrected['run_id'].unique())
-    #
-    # add_choice_et_variables(
-    #     min_required_trials=5, min_gaze_points=3,
-    #     path_origin=os.path.join('data', 'choice_task', 'added_var'),
-    #     path_target=os.path.join('data', 'choice_task', 'added_var'))
-    #
-    # add_log_k(path=os.path.join('data', 'choice_task', 'added_var'),
-    #           file_trial_input='data_trial.csv',
-    #           file_subjects_to_merge='data_subject.csv')
+
+    load_choice_data(path_origin=os.path.join('data', 'all_trials', 'cleaned'),
+                     path_target=os.path.join('data', 'choice_task', 'raw'))
+
+    add_choice_behavioral_variables(
+        path_origin=os.path.join('data', 'choice_task', 'raw'),
+        path_target=os.path.join('data', 'choice_task', 'added_var'),
+        path_fix_subject=os.path.join('data', 'fix_task', 'added_var'))
+
+    if new_plots:
+        plot_choice_task_heatmap(
+            path_origin=os.path.join('data', 'choice_task',
+                                     'raw', 'data_et.csv'),
+            path_target=os.path.join('results', 'plots',
+                                     'choice_Task', 'individual_heatmaps', 'all'))
+
+    add_aoi_et(aoi_width=main_aoi_width, aoi_height=main_aoi_height,
+               path_origin=os.path.join('data', 'choice_task', 'raw'),
+               path_target=os.path.join('data', 'choice_task', 'added_var'))
+
+    if new_plots:
+        data_plot = pd.read_csv(os.path.join(
+            'data', 'choice_task', 'added_var', 'data_et.csv'))
+        data_plot = data_plot[pd.notna(data_plot['aoi'])]
+        plot_et_scatter(x=data_plot['x'], y=data_plot['y'],
+                        title='AOI raw for all runs ',
+                        file_name='aoi_scatter.png',
+                        path=os.path.join('results', 'plots', 'choice_task', 'et'))
+
+    if correct_clusters:
+        data_et_corrected = init_cluster_correction(
+            distance_threshold=0.25,
+            min_cluster_size=50,
+            min_ratio=0.5,
+            max_deviation=0.25,
+            aoi_width=main_aoi_width,
+            aoi_height=main_aoi_height,
+            message=False,
+            path_origin=os.path.join('data', 'choice_task', 'added_var'),
+            path_target=os.path.join('data', 'choice_task', 'added_var'))
+
+        plot_choice_task_heatmap(
+            path_origin=os.path.join('data', 'choice_task',
+                                     'raw', 'data_et.csv'),
+            path_target=os.path.join('results', 'plots',
+                                     'clustering', 'py_clusters',
+                                     'heatmaps_selected'),
+            runs=data_et_corrected['run_id'].unique())
+
+    add_choice_et_variables(
+        min_required_trials=5, min_gaze_points=3,
+        path_origin=os.path.join('data', 'choice_task', 'added_var'),
+        path_target=os.path.join('data', 'choice_task', 'added_var'))
+
+    data_subject = add_log_k(
+        path=os.path.join('data', 'choice_task', 'added_var'),
+        file_trial_input='data_trial.csv',
+        file_subjects_to_merge='data_subject.csv'
+    )
+
+    compare_us_vs_int_sample(
+        data_subject=data_subject,
+        path_table=os.path.join('results', 'tables', 'demographics'))
 
     data_et, data_trial, data_subject = clean_data_choice(
         us_sample=False,
@@ -257,7 +264,7 @@ def analyze_choice():
 
     predictors = ['chinFirst', 'ethnic', 'degree', 'student_status']
 
-    # Confounders
+    # confounders
     get_box_plots(data=data_subject,
                   outcome='choseLL',
                   predictors=predictors,
@@ -297,9 +304,16 @@ def main(new_data=False):
 
     prep_global()
     prep_fix()
-    prep_choice()
+
+    prep_choice(new_plots=False)
     analyze_global()
-    analyze_fix()
+
+    analyze_fix_task(
+        path_origin=os.path.join('data', 'fix_task'),
+        path_plots=os.path.join('results', 'plots', 'fix_task'),
+        path_tables=os.path.join('results', 'tables', 'fix_task')
+    )
+
     analyze_choice()
 
     # Render R markdowns
@@ -309,8 +323,7 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    analyze_fix_task(
-        path_plots=os.path.join('results', 'plots', 'fix_task'),
-        path_tables=os.path.join('results', 'tables', 'fix_task'),
-        path_origin=os.path.join('data', 'fix_task', 'added_var'))
+
     # main(new_data=False)
+
+    prep_choice(new_plots=False)
