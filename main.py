@@ -324,17 +324,4 @@ def main(new_data=False):
 
 if __name__ == '__main__':
 
-    # main(new_data=False)
-    data_subject = add_log_k(
-        path=os.path.join('data', 'choice_task', 'added_var'),
-        file_trial_input='data_trial.csv',
-        file_subjects_to_merge='data_subject.csv'
-    )
-
-    compare_us_vs_int_sample(
-        data_subject=data_subject,
-        path_table=os.path.join('results', 'tables', 'demographics'))
-
-    exit()
-
-    prep_choice(new_plots=False)
+    main(new_data=False)
