@@ -11,7 +11,7 @@ function fit_discount_k(path, path_log_k)
 %     khoi 06.26.09 simplified
 %     schneegans 08.01.2021 simplified 
 
-root = 'C:\Users\User\GitHub\WebET_Analysis';
+root = 'C:\Users\schne\Documents\GitHub\WebET_Analysis';
 cd(fullfile(root, 'data_prep', 'add_variables', 'fit_k'));
 
 f = waitbar(0,'Reading data');
@@ -58,7 +58,3 @@ cd(root);
 close(f)
 
 end
-
-
-
-
