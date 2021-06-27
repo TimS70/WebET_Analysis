@@ -15,7 +15,9 @@ load_data <- function(kTrial, nsubj) {
         trial  = rep(1:kTrial, 2*nsubj),
         fps    = 10+rnorm(2*nsubj*kTrial, mean=4, sd=6.68),
         offset = round(rnorm((2*nsubj*kTrial), mean=0.15, sd=0.15), digits=2),
-        chin   = rep(c(0, 1), each=kTrial, nsubj)
+        chin   = rep(c(0, 1), each=kTrial, nsubj),
+        x_pos = rep(c(-1, 0, 1), each=kTrial/3, nsubj),
+        y_pos = rep(c(-1, 0, 1), each=kTrial/3, nsubj)
     )
 
     data$visualAid <- factor(data$visualAid, levels = c(1, 2, 3, 4),

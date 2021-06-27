@@ -1,7 +1,6 @@
 library(lmerTest)
 library(cAIC4)
 
-root = "C:/Users/TimSchneegans/Documents/github/WebET_Analysis"
 source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
 
 
@@ -87,19 +86,18 @@ compare_choice_models <- function(data, data_subject) {
 	
 	print('Control variables')	
 	print(summary(glmer_1_control))
-	ci <- confint(glmer_1_control, method="boot", n=500) # CI with Bootstrap
-	print(ci)
+	# ci <- confint(glmer_1_control, method="boot", n=500) # CI with Bootstrap
+	# print(ci)
 	
 	print('Experimental variables')
 	print(summary(glmer_2_ri))
-	ci <- confint(glmer_2_ri, method="boot", n=500) # CI with Bootstrap
-	print(ci)
-	
-	
+	# ci <- confint(glmer_2_ri, method="boot", n=500) # CI with Bootstrap
+	# print(ci)
+
 	print('Random Intercept - Random Slope')
 	print(summary(glmer_3_rs))
-	ci <- confint(glmer_3_rs, method="boot", n=500) # CI with Bootstrap
-	print(ci)
+	# ci <- confint(glmer_3_rs, method="boot", n=500) # CI with Bootstrap
+	# print(ci)
 	
     logistic_effect(
         model=glmer_3_rs,
@@ -150,7 +148,7 @@ compare_choice_models <- function(data, data_subject) {
 	print(output_anova)
 
 	# Final Model
-	glmer_final <- glmer_1_ri
+	glmer_final <- glmer_2_ri
 	# confint(glmer_final, method="boot", n=50), 
 	
 	return(glmer_final)

@@ -1,4 +1,4 @@
-library(boxcoxmix)
+library("boxcoxmix")
 
 
 transform_model <- function(data, model, outcome) {

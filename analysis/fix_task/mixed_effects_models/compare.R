@@ -1,25 +1,25 @@
-library(brms)
-library(lmerTest)
+library("brms")
+library("lmerTest")
 
-hit_ratio_models <- function(data, apa_path=FALSE) {
+hit_ratio_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
   
-    print('Testing control variables')
-    lmer_full_control <- lmer(
-        hit_mean ~
-        trial + 
-        chinFirst + 
-        x_pos_c +
-        y_pos_c +
-        fps_c + 
-        window_c +
-        webcam_diag +
-        vertPosition +
-        ethnic + 
-        fps_subject_c + 
-        (1 | run_id),
-        data=data)
-  
-    print(step(lmer_full_control))
+    # print('Testing control variables')
+    # lmer_full_control <- lmer(
+    #     hit_mean ~
+    #     trial +
+    #     chinFirst +
+    #     x_pos_c +
+    #     y_pos_c +
+    #     fps_c +
+    #     window_c +
+    #     webcam_diag +
+    #     vertPosition +
+    #     ethnic +
+    #     fps_subject_c +
+    #     (1 | run_id),
+    #     data=data)
+    #
+    # print(step(lmer_full_control))
     
     control_variables <- 'trial + x_pos_c + fps_c + fps_subject_c'
   
@@ -28,7 +28,7 @@ hit_ratio_models <- function(data, apa_path=FALSE) {
   # the subjects. Interdependence assumption of the simple linear regression 
   # is violated. We should to an MLA
   
-    lmer_0_io = lmer(
+    lmer_0_io <- lmer(
         hit_mean ~ 1 + (1 | run_id), 
         data=data,
         REML=FALSE
@@ -41,7 +41,7 @@ hit_ratio_models <- function(data, apa_path=FALSE) {
     # increased. Subjects vary by about 0.12 (Jan 24) around the intercept. 
     # The RI model is way better than the IO model. Therefore, we should do 
     # an MLM.
-    lmer_1_control = lmer(
+    lmer_1_control <- lmer(
         formula(paste0(
             'hit_mean ~ ',
             control_variables,
@@ -52,7 +52,7 @@ hit_ratio_models <- function(data, apa_path=FALSE) {
     )
   
   # 3) Random Intercept
-    lmer_2_exp = lmer(
+    lmer_2_exp <- lmer(
         formula(paste0(
             'hit_mean ~ ',
             control_variables,
@@ -63,7 +63,7 @@ hit_ratio_models <- function(data, apa_path=FALSE) {
     )  
   ### Random slopes
   # Do not forget to look at the correlations among the random effects
-    lmer_3_rs = lmer(
+    lmer_3_rs <- lmer(
         formula(paste0(
             'hit_mean ~ ',
             control_variables,
@@ -75,48 +75,65 @@ hit_ratio_models <- function(data, apa_path=FALSE) {
     ) 
   
     print(summary(lmer_0_io)) 
-    print(summary(lmer_1_control)) 
-    ci <- confint(lmer_1_control, method="boot", n=500) # CI with Bootstrap
-    print(ci)
-    print(summary(lmer_2_exp)) 
-    ci <- confint(lmer_2_exp, method="boot", n=500) # CI with Bootstrap
-    print(ci)
-    print(summary(lmer_3_rs)) 
-    ci <- confint(lmer_3_rs, method="boot", n=500) # CI with Bootstrap
-    print(ci)
-    
-    print('ANOVA Control')
-    print(anova(lmer_0_io, 
-                lmer_1_control, 
-                lmer_2_exp,
-                lmer_3_rs))
+    print(summary(lmer_1_control))
 
-    # confint(glmer_final, method="boot", n=50) # CI with Bootstrap
-    # The confidence intervals should not include 1 to be significant
-    
+    if (get_ci) {
+        ci <- confint(lmer_1_control, method="boot", n=500) # CI with Bootstrap
+        print(ci)
+    }
+
+    print(summary(lmer_2_exp))
+
+    if (get_ci) {
+        ci <- confint(lmer_2_exp, method="boot", n=500) # CI with Bootstrap
+        print(ci)
+    }
+
+    print(summary(lmer_3_rs)) 
+
+    if (get_ci) {
+        ci <- confint(lmer_3_rs, method="boot", n=500) # CI with Bootstrap
+        print(ci)
+    }
+
+    print('ANOVA Control')
+    print(anova(
+        lmer_0_io,
+        lmer_1_control,
+        lmer_2_exp,
+        lmer_3_rs)
+    )
+
     lmer_final <- lmer_3_rs
-    
+
+    if (get_ci) {
+        ci <- confint(glmer_final, method="boot", n=50) # CI with Bootstrap
+        print(ci)
+        # The confidence intervals should not include 1 to be significant
+    }
+
     return(lmer_final)
 }
 
 
-offset_models <- function(data, apa_path=FALSE) {
+offset_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
 
     print('Testing control variables')
     
-    lmer_full_control <- lmer(offset ~
-                                  trial + 
-                                  chinFirst + 
-                                  x_pos_c +
-                                  y_pos_c +
-                                  window_c +
-                                  fps_c +
-                                  webcam_diag +
-                                  vertPosition +
-                                  ethnic + 
-                                  fps_subject_c + 
-                                  (1 | run_id),
-                              data=data)
+    lmer_full_control <- lmer(
+        offset ~
+        trial +
+        chinFirst +
+        x_pos_c +
+        y_pos_c +
+        window_c +
+        fps_c +
+        webcam_diag +
+        vertPosition +
+        ethnic +
+        fps_subject_c +
+        (1 | run_id),
+        data=data)
     
     print(lmerTest::step(object=lmer_full_control))
     
@@ -174,27 +191,43 @@ offset_models <- function(data, apa_path=FALSE) {
     ) 
     
     print(summary(lmer_0_io)) 
-    print(summary(lmer_1_control)) 
-    ci <- confint(lmer_1_control, method="boot", n=500) # CI with Bootstrap
-    print(ci)
-    print(summary(lmer_2_exp)) 
-    ci <- confint(lmer_2_exp, method="boot", n=500) # CI with Bootstrap
-    print(ci)
+    print(summary(lmer_1_control))
+
+    if (get_ci) {
+        ci <- confint(lmer_1_control, method="boot", n=500) # CI with Bootstrap
+        print(ci)
+    }
+
+    print(summary(lmer_2_exp))
+
+    if (get_ci) {
+        ci <- confint(lmer_2_exp, method="boot", n=500) # CI with Bootstrap
+        print(ci)
+    }
+
     print(summary(lmer_3_rs)) 
-    ci <- confint(lmer_3_rs, method="boot", n=500) # CI with Bootstrap
-    print(ci)
-    
+
+    if (get_ci) {
+        ci <- confint(lmer_3_rs, method="boot", n=500) # CI with Bootstrap
+        print(ci)
+    }
+
     print('ANOVA Control')
-    print(anova(lmer_0_io, 
-                lmer_1_control, 
-                lmer_2_exp,
-                lmer_3_rs))
-    
-    # confint(glmer_final, method="boot", n=50) # CI with Bootstrap
-    # The confidence intervals should not include 1 to be significant
-    
+    print(anova(
+        lmer_0_io,
+        lmer_1_control,
+        lmer_2_exp,
+        lmer_3_rs))
+
+
     lmer_final <- lmer_3_rs
-    
+
+    if (get_ci) {
+        ci <- confint(glmer_final, method="boot", n=50) # CI with Bootstrap
+        print(ci)
+        # The confidence intervals should not include 1 to be significant
+    }
+
     return(lmer_final)
 }
 
@@ -273,30 +306,45 @@ precision_models <- function(data, apa_path=FALSE) {
     ) 
     
     print(summary(lmer_0_io)) 
-    print(summary(lmer_1_control)) 
-    ci <- confint(lmer_1_control, method="boot", n=500) # CI with Bootstrap
-    print(ci)
+    print(summary(lmer_1_control))
+
+    if (get_ci) {
+        ci <- confint(lmer_1_control, method="boot", n=500) # CI with Bootstrap
+        print(ci)
+    }
+
     print(summary(lmer_2_exp)) 
-    ci <- confint(lmer_2_exp, method="boot", n=500) # CI with Bootstrap
-    print(ci)
-    print(summary(lmer_3_rs)) 
-    ci <- confint(lmer_3_rs, method="boot", n=500) # CI with Bootstrap
-    print(ci)
-    
+    if (get_ci) {
+        ci <- confint(lmer_2_exp, method="boot", n=500) # CI with Bootstrap
+        print(ci)
+    }
+
+    print(summary(lmer_3_rs))
+
+    if (get_ci) {
+        ci <- confint(lmer_3_rs, method="boot", n=500) # CI with Bootstrap
+        print(ci)
+    }
+
     print('ANOVA')
-    print(anova(lmer_0_io, 
-                lmer_1_control, 
-                lmer_2_exp,
-                lmer_3_rs))
+    print(anova(
+        lmer_0_io,
+        lmer_1_control,
+        lmer_2_exp,
+        lmer_3_rs))
 
     print('ANOVA')
     print(anova(lmer_1_control, 
                 lmer_3_rs))    
-    # 
-    # The confidence intervals should not include 1 to be significant
-    
+
     lmer_final <- lmer_3_rs
-    
+
+    if (get_ci) {
+        ci <- confint(glmer_final, method="boot", n=50) # CI with Bootstrap
+        print(ci)
+        # The confidence intervals should not include 1 to be significant
+    }
+
     return(lmer_final)
 }
 

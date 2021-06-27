@@ -69,9 +69,11 @@ def prep_global():
 
 
 def prep_fix():
+
     data_et, data_trial, data_subject = load_fix_data(
         path_origin=os.path.join('data', 'all_trials', 'cleaned'),
-        path_target=os.path.join('data', 'fix_task', 'raw'))
+        path_target=os.path.join('data', 'fix_task', 'raw')
+    )
 
     data_et, data_trial, data_subject = add_data_quality(
         max_offset=0.15,
@@ -188,15 +190,15 @@ def prep_choice(main_aoi_width=0.4,
         us_sample=False,
         min_hit_ratio=0.6,
         max_precision=None,  # 0.15,
-        max_offset=None,  # 0.5,
+        max_offset=0.5,
         min_fps=5,
         min_rt=400, max_rt=10000,
         min_choice_percentage=0.01,
         max_choice_percentage=0.99,
-        # exclude_runs=[
-        #     12, 23, 93, 144, 243, 258, 268, 343, 356, 373, 384, 386, 387,
-        #     393, 404, 379, 410, 411, 417, 410, 417, 425, 429, 440, 441, 445,
-        #     449, 458, 462, 475, 425, 488, 493],
+        exclude_runs=[
+            12, 23, 93, 144, 243, 258, 268, 343, 356, 373, 384, 386, 387,
+            393, 404, 379, 410, 411, 417, 410, 417, 425, 429, 440, 441, 445,
+            449, 458, 462, 475, 425, 488, 493],
         exclude_runs_reason='No clear AOIs',
         filter_log_k=True,
         path_origin=os.path.join('data', 'choice_task', 'added_var'),
@@ -304,7 +306,6 @@ def main(new_data=False):
 
     prep_global()
     prep_fix()
-
     prep_choice(new_plots=False)
     analyze_global()
 
@@ -324,4 +325,5 @@ def main(new_data=False):
 
 if __name__ == '__main__':
 
-    main(new_data=False)
+    # main(new_data=False)
+    prep_choice(new_plots=False)

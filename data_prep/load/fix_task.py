@@ -34,6 +34,7 @@ def load_fix_data(path_origin, path_target):
             'success', 'chin', 'x_pos', 'y_pos',
             't_startTrial', 'trial_duration', 'trial_duration_exact',
             'task_nr_new',
+            'trial_type',
             'trial_type_new', 'trial_type_nr', 'fixTask', 'withinTaskIndex',
             'x_count', 'fps', 'glasses_binary']]
 
