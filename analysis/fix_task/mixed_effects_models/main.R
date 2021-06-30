@@ -49,9 +49,9 @@ source(file.path(path_analysis, 'prep_data.R'))
 # Read data
 path = file.path(root, 'data', 'fix_task', 'added_var')
 
-data_subject = read.csv(file.path(path, 'data_subject.csv'))
-data_trial = read.csv(file.path(path, 'data_trial.csv'))
-data_et = read.csv(file.path(path, 'data_et.csv'))
+data_subject <- read.csv(file.path(path, 'data_subject.csv'))
+data_trial <- read.csv(file.path(path, 'data_trial.csv'))
+data_et <- read.csv(file.path(path, 'data_et.csv'))
 
 summarize_datasets(data_et, data_trial, data_subject)
 

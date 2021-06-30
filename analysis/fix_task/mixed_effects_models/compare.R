@@ -232,7 +232,7 @@ offset_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
 }
 
 
-precision_models <- function(data, apa_path=FALSE) {
+precision_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
     
     # print('Testing control variables')
     #
@@ -259,7 +259,7 @@ precision_models <- function(data, apa_path=FALSE) {
     # the subjects. Interdependence assumption of the simple linear regression 
     # is violated. We should to an MLA
     
-    lmer_0_io = lmer(
+    lmer_0_io <- lmer(
         precision ~ 1 + (1 | run_id), 
         data=data,
         REML=FALSE
@@ -272,7 +272,7 @@ precision_models <- function(data, apa_path=FALSE) {
     # increased. Subjects vary by about 0.12 (Jan 24) around the intercept. 
     # The RI model is way better than the IO model. Therefore, we should do 
     # an MLM.
-    lmer_1_control = lmer(
+    lmer_1_control <- lmer(
         formula(paste0(
             'precision ~ ',
             control_variables,
@@ -283,7 +283,7 @@ precision_models <- function(data, apa_path=FALSE) {
     )
     
     # 3) Random Intercept
-    lmer_2_exp = lmer(
+    lmer_2_exp <- lmer(
         formula(paste0(
             'precision ~ ',
             control_variables,
@@ -294,7 +294,7 @@ precision_models <- function(data, apa_path=FALSE) {
     )  
     ### Random slopes
     # Do not forget to look at the correlations among the random effects
-    lmer_3_rs = lmer(
+    lmer_3_rs <- lmer(
         formula(paste0(
             'precision ~ ',
             control_variables,
@@ -331,7 +331,8 @@ precision_models <- function(data, apa_path=FALSE) {
         lmer_0_io,
         lmer_1_control,
         lmer_2_exp,
-        lmer_3_rs))
+        lmer_3_rs)
+    )
 
     print('ANOVA')
     print(anova(lmer_1_control, 
