@@ -68,7 +68,7 @@ hit_ratio_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
             'hit_mean ~ ',
             control_variables,
             ' + chin + glasses_binary', 
-            ' + (chin + glasses_binary | run_id)'
+            ' + (chin | run_id)'
         )),
         data=data,
         REML=FALSE
@@ -184,7 +184,7 @@ offset_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
             'offset ~ ',
             control_variables,
             ' + chin + glasses_binary', 
-            ' + (chin + glasses_binary | run_id)'
+            ' + (chin | run_id)'
         )),
         data=data,
         REML=FALSE
@@ -299,7 +299,7 @@ precision_models <- function(data, apa_path=FALSE) {
             'precision ~ ',
             control_variables,
             ' + chin + glasses_binary', 
-            ' + (chin + glasses_binary | run_id)'
+            ' + (chin | run_id)'
         )),
         data=data,
         REML=FALSE
