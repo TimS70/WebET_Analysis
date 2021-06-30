@@ -5,8 +5,13 @@ from analysis.choice_task.correlations import corr_analysis_choice
 from analysis.choice_task.test_clusters import add_transition_clusters
 from analysis.demographics import analyze_demographics, compare_us_vs_int_sample
 from analysis.dropouts.main import analyze_dropouts
+from analysis.fix_task.chin_rest import test_chin_rest
+from analysis.fix_task.correlations import corr_analysis_fix
 from analysis.fix_task.gaze_saccade import check_gaze_saccade
+from analysis.fix_task.glasses import test_glasses
 from analysis.fix_task.grand_mean_offset import grand_mean_offset
+from analysis.fix_task.positions import compare_positions
+from analysis.fix_task.randomization import check_randomization
 from analysis.main import analyze_fix_task
 from data_prep.add_variables.data_quality.main import add_data_quality
 from data_prep.add_variables.fit_k.call_from_py import add_log_k
@@ -23,10 +28,11 @@ from data_prep.load.fix_task import load_fix_data
 from data_prep.load.main import create_datasets_from_cognition
 from data_prep.load.prolific import integrate_prolific_data
 from inference.F import anova_outcomes_factor
-from inference.t_test import t_test_outcomes_vs_factor
+from inference.t_test import t_test_outcomes_vs_factor, welch_ttest
 from not_prolific.amasino.main import test_amasino_data
 from not_prolific.cognition_myself.main import \
     prep_and_analyze_data_cognition_myself
+from utils.euclidean import euclidean_distance
 from utils.save_data import load_all_three_datasets, save_all_three_datasets, \
     write_csv
 from visualize.all_tasks import get_box_plots, save_plot
@@ -38,7 +44,8 @@ from visualize.eye_tracking import plot_et_scatter
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from visualize.fix_task.main import hist_plots_quality
+from visualize.fix_task.main import hist_plots_quality, plot_outcome_over_trials, plot_outcome_over_trials_vs_chin
+from visualize.fix_task.positions import plot_top_vs_bottom_positions
 
 
 def prep_global():
@@ -80,7 +87,8 @@ def prep_fix():
         min_hits_per_dot=0.8,
         data_subject=data_subject,
         data_trial=data_trial,
-        data_et=data_et)
+        data_et=data_et,
+    )
 
     descriptives = round(data_subject[['offset', 'offset_px',
                                        'precision', 'precision_px',
@@ -88,11 +96,6 @@ def prep_fix():
 
     print(f"""Describe data quality: \n"""
           f"""{descriptives} \n""")
-
-    hist_plots_quality(
-        data_subject,
-        path_plots=os.path.join('results', 'plots', 'fix_task')
-    )
 
     outliers = data_subject.loc[
         (data_subject['offset'] > 0.5) |
@@ -105,16 +108,22 @@ def prep_fix():
 
     print(f"""Outliers: {round(outliers, 4)}""")
 
-    clean_data_fix(max_t_task=5500,
-                   exclude_runs=[268, 325, 243, 425, 488,
-                                 354, 293, 268  # Extreme offset
-                                 ],
-                   path_origin=os.path.join('data', 'fix_task', 'raw'),
-                   path_target=os.path.join('data', 'fix_task', 'cleaned'))
+    data_et, data_trial, data_subject = clean_data_fix(
+        max_t_task=5500,
+        exclude_runs=[268, 325, 243, 425, 488, 354, 293, 268],  # Extreme offset
+        path_origin=os.path.join('data', 'fix_task', 'raw')
+    )
+
+    data_subject['webcam_diag'] = euclidean_distance(
+        x=data_subject['webcam_width'], x_target=0,
+        y=data_subject['webcam_height'], y_target=0
+    )
 
     add_data_quality(max_offset=0.15,
                      min_hits_per_dot=0.8,
-                     path_origin=os.path.join('data', 'fix_task', 'cleaned'),
+                     data_subject=data_subject,
+                     data_trial=data_trial,
+                     data_et=data_et,
                      path_target=os.path.join('data', 'fix_task', 'added_var'))
 
 
@@ -310,7 +319,7 @@ def main(new_data=False):
     analyze_global()
 
     analyze_fix_task(
-        path_origin=os.path.join('data', 'fix_task'),
+        path_origin=os.path.join('data', 'fix_task', 'added_var'),
         path_plots=os.path.join('results', 'plots', 'fix_task'),
         path_tables=os.path.join('results', 'tables', 'fix_task')
     )
@@ -324,10 +333,4 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-
-    # main(new_data=False)
-
-    check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',
-                                                'cleaned'),
-                       path_target=os.path.join('results', 'plots', 'fix_task'),
-                       individual=False)
+    main(new_data=False)
