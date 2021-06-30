@@ -16,7 +16,7 @@ def check_randomization(data_trial, path_tables, path_plots):
     t_test_outcomes_vs_factor(
         data=data_trial,
         factor='chinFirst',
-        outcomes=['offset', 'precision', 'fps'],
+        outcomes=['hit_mean', 'offset', 'precision'],
         dependent=False,
         file_name='t_test_chinFirst_vs_outcomes.csv',
         path=os.path.join(path_tables, 'randomization'))
@@ -41,7 +41,7 @@ def check_randomization(data_trial, path_tables, path_plots):
         data=data_trial,
         dependent=True,
         factor='fix_order',
-        outcomes=['offset', 'precision', 'fps', 'hit_mean'],
+        outcomes=['offset', 'precision', 'hit_mean'],
         file_name='t_test_chin_vs_outcomes.csv',
         path=os.path.join(path_tables))
 
