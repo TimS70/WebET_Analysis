@@ -9,6 +9,7 @@ from tqdm import tqdm
 from utils.combine import merge_by_index
 from utils.euclidean import euclidean_distance
 from utils.path import makedir
+from utils.save_data import write_csv
 from visualize.all_tasks import save_plot
 
 
@@ -173,6 +174,20 @@ def plot_gaze_saccade_by_position(data, file_name, path):
           f"""{summary} \n\n"""
           f"""Describe all except the center stimulus: \n"""
           f"""{round(describe_summary, 2)} \n""")
+
+    write_csv(
+        data=round(summary, 2),
+        file_name='saccade_positions.csv',
+        path=os.path.join('results', 'tables', 'fix_task'),
+        index=False
+    )
+
+    write_csv(
+        data=round(describe_summary, 2),
+        file_name='saccade_positions_summary.csv',
+        path=os.path.join('results', 'tables', 'fix_task'),
+        index=True
+    )
 
     plt.setp(axes, xlim=(-1600, 5100), ylim=(0, 1))
 
