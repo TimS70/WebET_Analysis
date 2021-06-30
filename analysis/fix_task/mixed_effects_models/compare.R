@@ -118,24 +118,24 @@ hit_ratio_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
 
 offset_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
 
-    print('Testing control variables')
-    
-    lmer_full_control <- lmer(
-        offset ~
-        trial +
-        chinFirst +
-        x_pos_c +
-        y_pos_c +
-        window_c +
-        fps_c +
-        webcam_diag +
-        vertPosition +
-        ethnic +
-        fps_subject_c +
-        (1 | run_id),
-        data=data)
-    
-    print(lmerTest::step(object=lmer_full_control))
+    # print('Testing control variables')
+    #
+    # lmer_full_control <- lmer(
+    #     offset ~
+    #     trial +
+    #     chinFirst +
+    #     x_pos_c +
+    #     y_pos_c +
+    #     window_c +
+    #     fps_c +
+    #     webcam_diag +
+    #     vertPosition +
+    #     ethnic +
+    #     fps_subject_c +
+    #     (1 | run_id),
+    #     data=data)
+    #
+    # print(lmerTest::step(object=lmer_full_control))
     
     control_variables <- 'trial + x_pos_c + y_pos_c + fps_c + fps_subject_c'
     
@@ -168,7 +168,7 @@ offset_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
     )
     
     # 3) Random Intercept
-    lmer_2_exp = lmer(
+    lmer_2_exp <- lmer(
         formula(paste0(
             'offset ~ ',
             control_variables,
@@ -179,7 +179,7 @@ offset_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
     )  
     ### Random slopes
     # Do not forget to look at the correlations among the random effects
-    lmer_3_rs = lmer(
+    lmer_3_rs <- lmer(
         formula(paste0(
             'offset ~ ',
             control_variables,
@@ -234,22 +234,22 @@ offset_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
 
 precision_models <- function(data, apa_path=FALSE) {
     
-    print('Testing control variables')
-    
-    lmer_full_control <- lmer(precision ~
-                                  trial + 
-                                  chinFirst + 
-                                  x_pos_c +
-                                  y_pos_c +
-                                  window_c +
-                                  fps_c + 
-                                  webcam_diag +
-                                  vertPosition +
-                                  ethnic + 
-                                  fps_subject_c + 
-                                  (1 | run_id),
-                              data=data)
-    
+    # print('Testing control variables')
+    #
+    # lmer_full_control <- lmer(precision ~
+    #                               trial +
+    #                               chinFirst +
+    #                               x_pos_c +
+    #                               y_pos_c +
+    #                               window_c +
+    #                               fps_c +
+    #                               webcam_diag +
+    #                               vertPosition +
+    #                               ethnic +
+    #                               fps_subject_c +
+    #                               (1 | run_id),
+    #                           data=data)
+    #
     # print(step(lmer_full_control))
     
     control_variables <- 'trial + y_pos_c + fps_c + fps_subject_c'
