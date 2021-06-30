@@ -10,38 +10,40 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-def corr_analysis_fix(data_trial, data_subject, path_plots, path_tables):
+def corr_analysis_fix(data_trial, data_subject, path_plots, path_tables,
+                      trial_analysis=False):
 
-    # corr_columns_trial = ['fps', 'x_pos', 'y_pos',
-    #                       'glasses_binary', 'chin',
-    #                       'precision', 'offset', 'hit_mean']
-    #
-    # corr_columns_trial.sort(reverse=True)
-    #
-    # # Trial level
-    # data_plot = data_trial[
-    #     np.append(['run_id', 'withinTaskIndex'], corr_columns_trial)]
-    # data_plot = clean_corr_data(data_plot)
-    #
-    # sns.set()
-    # sns.pairplot(data=data_plot,
-    #              vars=['fps', 'precision', 'offset'],
-    #              hue='chin',
-    #              kind='reg',
-    #              corner=True,
-    #              plot_kws=dict(scatter_kws=dict(s=0.1)))
-    # save_plot(file_name='scatter_matrix_trial.png',
-    #           path=path_plots,
-    #           message=True)
-    # plt.close()
-    #
-    # matrix, matrix_stars = combine_corr_matrix(data=data_plot,
-    #                                            variables=corr_columns_trial)
-    #
-    # write_csv(data=matrix,
-    #           index=True,
-    #           file_name='corr_matrix_trial.csv',
-    #           path=path_tables)
+    if trial_analysis:
+        corr_columns_trial = ['fps', 'x_pos', 'y_pos',
+                              'glasses_binary', 'chin',
+                              'precision', 'offset', 'hit_mean']
+
+        corr_columns_trial.sort(reverse=True)
+
+        # Trial level
+        data_plot = data_trial[
+            np.append(['run_id', 'withinTaskIndex'], corr_columns_trial)]
+        data_plot = clean_corr_data(data_plot)
+
+        sns.set()
+        sns.pairplot(data=data_plot,
+                     vars=['fps', 'precision', 'offset'],
+                     hue='chin',
+                     kind='reg',
+                     corner=True,
+                     plot_kws=dict(scatter_kws=dict(s=0.1)))
+        save_plot(file_name='scatter_matrix_trial.png',
+                  path=path_plots,
+                  message=True)
+        plt.close()
+
+        matrix, matrix_stars = combine_corr_matrix(data=data_plot,
+                                                   variables=corr_columns_trial)
+
+        write_csv(data=matrix,
+                  index=True,
+                  file_name='corr_matrix_trial.csv',
+                  path=path_tables)
 
     # Participant level
 
@@ -53,6 +55,7 @@ def corr_analysis_fix(data_trial, data_subject, path_plots, path_tables):
     data_subject['6_age'] = data_subject['age']
     data_subject['7_glasses'] = data_subject['glasses_binary']
     data_subject['8_window'] = data_subject['window']
+    data_subject['9_webcam_resolution'] = data_subject['webcam_diag']
 
     corr_columns_subject = [
         '1_hit_ratio',
@@ -62,7 +65,8 @@ def corr_analysis_fix(data_trial, data_subject, path_plots, path_tables):
         '5_ethnic',
         '6_age',
         '7_glasses',
-        '8_window']
+        '8_window',
+        '9_webcam_resolution']
 
     corr_columns_subject.sort(reverse=False)
 

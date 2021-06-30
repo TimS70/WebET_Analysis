@@ -111,8 +111,11 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
                         path_plots=path_plots,
                         path_tables=path_tables)
 
-    corr_analysis_fix(data_trial=data_trial, data_subject=data_subject,
-                      path_plots=path_plots, path_tables=path_tables)
+    corr_analysis_fix(
+        data_trial=data_trial, data_subject=data_subject,
+        path_plots=path_plots,
+        path_tables=os.path.join(path_tables, 'correlations')
+    )
 
     # t-test for glasses vs. age
     t_test_outcomes_vs_factor(data=data_subject,
