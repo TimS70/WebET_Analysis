@@ -72,9 +72,9 @@ data_trial <- prep_trial_data(data_subject=data_subject, data_trial=data_trial)
 # ANOVA
 # anova_fix_data(data_subject)
 
-get_icc(data=data_trial, outcome='precision') 
-get_icc(data=data_trial, outcome='offset') 
-get_icc(data=data_trial, outcome='hit_mean') 
+get_icc(data=data_trial, outcome='hit_mean')
+get_icc(data=data_trial, outcome='offset')
+get_icc(data=data_trial, outcome='precision')
 
 lmer_hit_mean <- hit_ratio_models(data=data_trial, get_ci=FALSE)
 lmer_offset <- offset_models(data=data_trial, get_ci=FALSE)
