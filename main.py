@@ -326,4 +326,8 @@ def main(new_data=False):
 if __name__ == '__main__':
 
     # main(new_data=False)
-    prep_choice(new_plots=False)
+
+    check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',
+                                                'cleaned'),
+                       path_target=os.path.join('results', 'plots', 'fix_task'),
+                       individual=False)

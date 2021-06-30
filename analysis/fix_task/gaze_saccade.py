@@ -145,6 +145,12 @@ def plot_gaze_saccade_by_position(data, file_name, path):
                      legend='brief',
                      label='x=' + str(x) + ', y=' + str(y))
 
+        axes.set_yticks(np.arange(0, 1.2, 0.2), minor=False)
+        axes.set_yticks(np.arange(0, 1, 0.1), minor=True)
+        axes.grid(axis='y', which='major', alpha=0.5)
+        axes.grid(axis='y', which='minor', alpha=0.2)
+        axes.grid(axis='x', which='major', alpha=0.5)
+
     summary = pd.DataFrame(summary,
                            columns=['x_pos', 'y_pos',
                                     'cross_offset',

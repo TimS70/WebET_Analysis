@@ -27,7 +27,7 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
           '################################### \n')
 
     check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',
-                       'added_var'),
+                                                'added_var'),
                        path_target=os.path.join(path_plots, 'saccades'),
                        individual=True)
 
