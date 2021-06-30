@@ -15,7 +15,7 @@ from utils.combine import merge_by_index
 from utils.save_data import load_all_three_datasets, write_csv
 from visualize.all_tasks import get_box_plots
 from visualize.fix_task.main import visualize_exemplary_run, fix_heatmaps, \
-    plot_outcome_over_trials, plot_outcome_over_trials_vs_chin
+    plot_outcome_over_trials, plot_outcome_over_trials_vs_chin, hist_plots_quality
 from visualize.fix_task.positions import plot_top_vs_bottom_positions
 from tqdm import tqdm
 
@@ -42,9 +42,49 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
 
     data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
-    descriptives = round(data_subject[['offset', 'offset_px',
-                                       'precision', 'precision_px',
-                                       'fps', 'hit_ratio']].describe(), 4)
+    hist_plots_quality(
+        data_subject,
+        path_plots=path_plots,
+        outcome='hit_mean',
+        y_max=20,
+        x_label='Hit ratio'
+    )
+
+    hist_plots_quality(
+        data_subject,
+        path_plots=path_plots,
+        outcome='offset',
+        y_max=30,
+        x_label='Offset'
+    )
+
+    hist_plots_quality(
+        data_subject,
+        path_plots=path_plots,
+        outcome='precision',
+        y_max=50,
+        x_label='Precision'
+    )
+
+    hist_plots_quality(
+        data_subject,
+        path_plots=path_plots,
+        outcome='fps',
+        y_max=30,
+        x_max=40,
+        x_ticks=10,
+        x_label='Frame Rate'
+    )
+
+    descriptives = round(
+        data_subject[
+            [
+                'offset', 'offset_px',
+                'precision', 'precision_px',
+                'fps', 'hit_mean', 'hit_ratio']
+        ].describe(),
+        4
+    )
 
     write_csv(data=descriptives, file_name='descriptives.csv',
               path=path_tables, index=True)

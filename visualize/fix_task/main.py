@@ -18,22 +18,6 @@ from tqdm import tqdm
 # t / sqrt n
 
 
-def hist_plots_quality(data_subject, path_plots):
-    font_size = 15
-    plt.rcParams.update({'font.size': font_size})
-
-    for outcome in ['offset', 'precision', 'hit_mean']:
-        fig, ax = plt.subplots()
-        ax.hist(data_subject[outcome], bins=20)
-        ax.set_xticks(np.arange(0, 1.1, 0.1))
-        ax.set_title(outcome + ' Histogram')
-        save_plot(file_name=outcome + '_histogram.png',
-                  path=os.path.join(path_plots, 'histograms'),
-                  message=True)
-        plt.close()
-
-
-# noinspection PyUnresolvedReferences
 def fix_heatmaps(data, file_name, path_target, title="Fix task heatmap"):
 
     data = data[(data['t_task'] > 1000) &
@@ -66,6 +50,50 @@ def fix_heatmaps(data, file_name, path_target, title="Fix task heatmap"):
 
     save_plot(file_name=file_name, path=path_target)
     plt.close()
+
+
+def hist_plots_quality(data_subject, path_plots, outcome,
+                       y_max,
+                       x_max=1,
+                       x_ticks=0.2,
+                       y_ticks=10,
+                       n_bins=20,
+                       y_label='Frequency',
+                       x_label=None):
+    font_size = 15
+    plt.rcParams.update({'font.size': font_size})
+
+    fig, ax = plt.subplots()
+    ax.hist(
+        data_subject[outcome],
+        bins=n_bins,
+        facecolor='grey',
+    )
+
+    ax.set_xticks(np.arange(0, x_max+x_ticks, x_ticks), minor=False)
+    ax.set_xticks(np.arange(0, x_max, x_ticks/2), minor=True)
+    ax.set_yticks(np.arange(0, y_max + y_ticks, y_ticks), minor=False)
+    ax.set_yticks(np.arange(0, y_max, y_ticks/2), minor=True)
+    ax.grid(axis='x', which='major', alpha=0.5)
+    ax.grid(axis='x', which='minor', alpha=0.2)
+    ax.grid(axis='y', which='major', alpha=0.5)
+    ax.grid(axis='y', which='minor', alpha=0.2)
+
+    plt.ylabel(y_label)
+
+    if x_label is None:
+        x_label = str(outcome)
+    plt.xlabel(x_label)
+    # ax.set_title(outcome + ' Histogram')
+
+    file_name = outcome + '_histogram.png'
+    print(f"""{file_name} has {n_bins} Bins""")
+
+    save_plot(file_name=file_name,
+              path=os.path.join(path_plots, 'histograms'),
+              message=True)
+    plt.close()
+# noinspection PyUnresolvedReferences
 
 
 # noinspection PyUnboundLocalVariable
