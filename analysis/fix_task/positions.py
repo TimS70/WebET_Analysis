@@ -63,20 +63,21 @@ def outcome_by_position_long(data_trial_fix, outcome_var):
         as_index=False)[outcome_var].median()
 
     output_long['position'] = list(map(lambda x, y:
-                                       str(round(x * 100, 0)) + '%_' +
-                                       str(round(y * 100, 0)) + '%',
+                                       str(int(x * 100)) + '%_' +
+                                       str(int(y * 100)) + '%',
                                        output_long['x_pos'],
                                        output_long['y_pos']))
 
     output_long['position_nr'] = output_long['position'] \
         .replace(
         [
-            '20.0%_20.0%', '20.0%_50.0%', '20.0%_80.0%',
-            '50.0%_20.0%', '50.0%_50.0%', '50.0%_80.0%',
-            '80.0%_20.0%', '80.0%_50.0%', '80.0%_80.0%'
+            '20%_20%', '20%_50%', '20%_80%',
+            '50%_20%', '50%_50%', '50%_80%',
+            '80%_20%', '80%_50%', '80%_80%'
         ],
         np.arange(1, 10)
     )
+
     return output_long
 
 
@@ -102,9 +103,9 @@ def outcome_by_position_wide(data_trial_fix, outcome_var):
 
 def pos_combinations():
     cols = [
-        '20.0%_20.0%', '20.0%_50.0%', '20.0%_80.0%',
-        '50.0%_20.0%', '50.0%_50.0%', '50.0%_80.0%',
-        '80.0%_20.0%', '80.0%_50.0%', '80.0%_80.0%'
+        '20%_20%', '20%_50%', '20%_80%',
+        '50%_20%', '50%_50%', '50%_80%',
+        '80%_20%', '80%_50%', '80%_80%'
     ]
     combinations = np.array(
         np.meshgrid(cols, cols)).T.reshape((-1, 2))
@@ -133,6 +134,7 @@ def test_all_positions(data_trial_fix, outcome):
     n = len(positions_wide['run_id'].unique())
 
     for i in combinations.index:
+
         result = stats.ttest_rel(
             positions_wide[combinations.loc[i, 'col1']],
             positions_wide[combinations.loc[i, 'col2']])
