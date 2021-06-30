@@ -18,21 +18,26 @@ def test_glasses(data_trial, data_subject, path_plots, path_tables):
                   path=os.path.join(path_plots, 'glasses'))
 
     plot_sight_vs_outcomes(data=data_subject, path=path_plots)
-    anova_outcomes_factor(data=data_subject,
-                          factor='sight',
-                          outcomes=['offset', 'precision', 'fps'],
-                          path=path_tables)
 
-    anova_outcomes_factor(data=data_subject,
-                          factor='glasses',
-                          outcomes=['offset', 'precision', 'fps'],
-                          path=path_tables)
+    anova_outcomes_factor(
+        data=data_subject,
+        factor='sight',
+        outcomes=['hit_mean', 'offset', 'precision'],
+        path=path_tables
+    )
+
+    anova_outcomes_factor(
+        data=data_subject,
+        factor='glasses',
+        outcomes=['hit_mean', 'offset', 'precision'],
+        path=path_tables
+    )
 
     t_test_outcomes_vs_factor(
         data=data_subject,
         factor='glasses_binary',
         dependent=False,
-        outcomes=['offset', 'precision', 'fps', 'hit_ratio'],
+        outcomes=['offset', 'precision', 'fps', 'hit_ratio', 'age'],
         file_name='t_test_chin_vs_outcomes.csv',
         path=path_tables)
 

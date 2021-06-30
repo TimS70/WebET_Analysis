@@ -11,10 +11,10 @@ from scipy import stats
 from utils.save_data import write_csv
 
 
-def compare_positions(data_trial_fix, outcome, path_target):
-    position_tests = test_all_positions(data_trial_fix, outcome)
-    test_top_vs_bottom = test_top_vs_bottom_positions(data_trial_fix, outcome)
-    test_left_vs_right = test_left_vs_right_positions(data_trial_fix, outcome)
+def compare_positions(data_trial, outcome, path_target):
+    position_tests = test_all_positions(data_trial, outcome)
+    test_top_vs_bottom = test_top_vs_bottom_positions(data_trial, outcome)
+    test_left_vs_right = test_left_vs_right_positions(data_trial, outcome)
 
     position_tests = pd.concat(
         [position_tests, test_top_vs_bottom, test_left_vs_right],
@@ -48,6 +48,9 @@ def compare_positions(data_trial_fix, outcome, path_target):
         print(f"""No significant results for {outcome}. \n""")
 
     position_tests['Sig'] = position_tests['Sig'].replace('np', '')
+    position_tests[['pos_1', 'pos_2']] = round(
+        position_tests[['pos_1', 'pos_2']]
+    )
 
     write_csv(data=position_tests,
               file_name='positions_' + outcome + '_t_test.csv',

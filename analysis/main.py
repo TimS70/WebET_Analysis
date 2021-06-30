@@ -10,7 +10,7 @@ from analysis.fix_task.grand_mean_offset import grand_mean_offset
 from analysis.fix_task.positions import compare_positions
 from analysis.fix_task.randomization import check_randomization
 from inference.F import anova_outcomes_factor
-from inference.t_test import t_test_outcomes_vs_factor
+from inference.t_test import t_test_outcomes_vs_factor, welch_ttest
 from utils.combine import merge_by_index
 from utils.save_data import load_all_three_datasets, write_csv
 from visualize.all_tasks import get_box_plots
@@ -95,10 +95,11 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
     # Task order and position is analyzed in MLA
 
     data_subject['makeup'] = 0
-    data_subject.loc[(data_subject['eyeshadow'] == 1) |
-                     (data_subject['masquara'] == 1) |
-                     (data_subject['eyeliner'] == 1) |
-                     (data_subject['browliner'] == 1), 'makeup'] = 1
+    data_subject.loc[
+        (data_subject['eyeshadow'] == 1) |
+        (data_subject['masquara'] == 1) |
+        (data_subject['eyeliner'] == 1) |
+        (data_subject['browliner'] == 1), 'makeup'] = 1
 
     t_test_outcomes_vs_factor(data=data_subject,
                               factor='makeup',
@@ -118,29 +119,59 @@ def analyze_fix_task(path_origin, path_plots, path_tables):
     )
 
     # t-test for glasses vs. age
-    t_test_outcomes_vs_factor(data=data_subject,
-                              factor='glasses_binary',
-                              dependent=False,
-                              outcomes=['age'],
-                              file_name='t_test_glasses_vs_age.csv',
-                              path=path_tables)
+    t_test_outcomes_vs_factor(
+        data=data_subject,
+        factor='glasses_binary',
+        dependent=False,
+        outcomes=['age'],
+        file_name='t_test_glasses_vs_age.csv',
+        path=path_tables
+    )
 
-    test_chin_rest(data_trial=data_trial,
-                   data_subject=data_subject,
-                   path_plots=os.path.join(path_plots, 'chin_rest'),
-                   path_tables=os.path.join(path_tables, 'chin_rest'))
-    test_glasses(data_trial=data_trial,
-                 data_subject=data_subject,
-                 path_plots=os.path.join(path_plots, 'glasses'),
-                 path_tables=os.path.join(path_tables, 'glasses'))
+    test_chin_rest(
+        data_trial=data_trial,
+        data_subject=data_subject,
+        path_plots=os.path.join(path_plots, 'chin_rest'),
+        path_tables=os.path.join(path_tables, 'chin_rest')
+    )
+
+    test_glasses(
+        data_trial=data_trial,
+        data_subject=data_subject,
+        path_plots=os.path.join(path_plots, 'glasses'),
+        path_tables=os.path.join(path_tables, 'glasses')
+    )
+
+    welch_ttest(
+        x=data_subject.loc[data_subject['glasses_binary']==1, 'age'],
+        y=data_subject.loc[data_subject['glasses_binary']==0, 'age'],
+    )
 
     # Over the trials
-    for outcome in ['offset', 'precision']:
+    for outcome in ['hit_mean', 'offset', 'precision']:
         plot_outcome_over_trials(
-            data_trial[data_trial['fixTask'] == 1], outcome, path_plots)
-        plot_outcome_over_trials_vs_chin(data_trial, outcome, path_plots)
-        compare_positions(data_trial, outcome, path_tables)
-        plot_top_vs_bottom_positions(data_trial, outcome, path_plots)
+            data=data_trial[data_trial['fixTask'] == 1],
+            outcome=outcome,
+            path_target=os.path.join(path_plots, 'positions')
+        )
+
+        plot_outcome_over_trials_vs_chin(
+            data_trial=data_trial,
+            outcome=outcome,
+            path_target=os.path.join(path_plots, 'positions')
+        )
+
+        compare_positions(
+            data_trial=data_trial,
+            outcome=outcome,
+            path_target=os.path.join(path_tables, 'positions')
+        )
+
+        plot_top_vs_bottom_positions(
+            data_trial=data_trial,
+            outcome=outcome,
+            path_target=os.path.join(path_plots, 'positions')
+        )
 
     # Categorical confounders analysis
     for outcome in ['offset', 'precision', 'fps']:

@@ -7,9 +7,9 @@ from analysis.fix_task.positions import outcome_by_position_long
 from visualize.all_tasks import save_plot
 
 
-def plot_top_vs_bottom_positions(data_trial_fix, outcome, path_target):
+def plot_top_vs_bottom_positions(data_trial, outcome, path_target):
     outcome_by_y_pos = outcome_by_position_long(
-        data_trial_fix, outcome) \
+        data_trial, outcome) \
         .groupby(
         ['run_id', 'y_pos'],
         as_index=False)[outcome].mean()
