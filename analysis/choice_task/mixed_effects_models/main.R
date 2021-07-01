@@ -42,10 +42,10 @@ library("RColorBrewer")
 library('reshape2')
 library('tidyverse')
 
-path = file.path(root, 'data', 'choice_task', 'cleaned')
-data_subject = read.csv(file.path(path, 'data_subject.csv'))
-data_trial = read.csv(file.path(path, 'data_trial.csv'))
-data_et = read.csv(file.path(path, 'data_et.csv'))
+path <- file.path(root, 'data', 'choice_task', 'cleaned')
+data_subject <- read.csv(file.path(path, 'data_subject.csv'))
+data_trial <- read.csv(file.path(path, 'data_trial.csv'))
+data_et <- read.csv(file.path(path, 'data_et.csv'))
 
 summarize_datasets(data_et, data_trial, data_subject)
 
