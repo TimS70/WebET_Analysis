@@ -10,38 +10,40 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-def corr_analysis_choice(data_trial, data_subject, path_plots, path_tables):
+def corr_analysis_choice(data_trial, data_subject, path_plots, path_tables,
+                         corr_trial=False):
 
-    data_trial['rt'] = data_trial['trial_duration_exact']
-    corr_columns_trial = ['choseLL', 'k', 'rt', 'LL_top',
-                          'optionIndex', 'attributeIndex', 'payneIndex']
+    if corr_trial:
+        data_trial['rt'] = data_trial['trial_duration_exact']
+        corr_columns_trial = ['choseLL', 'k', 'rt', 'LL_top',
+                              'optionIndex', 'attributeIndex', 'payneIndex']
 
-    corr_columns_trial.sort(reverse=True)
+        corr_columns_trial.sort(reverse=True)
 
-    # Trial level
-    data_plot = data_trial[
-        np.append(['run_id', 'withinTaskIndex'], corr_columns_trial)]
-    data_plot = clean_corr_data(data_plot)
+        # Trial level
+        data_plot = data_trial[
+            np.append(['run_id', 'withinTaskIndex'], corr_columns_trial)]
+        data_plot = clean_corr_data(data_plot)
 
-    sns.set()
-    sns.pairplot(data=data_plot,
-                 vars=corr_columns_trial.remove('choseLL'),
-                 hue='choseLL',
-                 kind='reg',
-                 corner=True,
-                 plot_kws=dict(scatter_kws=dict(s=0.1)))
-    save_plot(file_name='scatter_matrix_trial.png',
-              path=path_plots,
-              message=True)
-    plt.close()
+        sns.set()
+        sns.pairplot(data=data_plot,
+                     vars=corr_columns_trial.remove('choseLL'),
+                     hue='choseLL',
+                     kind='reg',
+                     corner=True,
+                     plot_kws=dict(scatter_kws=dict(s=0.1)))
+        save_plot(file_name='scatter_matrix_trial.png',
+                  path=path_plots,
+                  message=True)
+        plt.close()
 
-    matrix, matrix_stars = combine_corr_matrix(
-        data=data_plot, variables=corr_columns_trial)
+        matrix, matrix_stars = combine_corr_matrix(
+            data=data_plot, variables=corr_columns_trial)
 
-    write_csv(data=matrix,
-              file_name='corr_matrix_trial.csv',
-              path=path_tables,
-              index=True)
+        write_csv(data=matrix,
+                  file_name='corr_matrix_trial.csv',
+                  path=path_tables,
+                  index=True)
 
     # Participant level
     data_subject['1 age'] = data_subject['age']
@@ -52,6 +54,7 @@ def corr_analysis_choice(data_trial, data_subject, path_plots, path_tables):
     data_subject['6 optionIndex'] = data_subject['optionIndex']
     data_subject['7 attributeIndex'] = data_subject['attributeIndex']
     data_subject['8 payneIndex'] = data_subject['payneIndex']
+    data_subject['9 LL Top'] = data_subject['LL_top']
 
     corr_columns_subject = ['1 age',
                             '2 fps',
@@ -60,7 +63,8 @@ def corr_analysis_choice(data_trial, data_subject, path_plots, path_tables):
                             '5 choice_rt',
                             '6 optionIndex',
                             '7 attributeIndex',
-                            '8 payneIndex']
+                            '8 payneIndex',
+                            '9 LL Top']
 
     corr_columns_subject.sort(reverse=False)
 

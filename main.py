@@ -298,7 +298,13 @@ def analyze_choice():
     plot_example_eye_movement(data_et, data_trial,
                               data_subject['run_id'].unique()[0])
 
-    corr_analysis_choice(data_trial, data_subject, path_plots, path_tables)
+    corr_analysis_choice(
+        data_trial=data_trial,
+        data_subject=data_subject,
+        path_plots=os.path.join(path_plots, 'correlations'),
+        path_tables=os.path.join(path_tables, 'correlations'),
+        corr_trial=False
+    )
 
 
 def main(new_data=False):
@@ -333,4 +339,6 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    main(new_data=False)
+    # main(new_data=False)
+
+    analyze_choice()
