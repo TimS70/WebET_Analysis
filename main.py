@@ -339,6 +339,4 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    # main(new_data=False)
-
-    analyze_choice()
+    main(new_data=False)
