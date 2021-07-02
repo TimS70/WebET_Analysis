@@ -27,6 +27,11 @@ def analyze_demographics():
         data_subject, 'Nationality', 'nationality_grouped',
         ['Poland', 'United Kingdom', 'United States', 'Italy'])
 
+    print(
+        f"""Describe window size\n"""
+        f"""{data_subject[['window_x', 'window_y']].describe()}"""
+    )
+
     predictors = [
         'residence', 'nationality_grouped',
         'employment_status', 'Student Status', 'degree',
