@@ -1,6 +1,6 @@
 # https://stackoverflow.com/a/45614547
 # Requires library ggplot
-source(file.path(root, 'utils', 'r', 'get_packages.R'))
+source(file.path('utils', 'r', 'get_packages.R'))
 
 get_packages('ggplot2')
 

@@ -1,24 +1,20 @@
 # setup
-root = "C:/Users/User/GitHub/WebET_Analysis"
-setwd(root)
-path_results = file.path(root, 'results', 'plots', 'choice_task')
-
-source(file.path(root, 'utils', 'r', 'geom_split_violin.R'))
-source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
-source(file.path(root, 'utils', 'r', 'merge_by_index.R'))
-source(file.path(root, 'utils', 'r', 'summarize_datasets.R'))
-source(file.path(root, 'utils', 'r', 'get_packages.R'))
-source(file.path(root, 'utils', 'r', 'remove_runs.R'))
-source(file.path(root, 'utils', 'r', 'add_log_k.R'))
-source(file.path(root, 'utils', 'r', 'remove_na_et_indices.R'))
-source(file.path(root, 'utils', 'r', 'add_x_count.R'))
-source(file.path(root, 'utils', 'r', 'identify_bad_choice_runs.R'))
-source(file.path(root, 'utils', 'r', 'create_time_bins.R'))
-source(file.path(root, 'utils', 'r', 'plot_et_time_bins.R'))
-source(file.path(root, 'utils', 'r', 'plot_outcome_variance.R'))
-
-source(file.path(root, 'analysis', 'choice_task', 'scatter_matrix.R'))
-source(file.path(root, 'analysis', 'choice_task', 'fit_clusters.R'))
+path_results <- file.path('results', 'plots', 'choice_task')
+source(file.path('utils', 'r', 'geom_split_violin.R'))
+source(file.path('utils', 'r', 'merge_by_subject.R'))
+source(file.path('utils', 'r', 'merge_by_index.R'))
+source(file.path('utils', 'r', 'summarize_datasets.R'))
+source(file.path('utils', 'r', 'get_packages.R'))
+source(file.path('utils', 'r', 'remove_runs.R'))
+source(file.path('utils', 'r', 'add_log_k.R'))
+source(file.path('utils', 'r', 'remove_na_et_indices.R'))
+source(file.path('utils', 'r', 'add_x_count.R'))
+source(file.path('utils', 'r', 'identify_bad_choice_runs.R'))
+source(file.path('utils', 'r', 'create_time_bins.R'))
+source(file.path('utils', 'r', 'plot_et_time_bins.R'))
+source(file.path('analysis', 'choice_task', 'gaze_transitions', 'add_clusters.R'))
+source(file.path('analysis', 'choice_task', 'gaze_transitions', 'compare_models.R'))
+source(file.path('analysis', 'choice_task', 'gaze_transitions', 'plot_transition_strength.R'))
 
 get_packages(c(
 	'apaTables',
@@ -38,27 +34,39 @@ get_packages(c(
 	'tidyverse'))
 
 # Load data
-path = file.path(root, 'data', 'choice_task', 'cleaned')
-data_subject = read.csv(file.path(path, 'data_subject.csv'))
-data_trial = read.csv(file.path(path, 'data_trial.csv'))
-data_et = read.csv(file.path(path, 'data_et.csv'))
+path <- file.path('data', 'choice_task', 'cleaned')
+data_subject <- read.csv(file.path(path, 'data_subject.csv'))
+data_trial <- read.csv(file.path(path, 'data_trial.csv'))
+data_et <- read.csv(file.path(path, 'data_et.csv'))
 
 summarize_datasets(data_et, data_trial, data_subject)
 
-data_trial$rt_c = scale(data_trial$trial_duration_exact)
+print(names(data_subject))
 
-# The two cluster solution fits best
-model_comparison = fit_clusters(data_trial)
+data_subject$cluster_2 <- add_clusters(
+	data=data_subject,
+	n_cluster=2
+)
 
-m_cluster_2 = glmer(
-    choseLL ~ withinTaskIndex + rt_c + attributeIndex + 
-    	payneIndex  + cluster2 + 
-    	(1 | run_id), 
-    data = data_trial, 
-    family = binomial, 
-    control = glmerControl(optimizer = "bobyqa"),
-    nAGQ = 1)
-confint(m_cluster_2, method="boot", n=50)
+data_subject$cluster_3 <- add_clusters(
+	data=data_subject,
+	n_cluster=3
+)
+
+data_subject$cluster_4 <- add_clusters(
+	data=data_subject,
+	n_cluster=4
+)
+
+data_trial <- data_trial %>%
+	merge(
+		data_subject[ , c('run_id', 'cluster_2', 'cluster_3', 'cluster_4')],
+	    by='run_id')
+
+glmer_cluster_2 <- compare_models(data=data_trial, get_ci=FALSE)
+
+print(summary(glmer_cluster_2))
+# print(confint(glmer_cluster_2, method="boot", n=500))
 
 table(data_subject$cluster2)
 table(data_subject$cluster3)
@@ -70,8 +78,6 @@ data_subject %>%
 scatter_matrix(data=data_subject, 
 			   path=file.path(path_results, 'et', 'cluster_matrix.png'))
 
-source(file.path(root, 'analysis', 'choice_task', 'plot_transition_strength.R'))
-
 plot_transition_strength(data=data_subject,
 						 cluster=1, 
 						 parralel_distance=0.01, 
@@ -79,7 +85,7 @@ plot_transition_strength(data=data_subject,
 						 strength_factor=1.5,
 						 cutoff=0,
 						 undirected=TRUE,
-						 title = 'Gaze transitions of cluster 1 trials')
+						 title = '')
 ggsave(file.path(path_results, 'et', 'transitions_cluster_1.png'), 
 	   width=5.5, height=5)
 
@@ -90,6 +96,6 @@ plot_transition_strength(data=data_subject,
 						 strength_factor=1.5,
 						 cutoff=0,
 						 undirected=TRUE,
-						 title = 'Gaze transitions of cluster 2 trials')
-ggsave(file.path(path_results, 'et', 'transitions_cluster_2.png'), 
+						 title = '')
+ggsave(file.path(path_results, 'et', 'transitions_cluster_2.png'),
 	   width=5.5, height=5)

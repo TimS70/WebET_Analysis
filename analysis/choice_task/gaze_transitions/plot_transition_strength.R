@@ -1,10 +1,10 @@
-plot_transition_strength = function(data, cluster=1, 
-									parralel_distance=0.01, 
-									cluster_name='cluster2', 
-									strength_factor=0.25,
-									undirected=FALSE, 
-									cutoff=0,
-									title='Transition clusters') {
+plot_transition_strength <- function(data, cluster=1,
+									 parralel_distance=0.01,
+									 cluster_name='cluster2',
+									 strength_factor=0.25,
+									 undirected=FALSE,
+									 cutoff=0,
+									 title='Transition clusters') {
 
 	n_transitions = data_trial %>% 
 		dplyr::select(trans_type_aLLtLL,
@@ -158,7 +158,7 @@ plot_transition_strength = function(data, cluster=1,
 			xlim(0, 1) + ylim(1, 0) +
 			theme_bw() +
 			theme(text=element_text(size=15),
-				  plot.title = element_text(size = 20, face = "bold")) + 
+				  plot.title = element_text(size = 15, face = "bold")) +
 			ggtitle(title) +
 			xlab('x-Position [% screen size]') +
 			ylab('y-Position [% screen size]') 
@@ -294,7 +294,7 @@ plot_transition_strength = function(data, cluster=1,
 			xlim(0, 1) + ylim(1, 0) +
 			theme_bw() + 
 			theme(text=element_text(size=15),
-				  plot.title = element_text(size = 20, face = "bold")) + 
+				  plot.title = element_text(size = 15, face = "bold")) +
 			ggtitle(title) +
 			xlab('x-Position [% screen size]') +
 			ylab('y-Position [% screen size]') 

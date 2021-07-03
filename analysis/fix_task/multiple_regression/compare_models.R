@@ -1,7 +1,8 @@
 compare_models <- function(data, outcome) {
 	
-	data = data %>%
-		mutate(fps_c = scale(fps),
+	data <- data %>%
+		mutate(rt_c = scale(rt),
+			   fps_c = scale(fps),
 			   window_c = scale(window))
 	
 	lm_control <- lm(formula(paste(outcome, 
