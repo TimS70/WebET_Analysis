@@ -21,7 +21,7 @@ hit_ratio_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
     #
     # print(step(lmer_full_control))
     
-    control_variables <- 'trial + x_pos_c + fps_c + fps_subject_c'
+    control_variables <- 'trial + x_pos_c_sq + fps_c + fps_subject_c'
   
   # 1) Emtpy model (intercept only)
   # ICC = 0.46. 46% of the variance can be explained by the variance between 
@@ -78,21 +78,21 @@ hit_ratio_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
     print(summary(lmer_1_control))
 
     if (get_ci) {
-        ci <- confint(lmer_1_control, method="boot", n=500) # CI with Bootstrap
+        ci <- confint(lmer_1_control, method="boot", n=500, oldNames=FALSE) # CI with Bootstrap
         print(ci)
     }
 
     print(summary(lmer_2_exp))
 
     if (get_ci) {
-        ci <- confint(lmer_2_exp, method="boot", n=500) # CI with Bootstrap
+        ci <- confint(lmer_2_exp, method="boot", n=500, oldNames=FALSE) # CI with Bootstrap
         print(ci)
     }
 
     print(summary(lmer_3_rs)) 
 
     if (get_ci) {
-        ci <- confint(lmer_3_rs, method="boot", n=500) # CI with Bootstrap
+        ci <- confint(lmer_3_rs, method="boot", n=500, oldNames=FALSE) # CI with Bootstrap
         print(ci)
     }
 
@@ -105,12 +105,7 @@ hit_ratio_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
     )
 
     lmer_final <- lmer_3_rs
-
-    if (get_ci) {
-        ci <- confint(glmer_final, method="boot", n=50) # CI with Bootstrap
-        print(ci)
-        # The confidence intervals should not include 1 to be significant
-    }
+    print('lmer_final <- lmer_3_rs')
 
     return(lmer_final)
 }
@@ -137,7 +132,7 @@ offset_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
     #
     # print(lmerTest::step(object=lmer_full_control))
     
-    control_variables <- 'trial + x_pos_c + y_pos_c + fps_c + fps_subject_c'
+    control_variables <- 'trial + x_pos_c_sq + y_pos_c + fps_c + fps_subject_c'
     
     # 1) Emtpy model (intercept only)
     # ICC = 0.46. 46% of the variance can be explained by the variance between 
@@ -194,21 +189,21 @@ offset_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
     print(summary(lmer_1_control))
 
     if (get_ci) {
-        ci <- confint(lmer_1_control, method="boot", n=500) # CI with Bootstrap
+        ci <- confint(lmer_1_control, method="boot", n=500, oldNames=FALSE) # CI with Bootstrap
         print(ci)
     }
 
     print(summary(lmer_2_exp))
 
     if (get_ci) {
-        ci <- confint(lmer_2_exp, method="boot", n=500) # CI with Bootstrap
+        ci <- confint(lmer_2_exp, method="boot", n=500, oldNames=FALSE) # CI with Bootstrap
         print(ci)
     }
 
     print(summary(lmer_3_rs)) 
 
     if (get_ci) {
-        ci <- confint(lmer_3_rs, method="boot", n=500) # CI with Bootstrap
+        ci <- confint(lmer_3_rs, method="boot", n=500, oldNames=FALSE) # CI with Bootstrap
         print(ci)
     }
 
@@ -219,14 +214,8 @@ offset_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
         lmer_2_exp,
         lmer_3_rs))
 
-
     lmer_final <- lmer_3_rs
-
-    if (get_ci) {
-        ci <- confint(glmer_final, method="boot", n=50) # CI with Bootstrap
-        print(ci)
-        # The confidence intervals should not include 1 to be significant
-    }
+    print('lmer_final <- lmer_3_rs')
 
     return(lmer_final)
 }
@@ -339,12 +328,7 @@ precision_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
                 lmer_3_rs))    
 
     lmer_final <- lmer_3_rs
-
-    if (get_ci) {
-        ci <- confint(glmer_final, method="boot", n=50) # CI with Bootstrap
-        print(ci)
-        # The confidence intervals should not include 1 to be significant
-    }
+    print('lmer_final <- lmer_3_rs')
 
     return(lmer_final)
 }

@@ -16,6 +16,7 @@ prep_trial_data <- function(data_subject, data_trial) {
     merge_by_subject(data_subject, 'ethnic') %>%
     mutate(y_pos_c = dplyr::recode(y_pos, '0.2'=(-1L), '0.5'=0L, '0.8'=1L),
            x_pos_c = dplyr::recode(x_pos, '0.2'=(-1L), '0.5'=0L, '0.8'=1L),
+           x_pos_c_sq = dplyr::recode(x_pos, '0.2'=(1L), '0.5'=0L, '0.8'=1L),
            fps_c = scale(fps),
            window_c = scale(window),
            hit_mean = hit_mean * 100, 

@@ -31,8 +31,7 @@ hit_ratio_models <- function(data, outcome='hit_ratio') {
 			   offset_c = scale(offset), 
 			   precision_c = scale(precision))
 	
-	lm_control <- lm(formula(paste(outcome, 
-								   '~ fps_c + window_c + ethnic + vert_pos + webcam_diag')),
+	lm_control <- lm(formula(paste(outcome, '~ fps_c + window_c + ethnic + vert_pos + webcam_diag')),
 					 data=data) 
 	print('lm_control')
 	print(summary(lm_control))
