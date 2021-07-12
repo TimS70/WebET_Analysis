@@ -7,8 +7,8 @@ output:
 
 # Setup
 ```{r, setup, message=FALSE, warning=FALSE}
-root = "C:/Users/User/GitHub/WebET_Analysis"
-path_results = file.path(root, 'results', 'plots', 'choice_task')
+root <- file.path('C:/Users/schne/Documents/github/WebET_Analysis')
+path_results = file.path('results', 'plots', 'choice_task')
 
 knitr::opts_knit$set(root.dir = normalizePath(file.path('..', '..')))
 
@@ -28,22 +28,18 @@ source(file.path(root, 'utils', 'r', 'plot_et_time_bins.R'))
 source(file.path(root, 'utils', 'r', 'add_last_fix_top_bottom.R'))
 source(file.path(root, 'utils', 'r', 'add_last_fix_ll_amount.R'))
 
-get_packages(c(
-	'plyr',
-	'dplyr', 
-	"effsize",
-	'e1071',
-	"ggplot2",
-	"ggsignif",
-	'knitrProgressBar',
-	'lme4',
-	'progress',
-	'QuantPsyc',
-	"RColorBrewer",
-	'reshape2',
-	'tidyr'))
-
-print(getwd())
+library('plyr')
+library('dplyr')
+library("effsize")
+library('e1071')
+library("ggplot2")
+library("ggsignif")
+library('lme4')
+library('progress')
+library('QuantPsyc')
+library("RColorBrewer")
+library('reshape2')
+library('tidyr')
 ```
 
 
@@ -66,23 +62,19 @@ data_trial = merge_by_subject(data_trial, data_subject, 'noise')
 
 ## fixations
 ```{r, add_fixations}
-grouped_fixations = data_et %>%
-    group_by(run_id, withinTaskIndex) %>%
+grouped_fixations <- data_et %>%
+    group_by(run_id, trial_index) %>%
     dplyr::summarise(
         n_fixations = length(unique(fix_counter)),
         .groups='keep')
 
-data_trial = merge(
-    data_trial,
-    grouped_fixations,
-    by=c('run_id', 'withinTaskIndex'))
-
+data_trial <- data_trial %>% merge_by_index(grouped_fixations, 'n_fixations')
 summary(data_trial$n_fixations)
 ```
 
 
-# Distribution of add_k-values
-````{r, plot_k}
+# Distribution of k-values
+```{r, plot_k}
 dir.create(file.path(path_results, 'discounting'), showWarnings = FALSE)
 
 ggplot(data_subject, aes(x=logK))+
@@ -113,7 +105,7 @@ ggplot(data_subject, aes(x=logK, y=noise)) +
     ggtitle('logK vs. noise') 
 ggsave(file.path(path_results, 'discounting', 'log_k_vs_noise.png'), 
 	   width=5.5, height=5)
-````
+```
 
 
 # Histogram of top/bottom choice distribution
@@ -445,6 +437,8 @@ data_time_bins =  data_et %>%
 plot_et_time_bins(data_time_bins)
 ggsave(file.path(path_results, 'et', 'bins_top_vs_bottom.png'), 
 			 width=5.5, height=5)
+
+
 ```
 
 # Last fixation
