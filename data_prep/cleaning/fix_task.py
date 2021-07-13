@@ -7,7 +7,7 @@ from utils.save_data import load_all_three_datasets, save_all_three_datasets
 
 
 def clean_data_fix(
-        max_t_task, exclude_runs,
+        max_t_task, exclude_runs=None, max_offset=None,
         data_et=None, data_trial=None, data_subject=None,
         path_origin=None, path_target=None):
 
@@ -25,18 +25,31 @@ def clean_data_fix(
     data_trial = clean_trial_duration(data_trial, 0, max_t_task, 'data_trial')
     data_et = clean_trial_duration(data_et, 0, max_t_task, 'data_et')
 
-    data_subject = clean_runs(data_subject, exclude_runs, name='data_subject')
-    data_et = clean_runs(data_et, exclude_runs, name='data_et')
-    data_trial = clean_runs(data_trial, exclude_runs, name='data_trial')
+    if max_offset is not None:
+        runs_high_offset = data_subject.loc[data_subject['offset'] > max_offset,
+                                            'run_id']
+
+        print(f"""Exclude {len(runs_high_offset)} for offset > {max_offset} """
+              f"""({runs_high_offset})""")
+
+        data_subject = clean_runs(data_subject, runs_high_offset, name='data_subject')
+        data_et = clean_runs(data_et, runs_high_offset, name='data_et')
+        data_trial = clean_runs(data_trial, runs_high_offset, name='data_trial')
+
+    if exclude_runs is not None:
+        data_subject = clean_runs(data_subject, exclude_runs, name='data_subject')
+        data_et = clean_runs(data_et, exclude_runs, name='data_et')
+        data_trial = clean_runs(data_trial, exclude_runs, name='data_trial')
 
     if path_target is not None:
         save_all_three_datasets(data_et, data_trial, data_subject, path_target)
 
-    return data_et, data_trial, data_subject,
+    return data_et, data_trial, data_subject
 
 
 def show_empty_fix_trials(data_trial_fix):
-    null_data = data_trial_fix.loc[pd.isna(data_trial_fix['x_count']), :]
+
+    null_data = data_trial_fix[pd.isna(data_trial_fix['x_count'])]
 
     if len(null_data) > 0:
         print(

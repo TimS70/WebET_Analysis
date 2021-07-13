@@ -21,6 +21,7 @@ def add_data_quality(max_offset, min_hits_per_dot,
 
     # Offset
     data_et = add_offset(data_et)
+
     grouped = data_et \
         .groupby(['run_id', 'trial_index'], as_index=False) \
         .agg(offset=('offset', 'mean'),
@@ -37,6 +38,7 @@ def add_data_quality(max_offset, min_hits_per_dot,
              offset_px=('offset_px', 'mean'),
              offset_std=('offset', 'std'),
              offset_px_std=('offset_px', 'std'))
+
     data_subject = merge_by_subject(data_subject, grouped,
                                     'offset', 'offset_std',
                                     'offset_px', 'offset_px_std')

@@ -80,22 +80,6 @@ def clean_global_data(path_origin, path_target=None,
         runs_not_full_trial = np.setdiff1d(data_trial['run_id'].unique(),
                                            runs_full_trial)
 
-        invalid_runs = combine_runs(invalid_runs, runs_not_full_trial)
-
-        summary.append(['incomplete',
-                        len(runs_not_full_trial) + n_missing_trial,
-                        (len(runs_not_full_trial) + n_missing_trial) / n_runs])
-
-    if max_missing_et is not None:
-        runs_full_but_not_enough_et = filter_full_but_no_et_data(
-            data_et, data_trial, max_missing_et)
-        invalid_runs = combine_runs(invalid_runs, runs_full_but_not_enough_et)
-        summary.append(
-            ['runs_not_enough_et',
-             len(runs_full_but_not_enough_et) + n_missing_et,
-             (len(runs_full_but_not_enough_et) + n_missing_et) / n_runs])
-
-    if complete_fix_task:
         # Fixation task. No validation possible
         data_trial_fix = data_trial[
             (data_trial['trial_type'] == 'eyetracking-fix-object') &
@@ -104,10 +88,19 @@ def clean_global_data(path_origin, path_target=None,
         runs_incomplete_fix_task = runs_with_incomplete_fix_tasks(
             data_trial_fix)
 
-        invalid_runs = combine_runs(invalid_runs, runs_incomplete_fix_task)
-        summary.append(['runs_incomplete_fix_task',
-                        len(runs_incomplete_fix_task),
-                        len(runs_incomplete_fix_task) / n_runs])
+        runs_incomplete = combine_runs(runs_not_full_trial, runs_incomplete_fix_task)
+        invalid_runs = combine_runs(invalid_runs, runs_incomplete)
+
+        if max_missing_et is not None:
+            runs_full_but_not_enough_et = filter_full_but_no_et_data(
+                data_et, data_trial, max_missing_et)
+            invalid_runs = combine_runs(invalid_runs, runs_full_but_not_enough_et)
+
+            runs_incomplete = combine_runs(runs_incomplete, runs_full_but_not_enough_et)
+
+        summary.append(['runs_incomplete',
+                        len(runs_incomplete),
+                        len(runs_incomplete) / n_runs])
 
     if correct_webgazer_clock:
         # Fixation task. No validation possible

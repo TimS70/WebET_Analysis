@@ -44,7 +44,8 @@ from visualize.eye_tracking import plot_et_scatter
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from visualize.fix_task.main import hist_plots_quality, plot_outcome_over_trials, plot_outcome_over_trials_vs_chin
+from visualize.fix_task.main import hist_plots_quality, plot_outcome_over_trials, plot_outcome_over_trials_vs_chin, \
+    visualize_exemplary_run
 from visualize.fix_task.positions import plot_top_vs_bottom_positions
 
 
@@ -61,7 +62,7 @@ def prep_global():
         path_origin=os.path.join('data', 'all_trials', 'added_var'),
         path_target=os.path.join('data', 'all_trials', 'added_var'))
 
-    runs_no_saccade = [144, 171, 380]
+    runs_no_saccade = [144, 171, 380, 325, 243, 425, 488]
     clean_global_data(
         path_origin=os.path.join('data', 'all_trials', 'added_var'),
         path_target=os.path.join('data', 'all_trials', 'cleaned'),
@@ -75,7 +76,7 @@ def prep_global():
         approval_rate=0.5)
 
 
-def prep_fix():
+def prep_fix(path_plots):
 
     data_et, data_trial, data_subject = load_fix_data(
         path_origin=os.path.join('data', 'all_trials', 'cleaned'),
@@ -98,20 +99,26 @@ def prep_fix():
           f"""{descriptives} \n""")
 
     outliers = data_subject.loc[
-        (data_subject['offset'] > 0.5) |
-        (data_subject['precision'] > 0.2),
+        data_subject['run_id'].isin([325, 243, 425, 488]),
         ['run_id', 'offset', 'precision', 'hit_mean', 'fps', 'glasses_binary']] \
         .T
 
     write_csv(data=outliers, file_name='outliers.csv',
               path=os.path.join('results', 'tables', 'fix_task'), index=True)
 
-    print(f"""Outliers: {round(outliers, 4)}""")
+    # # No saccade for these guys
+    # for run in [325, 243, 425, 488]:
+    #     visualize_exemplary_run(
+    #         data=data_et[data_et['run_id'] == run],
+    #         path_target=os.path.join(path_plots, 'exemplary_runs', 'clean_fix_task')
+    #     )
 
     data_et, data_trial, data_subject = clean_data_fix(
+        data_subject=data_subject,
+        data_trial=data_trial,
+        data_et=data_et,
         max_t_task=5500,
-        exclude_runs=[268, 325, 243, 425, 488, 354, 293, 268],  # Extreme offset
-        path_origin=os.path.join('data', 'fix_task', 'raw')
+        max_offset=0.5
     )
 
     data_subject['webcam_diag'] = euclidean_distance(
@@ -320,7 +327,7 @@ def main(new_data=False):
             path_target=os.path.join('data', 'all_trials', 'combined'))
 
     prep_global()
-    prep_fix()
+    prep_fix(path_plots=os.path.join('results', 'plots', 'fix_task'))
     prep_choice(new_plots=False)
     analyze_global()
 
@@ -339,4 +346,6 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    main(new_data=False)
+    prep_global()
+    prep_fix(path_plots=os.path.join('results', 'plots', 'fix_task'))
+    # main(new_data=False)

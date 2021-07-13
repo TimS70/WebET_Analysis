@@ -14,7 +14,6 @@ knitr::opts_knit$set(root.dir = normalizePath(file.path('..', '..')))
 
 knitr::opts_knit$get("root.dir")
 
-
 source(file.path(root, 'utils', 'r', 'geom_split_violin.R'))
 source(file.path(root, 'utils', 'r', 'merge_by_index.R'))
 source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
