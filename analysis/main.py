@@ -20,61 +20,68 @@ from visualize.fix_task.positions import plot_top_vs_bottom_positions
 from tqdm import tqdm
 
 
-def analyze_fix_task(path_origin, path_plots, path_tables):
+def analyze_fix_task(path_origin, path_plots, path_tables,
+                     check_saccades=False,
+                     check_systematic_offset=False,
+                     plot_histograms=False
+                     ):
 
     print('################################### \n'
           'Analyze fix task data \n'
           '################################### \n')
 
-    check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',
-                                                'added_var'),
-                       path_target=os.path.join(path_plots, 'saccades'),
-                       individual=True)
+    if check_saccades:
+        check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',
+                                                    'added_var'),
+                           path_target=os.path.join(path_plots, 'saccades'),
+                           individual=True)
 
-    check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',
-                                                'cleaned'),
-                       path_target=os.path.join(path_plots),
-                       individual=False)
+        check_gaze_saccade(path_origin=os.path.join('data', 'all_trials',
+                                                    'cleaned'),
+                           path_target=os.path.join(path_plots),
+                           individual=False)
 
-    grand_mean_offset(path_origin=path_origin,
-                      path_plots=path_plots,
-                      path_tables=path_tables)
+    if check_systematic_offset:
+        grand_mean_offset(path_origin=path_origin,
+                          path_plots=path_plots,
+                          path_tables=path_tables)
 
     data_et, data_trial, data_subject = load_all_three_datasets(path_origin)
 
-    hist_plots_quality(
-        data_subject,
-        path_plots=path_plots,
-        outcome='hit_mean',
-        y_max=20,
-        x_label='Hit ratio'
-    )
+    if plot_histograms:
+        hist_plots_quality(
+            data_subject,
+            path_plots=path_plots,
+            outcome='hit_mean',
+            y_max=20,
+            x_label='Hit ratio'
+        )
 
-    hist_plots_quality(
-        data_subject,
-        path_plots=path_plots,
-        outcome='offset',
-        y_max=30,
-        x_label='Offset'
-    )
+        hist_plots_quality(
+            data_subject,
+            path_plots=path_plots,
+            outcome='offset',
+            y_max=30,
+            x_label='Offset'
+        )
 
-    hist_plots_quality(
-        data_subject,
-        path_plots=path_plots,
-        outcome='precision',
-        y_max=50,
-        x_label='Precision'
-    )
+        hist_plots_quality(
+            data_subject,
+            path_plots=path_plots,
+            outcome='precision',
+            y_max=50,
+            x_label='Precision'
+        )
 
-    hist_plots_quality(
-        data_subject,
-        path_plots=path_plots,
-        outcome='fps',
-        y_max=30,
-        x_max=40,
-        x_ticks=10,
-        x_label='Frame Rate'
-    )
+        hist_plots_quality(
+            data_subject,
+            path_plots=path_plots,
+            outcome='fps',
+            y_max=30,
+            x_max=40,
+            x_ticks=10,
+            x_label='Frame Rate'
+        )
 
     descriptives = round(
         data_subject[

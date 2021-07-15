@@ -5,6 +5,7 @@ from scipy import stats
 # https://pythonfordatascienceorg.wordpress.com/welch-t-test-python-pandas/
 from statsmodels.compat import scipy
 
+from utils.effects import cohen_d
 from utils.rearrange import pivot_outcome_by_factor
 from utils.save_data import write_csv
 
@@ -50,10 +51,19 @@ def t_test_outcomes_vs_factor(data, dependent, factor,
         else:
             t_test_result = t_test_ind(outcome_by_factor)
 
+        d = cohen_d(
+            outcome_by_factor.iloc[:, 0],
+            outcome_by_factor.iloc[:, 1]
+        )
+
         result_summary.append(
-            [var,
-             t_test_result.statistic.astype(float),
-             t_test_result.pvalue.astype(float)])
+            [
+                var,
+                t_test_result.statistic.astype(float),
+                t_test_result.pvalue.astype(float),
+                d
+            ]
+        )
 
         # Descriptives
         summary_this_outcome = data \
@@ -67,7 +77,7 @@ def t_test_outcomes_vs_factor(data, dependent, factor,
             summary_this_outcome)
 
     result_summary = pd.DataFrame(result_summary,
-                                  columns=['outcome', 't', 'p'])
+                                  columns=['outcome', 't', 'p', 'd'])
 
     # Holm correction
     result_summary['p'] = smt.multipletests(
@@ -89,7 +99,6 @@ def t_test_rel(data_outcome_by_factor):
     return stats.ttest_rel(
         data_outcome_by_factor.iloc[:, 0],
         data_outcome_by_factor.iloc[:, 1])
-
 
 def t_test_ind(data_outcome_by_factor):
     return stats.ttest_ind(

@@ -346,6 +346,4 @@ def main(new_data=False):
 
 
 if __name__ == '__main__':
-    prep_global()
-    prep_fix(path_plots=os.path.join('results', 'plots', 'fix_task'))
-    # main(new_data=False)
+    main(new_data=False)
