@@ -70,7 +70,9 @@ data_clean <- data_trial %>%
 
 glmer_choice <- compare_choice_models(
     data=data_clean,
-    data_subject=data_subject)
+    data_subject=data_subject,
+	get_ci=FALSE
+)
 
 test_clusters(model=glmer_choice, data=data_clean)
 

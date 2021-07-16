@@ -17,7 +17,7 @@ logistic_effect <- function(model, beta_index, beta_name) {
 }
 
 
-compare_choice_models <- function(data, data_subject) {
+compare_choice_models <- function(data, data_subject, get_ci=FALSE) {
     
     # data <- data %>%
     #     merge_by_subject(data_subject, 'gender') %>%
@@ -86,18 +86,27 @@ compare_choice_models <- function(data, data_subject) {
 	
 	print('Control variables')	
 	print(summary(glmer_1_control))
-	ci <- confint(glmer_1_control, method="boot", n=500) # CI with Bootstrap
-	print(ci)
-	
+
+	if (get_ci) {
+		ci <- confint(glmer_1_control, method="boot", n=500) # CI with Bootstrap
+		print(ci)
+	}
+
 	print('Experimental variables')
 	print(summary(glmer_2_ri))
-	ci <- confint(glmer_2_ri, method="boot", n=500) # CI with Bootstrap
-	print(ci)
+
+	if (get_ci) {
+		ci <- confint(glmer_2_ri, method="boot", n=500) # CI with Bootstrap
+		print(ci)
+	}
 
 	print('Random Intercept - Random Slope')
 	print(summary(glmer_3_rs))
-	ci <- confint(glmer_3_rs, method="boot", n=500) # CI with Bootstrap
-	print(ci)
+
+	if (get_ci) {
+		ci <- confint(glmer_3_rs, method="boot", n=500) # CI with Bootstrap
+		print(ci)
+	}
 	
     logistic_effect(
         model=glmer_3_rs,
@@ -149,6 +158,7 @@ compare_choice_models <- function(data, data_subject) {
 
 	# Final Model
 	glmer_final <- glmer_2_ri
+	print('lmer_final <- glmer_2_ri')
 	
 	return(glmer_final)
 }

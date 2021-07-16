@@ -713,7 +713,7 @@ data_trial %>%
 
 
 ### Filter those subjects with matched error and correct trials
-````{r}
+```{r}
 subjects_LLcorrect = data_trial %>%
     filter(LLexpected==1) %>%
     dplyr::group_by(run_id) %>%
@@ -742,7 +742,7 @@ length(subjects_SScorrect)
 
 Dianna found differences reaction time and option index
 
-### group_by(LLexpected, run_id, errorTrial)
+# group_by(LLexpected, run_id, errorTrial)
 ```{r}
 grouped = data_trial %>%
     filter(
@@ -765,7 +765,7 @@ grouped %>% head(5)
 
 ## t-test LL expected 
 Do subjects behave differently when they correctly choose LL (as expected) than when they unexpectedly chose SS instead?
-`````{r}
+```{r}
 runs_na_oi = data_subject %>%
 	filter(is.na(optionIndex)) %>%
 	dplyr::pull(run_id)
@@ -836,12 +836,12 @@ runs_na_error_pi = grouped %>%
 #        data=grouped %>% filter(
 #            LLexpected==1 & !run_id %in% c(runs_na_pi, runs_na_error_pi)),
 #        paired=TRUE, na.action=na.omit)
-````
+```
 
 
 ## SS expected 
 Do subjects behave differently when they correctly choose SS (as expected) than when they unexpectedly chose LL instead?
-````{r}
+```{r}
 runs_na_oi = data_subject %>%
 	filter(is.na(optionIndex)) %>%
 	dplyr::pull(run_id)
