@@ -38,6 +38,7 @@ library("ggsignif")
 library('Hmisc')
 library('lme4')
 library('QuantPsyc')
+library('performance')
 library("RColorBrewer")
 library('reshape2')
 library('tidyverse')
@@ -66,7 +67,34 @@ data_clean <- data_trial %>%
    		   !is.na(payneIndex) &
 		   !is.na(optionIndex))
 
+# Add et_indices on participant-level (level 2)
+grouped <- data_subject %>%
+	mutate(
+		optionIndex_run = optionIndex,
+		attributeIndex_run = attributeIndex,
+		payneIndex_run = payneIndex
+	) %>%
+	dplyr::select(run_id, optionIndex_run, attributeIndex_run, payneIndex_run)
+
+for (var in c('optionIndex_run', 'attributeIndex_run', 'payneIndex_run')) {
+	data_clean <- data_clean %>% merge_by_subject(grouped, varName=var)
+}
+
+
 # compare_logistic(data_subject)
+
+glmer_0_io = glmer(
+	choseLL ~ 1 + (1 | run_id),
+	data = data_clean,
+	family = binomial,
+	control = glmerControl(optimizer = "bobyqa"),
+	nAGQ = 1
+)
+
+# rand_int <- 1.189
+# rand_int**2 / (rand_int**2 + 2*pi / 3)
+#
+# icc(glmer_0_io)
 
 glmer_choice <- compare_choice_models(
     data=data_clean,

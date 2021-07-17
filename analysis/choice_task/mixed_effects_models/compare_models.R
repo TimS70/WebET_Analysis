@@ -64,7 +64,15 @@ compare_choice_models <- function(data, data_subject, get_ci=FALSE) {
 	    nAGQ = 1
     )
 
-	# Random Intercept
+	print('Control variables')
+	print(summary(glmer_1_control))
+
+	if (get_ci) {
+		ci <- confint(glmer_1_control, method="boot", n=500) # CI with Bootstrap
+		print(ci)
+	}
+
+	# Experimental variables
 	glmer_2_ri = glmer(
 	    choseLL ~ withinTaskIndex + rt_c + 
 	    	optionIndex + attributeIndex + payneIndex + (1 | run_id), 
@@ -73,6 +81,14 @@ compare_choice_models <- function(data, data_subject, get_ci=FALSE) {
 	    control = glmerControl(optimizer = "bobyqa"),
 	    nAGQ = 1
     )
+
+	print('Experimental variables')
+	print(summary(glmer_2_ri))
+
+	if (get_ci) {
+		ci <- confint(glmer_2_ri, method="boot", n=500) # CI with Bootstrap
+		print(ci)
+	}
 
 	glmer_3_rs = glmer(
 	    choseLL ~ withinTaskIndex + rt_c + 
@@ -83,22 +99,6 @@ compare_choice_models <- function(data, data_subject, get_ci=FALSE) {
 	    control = glmerControl(optimizer = "bobyqa"),
 	    nAGQ = 1
     )
-	
-	print('Control variables')	
-	print(summary(glmer_1_control))
-
-	if (get_ci) {
-		ci <- confint(glmer_1_control, method="boot", n=500) # CI with Bootstrap
-		print(ci)
-	}
-
-	print('Experimental variables')
-	print(summary(glmer_2_ri))
-
-	if (get_ci) {
-		ci <- confint(glmer_2_ri, method="boot", n=500) # CI with Bootstrap
-		print(ci)
-	}
 
 	print('Random Intercept - Random Slope')
 	print(summary(glmer_3_rs))
@@ -107,7 +107,27 @@ compare_choice_models <- function(data, data_subject, get_ci=FALSE) {
 		ci <- confint(glmer_3_rs, method="boot", n=500) # CI with Bootstrap
 		print(ci)
 	}
-	
+
+	# Experimental variables
+	glmer_4_lvl2 = glmer(
+	    choseLL ~ withinTaskIndex + rt_c +
+	    	optionIndex + attributeIndex + payneIndex +
+			optionIndex_run + attributeIndex_run + payneIndex_run + (1 | run_id),
+	    data = data,
+	    family = binomial,
+	    control = glmerControl(optimizer = "bobyqa"),
+	    nAGQ = 1
+    )
+
+	print('Experimental variables on level 2')
+	print(summary(glmer_4_lvl2))
+
+	exception <- TRUE
+	if (get_ci || exception) {
+		ci <- confint(glmer_4_lvl2, method="boot", n=500, oldNames = TRUE) # CI with Bootstrap
+		print(ci)
+	}
+
     logistic_effect(
         model=glmer_3_rs,
         beta_index=3,
@@ -152,7 +172,9 @@ compare_choice_models <- function(data, data_subject, get_ci=FALSE) {
         glmer_0_io, 
         glmer_1_control,
         glmer_2_ri,
-        glmer_3_rs)
+        glmer_3_rs,
+		glmer_4_lvl2
+	)
 
 	print(output_anova)
 
