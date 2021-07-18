@@ -1,6 +1,11 @@
+import os
+
+from utils.path import makedir
+
+os.chdir(r'C:\Users\schne\Documents\github\WebET_Analysis')
+
 import datetime
 import pandas as pd
-import os
 
 
 def calculate_bonus_payments():
@@ -16,7 +21,6 @@ def calculate_bonus_payments():
 
 
 def load_data():
-    os.chdir(r'C:\Users\User\GitHub\WebET_Analysis')
     data_prolific_int = pd.read_csv(
         os.path.join('data', 'prolific', 'prolific_export_int.csv')) \
         .rename(columns={'participant_id': 'prolificID'})
@@ -144,6 +148,7 @@ def add_variable_due_on(data):
 
 
 def save_data_bonus_due_on(data):
+    makedir(os.path.join('data', 'payment', 'bonus_due'))
     data.loc[:, [
                 'prolificID', 'run_id',
                 'Nationality', 'Current Country of Residence', 'Sex',
