@@ -21,6 +21,7 @@ prep_trial_data <- function(data_subject, data_trial) {
            window_c = scale(window),
            hit_mean = hit_mean * 100, 
            offset = offset * 100,
+           grand_offset = grand_offset * 100,
            precision = precision * 100,
            offset_c = scale(offset), 
            trial = withinTaskIndex,

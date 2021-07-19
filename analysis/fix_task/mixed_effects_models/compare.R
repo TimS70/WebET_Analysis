@@ -221,6 +221,116 @@ offset_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
 }
 
 
+grand_offset_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
+
+    # print('Testing control variables')
+    #
+    # lmer_full_control <- lmer(
+    #     offset ~
+    #     trial +
+    #     chinFirst +
+    #     x_pos_c +
+    #     y_pos_c +
+    #     window_c +
+    #     fps_c +
+    #     webcam_diag +
+    #     vertPosition +
+    #     ethnic +
+    #     fps_subject_c +
+    #     (1 | run_id),
+    #     data=data)
+    #
+    # print(lmerTest::step(object=lmer_full_control))
+
+    control_variables <- 'trial + x_pos_c_sq + y_pos_c + fps_c + fps_subject_c'
+
+    # 1) Emtpy model (intercept only)
+    # ICC = 0.46. 46% of the variance can be explained by the variance between
+    # the subjects. Interdependence assumption of the simple linear regression
+    # is violated. We should to an MLA
+
+    lmer_0_io = lmer(
+        grand_offset ~ 1 + (1 | run_id),
+        data=data,
+        REML=FALSE
+    ) # FML for comparing different fixed effects
+
+    # 2) Intermediate models
+    # Control variables
+    # Control for the fact that the subjects start at different places
+    # regarding the accuracy of the eyetracking data. Standard error has
+    # increased. Subjects vary by about 0.12 (Jan 24) around the intercept.
+    # The RI model is way better than the IO model. Therefore, we should do
+    # an MLM.
+    lmer_1_control = lmer(
+        formula(paste0(
+            'grand_offset ~ ',
+            control_variables,
+            ' + (1 | run_id)'
+        )),
+        data=data,
+        REML=FALSE
+    )
+
+    # 3) Random Intercept
+    lmer_2_exp <- lmer(
+        formula(paste0(
+            'grand_offset ~ ',
+            control_variables,
+            ' + chin + glasses_binary + (1 | run_id)'
+        )),
+        data=data,
+        REML=FALSE
+    )
+    ### Random slopes
+    # Do not forget to look at the correlations among the random effects
+    lmer_3_rs <- lmer(
+        formula(paste0(
+            'grand_offset ~ ',
+            control_variables,
+            ' + chin + glasses_binary',
+            ' + (chin | run_id)'
+        )),
+        data=data,
+        REML=FALSE
+    )
+
+    print(summary(lmer_0_io))
+    print(summary(lmer_1_control))
+
+    if (get_ci) {
+        ci <- confint(lmer_1_control, method="boot", n=500, oldNames=FALSE) # CI with Bootstrap
+        print(ci)
+    }
+
+    print(summary(lmer_2_exp))
+
+    if (get_ci) {
+        ci <- confint(lmer_2_exp, method="boot", n=500, oldNames=FALSE) # CI with Bootstrap
+        print(ci)
+    }
+
+    print(summary(lmer_3_rs))
+
+    if (get_ci) {
+        ci <- confint(lmer_3_rs, method="boot", n=500, oldNames=FALSE) # CI with Bootstrap
+        print(ci)
+    }
+
+    print('ANOVA Control')
+    print(anova(
+        lmer_0_io,
+        lmer_1_control,
+        lmer_2_exp,
+        lmer_3_rs))
+
+    lmer_final <- lmer_3_rs
+    print('lmer_final <- lmer_3_rs')
+
+    return(lmer_final)
+}
+
+
 precision_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
     
     # print('Testing control variables')

@@ -1,6 +1,3 @@
-data=data_subject
-path=file.path(path_results, 'glasses')
-
 examine_glasses <- function(data, path) {
 
 	for (var in c('hit_mean', 'offset')) {

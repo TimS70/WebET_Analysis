@@ -3,9 +3,17 @@ source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
 prep_data_subject <- function(data_subject, data_trial) {
 	
 	grouped <- data_trial %>% 
-	group_by(run_id) %>%
-	dplyr::summarise(hit_mean = mean(hit_mean), 
-					 .groups='keep')
+		group_by(run_id) %>%
+		dplyr::summarise(
+			hit_mean = mean(hit_mean),
+			rt = mean(trial_duration_exact),
+			.groups='keep'
+		)
+
+	data_subject <- data_subject %>%
+		merge_by_subject(grouped, 'hit_mean') %>%
+		merge_by_subject(grouped, 'rt')
+
 
 	data_subject <- data_subject %>%
 		mutate(
@@ -16,8 +24,7 @@ prep_data_subject <- function(data_subject, data_trial) {
 			vert_pos = factor(vertPosition,
 							  levels=c('a', 'b', 'c'), 
 							  labels=c('a', 'b', 'c')),
-			webcam_diag = sqrt(webcam_width**2 + webcam_height**2))  %>%
-		merge_by_subject(grouped, 'hit_mean')
-	
+			webcam_diag = sqrt(webcam_width**2 + webcam_height**2))
+
 	return(data_subject)
 }

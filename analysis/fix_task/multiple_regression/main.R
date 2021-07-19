@@ -1,20 +1,40 @@
-root = "C:/Users/User/GitHub/WebET_Analysis"
-setwd(root)
-path_results = file.path(root, 'results', 'plots', 'fix_task')
-path_analysis = file.path(root, 'analysis', 'fix_task', 'multiple_regression')
+setwd <- "C:/Users/schne/Documents/github/WebET_Analysis"
+root <- "C:/Users/schne/Documents/github/WebET_Analysis"
+path_results <- file.path(root, 'results', 'plots', 'fix_task')
+path_analysis <- file.path(root, 'analysis', 'fix_task', 'multiple_regression')
 
-source(file.path(path_analysis, 'setup.R'))
+source(file.path(root, 'utils', 'r', 'geom_split_violin.R'))
+source(file.path(root, 'utils', 'r', 'merge_by_subject.R'))
+source(file.path(root, 'utils', 'r', 'summarize_datasets.R'))
+source(file.path(root, 'utils', 'r', 'get_packages.R'))
+source(file.path(root, 'utils', 'r', 'remove_runs.R'))
+source(file.path(root, 'utils', 'r', 'add_log_k.R'))
+source(file.path(root, 'utils', 'r', 'remove_na_et_indices.R'))
+source(file.path(root, 'utils', 'r', 'add_x_count.R'))
+source(file.path(path_analysis, 'compare_models.R'))
+source(file.path(path_analysis, 'assumptions.R'))
+source(file.path(path_analysis, 'glasses.R'))
+source(file.path(path_analysis, 'inspect_outliers.R'))
+source(file.path(path_analysis, 'prep_data_subject.R'))
+source(file.path(path_analysis, 'predict_validation.R'))
+
+get_packages(c('tidyverse',
+			   'car',
+			   'MASS',
+			   'gvlma'))
 
 # Read data
-path = file.path(root, 'data', 'fix_task', 'added_var')
-data_subject = read.csv(file.path(path, 'data_subject.csv'))
-data_trial = read.csv(file.path(path, 'data_trial.csv'))
-data_et = read.csv(file.path(path, 'data_et.csv'))
+path <- file.path('data', 'fix_task', 'added_var')
+data_subject <- read.csv(file.path(path, 'data_subject.csv'))
+data_trial <- read.csv(file.path(path, 'data_trial.csv'))
+data_et <- read.csv(file.path(path, 'data_et.csv'))
 
 summarize_datasets(data_et, data_trial, data_subject)
 
-data_subject <- prep_data_subject(data_subject=data_subject, 
-				  data_trial=data_trial)
+data_subject <- prep_data_subject(
+	data_subject=data_subject,
+	data_trial=data_trial
+)
 
 # inspect_outliers(data_subject=data_subject, 
 # 				 data_et=data_et)
@@ -27,7 +47,9 @@ lm_offset <- compare_models(data=data_subject, outcome='offset')
 test_assumptions(model=lm_offset, data=data_subject,  
 				 path=file.path(root, 'offset'))
 
-# - variance of fps is 23% bigger than would be expected under no 
+lm_grand_offset <- grand_offset_model(data=data_subject)
+
+# - variance of fps is 23% bigger than would be expected under no
 # multicollinearity
 
 lm_precision <- compare_models(data=data_subject, outcome='precision')

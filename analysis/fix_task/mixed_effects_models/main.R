@@ -47,7 +47,7 @@ source(file.path(path_analysis, 'icc.R'))
 source(file.path(path_analysis, 'prep_data.R'))
 
 # Read data
-path = file.path(root, 'data', 'fix_task', 'added_var')
+path <- file.path(root, 'data', 'fix_task', 'added_var')
 
 data_subject <- read.csv(file.path(path, 'data_subject.csv'))
 data_trial <- read.csv(file.path(path, 'data_trial.csv'))
@@ -78,6 +78,7 @@ get_icc(data=data_trial, outcome='precision')
 
 lmer_hit_mean <- hit_ratio_models(data=data_trial, get_ci=FALSE)
 lmer_offset <- offset_models(data=data_trial, get_ci=FALSE)
+lmer_offset <- grand_offset_models(data=data_trial, get_ci=FALSE)
 lmer_precision <- precision_models(data=data_trial, get_ci=FALSE)
 
 # effects
