@@ -1,6 +1,56 @@
 library("brms")
 library("lmerTest")
 
+pseudo_r <- function(data, control_variables, outcome) {
+    
+    lmer1_control <- lmer(
+        formula(paste0(
+            outcome,
+            ' ~ ',
+            control_variables,
+            ' + (1 | run_id)'
+        )),
+        data=data,
+        REML=FALSE
+    )
+    
+    lmer2_chin <- lmer(
+        formula(paste0(
+            outcome,
+            ' ~ ',
+            control_variables,
+            ' + chin ',
+            ' + (1 | run_id)'
+        )),
+        data=data,
+        REML=FALSE
+    )
+    
+    # Snijders & Bosker (2012): Do not use random slopes models
+    pseudor <- (sigma(lmer1_control)^2-sigma(lmer2_chin)^2)/sigma(lmer1_control)^2
+    print(paste0('The chin rest effect reduces the unexplained variance for the outcome ',
+                 outcome, ' on level 1 by ', round(pseudor*100, 2), '%.'))
+    
+    lmer3_glasses <- lmer(
+        formula(paste0(
+            outcome,
+            ' ~ ',
+            control_variables,
+            ' + chin + glasses_binary',
+            ' + (1 | run_id)'
+        )),
+        data=data,
+        REML=FALSE
+    )
+    
+    
+    pseudor <- (unlist(summary(lmer2_chin)$var)-unlist(summary(lmer3_glasses)$var))/unlist(summary(lmer2_chin)$var)
+    print(
+        paste0('Glasses reduce the unexplained variance of the intercept of the outcome ', outcome, 
+               ', compared to the model that only contains the control variables and chin-rest, by ', round(pseudor*100, 2), '%.')
+    )
+}
+
 hit_ratio_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
   
     # print('Testing control variables')
@@ -102,6 +152,12 @@ hit_ratio_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
         lmer_1_control,
         lmer_2_exp,
         lmer_3_rs)
+    )
+    
+    pseudo_r(
+        data=data, 
+        control_variables=control_variables, 
+        outcome='hit_mean'
     )
 
     lmer_final <- lmer_3_rs
@@ -207,6 +263,13 @@ offset_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
         print(ci)
     }
 
+    
+    pseudo_r(
+        data=data, 
+        control_variables=control_variables, 
+        outcome='offset'
+    )
+    
     print('ANOVA Control')
     print(anova(
         lmer_0_io,
@@ -425,6 +488,13 @@ precision_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
         print(ci)
     }
 
+    
+    pseudo_r(
+        data=data, 
+        control_variables=control_variables, 
+        outcome='precision'
+    )
+    
     print('ANOVA')
     print(anova(
         lmer_0_io,
@@ -442,6 +512,8 @@ precision_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
 
     return(lmer_final)
 }
+
+
 
 
 find_brm_models <- function(data, outcome) {

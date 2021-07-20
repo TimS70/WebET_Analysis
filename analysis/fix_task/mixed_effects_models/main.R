@@ -1,3 +1,5 @@
+setwd('C:/Users/schne/Documents/github/WebET_Analysis')
+
 library("boot")
 library("broom")
 library("car")
