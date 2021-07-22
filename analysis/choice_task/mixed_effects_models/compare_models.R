@@ -126,7 +126,7 @@ compare_choice_models <- function(data, data_subject, get_ci=FALSE) {
 	print('Experimental variables on level 2')
 	print(summary(glmer_4_lvl2_rs))
 
-	if (1==1) {
+	if (get_ci) {
 		ci <- confint(glmer_4_lvl2_rs, method="boot", n=ci_iterations, oldNames = FALSE) # CI with Bootstrap
 		print(ci)
 	}
