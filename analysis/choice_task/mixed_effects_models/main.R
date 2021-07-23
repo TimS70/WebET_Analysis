@@ -102,6 +102,8 @@ glmer_choice <- compare_choice_models(
 	get_ci=FALSE
 )
 
+
+
 test_clusters(model=glmer_choice, data=data_clean)
 
 glmer_sd_ul <- simple_slopes(data=data_clean, model=glmer_choice, upper=TRUE)

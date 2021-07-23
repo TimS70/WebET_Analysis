@@ -80,7 +80,7 @@ get_icc(data=data_trial, outcome='precision')
 
 lmer_hit_mean <- hit_ratio_models(data=data_trial, get_ci=FALSE)
 lmer_offset <- offset_models(data=data_trial, get_ci=FALSE)
-lmer_offset <- grand_offset_models(data=data_trial, get_ci=FALSE)
+lmer_offset_grand <- grand_offset_models(data=data_trial, get_ci=FALSE)
 lmer_precision <- precision_models(data=data_trial, get_ci=FALSE)
 
 # effects

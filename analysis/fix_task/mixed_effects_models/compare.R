@@ -167,7 +167,7 @@ hit_ratio_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
 }
 
 
-offset_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
+offset_models <- function(data, apa_path=FALSE, get_ci=TRUE, output_model='best') {
 
     # print('Testing control variables')
     #
@@ -277,8 +277,15 @@ offset_models <- function(data, apa_path=FALSE, get_ci=TRUE) {
         lmer_2_exp,
         lmer_3_rs))
 
-    lmer_final <- lmer_3_rs
-    print('lmer_final <- lmer_3_rs')
+    if (output_model=='random_intercept') {
+        lmer_final <- lmer_2_exp
+        print('lmer_final <- lmer_2_exp')
+    }
+
+    if (output_model=='best') {
+        lmer_final <- lmer_3_rs
+        print('lmer_final <- lmer_3_rs')
+    }
 
     return(lmer_final)
 }
